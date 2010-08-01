@@ -1,4 +1,9 @@
-/*! This file is basically a hacked version of JSLitmus.js by Robert Kieffer. Check it out: http://broofa.com/Tools/JSLitmus */
+/*!
+ * benchmark.js
+ * Copyright Mathias Bynens <http://mths.be/>
+ * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
+ * Available under MIT license <http://mths.be/mit>
+ */
 
 (function() {
 
