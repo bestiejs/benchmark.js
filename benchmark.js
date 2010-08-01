@@ -1,5 +1,5 @@
 /*!
- * benchmark.js
+ * benchmark.js for jsPerf.com
  * Copyright Mathias Bynens <http://mths.be/>
  * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
  * Available under MIT license <http://mths.be/mit>
