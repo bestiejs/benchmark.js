@@ -5,9 +5,20 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
+/*jslint browser: true, forin: true, es5: true, onevar: true, eqeqeq: true, immed: true */
+/*global window, benchmark, opera */
+
 (function() {
 
-  function formatNumber(h,b){var l=isNaN(b)?0:Math.abs(b),k='.',g=',',a=(h<0)?'-':'',f=parseInt(h=Math.abs(h).toFixed(l))+'',e=((e=f.length)>3)?e%3:0;return a+(e?f.substr(0,e)+g:'')+f.substr(e).replace(/(\d{3})(?=\d)/g,'$1'+g)+(l?k+Math.abs(h-f).toFixed(l).slice(2):'')}
+  function formatNumber(h, b) {
+    var l = isNaN(b) ? 0 : Math.abs(b),
+        k = '.',
+        g = ',',
+        a = (h < 0) ? '-' : '',
+        f = ~~(h = Math.abs(h).toFixed(l)) + '',
+        e = ((e = f.length) > 3) ? e % 3 : 0;
+    return a + (e ? f.substr(0, e) + g : '') + f.substr(e).replace(/(\d{3})(?=\d)/g, '$1' + g) + (l ? k + Math.abs(h - f).toFixed(l).slice(2) : '');
+  }
 
   // A smattering of methods that are needed to implement the benchmark testbed.
   var bnch = {
@@ -61,10 +72,10 @@
       }
       return -1;
     }
-  };
+  },
 
   // Test manages a single test (created with benchmark.test())
-  var Test = function (name, id, f) {
+  Test = function (name, id, f) {
     if (!f) {
       throw new Error('Undefined test function');
     }
@@ -80,15 +91,15 @@
   bnch.extend(Test, {
     // Calibration tests for establishing iteration loop overhead
     CALIBRATIONS: [
-      new Test('Calibrating loop', 'cl', function(count) { while(count--); }),
+      new Test('Calibrating loop', 'cl', function(count) { while (count--) { } }),
       new Test('Calibrating function', 'cf', bnch.F)
     ],
 
     // Run calibration tests. Returns true if calibrations are not yet complete (in which case calling code should run the tests yet again).
     // onCalibrated - Callback to invoke when calibrations have finished
     calibrate: function(onCalibrated) {
-      for (var i = 0; i < Test.CALIBRATIONS.length; i++) {
-        var cal = Test.CALIBRATIONS[i];
+      for (var i = 0, cal; i < Test.CALIBRATIONS.length; i++) {
+        cal = Test.CALIBRATIONS[i];
         if (cal.running) {
           return true;
         }
@@ -110,7 +121,7 @@
     // Max iterations allowed (i.e. used to detect bad looping functions)
     MAX_COUNT: 1e9,
     // Minimum time a test should take to get valid results (secs)
-    MIN_TIME: .5,
+    MIN_TIME: 0.5,
 
     // Callback invoked when test state changes
     onChange: bnch.F,
@@ -139,7 +150,12 @@
 
     // The nuts and bolts code that actually runs a test
     _run: function(count) {
-      var me = this;
+      var me = this,
+          start,
+          f = me.f,
+          i = count,
+          x,
+          pow;
 
       // Make sure calibration tests have run
       if (!me.isCalibration && Test.calibrate(function() { me.run(count); })) {
@@ -149,11 +165,6 @@
       this.error = null;
 
       try {
-
-        var start,
-            f = this.f,
-            now,
-            i = count;
 
         start = new Date();
         while (i--) {
@@ -165,7 +176,7 @@
 
         // Store iteration count and per-operation time taken
         this.count = count;
-        this.period = this.time/count;
+        this.period = this.time / count;
 
         // Do we need to do another run?
         this.running = this.time <= this.MIN_TIME;
@@ -173,8 +184,8 @@
         // …if so, compute how many times we should iterate
         if (this.running) {
           // Bump the count to the nearest power of 2
-          var x = this.MIN_TIME / this.time,
-              pow = Math.pow(2, Math.max(1, Math.ceil(Math.log(x) / Math.log(2))));
+          x = this.MIN_TIME / this.time;
+          pow = Math.pow(2, Math.max(1, Math.ceil(Math.log(x) / Math.log(2))));
           count *= pow;
           if (count > this.MAX_COUNT) {
             throw new Error('Maximum count exceeded. If this test uses a looping function, make sure the iteration loop is working properly.');
@@ -214,15 +225,16 @@
     // Initialize
     _init: function() {
       // Parse query params into benchmark.params[] hash
-      var match = (location + '').match(/([^?#]*)(#.*)?$/);
+      var match = (location + '').match(/([^?#]*)(#.*)?$/),
+          pairs,
+          i,
+          pair;
       if (match) {
-        var pairs = match[1].split('&');
-        for (var i = 0; i < pairs.length; i++) {
-          var pair = pairs[i].split('=');
+        pairs = match[1].split('&');
+        for (i = 0; i < pairs.length; i++) {
+          pair = pairs[i].split('=');
           if (pair.length > 1) {
-            var key = pair.shift(),
-                value = pair.length > 1 ? pair.join('=') : pair[0];
-            this.params[key] = value;
+            this.params[pair.shift()] = pair.length > 1 ? pair.join('=') : pair[0];
           }
         }
       }
@@ -241,11 +253,13 @@
     renderTest: function(test) {
 
       var cell = bnch.$('results-' + test.id),
-          cns = [test.loopArg ? 'test-looping' : ''];
+          elError,
+          strError,
+          hz;
 
       if (test.error) {
-        var elError = bnch.$('error-info'),
-            strError = '<p>' + test.error + '.</p><ul><li>' + bnch.join(test.error, ': ', '</li><li>') + '</li></ul>';
+        elError = bnch.$('error-info');
+        strError = '<p>' + test.error + '.</p><ul><li>' + bnch.join(test.error, ': ', '</li><li>') + '</li></ul>';
         cell.className = 'error';
         cell.innerHTML = 'Error';
         elError.className = 'show';
@@ -259,8 +273,8 @@
         } else if (bnch.indexOf(benchmark._queue, test) >= 0) {
           cell.innerHTML = 'pending…';
         } else if (test.count) {
-          var hz = Math.round(1 / test.period);
-          cell.innerHTML = hz != Infinity ? formatNumber(hz) : '∞';
+          hz = Math.round(1 / test.period);
+          cell.innerHTML = hz !== Infinity ? formatNumber(hz) : '∞';
           //arrHz.push({ i: test.id, o: hz });
           cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds';
         } else {
@@ -278,13 +292,13 @@
       benchmark.elResults.push(bnch.$('results-' + id));
       benchmark._tests.push(test);
 
-      elTitle.onclick = function() { benchmark._queueTest(test); }
+      elTitle.onclick = function() { benchmark._queueTest(test); };
       elTitle.onkeyup = function(e) {
         if (13 === e.keyCode) {
           e.preventDefault();
           elTitle.onclick.call(elTitle);
         }
-      }
+      };
       elTitle.setAttribute('tabindex', 0);
       elTitle.title = 'Click to run this test again';
 
@@ -298,7 +312,7 @@
         }
         benchmark.currentTest = null;
         benchmark._nextTest();
-      }
+      };
 
       // Render the new test
       this.renderTest(test);
@@ -309,8 +323,9 @@
       e = e || window.event;
       bnch.$('run').innerHTML = 'Stop tests';
       var reverse = e && e.shiftKey,
-          len = benchmark._tests.length;
-      for (var i = 0; i < len; i++) {
+          len = benchmark._tests.length,
+          i;
+      for (i = 0; i < len; i++) {
         benchmark._queueTest(benchmark._tests[!reverse ? i : (len - i - 1)]);
       }
     },
@@ -327,7 +342,10 @@
     // Run the next test in the run queue
     _nextTest: function() {
       if (!benchmark.currentTest) {
-        var test = benchmark._queue.shift();
+        var test = benchmark._queue.shift(),
+            i,
+            arrHz = [],
+            t;
         if (test) {
           benchmark.currentTest = test;
           test.run();
@@ -337,22 +355,20 @@
           }
         } else {
           bnch.$('run').innerHTML = 'Run tests again';
-          var i = benchmark._tests.length,
-              arrHz = [],
-              x;
+          i = benchmark._tests.length;
           while (i--) {
-            var test = benchmark._tests[i];
-            if (test.count) {
-              arrHz.push({ i: test.id, o: Math.round(1 / test.period) });
+            t = benchmark._tests[i];
+            if (t.count) {
+              arrHz.push({ i: t.id, o: Math.round(1 / t.period) });
             }
           }
           // Sort tests descending by number of operations (most ops / fastest first)
-          x = arrHz.sort(function(a, b) {
+          arrHz.sort(function(a, b) {
             return b.o - a.o;
           });
-          if (x.length > 1) {
-            bnch.$('results-' + x[0].i).className = 'fastest';
-            bnch.$('results-' + x.pop().i).className = 'slowest';
+          if (arrHz.length > 1) {
+            bnch.$('results-' + arrHz[0].i).className = 'fastest';
+            bnch.$('results-' + arrHz.pop().i).className = 'slowest';
           }
         }
       }
@@ -381,26 +397,42 @@
 
   benchmark._init();
 
-})();
+}());
 
 document.documentElement.className = 'js';
 // Don’t let people alert / confirm / prompt
-window.alert = window.confirm = window.prompt = Function();
+window.alert = window.confirm = window.prompt = function() { };
 
 window.onload = function() {
+
+  // platformInfo() – see http://gist.github.com/465384
+  function platformInfo() {
+    var ua = navigator.userAgent,
+        os = 'Windows|iPhone OS|(Intel |PPC )?Mac OS X|Linux',
+        pOS = RegExp('((' + os + ') [^ );]*)').test(ua) ? RegExp.$1 : null,
+        pName = /(Chrome|MSIE|Safari|Opera|Firefox|Minefield)/.test(ua) ? RegExp.$1 : null,
+        pVersion = 'Opera' === pName ? opera.version() : (pName && RegExp('(Version|' + pName + ')[ \/]([^ ;]*)').test(ua)) ? RegExp.$2 : null;
+    if (!pOS) {
+      pOS = RegExp('((' + os + ')[^ );]*)').test(ua) ? RegExp.$1 : null;
+    }
+    return (pOS && pName && pVersion) ? pName + ' '  + pVersion + ' on ' + pOS.replace(/_/g, '.') : 'unknown platform';
+  }
+
+  function id(x) {
+    return document.getElementById(x);
+  }
+
   var elRun = id('run'),
       elError = document.createElement('div'),
       elTable = id('test-table');
+
   elError.id = 'error-info';
   // Insert div#error-info after the test table
   elTable.parentNode.insertBefore(elError, elTable.nextSibling);
-  // platformInfo() – see http://gist.github.com/465384
-  function platformInfo(){var c=navigator.userAgent,d=['Windows','iPhone OS','(Intel |PPC )?Mac OS X','Linux'].join('|'),a=RegExp('(('+d+') [^ );]*)').test(c)?RegExp.$1:null,b=/(Chrome|MSIE|Safari|Opera|Firefox|Minefield)/.test(c)?RegExp.$1:null,e='Opera'===b?opera.version():(b&&RegExp('(Version|'+b+')[ /]([^ ;]*)').test(c))?RegExp.$2:null;if(!a){a=RegExp('(('+d+')[^ );]*)').test(c)?RegExp.$1:null}return(a&&b&&e)?b+' '+e+' on '+a.replace(/_/g,'.'):'unknown platform'}
-  function id(id) {
-    return document.getElementById(id);
-  }
+
   // Show platform info
   id('user-agent').innerHTML = platformInfo();
+
   // Run button
   elRun.onclick = function(event) {
     if (this.innerHTML === 'Stop tests') {
@@ -408,7 +440,7 @@ window.onload = function() {
     } else {
       benchmark.runAll(event);
     }
-  }
+  };
   // Auto-run tests when the URL has #run appended
   if ('#run' === location.hash) {
     elRun.onclick.call(elRun);
@@ -416,4 +448,4 @@ window.onload = function() {
 };
 
 /*! Optimized asynchronous Google Analytics snippet: http://mathiasbynens.be/notes/async-analytics-snippet */
-var _gaq=[['_setAccount','UA-6065217-40'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)})(document,'script')
+var _gaq=[['_setAccount','UA-6065217-40'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s);}(document,'script'));
