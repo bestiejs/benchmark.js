@@ -400,8 +400,8 @@
 }());
 
 document.documentElement.className = 'js';
-// Don’t let people alert / confirm / prompt
-window.alert = window.confirm = window.prompt = function() { };
+// Don’t let people alert / confirm / prompt / open new windows
+window.alert = window.confirm = window.prompt = window.open = function() { };
 
 window.onload = function() {
 
