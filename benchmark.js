@@ -384,7 +384,7 @@
       elError.innerHTML = '';
       elError.className = '';
       while (i--) {
-        if (benchmark.elResults[i].className !== 'error') {
+        if (benchmark.elResults[i].className !== 'results error') {
           benchmark.elResults[i].className = 'results';
         }
       }
