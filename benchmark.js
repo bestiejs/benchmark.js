@@ -87,7 +87,7 @@
     // Run calibration tests. Returns true if calibrations are not yet complete (in which case calling code should run the tests yet again).
     // onCalibrated - Callback to invoke when calibrations have finished
     calibrate: function(onCalibrated) {
-      for (var i = 0; i < Test.CALIBRATIONS.length; i++) { 
+      for (var i = 0; i < Test.CALIBRATIONS.length; i++) {
         var cal = Test.CALIBRATIONS[i];
         if (cal.running) {
           return true;
@@ -384,6 +384,8 @@
 })();
 
 document.documentElement.className = 'js';
+// Don’t let people alert / confirm / prompt
+window.alert = window.confirm = window.prompt = Function();
 
 window.onload = function() {
   var elRun = id('run'),
@@ -397,8 +399,6 @@ window.onload = function() {
   function id(id) {
     return document.getElementById(id);
   }
-  // Don’t let people alert / confirm / prompt
-  window.alert = window.confirm = window.prompt = Function();
   // Show platform info
   id('user-agent').innerHTML = platformInfo();
   // Run button
