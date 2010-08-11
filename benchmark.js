@@ -260,7 +260,7 @@
       if (test.error) {
         elError = bnch.$('error-info');
         strError = '<p>' + test.error + '.</p><ul><li>' + bnch.join(test.error, ': ', '</li><li>') + '</li></ul>';
-        cell.className = 'error';
+        cell.className += ' error';
         cell.innerHTML = 'Error';
         elError.className = 'show';
         // If this error message isn’t visible yet
@@ -367,8 +367,8 @@
             return b.o - a.o;
           });
           if (arrHz.length > 1) {
-            bnch.$('results-' + arrHz[0].i).className = 'fastest';
-            bnch.$('results-' + arrHz.pop().i).className = 'slowest';
+            bnch.$('results-' + arrHz[0].i).className += ' fastest';
+            bnch.$('results-' + arrHz.pop().i).className += ' slowest';
           }
         }
       }
@@ -385,7 +385,7 @@
       elError.className = '';
       while (i--) {
         if (benchmark.elResults[i].className !== 'error') {
-          benchmark.elResults[i].className = '';
+          benchmark.elResults[i].className = 'results';
         }
       }
       benchmark._queue.push(test);
