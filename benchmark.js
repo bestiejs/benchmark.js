@@ -72,6 +72,7 @@
       }
       return -1;
     }
+
   },
 
   // Test manages a single test (created with benchmark.test())
@@ -162,7 +163,7 @@
         return;
       }
 
-      this.error = null;
+      me.error = null;
 
       try {
 
@@ -172,41 +173,41 @@
         }
 
         // Get time test took (in secs)
-        this.time = Math.max(1, new Date() - start) / 1e3;
+        me.time = Math.max(1, new Date() - start) / 1e3;
 
         // Store iteration count and per-operation time taken
-        this.count = count;
-        this.period = this.time / count;
+        me.count = count;
+        me.period = me.time / count;
 
         // Do we need to do another run?
-        this.running = this.time <= this.MIN_TIME;
+        me.running = me.time <= me.MIN_TIME;
 
         // …if so, compute how many times we should iterate
-        if (this.running) {
+        if (me.running) {
           // Bump the count to the nearest power of 2
-          x = this.MIN_TIME / this.time;
+          x = me.MIN_TIME / me.time;
           pow = Math.pow(2, Math.max(1, Math.ceil(Math.log(x) / Math.log(2))));
           count *= pow;
-          if (count > this.MAX_COUNT) {
+          if (count > me.MAX_COUNT) {
             throw new Error('Maximum count exceeded. If this test uses a looping function, make sure the iteration loop is working properly.');
           }
         }
       } catch (e) {
         // Exceptions are caught and displayed in the test UI
-        this.reset();
-        this.error = e;
+        me.reset();
+        me.error = e;
       }
 
+      me.onChange(me);
+
       // Figure out what to do next
-      if (this.running) {
+      if (me.running) {
         me.run(count);
       } else {
         bnch.status('Done. Ready to run tests again');
         me.onStop(me);
       }
 
-      // Finish up
-      this.onChange(this);
     }
   });
 
@@ -260,7 +261,9 @@
       if (test.error) {
         elError = bnch.$('error-info');
         strError = '<p>' + test.error + '.</p><ul><li>' + bnch.join(test.error, ': ', '</li><li>') + '</li></ul>';
-        cell.className += ' error';
+        if (cell.className !== 'results error') {
+          cell.className += ' error';
+        }
         cell.innerHTML = 'Error';
         elError.className = 'show';
         // If this error message isn’t visible yet
@@ -307,9 +310,6 @@
 
       // Run the next test if this one finished
       test.onStop = function(test) {
-        if (benchmark.onTestFinish) {
-          benchmark.onTestFinish(test);
-        }
         benchmark.currentTest = null;
         benchmark._nextTest();
       };
@@ -345,15 +345,17 @@
         var test = benchmark._queue.shift(),
             i,
             arrHz = [],
-            t;
+            t,
+            el,
+            elSpan,
+            txt,
+            max;
         if (test) {
           benchmark.currentTest = test;
           test.run();
           benchmark.renderTest(test);
-          if (benchmark.onTestStart) {
-            benchmark.onTestStart(test);
-          }
         } else {
+          // All tests are finished
           bnch.$('run').innerHTML = 'Run tests again';
           i = benchmark._tests.length;
           while (i--) {
@@ -367,8 +369,25 @@
             return b.o - a.o;
           });
           if (arrHz.length > 1) {
+            max = arrHz[0].o;
+            for (i = 0; i < arrHz.length; i++) {
+              el = bnch.$('results-' + arrHz[i].i);
+              t = ~~((1 - arrHz[i].o / max) * 100);
+              if (!i) { // i === 0
+                el.className += ' fastest';
+              } else if (i === arrHz.length - 1) {
+                el.className += ' slowest';
+              }
+              txt = (t ? t + '% slower' : 'fastest');
+              elSpan = el.getElementsByTagName('span')[0];
+              if (elSpan) {
+                elSpan.innerHTML = txt;
+              } else {
+                el.innerHTML += ' <span>' + txt + '</span>';
+              }
+            }
             bnch.$('results-' + arrHz[0].i).className += ' fastest';
-            bnch.$('results-' + arrHz.pop().i).className += ' slowest';
+            bnch.$('results-' + arrHz[arrHz.length - 1].i).className += ' slowest';
           }
         }
       }
