@@ -226,20 +226,16 @@
     // Initialize
     _init: function() {
       // Parse query params into benchmark.params[] hash
-      var match = (location + '').match(/([^?#]*)(#.*)?$/),
-          pairs,
-          i,
-          pair;
-      if (match) {
-        pairs = match[1].split('&');
-        for (i = 0; i < pairs.length; i++) {
-          pair = pairs[i].split('=');
-          if (pair.length > 1) {
-            this.params[pair.shift()] = pair.length > 1 ? pair.join('=') : pair[0];
-          }
+      var hash,
+          hashes = location.href.slice(location.href.indexOf('#') + 1).split('&'),
+          i = hashes.length;
+      this.params = {};
+      if (hashes[0] !== location.href) {
+        while (i--) {
+          hash = hashes[i].split('=');
+          this.params[hash[0]] = hash[1];
         }
       }
-
       return this;
     },
 
@@ -372,13 +368,13 @@
             max = arrHz[0].o;
             for (i = 0; i < arrHz.length; i++) {
               el = bnch.$('results-' + arrHz[i].i);
-              t = ~~((1 - arrHz[i].o / max) * 100);
+              t = (1 - arrHz[i].o / max) * 100;
               if (!i) { // i === 0
                 el.className += ' fastest';
               } else if (i === arrHz.length - 1) {
                 el.className += ' slowest';
               }
-              txt = (t ? t + '% slower' : 'fastest');
+              txt = (t ? ~~t + '% slower' : 'fastest');
               elSpan = el.getElementsByTagName('span')[0];
               if (elSpan) {
                 elSpan.innerHTML = txt;
@@ -415,6 +411,8 @@
   };
 
   benchmark._init();
+
+  window.onhashchange = benchmark._init;
 
 }());
 
@@ -461,7 +459,7 @@ window.onload = function() {
     }
   };
   // Auto-run tests when the URL has #run appended
-  if ('#run' === location.hash) {
+  if ('#run' === location.hash.substr(0, 4)) {
     elRun.onclick.call(elRun);
   }
 };
