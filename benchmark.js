@@ -6,7 +6,7 @@
  */
 
 /*jslint browser: true, forin: true, es5: true, onevar: true, eqeqeq: true, immed: true */
-/*global window, benchmark, opera */
+/*global window, benchmark, opera, init */
 
 (function() {
 
@@ -164,6 +164,10 @@
       }
 
       me.error = null;
+
+      if (window.init) {
+        init();
+      }
 
       try {
 
@@ -412,7 +416,12 @@
 
   benchmark._init();
 
-  window.onhashchange = benchmark._init;
+  window.onhashchange = function() {
+    benchmark._init();
+    if (window.init) {
+      init();
+    }
+  };
 
 }());
 
@@ -461,6 +470,9 @@ window.onload = function() {
   // Auto-run tests when the URL has #run appended
   if ('#run' === location.hash.substr(0, 4)) {
     elRun.onclick.call(elRun);
+  }
+  if (window.init) {
+   init();
   }
 };
 
