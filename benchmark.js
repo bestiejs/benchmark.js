@@ -425,7 +425,7 @@
 
 }());
 
-document.documentElement.className = 'js';
+document.documentElement.className = 'js' + ('#comment' === location.hash.substr(0, 8) ? ' show-comments' : '');
 // Don’t let people alert / confirm / prompt / open new windows
 window.alert = window.confirm = window.prompt = window.open = function() { };
 
@@ -450,7 +450,26 @@ window.onload = function() {
 
   var elRun = id('run'),
       elError = document.createElement('div'),
-      elTable = id('test-table');
+      elTable = id('test-table'),
+      elCommentsWrapper = id('comments-wrapper'),
+      elCommentsHead,
+      elQuestion = id('question'),
+      txtCommentsHead;
+
+  if (elCommentsWrapper) {
+    if ('#comment' !== location.hash.substr(0, 8)) {
+      elCommentsHead = elCommentsWrapper.previousSibling;
+      txtCommentsHead = elCommentsHead.innerHTML;
+      elCommentsHead.innerHTML = '<a href="#comments" title="Show comments">Show ' + txtCommentsHead + '</a>';
+      elCommentsHead.onclick = function() {
+        elCommentsHead.innerHTML = txtCommentsHead;
+        elCommentsWrapper.style.display = 'block';
+        elCommentsHead.onclick = null;
+      };
+    }
+    elQuestion.value = 'no';
+  }
+
 
   elError.id = 'error-info';
   // Insert div#error-info after the test table
@@ -467,13 +486,17 @@ window.onload = function() {
       benchmark.runAll(event);
     }
   };
+
   // Auto-run tests when the URL has #run appended
   if ('#run' === location.hash.substr(0, 4)) {
     elRun.onclick.call(elRun);
   }
+
+  // Run init() if it’s defined
   if (window.init) {
    init();
   }
+
 };
 
 /*! Optimized asynchronous Google Analytics snippet: http://mathiasbynens.be/notes/async-analytics-snippet */
