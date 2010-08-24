@@ -5,8 +5,10 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-/*jslint browser: true, forin: true, es5: true, onevar: true, eqeqeq: true, immed: true */
-/*global window, benchmark, opera, init */
+/*jslint browser: true, forin: true, es5: false, onevar: true, eqeqeq: true, immed: true */
+/*global window, benchmark, opera, init, _bTestResults, _bTestKey */
+
+var _bTestResults; // For Browserscope; don’t rename
 
 (function() {
 
@@ -349,7 +351,8 @@
             el,
             elSpan,
             txt,
-            max;
+            max,
+            ops;
         if (test) {
           benchmark.currentTest = test;
           test.run();
@@ -358,10 +361,13 @@
           // All tests are finished
           bnch.$('run').innerHTML = 'Run tests again';
           i = benchmark._tests.length;
+          _bTestResults = {};
           while (i--) {
             t = benchmark._tests[i];
             if (t.count) {
-              arrHz.push({ i: t.id, o: Math.round(1 / t.period) });
+              ops = Math.round(1 / t.period);
+              arrHz.push({ i: t.id, o: ops });
+              _bTestResults[t.name.match(/[a-z0-9]+/ig).join(' ')] = ops;
             }
           }
           // Sort tests descending by number of operations (most ops / fastest first)
@@ -388,6 +394,13 @@
             }
             bnch.$('results-' + arrHz[0].i).className += ' fastest';
             bnch.$('results-' + arrHz[arrHz.length - 1].i).className += ' slowest';
+            // Beacon the results to Browserscope.
+            (function(d) {
+              var _bScript = d.createElement('script');
+              _bScript.src = 'http://www.browserscope.org/user/beacon/' + _bTestKey;
+              _bScript.async = 1;
+              d.body.appendChild(_bScript);
+            }(document));
           }
         }
       }
@@ -469,7 +482,6 @@ window.onload = function() {
     }
     elQuestion.value = 'no';
   }
-
 
   elError.id = 'error-info';
   // Insert div#error-info after the test table
