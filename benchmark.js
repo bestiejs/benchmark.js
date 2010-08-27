@@ -14,11 +14,11 @@ var _bTestResults; // For Browserscope; don’t rename
 
 	function formatNumber(h, b) {
 		var l = isNaN(b) ? 0 : Math.abs(b),
-				k = '.',
-				g = ',',
-				a = (h < 0) ? '-' : '',
-				f = ~~(h = Math.abs(h).toFixed(l)) + '',
-				e = ((e = f.length) > 3) ? e % 3 : 0;
+		    k = '.',
+		    g = ',',
+		    a = (h < 0) ? '-' : '',
+		    f = ~~(h = Math.abs(h).toFixed(l)) + '',
+		    e = ((e = f.length) > 3) ? e % 3 : 0;
 		return a + (e ? f.substr(0, e) + g : '') + f.substr(e).replace(/(\d{3})(?=\d)/g, '$1' + g) + (l ? k + Math.abs(h - f).toFixed(l).slice(2) : '');
 	}
 
@@ -55,7 +55,7 @@ var _bTestResults; // For Browserscope; don’t rename
 				return o.join(delimit1); // If it's an array
 			}
 			var pairs = [],
-					k;
+			    k;
 			for (k in o) {
 				pairs.push(k + delimit1 + o[k]);
 			}
@@ -154,11 +154,11 @@ var _bTestResults; // For Browserscope; don’t rename
 		// The nuts and bolts code that actually runs a test
 		_run: function(count) {
 			var me = this,
-					start,
-					f = me.f,
-					i = count,
-					x,
-					pow;
+			    start,
+			    f = me.f,
+			    i = count,
+			    x,
+			    pow;
 
 			// Make sure calibration tests have run
 			if (!me.isCalibration && Test.calibrate(function() { me.run(count); })) {
@@ -233,8 +233,8 @@ var _bTestResults; // For Browserscope; don’t rename
 		_init: function() {
 			// Parse query params into benchmark.params[] hash
 			var hash,
-					hashes = location.href.slice(location.href.indexOf('#') + 1).split('&'),
-					i = hashes.length;
+			    hashes = location.href.slice(location.href.indexOf('#') + 1).split('&'),
+			    i = hashes.length;
 			this.params = {};
 			if (hashes[0] !== location.href) {
 				while (i--) {
@@ -256,9 +256,9 @@ var _bTestResults; // For Browserscope; don’t rename
 		renderTest: function(test) {
 
 			var cell = bnch.$('results-' + test.id),
-					elError,
-					strError,
-					hz;
+			    elError,
+			    strError,
+			    hz;
 
 			if (test.error) {
 				elError = bnch.$('error-info');
@@ -292,7 +292,7 @@ var _bTestResults; // For Browserscope; don’t rename
 		test: function(name, id, f) {
 			// Create the Test object
 			var test = new Test(name, id, f),
-					elTitle = bnch.$('title-' + id);
+			    elTitle = bnch.$('title-' + id);
 
 			benchmark.elResults.push(bnch.$('results-' + id));
 			benchmark._tests.push(test);
@@ -325,8 +325,8 @@ var _bTestResults; // For Browserscope; don’t rename
 			e = e || window.event;
 			bnch.$('run').innerHTML = 'Stop tests';
 			var reverse = e && e.shiftKey,
-					len = benchmark._tests.length,
-					i;
+			    len = benchmark._tests.length,
+			    i;
 			for (i = 0; i < len; i++) {
 				benchmark._queueTest(benchmark._tests[!reverse ? i : (len - i - 1)]);
 			}
@@ -345,14 +345,14 @@ var _bTestResults; // For Browserscope; don’t rename
 		_nextTest: function() {
 			if (!benchmark.currentTest) {
 				var test = benchmark._queue.shift(),
-						i,
-						arrHz = [],
-						t,
-						el,
-						elSpan,
-						txt,
-						max,
-						ops;
+				    i,
+				    arrHz = [],
+				    t,
+				    el,
+				    elSpan,
+				    txt,
+				    max,
+				    ops;
 				if (test) {
 					benchmark.currentTest = test;
 					test.run();
@@ -412,7 +412,7 @@ var _bTestResults; // For Browserscope; don’t rename
 				return;
 			}
 			var elError = bnch.$('error-info'),
-					i = benchmark.elResults.length;
+			    i = benchmark.elResults.length;
 			elError.innerHTML = '';
 			elError.className = '';
 			while (i--) {
@@ -447,10 +447,10 @@ window.onload = function() {
 	// platformInfo() – see http://gist.github.com/465384
 	function platformInfo() {
 		var ua = navigator.userAgent,
-				os = 'Windows|iPhone OS|(Intel |PPC )?Mac OS X|Linux',
-				pOS = RegExp('((' + os + ') [^ );]*)').test(ua) ? RegExp.$1 : null,
-				pName = /(Chrome|MSIE|Safari|Opera|Firefox|Minefield)/.test(ua) ? RegExp.$1 : null,
-				pVersion = 'Opera' === pName ? opera.version() : (pName && RegExp('(Version|' + pName + ')[ \/]([^ ;]*)').test(ua)) ? RegExp.$2 : null;
+		    os = 'Windows|iPhone OS|(Intel |PPC )?Mac OS X|Linux',
+		    pOS = RegExp('((' + os + ') [^ );]*)').test(ua) ? RegExp.$1 : null,
+		    pName = /(Chrome|MSIE|Safari|Opera|Firefox|Minefield)/.test(ua) ? RegExp.$1 : null,
+		    pVersion = 'Opera' === pName ? opera.version() : (pName && RegExp('(Version|' + pName + ')[ \/]([^ ;]*)').test(ua)) ? RegExp.$2 : null;
 		if (!pOS) {
 			pOS = RegExp('((' + os + ')[^ );]*)').test(ua) ? RegExp.$1 : null;
 		}
@@ -462,9 +462,9 @@ window.onload = function() {
 	}
 
 	var elRun = id('run'),
-			elError = document.createElement('div'),
-			elTable = id('test-table'),
-			elQuestion = id('question');
+	    elError = document.createElement('div'),
+	    elTable = id('test-table'),
+	    elQuestion = id('question');
 
 	if (elQuestion) {
 		elQuestion.value = 'no';
