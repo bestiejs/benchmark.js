@@ -493,10 +493,17 @@ window.onload = function() {
 
 	// Run init() if it’s defined
 	if (window.init) {
-	 init();
+		init();
 	}
 
 };
 
 /*! Optimized asynchronous Google Analytics snippet: http://mathiasbynens.be/notes/async-analytics-snippet */
-var _gaq=[['_setAccount','UA-6065217-40'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;g.src='//www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s);}(document,'script'));
+var _gaq = [['_setAccount', 'UA-6065217-40'], ['_trackPageview']];
+(function(d, t) {
+	var g = d.createElement(t),
+	    s = d.getElementsByTagName(t)[0];
+	g.async = 1;
+	g.src = '//www.google-analytics.com/ga.js';
+	s.parentNode.insertBefore(g, s);
+}(document, 'script'));
