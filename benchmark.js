@@ -367,7 +367,7 @@ var _bTestResults; // For Browserscope; don’t rename
 						if (t.count) {
 							ops = Math.round(1 / t.period);
 							arrHz.push({ i: t.id, o: ops });
-							_bTestResults[t.name.match(/[a-z0-9]+/ig).join(' ')] = ops;
+							_bTestResults[(t.name.match(/[a-z0-9]+/ig) || [t.id]).join(' ')] = ops;
 						}
 					}
 					// Sort tests descending by number of operations (most ops / fastest first)
