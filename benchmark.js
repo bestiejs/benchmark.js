@@ -135,9 +135,10 @@ var _bTestResults; // For Browserscope; don’t rename
 		// Reset test state
 		reset: function() {
 			delete this.count;
-			delete this.time;
-			delete this.running;
 			delete this.error;
+			delete this.period;
+			delete this.running;
+			delete this.time;
 		},
 
 		// Run the test (in a timeout). We use a timeout to make sure the browser has a chance to finish rendering any UI changes we’ve made, like updating the status message.
