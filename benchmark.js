@@ -159,6 +159,7 @@ var _bTestResults; // For Browserscope; don’t rename
 			    f = me.f,
 			    i = count,
 			    x,
+			    diff,
 			    pow;
 
 			// Make sure calibration tests have run
@@ -180,7 +181,8 @@ var _bTestResults; // For Browserscope; don’t rename
 				}
 
 				// Get time test took (in secs)
-				me.time = Math.max(1, new Date() - start) / 1e3;
+				diff = isNaN(Test.CALIBRATIONS[1].period) || isNaN(me.count) ? 0 : Test.CALIBRATIONS[1].period * me.count;
+				me.time = Math.max(1, new Date() - start) / 1e3 - diff;
 
 				// Store iteration count and per-operation time taken
 				me.count = count;
