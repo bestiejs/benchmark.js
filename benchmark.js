@@ -466,7 +466,7 @@ window.onload = function() {
 		if (!pOS) {
 			pOS = RegExp('((' + os + ')[^ );]*)').test(ua) ? RegExp.$1 : null;
 		}
-		return (pOS && pName && pVersion) ? pName + ' '	+ pVersion + ' on ' + pOS.replace(/_/g, '.') : 'unknown platform';
+		return (pOS && pName && pVersion) ? pName + ' ' + pVersion + ' on ' + pOS.replace(/_/g, '.') : 'unknown platform';
 	}
 
 	function id(x) {
