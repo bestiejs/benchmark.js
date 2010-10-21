@@ -78,7 +78,7 @@ var _bTestResults; // For Browserscope; don’t rename
 	},
 
 	// Test manages a single test (created with benchmark.test())
-	Test = function (name, id, f) {
+	Test = function(name, id, f) {
 		if (!f) {
 			throw new Error('Undefined test function');
 		}
@@ -176,12 +176,21 @@ var _bTestResults; // For Browserscope; don’t rename
 			try {
 
 				start = new Date();
-				while (i--) {
-					f();
+
+				// If this is a looping function…
+				if (this.loopArg) {
+					// …let it do the iteration itself
+					f(count);
+				} else {
+					while (i--) {
+					 f();
+					}
 				}
 
 				// Get time test took (in secs)
-				diff = isNaN(Test.CALIBRATIONS[1].period) || isNaN(me.count) ? 0 : Test.CALIBRATIONS[1].period * me.count;
+				x = Test.CALIBRATIONS[this.loopArg ? 0 : 1];
+
+				diff = isNaN(x.period) || isNaN(me.count) ? 0 : x.period * me.count;
 				me.time = Math.max(1, new Date() - start) / 1e3 - diff;
 
 				// Store iteration count and per-operation time taken
