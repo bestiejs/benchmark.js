@@ -1,0 +1,356 @@
+html,h1,h2,h3,fieldset,#faq,#faq dt,#faq dd,iframe{
+  margin:0;
+  padding:0;
+  border:0
+}
+table,p,ul,h1,h2,h3,#error-info,iframe{
+  margin-bottom:1em
+}
+button,input,textarea,a{
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  border-radius:4px
+}
+html,input,textarea,button{
+  font:1em/1.5 Helvetica,Arial,sans-serif
+}
+html{
+  background:#c4c4c4;
+  height:100%
+}
+body{
+  background:#fff;
+  border:1px solid #aaa;
+  border-width:0 1px;
+  width:55em;
+  padding:0 2.5em;
+  margin:0 auto;
+  min-height:100%
+}
+a{
+  color:#357ab0;
+  padding:.2em
+}
+a:hover,a:focus{
+  text-decoration:none
+}
+table{
+  width:100%;
+  border-collapse:collapse
+}
+thead th,caption,button:hover,button:focus,.submit:hover,.submit:focus,a:hover,a:focus,#comments .meta a:hover,#comments .meta a:focus,li.current a:hover,li.current a:focus,form h3,#comments .owner .meta{
+  background:#1a6ab9;
+  background-image:-moz-linear-gradient(top,#6ca5dd,#1a6ab9);
+  background-image:-webkit-gradient(linear,left top,left bottom,from(#6ca5dd),to(#1a6ab9));
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#6ca5dd',EndColorStr='#1a6ab9');
+  -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorStr='#6ca5dd',EndColorStr='#1a6ab9')";
+  color:#fff
+}
+caption,#comments .meta{
+  background:#bcbcbc;
+  background-image:-moz-linear-gradient(top,#d0d0d0,#a7a7a7);
+  background-image:-webkit-gradient(linear,left top,left bottom,from(#d0d0d0),to(#a7a7a7));
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#d0d0d0',EndColorStr='#a7a7a7');
+  -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorStr='#d0d0d0',EndColorStr='#a7a7a7')";
+  color:#555
+}
+thead th,caption{
+  font-weight:bold
+}
+tbody th{
+  background:#dde4ea;
+  border:1px solid #b4b4b4;
+  border-width:0 1px 1px 0
+}
+td{
+  border:1px solid #b4b4b4;
+  border-width:0 1px 1px 0
+}
+td.results{
+  border-right:0;
+  text-align:center
+}
+.results span{
+  display:block;
+  font-size:.8em
+}
+tr:last-child td,tr:last-child th{
+  border-bottom:0
+}
+td,th,caption{
+  padding:.2em .5em
+}
+td.fastest{
+  background:#9cee82
+}
+td.slowest,td.error{
+  background:pink
+}
+td.error{
+  text-transform:uppercase;
+  font-weight:bold
+}
+button,.submit{
+  padding:.35em .5em;
+  cursor:pointer;
+  color:#000;
+  border:1px solid #999;
+  background:#dadada;
+  background-image:-moz-linear-gradient(top,#ebebeb,#b8b8b8);
+  background-image:-webkit-gradient(linear,left top,left bottom,from(#ebebeb),to(#b8b8b8));
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorStr='#ebebeb',EndColorStr='#b8b8b8');
+  -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorStr='#ebebeb',EndColorStr='#b8b8b8')"
+}
+a:hover span,a:focus span{
+  color:#fff
+}
+#run,.buttons{
+  float:right
+}
+button:hover,button:focus,.submit:hover,.submit:focus{
+  border-color:#357ab0
+}
+#add-buttons button{
+  padding:.15em .4em;
+  font-size:11px;
+  font-weight:bold
+}
+h1,h2,h3,h4{
+  font-weight:bold;
+  font-size:1em
+}
+h1{
+  padding-top:1em;
+  font-size:1.4em
+}
+hgroup h2{
+  display:none
+}
+form h3{
+  padding-top:.2em;
+  padding-bottom:.2em
+}
+h1 em{
+  font-style:normal
+}
+h1 strong{
+  font-style:italic;
+  font-family:Monaco,'Lucida Console',monospace
+}
+iframe{
+  width:100%;
+  height:450px;
+  resize:vertical
+}
+iframe#browserscope{
+  width:1px;
+  height:1px;
+  margin:0
+}
+form div{
+  margin-bottom:1em
+}
+label{
+  float:left;
+  width:14em;
+  cursor:pointer;
+  text-align:right;
+  margin-right:1em;
+  padding:.4em
+}
+label.inline{
+  float:none;
+  padding:0;
+  margin:0
+}
+label[for=visible]{
+  position:relative;
+  top:-.37em
+}
+label span{
+  display:block;
+  font-size:90%;
+  color:#b4b4b4
+}
+label em{
+  color:red;
+  font-style:normal
+}
+textarea{
+  width:42.6em;
+  _width:42.4em;
+  height:15em;
+  resize:vertical
+}
+input,textarea{
+  border:1px solid #b4b4b4;
+  padding:.4em
+}
+form h2,form h3,form h4,p.error,.preview,#add-libraries,#add-buttons{
+  padding-left:250px;
+  display:block
+}
+pre{
+  width:100%;
+  overflow:auto
+}
+table pre{
+  max-width:40em;
+  *padding-bottom:2em;
+  _width:40em;
+}
+table #results-1{
+  width:5em;
+  *width:6em
+}
+mark{
+  background:#ff9;
+  padding:.2em .1em
+}
+li.current a{
+  background:lightgreen
+}
+footer{
+  display:block;
+  margin-top:2em;
+  padding:.5em 0 1.5em;
+  border-top:2px solid #c4c4c4
+}
+
+:focus:invalid,.invalid{
+  background:pink
+}
+.error{
+  color:#b00b00
+}
+.co1,.co2,.coMULTI{
+  font-style:italic
+}
+.imp{
+  color:red
+}
+.meta strong,#status strong{
+  padding:.4em
+}
+
+#add-test{
+  margin-right:.3em
+}
+#run{
+  margin-top:-.4em;
+  display:none
+}
+#faq{
+  margin-bottom:1em
+}
+#faq dt{
+  margin-top:1em;
+  font-weight:bold
+}
+#faq dt:target,#faq dt:target+dd{
+  background:lightgreen;
+  padding:.5em .8em 0 .8em
+}
+#faq dt:target+dd{
+  padding-top:0;
+  padding-bottom:.5em
+}
+#error-info.show,.meta strong,#status strong{
+  background:pink;
+  border:1px solid #b00b00;
+  padding:1em
+}
+#error-info,code,samp,var,textarea{
+  font-family:Monaco,'Courier New',monospace;
+  font-size:.9em
+}
+#status span{
+  display:none
+}
+
+.js #run{
+  display:block
+}
+.js .question{
+  display:none
+}
+.js tbody th:hover,.js tbody th:focus{
+  text-decoration:underline;
+  cursor:pointer
+}
+.js #status span{
+  display:inline
+}
+
+/* comments */
+#comments .meta,#comments .meta img{
+  position:absolute;
+  left:0;
+  top:0;
+  margin:0
+}
+#comments .meta img{
+  top:2px;
+  left:2px
+}
+#comments .meta{
+  padding-left:35px;
+  top:0;
+  width:843px;
+  line-height:30px
+}
+#comments .meta a{
+  font-weight:bold;
+  color:#555
+}
+#comments .owner .meta a{
+  color:#fff
+}
+#comments article div{
+  margin-top:30px;
+  padding:.2em 1em 0
+}
+#comments article{
+  display:block;
+  border:1px solid #b4b4b4;
+  position:relative;
+  margin-bottom:1em
+}
+#comments article:target{
+  background:#dde4ea
+}
+
+/* pretty print code */
+.kw1,.kw3{
+  color:#006
+}
+.kw2{
+  color:#036
+}
+.co1{
+  color:#060
+}
+.co2{
+  color:#096
+}
+.coMULTI{
+  color:#060
+}
+.es0{
+  color:#009
+}
+.br0{
+  color:#090
+}
+.sy0{
+  color:#393
+}
+.st0{
+  color:#36c
+}
+.nu0{
+  color:#c00
+}
+.me1{
+  color:#606
+}
