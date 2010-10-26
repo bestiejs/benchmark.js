@@ -11,26 +11,23 @@
 
 (function(global) {
 
-  function Klass() { }
-
   function Benchmark(fn, options) {
     options = extend({ }, options);
     extend(this, options);
-
     this.fn = fn;
     this.options = options;
-    this.constructor = Benchmark;
   }
 
   function Calibration(fn) {
     Benchmark.call(this, fn);
-    this.constructor = Calibration;
   }
 
-  Klass.prototype = Benchmark.prototype;
-  Calibration.prototype = new Klass;
+  function Klass() { }
 
-  (function() {
+  Klass.prototype = Benchmark.prototype;
+
+  (function(proto) {
+    // bypass calibrating the Calibration tests when they are run
     function run(count, synchronous) {
       var me = this;
       me.running = true;
@@ -38,8 +35,9 @@
       me.onStart(me);
       _run(me, synchronous);
     }
-    Calibration.prototype.run = run;
-  })();
+    proto.constructor = Calibration;
+    proto.run = run;
+  })(Calibration.prototype = new Klass);
 
   /*--------------------------------------------------------------------------*/
 
@@ -62,7 +60,6 @@
       destination[key] = source[key];
     }
   }
-
 
   /*--------------------------------------------------------------------------*/
 
