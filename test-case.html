@@ -128,7 +128,7 @@
       <pre><code><span
         class="kw2">var</span> x <span class="sy0">=</span> arr<span
         class="sy0">,</span><br>&nbsp; &nbsp; y <span
-        class="sy0">=</span> ~~ <span class="br0">&#40;</span>Math.<span
+        class="sy0">=</span> ~~<span class="br0">&#40;</span>Math.<span
         class="me1">random</span><span class="br0">&#40;</span><span
         class="br0">&#41;</span> <span class="sy0">*</span> <span
         class="nu0">100</span><span class="br0">&#41;</span><span
@@ -194,7 +194,7 @@
 
   ui.addTest("Just another unrelated test", 5, function() {
     var x = arr,
-        y = ~~ (Math.random() * 100);
+        y = ~~(Math.random() * 100);
     while (y--) {
       if (arr[y]) {
         arr[y];
@@ -209,8 +209,10 @@
   // Browserscope API key
   var _bTestKey = "";
 
-  if (typeof window.console == "function" &&
-      typeof console.error == "function") {
+  if (typeof window.console != "undefined" &&
+      typeof console.error == "function" &&
+      typeof console.profile == "function" &&
+      typeof console.profileEnd == "function") {
 
     (function() {
       try {
@@ -265,7 +267,7 @@
       try {
         console.profile("Just another unrelated test");
         var x = arr,
-            y = ~~ (Math.random() * 100);
+            y = ~~(Math.random() * 100);
         while (y--) {
           if (arr[y]) {
            arr[y];
