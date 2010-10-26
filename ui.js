@@ -140,13 +140,9 @@
   }
 
   function onKeyUp(e) {
+    // treat hitting ENTER while focused on a test title as if it were clicked
     e || (e = global.event);
     if (13 == e.keyCode) {
-      if (typeof e.preventDefault == "function") {
-        e.preventDefault();
-      } else if ("returnValue" in e) {
-        e.returnValue = false;
-      }
       onClick.call(this);
     }
   }
