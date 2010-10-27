@@ -36,7 +36,7 @@
     }
     proto.constructor = Calibration;
     proto.run = run;
-  })(Calibration.prototype = new Klass);
+  }(Calibration.prototype = new Klass()));
 
   /*--------------------------------------------------------------------------*/
 
@@ -60,39 +60,41 @@
     }
   }
 
+
   /*--------------------------------------------------------------------------*/
 
   function getPlatform() {
-    var result, token,
-     description = [],
-     ua = navigator.userAgent,
-     oses = "(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)",
-     os = (ua.match(RegExp(oses + "(?:[^ );]| )*")) || [])[0],
-     name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
-     version = global.opera && typeof opera.version == "function" && opera.version(),
-     mses = { "6.1": "7", "6.0": "Vista", "5.2": "Server 2003 / XP x64", "5.1": "XP", "5.0": "2000", "4.0": "NT", "4.9": "Me" };
+    var result,
+        token,
+        description = [],
+        ua = navigator.userAgent,
+        oses = '(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)',
+        os = (ua.match(RegExp(oses + '(?:[^ );]| )*')) || [])[0],
+        name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
+        version = global.opera && typeof opera.version === 'function' && opera.version(),
+        mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'Me' };
 
     // IE platform tokens defined
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    if (os && os.indexOf("Windows") > -1) {
+    if (os && os.indexOf('Windows') > -1) {
       token = mses[(os.match(/[456]\.\d/) || [])[0]];
       if (token) {
-        os = "Windows " + token;
+        os = 'Windows ' + token;
       }
     }
     if (!version) {
-      version = name && (ua.match(RegExp("(?:Version|" + name + ")[ /]([^ ;]*)")) || [])[1];
+      version = name && (ua.match(RegExp('(?:Version|' + name + ')[ /]([^ ;]*)')) || [])[1];
     }
     result = {
-      "name":        name ? description.push(name) && name : null,
-      "version":     version ? description.push(version) && version : null,
-      "os":          os ? description.push("on " + (os = os.replace(/_/g, "."))) && os : null,
-      "description": description.length ? description.join(" ") : "unknown platform",
-      "toString":    function() { return this.description }
+      'name':        name ? description.push(name) && name : null,
+      'version':     version ? description.push(version) && version : null,
+      'os':          os ? description.push('on ' + (os = os.replace(/_/g, '.'))) && os : null,
+      'description': description.length ? description.join(' ') : 'unknown platform',
+      'toString':    function() { return this.description; }
     };
 
     // lazy defined
-    function getPlatform() { return result }
+    function getPlatform() { return result; }
     this.getPlatform = getPlatform;
     return result;
   }
@@ -102,7 +104,10 @@
   /*--------------------------------------------------------------------------*/
 
   function bestOf(times, count, synchronous) {
-    var best, finished = 0, i = times, me = this;
+    var best,
+        finished = 0,
+        i = times,
+        me = this;
     me.reset();
     me.running = true;
     me.onStart(me);
@@ -116,7 +121,7 @@
           if (!best || clone.period < best.period) {
             best = clone;
           }
-          if (++finished == times) {
+          if (++finished === times) {
             if (best.error) {
               me.error = best.error;
             }
@@ -129,13 +134,14 @@
           }
         };
         clone.run(count, synchronous);
-      })();
+      }());
     }
   }
 
   function clone() {
-    var key, me = this,
-     result = new me.constructor(me.fn, me.options);
+    var key,
+        me = this,
+        result = new me.constructor(me.fn, me.options);
 
     for (key in me) {
       if (!result[key]) {
@@ -163,7 +169,9 @@
           if (synchronous) {
             me.run(count, synchronous);
           } else {
-            setTimeout(function() { me.run(count) }, me.CYCLE_DELAY * 1e3);
+            setTimeout(function() {
+              me.run(count);
+            }, me.CYCLE_DELAY * 1e3);
           }
         })) {
       me.reset();
@@ -175,19 +183,23 @@
   }
 
   function _run(me, synchronous) {
-    var start, fn = me.fn, i = me.count,
+    var start,
+        fn = me.fn,
+        i = me.count,
      calPeriod = Benchmark.CALIBRATION.period;
 
     try {
       // test execution loop
-      start = new Date;
-      while (i--) { fn(); }
+      start = new Date();
+      while (i--) {
+        fn();
+      }
 
       // get time test took (in secs)
       me.time = Math.max(0,
         // avoid Infinity values if there is 0ms between start
         // and end times by forcing at least 1ms
-        (Math.max(1, new Date - start) / 1e3) -
+        (Math.max(1, new Date() - start) / 1e3) -
         // subtract the base loop time
         (calPeriod ? calPeriod * me.count : 0));
 
@@ -223,7 +235,9 @@
       if (synchronous) {
         _run(me, synchronous);
       } else {
-        setTimeout(function() { _run(me) }, me.CYCLE_DELAY * 1e3);
+        setTimeout(function() {
+          _run(me);
+        }, me.CYCLE_DELAY * 1e3);
       }
     }
     else {
@@ -242,40 +256,40 @@
 
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
-    "CYCLE_DELAY" : 0.2,
+    'CYCLE_DELAY' : 0.2,
 
     // initial number of iterations
-    "INIT_COUNT" : 10,
+    'INIT_COUNT' : 10,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
-    "MAX_COUNT" : 2e7, // 20 million
+    'MAX_COUNT' : 2e7, // 20 million
 
     // minimum time a test should take to get valid results (secs)
-    "MIN_TIME" : 0.96,
+    'MIN_TIME' : 0.96,
 
     // callback invoked when one test cycle ends
-    "onCycle" : noop,
+    'onCycle' : noop,
 
     // callback invoked when test is started
-    "onStart" : noop,
+    'onStart' : noop,
 
     // callback invoked when test is finished
-    "onStop" : noop,
+    'onStop' : noop,
 
     // runs the test accepting the best of `n` attempts
-    "bestOf" : bestOf,
+    'bestOf' : bestOf,
 
     // create new benchmark with the same test and options
-    "clone" : clone,
+    'clone' : clone,
 
     // reset test state
-    "reset" : reset,
+    'reset' : reset,
 
     // run the test
-    "run" : run
+    'run' : run
   });
 
   // expose
   global.Benchmark = Benchmark;
 
-})(this);
+}(this));
