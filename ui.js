@@ -18,7 +18,8 @@
   // private cache
   cache = {
     'elements' : {},
-    'errors' : []
+    'errors' : [],
+    'trash' : document.createElement('div')
   };
 
   // GEBID shortcut
@@ -290,7 +291,8 @@
   }
 
   function nextTest(me) {
-    var elResult,
+    var elIframe,
+        elResult,
         elSpan,
         first,
         hz,
@@ -358,6 +360,12 @@
 
         // beacon results to Browserscope (_bTestKey is defined elsewhere)
         if (global._bTestKey) {
+          // remove previous beacon
+          elIframe = $('browserscope');
+          if (elIframe) {
+            cache.trash.appendChild(elIframe);
+            cache.trash.innerHTML = cache.elements.browserscope = '';
+          }
           addScript('//www.browserscope.org/user/beacon/' + _bTestKey);
         }
       }
