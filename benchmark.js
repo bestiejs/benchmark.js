@@ -60,27 +60,25 @@
     }
   }
 
-
   /*--------------------------------------------------------------------------*/
 
   function getPlatform() {
     var result,
-        token,
         description = [],
         ua = navigator.userAgent,
-        oses = '(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)',
-        os = (ua.match(RegExp(oses + '(?:[^ );]| )*')) || [])[0],
+        os = (ua.match(/(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
         name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
         version = global.opera && typeof opera.version === 'function' && opera.version(),
-        mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'Me' };
+        mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
-    // IE platform tokens defined
+    // cleanup iOS
+    os = (os || '').split(' like ')[0].replace(/_/g, '.');
+
+    // IE platform tokens
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    if (os && os.indexOf('Windows') > -1) {
-      token = mses[(os.match(/[456]\.\d/) || [])[0]];
-      if (token) {
-        os = 'Windows ' + token;
-      }
+    mses = os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
+    if (mses) {
+      os = 'Windows ' + mses;
     }
     if (!version) {
       version = name && (ua.match(RegExp('(?:Version|' + name + ')[ /]([^ ;]*)')) || [])[1];
@@ -88,7 +86,7 @@
     result = {
       'name':        name ? description.push(name) && name : null,
       'version':     version ? description.push(version) && version : null,
-      'os':          os ? description.push('on ' + (os = os.replace(/_/g, '.'))) && os : null,
+      'os':          os ? description.push('on ' + os) && os : null,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString':    function() { return this.description; }
     };
@@ -108,6 +106,7 @@
         finished = 0,
         i = times,
         me = this;
+
     me.reset();
     me.running = true;
     me.onStart(me);
