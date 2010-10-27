@@ -185,7 +185,7 @@
 
     try {
       // test execution loop
-      start = new Date();
+      start = new Date;
       while (i--) {
         fn();
       }

@@ -166,8 +166,8 @@
     }
   }
 
-  function onRun() {
-    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'stop' : 'runAll']();
+  function onRun(e) {
+    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'stop' : 'runAll'](e);
   }
 
   function onStart(test) {
