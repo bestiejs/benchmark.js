@@ -6,8 +6,6 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-/*jslint browser: true, forin: true, es5: false, onevar: true, eqeqeq: true, immed: true*/
-
 (function(global) {
 
   function Benchmark(fn, options) {
@@ -68,7 +66,7 @@
         ua = navigator.userAgent,
         os = (ua.match(/(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
         name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
-        version = global.opera && typeof opera.version === 'function' && opera.version(),
+        version = global.opera && typeof opera.version == 'function' && opera.version(),
         mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     // cleanup iOS
@@ -120,7 +118,7 @@
           if (!best || clone.period < best.period) {
             best = clone;
           }
-          if (++finished === times) {
+          if (++finished == times) {
             if (best.error) {
               me.error = best.error;
             }

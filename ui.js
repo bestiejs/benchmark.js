@@ -5,9 +5,6 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-/*jslint browser: true, forin: true, es5: false, onevar: true, eqeqeq: true, immed: true*/
-/*global Benchmark, ui, init, _bTestResults, _bTestKey*/
-
 (function(global, document) {
 
   var RUN_TEXT = {
@@ -55,7 +52,7 @@
         tests = ui.tests,
         i = 0;
     while (test = tests[i++]) {
-      if (test.id == id) { // don't use strict equality here
+      if (test.id == id) {
         result = test;
         break;
       }
@@ -70,7 +67,7 @@
 
   // a cross-browser Array#indexOf solution
   function indexOf(array, value) {
-    if (typeof array.indexOf === 'function') {
+    if (typeof array.indexOf == 'function') {
       return array.indexOf(value);
     }
     var i = -1,
@@ -141,7 +138,7 @@
 
   function onHashChange() {
     ui.parseHash();
-    if (typeof global.init === 'function') {
+    if (typeof global.init == 'function') {
       init();
     }
   }
@@ -149,7 +146,7 @@
   function onKeyUp(e) {
     // treat hitting ENTER while focused on a test title as if it were clicked
     e || (e = global.event);
-    if (13 === e.keyCode) {
+    if (13 == e.keyCode) {
       onClick.call(this);
     }
   }
@@ -160,16 +157,16 @@
     ($('question') || { }).value = 'no';
 
     // auto-run tests when the URL has #run
-    if ('run' === location.hash.slice(1, 3)) {
+    if ('run' == location.hash.slice(1, 3)) {
       onRun();
     }
-    if (typeof global.init === 'function') {
+    if (typeof global.init == 'function') {
       init();
     }
   }
 
   function onRun() {
-    ui[$('run').innerHTML === RUN_TEXT.RUNNING ? 'stop' : 'runAll']();
+    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'stop' : 'runAll']();
   }
 
   function onStart(test) {
@@ -342,7 +339,7 @@
           elSpan = elResult.getElementsByTagName('span')[0];
 
           percent = (1 - item.hz / first.hz) * 100;
-          text = item === first ? 'fastest' : Math.floor(percent) + '% slower';
+          text = item == first ? 'fastest' : Math.floor(percent) + '% slower';
 
           if (elSpan) {
             elSpan.innerHTML = text;
