@@ -64,13 +64,10 @@
     var result,
         description = [],
         ua = navigator.userAgent,
-        os = (ua.match(/(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
+        os = (ua.match(/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
         name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
         version = global.opera && typeof opera.version == 'function' && opera.version(),
         mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
-
-    // cleanup iOS
-    os = (os || '').split(' like ')[0].replace(/_/g, '.');
 
     // IE platform tokens
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
@@ -78,8 +75,12 @@
     if (mses) {
       os = 'Windows ' + mses;
     }
+    if (/iP[ao]d|iPhone/.test(os)) {
+      os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
+      os = 'iOS' + (os ? ' ' + os.replace(/_/g, '.') : '');
+    }
     if (!version) {
-      version = name && (ua.match(RegExp('(?:Version|' + name + ')[ /]([^ ;]*)')) || [])[1];
+      version = name && (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
     }
     result = {
       'name':        name ? description.push(name) && name : null,
@@ -91,7 +92,7 @@
 
     // lazy defined
     function getPlatform() { return result; }
-    this.getPlatform = getPlatform;
+    (this != global && this || { }).getPlatform = getPlatform;
     return result;
   }
 
