@@ -43,9 +43,9 @@
   // grabs the test from the ui object that matches the id
   function getTestById(id) {
     var test,
+        i = 0,
         result = null,
-        tests = ui.tests,
-        i = 0;
+        tests = ui.tests;
     while (test = tests[i++]) {
       if (test.id == id) {
         result = test;
@@ -62,12 +62,12 @@
 
   // a cross-browser Array#indexOf solution
   function indexOf(array, value) {
+    var i = -1,
+        length = this.length,
+        result = i;
     if (typeof array.indexOf == 'function') {
       return array.indexOf(value);
     }
-    var i = -1,
-        length = this.length,
-        result = -1;
     while (++i < length) {
       if (i in array && array[i] === value) {
         result = i;
@@ -128,12 +128,12 @@
         body = document.body,
         id = 'browserscope_',
         elIframe = $(id + cache.counter),
-        results = { };
+        result = { };
 
-    // populate results object
+    // populate result object
     while (item = me.tests[i++]) {
       if (item.count) {
-        results[(item.name.match(/[a-z0-9]+/ig) || [item.id]).join(' ')] = item.hz;
+        result[(item.name.match(/[a-z0-9]+/ig) || [item.id]).join(' ')] = item.hz;
       }
     }
     // remove old beacon
@@ -155,10 +155,10 @@
 
     // perform inception :3
     if (ui._bTestKey) {
-      ui._bTestResults = results;
+      ui._bTestResults = result;
       idoc = global.frames[id].document;
       idoc.write('<html><body><script>var _bTestResults=parent.ui._bTestResults<\/script>' +
-                 '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey + 
+                 '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey +
                  '"><\/script><\/body><\/html>');
       idoc.close();
       delete ui._bTestResults;
@@ -340,7 +340,7 @@
         test,
         text,
         i = 0,
-        results = [];
+        result = [];
 
     if (me.currentTest) {
       // do nothing when running another test
@@ -354,21 +354,21 @@
       // gather results
       while (item = me.tests[i++]) {
         if (item.count) {
-          results.push({ 'id': item.id, 'hz': item.hz });
+          result.push({ 'id': item.id, 'hz': item.hz });
         }
       }
       // print results
-      length = results.length;
+      length = result.length;
       if (length > 1) {
         // sort descending by hz (highest hz / fastest first)
-        results.sort(function(a, b) { return b.hz - a.hz; });
+        result.sort(function(a, b) { return b.hz - a.hz; });
 
         i = 0;
-        first = results[0];
-        last = results[length - 1];
+        first = result[0];
+        last = result[length - 1];
 
         if (first.hz != last.hz) {
-          while (item = results[i++]) {
+          while (item = result[i++]) {
             elResult = $('results-' + item.id);
             elSpan = elResult.getElementsByTagName('span')[0];
 
@@ -389,7 +389,7 @@
         }
         // send results to Browserscope
         postBrowserscope(me);
-        
+
         // all tests are finished
         $('run').innerHTML = RUN_TEXT.RUN_AGAIN;
       }
@@ -456,13 +456,13 @@
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
-  (function() {
-    var script = createElement('script'),
-     s = document.getElementsByTagName('script')[0];
+  (function(tag) {
+    var script = createElement(tag),
+        s = document.getElementsByTagName(tag)[0];
     script.async = 1;
     script.src = '//www.google-analytics.com/ga.js';
     global._gaq = [['_setAccount', 'UA-6065217-40'], ['_trackPageview']];
     s.parentNode.insertBefore(script, s);
-  }());
+  }('script'));
 
 }(this, document));
