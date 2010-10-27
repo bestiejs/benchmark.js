@@ -34,7 +34,7 @@
     }
     proto.constructor = Calibration;
     proto.run = run;
-  }(Calibration.prototype = new Klass);
+  }(Calibration.prototype = new Klass));
 
   /*--------------------------------------------------------------------------*/
 
@@ -257,7 +257,7 @@
     'INIT_COUNT' : 10,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
-    'MAX_COUNT' : 2e7, // 20 million
+    'MAX_COUNT' : 1e6, // 1 million
 
     // minimum time a test should take to get valid results (secs)
     'MIN_TIME' : 0.96,
