@@ -336,27 +336,28 @@
         first = results[0];
         last = results[length - 1];
 
-        while (item = results[i++]) {
-          elResult = $('results-' + item.id);
-          elSpan = elResult.getElementsByTagName('span')[0];
+        if (first.hz != last.hz) {
+          while (item = results[i++]) {
+            elResult = $('results-' + item.id);
+            elSpan = elResult.getElementsByTagName('span')[0];
 
-          percent = (1 - item.hz / first.hz) * 100;
-          text = item == first ? 'fastest' : Math.floor(percent) + '% slower';
+            percent = (1 - item.hz / first.hz) * 100 || 0;
+            text = item == first ? 'fastest' : Math.floor(percent) + '% slower';
 
-          if (elSpan) {
-            elSpan.innerHTML = text;
-          } else {
-            elResult.innerHTML += ' <span>' + text + '<\/span>';
+            if (elSpan) {
+              elSpan.innerHTML = text;
+            } else {
+              elResult.innerHTML += ' <span>' + text + '<\/span>';
+            }
           }
+          // mark fastest
+          $('results-' + first.id).className += ' fastest';
+
+          // mark slowest
+          $('results-' + last.id).className += ' slowest';
         }
         // all tests are finished
         $('run').innerHTML = RUN_TEXT.RUN_AGAIN;
-
-        // mark fastest
-        $('results-' + first.id).className += ' fastest';
-
-        // mark slowest
-        $('results-' + last.id).className += ' slowest';
 
         // beacon results to Browserscope (_bTestKey is defined elsewhere)
         if (global._bTestKey) {
