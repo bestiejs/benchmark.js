@@ -7,7 +7,6 @@
  */
 
 /*jslint browser: true, forin: true, es5: false, onevar: true, eqeqeq: true, immed: true*/
-/*global window*/
 
 (function(global) {
 
@@ -47,7 +46,7 @@
     var cal = Benchmark.CALIBRATION;
     if (!cal.count) {
       cal.onStop = deferredTest;
-      cal.bestOf(3, 7e3); // 7 thousand * 3
+      cal.bestOf(3, 7e3); // 7000 * 3
       return true;
     }
     return false;
@@ -70,7 +69,7 @@
      oses = "(?:Windows 98;|Windows |iPhone OS|(?:Intel |PPC )?Mac OS X|Linux)",
      os = (ua.match(RegExp(oses + "(?:[^ );]| )*")) || [])[0],
      name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
-     version = window.opera && typeof opera.version == "function" && opera.version(),
+     version = global.opera && typeof opera.version == "function" && opera.version(),
      mses = { "6.1": "7", "6.0": "Vista", "5.2": "Server 2003 / XP x64", "5.1": "XP", "5.0": "2000", "4.0": "NT", "4.9": "Me" };
 
     // IE platform tokens defined
