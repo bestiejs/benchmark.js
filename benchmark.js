@@ -77,7 +77,7 @@
     }
     else if (/iP[ao]d|iPhone/.test(os)) {
       os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
-      os = 'iOS' + (os ? ' ' + os.replace(/_/g, '.') : '');
+      os = 'iOS' + (os ? ' ' + os : '');
     }
     if (name && !version) {
       version = typeof document.documentMode == 'number'
@@ -87,7 +87,7 @@
     return {
       'name':        name ? description.push(name) && name : null,
       'version':     version ? description.push(version) && version : null,
-      'os':          os ? description.push('on ' + os) && os : null,
+      'os':          os ? description.push('on ' + (os = os.replace(/_/g, '.'))) && os : null,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString':    function() { return this.description; }
     };
