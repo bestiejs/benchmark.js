@@ -55,7 +55,7 @@
         tests = ui.tests,
         i = 0;
     while (test = tests[i++]) {
-      if (test.id === id) {
+      if (test.id == id) { // don't use strict equality here
         result = test;
         break;
       }
