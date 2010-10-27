@@ -34,7 +34,7 @@
     }
     proto.constructor = Calibration;
     proto.run = run;
-  }(Calibration.prototype = new Klass()));
+  }(Calibration.prototype = new Klass);
 
   /*--------------------------------------------------------------------------*/
 
@@ -194,7 +194,7 @@
       me.time = Math.max(0,
         // avoid Infinity values if there is 0ms between start
         // and end times by forcing at least 1ms
-        (Math.max(1, new Date() - start) / 1e3) -
+        (Math.max(1, new Date - start) / 1e3) -
         // subtract the base loop time
         (calPeriod ? calPeriod * me.count : 0));
 
