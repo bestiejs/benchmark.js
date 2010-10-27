@@ -213,7 +213,7 @@
 
     if (hashes[0]) {
       while (length--) {
-        pair = hashes[i].split('=');
+        pair = hashes[length].split('=');
         params[pair[0]] = pair[1];
       }
     }
