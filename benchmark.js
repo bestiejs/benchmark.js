@@ -66,34 +66,31 @@
         ua = navigator.userAgent,
         os = (ua.match(/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
         name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
-        version = global.opera && typeof opera.version == 'function' && opera.version(),
+        version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     // IE platform tokens
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    mses = os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
+    mses = os && os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
     if (mses) {
       os = 'Windows ' + mses;
     }
-    if (/iP[ao]d|iPhone/.test(os)) {
+    else if (/iP[ao]d|iPhone/.test(os)) {
       os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
       os = 'iOS' + (os ? ' ' + os.replace(/_/g, '.') : '');
     }
-    if (!version) {
-      version = name && (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
+    if (name && !version) {
+      version = typeof document.documentMode == 'number'
+        ? document.documentMode
+        : (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
     }
-    result = {
+    return {
       'name':        name ? description.push(name) && name : null,
       'version':     version ? description.push(version) && version : null,
       'os':          os ? description.push('on ' + os) && os : null,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString':    function() { return this.description; }
     };
-
-    // lazy defined
-    function getPlatform() { return result; }
-    (this != global && this || { }).getPlatform = getPlatform;
-    return result;
   }
 
   function noop() { }
