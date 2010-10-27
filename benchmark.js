@@ -216,7 +216,7 @@
         }
       }
     }
-    catch (e) {
+    catch(e) {
       me.reset();
       me.error = e;
     }

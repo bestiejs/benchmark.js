@@ -17,24 +17,18 @@
 
   // private cache
   cache = {
-    'elements' : {},
+    'counter' : 0,
     'errors' : [],
-    'trash' : document.createElement('div')
+    'trash' : createElement('div')
   };
 
-  // GEBID shortcut
+  // shortcut(s)
   function $(id) {
-    return cache.elements[id] || (cache.elements[id] = document.getElementById(id));
+    return document.getElementById(id);
   }
 
-  // adds external JavaScript files to the page
-  function addScript(src) {
-    var script = document.createElement('script'),
-     s = document.getElementsByTagName('script')[0];
-
-    script.async = 1;
-    script.src = src;
-    s.parentNode.insertBefore(script, s);
+  function createElement(tag) {
+    return document.createElement(tag);
   }
 
   // pretty print for numbers
@@ -100,7 +94,7 @@
 
     if (!el) {
       table = $('test-table');
-      el = document.createElement('div');
+      el = createElement('div');
       el.id = 'error-info';
       table.parentNode.insertBefore(el, table.nextSibling);
     }
@@ -123,6 +117,51 @@
     var el = $('status');
     if (el) {
       el.innerHTML = text || '';
+    }
+  }
+
+  // Browserscope makes us work for it
+  function postBrowserscope(me) {
+    var idoc,
+        item,
+        i = 0,
+        body = document.body,
+        id = 'browserscope_',
+        elIframe = $(id + cache.counter),
+        results = { };
+
+    // populate results object
+    while (item = me.tests[i++]) {
+      if (item.count) {
+        results[(item.name.match(/[a-z0-9]+/ig) || [item.id]).join(' ')] = item.hz;
+      }
+    }
+    // remove old beacon
+    if (elIframe) {
+      cache.trash.appendChild(elIframe);
+      cache.trash.innerHTML = '';
+    }
+    // create new beacon
+    id += ++cache.counter;
+    try {
+      elIframe = createElement('<iframe name="' + id + '">');
+    } catch(e) {
+      (elIframe = createElement('iframe')).name = id;
+    }
+    // inject beacon
+    elIframe.id = id;
+    elIframe.style.display = 'none';
+    body.insertBefore(elIframe, body.firstChild);
+
+    // perform inception :3
+    if (ui._bTestKey) {
+      ui._bTestResults = results;
+      idoc = global.frames[id].document;
+      idoc.write('<html><body><script>var _bTestResults=parent.ui._bTestResults<\/script>' +
+                 '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey + 
+                 '"><\/script><\/body><\/html>');
+      idoc.close();
+      delete ui._bTestResults;
     }
   }
 
@@ -237,7 +276,7 @@
       }
       else if (test.count) {
         hz = Math.round(1 / test.period);
-        cell.innerHTML = hz !== Infinity ? formatNumber(hz) : '&#8734;';
+        cell.innerHTML = hz == Infinity ? '&infin;' : formatNumber(hz);
         cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds';
       }
       else {
@@ -291,12 +330,9 @@
   }
 
   function nextTest(me) {
-    var elIframe,
-        elResult,
+    var elResult,
         elSpan,
         first,
-        hz,
-        id,
         item,
         last,
         length,
@@ -315,17 +351,12 @@
       test.run();
     }
     else {
-      // populate Browserscope's result object
-      _bTestResults = { };
+      // gather results
       while (item = me.tests[i++]) {
         if (item.count) {
-          id = item.id;
-          hz = item.hz;
-          results.push({ 'id': id, 'hz': hz });
-          _bTestResults[(item.name.match(/[a-z0-9]+/ig) || [id]).join(' ')] = hz;
+          results.push({ 'id': item.id, 'hz': item.hz });
         }
       }
-
       // print results
       length = results.length;
       if (length > 1) {
@@ -347,7 +378,7 @@
             if (elSpan) {
               elSpan.innerHTML = text;
             } else {
-              elResult.innerHTML += ' <span>' + text + '<\/span>';
+              elResult.innerHTML += '<span>' + text + '<\/span>';
             }
           }
           // mark fastest
@@ -356,19 +387,11 @@
           // mark slowest
           $('results-' + last.id).className += ' slowest';
         }
+        // send results to Browserscope
+        postBrowserscope(me);
+        
         // all tests are finished
         $('run').innerHTML = RUN_TEXT.RUN_AGAIN;
-
-        // beacon results to Browserscope (_bTestKey is defined elsewhere)
-        if (global._bTestKey) {
-          // remove previous beacon
-          elIframe = $('browserscope');
-          if (elIframe) {
-            cache.trash.appendChild(elIframe);
-            cache.trash.innerHTML = cache.elements.browserscope = '';
-          }
-          addScript('//www.browserscope.org/user/beacon/' + _bTestKey);
-        }
       }
     }
   }
@@ -422,9 +445,6 @@
   // bootstrap onload
   global.onload = onLoad;
 
-  // for Browserscope, don't rename!
-  global._bTestResults = {};
-
   // parse location hash string
   ui.parseHash();
 
@@ -436,7 +456,13 @@
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
-  global._gaq = [['_setAccount', 'UA-6065217-40'], ['_trackPageview']];
-  addScript('//www.google-analytics.com/ga.js');
+  (function() {
+    var script = createElement('script'),
+     s = document.getElementsByTagName('script')[0];
+    script.async = 1;
+    script.src = '//www.google-analytics.com/ga.js';
+    global._gaq = [['_setAccount', 'UA-6065217-40'], ['_trackPageview']];
+    s.parentNode.insertBefore(script, s);
+  }());
 
 }(this, document));
