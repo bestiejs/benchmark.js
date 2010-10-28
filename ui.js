@@ -211,7 +211,7 @@
         test = new Benchmark(fn);
 
     elTitle.tabIndex = 0;
-    elTitle.title = 'Click to run this test again';
+    elTitle.title = 'Click to run this test again.';
     elTitle.onclick = onClick;
     elTitle.onkeyup = onKeyUp;
 
@@ -302,7 +302,7 @@
           elResult.className = RESULTS_CLASS;
         }
       }
-      // reset test before running in case testing is aborted
+      // reset test before (re)running in case testing is aborted
       // so previous results are not recorded
       if (!test.error) {
         test.reset();
