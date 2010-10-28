@@ -32,7 +32,7 @@
    GA_ACCOUNT_ID = 'UA-6065217-40',
 
    // the default text for use with logStatus()
-   DEFAULT_STATUS_TEXT = 'Done. Ready to run tests again.',
+   DEFAULT_STATUS_TEXT = 'Done. Ready to run tests.',
 
    // results element id prefix (e.g. `results-1`)
    RESULTS_PREFIX = 'results-',
