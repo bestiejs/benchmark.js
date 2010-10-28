@@ -181,7 +181,7 @@
     var start,
         fn = me.fn,
         i = me.count,
-     calPeriod = Benchmark.CALIBRATION.period;
+        calPeriod = Benchmark.CALIBRATION.period;
 
     try {
       // test execution loop

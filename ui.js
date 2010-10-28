@@ -417,7 +417,7 @@
     idoc.write('<html><body><script>with(parent.ui){' +
                'var _bTestResults=_bR,' +
                '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
-               '_bT=function(){trash(frameElement);setTimeout(browserscope.refresh,_bD)},' +
+               '_bT=function(){parent.setTimeout(browserscope.refresh,_bD);trash(frameElement)},' +
                '_bK=setTimeout(_bT,_bD),' +
                '_bP=setInterval(function(){if(frames[0]){' +
                'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}},10)' +
@@ -474,15 +474,15 @@
     'stop' : stop,
 
     // remove elements from the document and avoid memory leaks
-    'trash': trash
+    'trash' : trash
   };
 
   ui.browserscope = {
     // handles Browserscope reporting
-    'post': post,
+    'post' : post,
 
     // refreshes Browserscope results iframe
-    'refresh': refresh
+    'refresh' : refresh
   };
 
   /*--------------------------------------------------------------------------*/
