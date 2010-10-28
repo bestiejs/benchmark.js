@@ -31,6 +31,9 @@
    // Google Analytics
    GA_ACCOUNT_ID = 'UA-6065217-40',
 
+   // the default text for use with logStatus()
+   DEFAULT_STATUS_TEXT = 'Done. Ready to run tests again.',
+
    // results element id prefix (e.g. `results-1`)
    RESULTS_PREFIX = 'results-',
 
@@ -194,9 +197,10 @@
 
     // show warning when Firebug is enabled
     if (typeof global.console != 'undefined' && typeof console.firebug == 'string') {
-      addClass($('firebug'), 'show');
+      addClass('firebug', 'show');
+    } else {
+      logStatus(DEFAULT_STATUS_TEXT);
     }
-
     // auto-run tests when the URL has #run
     if ('run' == location.hash.slice(1, 3)) {
       onRun();
@@ -215,7 +219,7 @@
   }
 
   function onStop() {
-    logStatus('Done. Ready to run tests again.');
+    logStatus(DEFAULT_STATUS_TEXT);
     ui.currentTest = null;
     nextTest(ui);
   }

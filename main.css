@@ -255,17 +255,20 @@ footer{
   padding-top:0;
   padding-bottom:.5em
 }
+#error-info,code,samp,var,textarea{
+  font-family:Monaco,'Courier New',monospace;
+  font-size:.9em
+}
 #error-info.show,.meta strong,#status strong{
   background:pink;
   border:1px solid #b00b00;
   padding:1em
 }
-#error-info,code,samp,var,textarea{
-  font-family:Monaco,'Courier New',monospace;
-  font-size:.9em
-}
-#status span,#firebug{
+#firebug{
   display:none
+}
+#firebug.show{
+  display:inline
 }
 
 .js #run{
@@ -277,9 +280,6 @@ footer{
 .js tbody th:hover,.js tbody th:focus{
   text-decoration:underline;
   cursor:pointer
-}
-.js #status span,#firebug.show{
-  display:inline
 }
 
 /* comments */
