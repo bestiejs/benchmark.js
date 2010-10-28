@@ -7,20 +7,37 @@
 
 (function(global, document) {
 
-  var RUN_TEXT = {
-    'RUNNING' :   'Stop tests',
-    'RUN_AGAIN' : 'Run tests again',
-    'STOPPED' :   'Run tests'
-  },
+  var FN = 'function',
+
+   ERROR_CLASS = 'error',
+
+   JS_CLASS = 'js',
+
+   SHOW_CLASS = 'show',
+
+   RESULTS_CLASS = 'results',
+
+   BROWSERSCOPE_ID = 'browserscope',
+
+   BROWSERSCOPE_TIMEOUT = 2,
+
+   GA_ACCOUNT_ID = 'UA-6065217-40',
+
+   RESULTS_PREFIX = 'results-',
+
+   RUN_TEXT = {
+     'RUNNING' :   'Stop tests',
+     'RUN_AGAIN' : 'Run tests again',
+     'STOPPED' :   'Run tests'
+   },
+
+   cache = {
+     'counter' : 0,
+     'errors' : [],
+     'trash' : createElement('div')
+   };
 
   /*--------------------------------------------------------------------------*/
-
-  // private cache
-  cache = {
-    'counter' : 0,
-    'errors' : [],
-    'trash' : createElement('div')
-  };
 
   // shortcut(s)
   function $(id) {
@@ -37,7 +54,9 @@
         string = String(Math.max(0, Math.abs(number).toFixed(0))),
         length = string.length,
         end = /^\d{4,}$/.test(string) ? length % 3 : 0;
-    return (end ? string.slice(0, end) + comma : '') + string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
+
+    return (end ? string.slice(0, end) + comma : '') +
+      string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
   }
 
   // grabs the test from the ui object that matches the id
@@ -46,6 +65,7 @@
         i = 0,
         result = null,
         tests = ui.tests;
+
     while (test = tests[i++]) {
       if (test.id == id) {
         result = test;
@@ -65,7 +85,8 @@
     var i = -1,
         length = this.length,
         result = i;
-    if (typeof array.indexOf == 'function') {
+
+    if (typeof array.indexOf == FN) {
       return array.indexOf(value);
     }
     while (++i < length) {
@@ -81,6 +102,7 @@
   function join(object, delimit1, delimit2) {
     var key,
         pairs = [];
+
     for (key in object) {
       pairs.push(key + delimit1 + object[key]);
     }
@@ -89,80 +111,32 @@
 
   // appends or clears error log
   function logError(text) {
-    var table,
-        el = $('error-info');
+    var elTable,
+        elDiv = $('error-info');
 
-    if (!el) {
-      table = $('test-table');
-      el = createElement('div');
-      el.id = 'error-info';
-      table.parentNode.insertBefore(el, table.nextSibling);
+    if (!elDiv) {
+      elTable = $('test-table');
+      elDiv = createElement('div');
+      elDiv.id = 'error-info';
+      elTable.parentNode.insertBefore(elDiv, elTable.nextSibling);
     }
     if (text === false) {
-      el.className = el.innerHTML = '';
+      elDiv.className = elDiv.innerHTML = '';
       cache.errors = [];
     }
     else {
-      text || (text = '');
+      text = text == null ? '' : text;
       if (indexOf(cache.errors, text) < 0) {
         cache.errors.push(text);
-        el.className = 'show';
-        el.innerHTML += text;
+        elDiv.className = SHOW_CLASS;
+        elDiv.innerHTML += text;
       }
     }
   }
 
   // sets the status text
   function logStatus(text) {
-    var el = $('status');
-    if (el) {
-      el.innerHTML = text || '';
-    }
-  }
-
-  // Browserscope makes us work for it
-  function postBrowserscope(me) {
-    var idoc,
-        item,
-        i = 0,
-        body = document.body,
-        id = 'browserscope_',
-        elIframe = $(id + cache.counter),
-        result = { };
-
-    // populate result object
-    while (item = me.tests[i++]) {
-      if (item.count) {
-        result[(item.name.match(/[a-z0-9]+/ig) || [item.id]).join(' ')] = item.hz;
-      }
-    }
-    // remove old beacon
-    if (elIframe) {
-      cache.trash.appendChild(elIframe);
-      cache.trash.innerHTML = '';
-    }
-    // create new beacon
-    id += ++cache.counter;
-    try {
-      elIframe = createElement('<iframe name="' + id + '">');
-    } catch(e) {
-      (elIframe = createElement('iframe')).name = id;
-    }
-    // inject beacon
-    elIframe.id = id;
-    elIframe.style.display = 'none';
-    body.insertBefore(elIframe, body.firstChild);
-
-    // perform inception :3
-    if (ui._bTestKey) {
-      ui._bTestResults = result;
-      idoc = global.frames[id].document;
-      idoc.write('<html><body><script>var _bTestResults=parent.ui._bTestResults<\/script>' +
-                 '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey +
-                 '"><\/script><\/body><\/html>');
-      idoc.close();
-      delete ui._bTestResults;
-    }
+    ($('status') || { }).innerHTML = text == null ? '' : text;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -178,7 +152,7 @@
 
   function onHashChange() {
     ui.parseHash();
-    if (typeof global.init == 'function') {
+    if (typeof global.init == FN) {
       init();
     }
   }
@@ -193,14 +167,14 @@
 
   function onLoad() {
     $('run').onclick = onRun;
-    $('user-agent').innerHTML = Benchmark.getPlatform();
     ($('question') || { }).value = 'no';
+    $('user-agent').innerHTML = Benchmark.getPlatform();
 
     // auto-run tests when the URL has #run
     if ('run' == location.hash.slice(1, 3)) {
       onRun();
     }
-    if (typeof global.init == 'function') {
+    if (typeof global.init == FN) {
       init();
     }
   }
@@ -238,7 +212,7 @@
     test.onStop = onStop;
 
     me.tests.push(test);
-    me.elResults.push($('results-' + id));
+    me.elResults.push($(RESULTS_PREFIX + id));
     me.renderTest(test);
   }
 
@@ -258,12 +232,12 @@
 
   function renderTest(test) {
     var hz,
-        cell = $('results-' + test.id);
+        cell = $(RESULTS_PREFIX + test.id);
 
     if (test.error) {
       cell.innerHTML = 'Error';
-      if (!hasClass(cell, 'error')) {
-        cell.className += ' error';
+      if (!hasClass(cell, ERROR_CLASS)) {
+        cell.className += ' ' + ERROR_CLASS;
       }
       logError('<p>' + test.error + '.<\/p><ul><li>' + join(test.error, ': ', '<\/li><li>') + '<\/li><\/ul>');
     }
@@ -302,7 +276,7 @@
     var elResult,
         i = 0,
         me = this,
-     elResults = me.elResults;
+        elResults = me.elResults;
 
     if (indexOf(me.queue, test) < 0) {
       // clear error log
@@ -310,8 +284,8 @@
 
       // reset result classNames
       while (elResult = elResults[i++]) {
-        if (!hasClass(elResult, 'error')) {
-          elResult.className = 'results';
+        if (!hasClass(elResult, ERROR_CLASS)) {
+          elResult.className = RESULTS_CLASS;
         }
       }
       me.queue.push(test);
@@ -329,11 +303,15 @@
     }
   }
 
+  function trash(element) {
+    cache.trash.appendChild(element);
+    cache.trash.innerHTML = '';
+  }
+
   function nextTest(me) {
     var elResult,
         elSpan,
         first,
-        item,
         last,
         length,
         percent,
@@ -352,9 +330,9 @@
     }
     else {
       // gather results
-      while (item = me.tests[i++]) {
-        if (item.count) {
-          result.push({ 'id': item.id, 'hz': item.hz });
+      while (test = me.tests[i++]) {
+        if (test.count) {
+          result.push({ 'id': test.id, 'hz': test.hz });
         }
       }
       // print results
@@ -368,12 +346,12 @@
         last = result[length - 1];
 
         if (first.hz != last.hz) {
-          while (item = result[i++]) {
-            elResult = $('results-' + item.id);
+          while (test = result[i++]) {
+            elResult = $(RESULTS_PREFIX + test.id);
             elSpan = elResult.getElementsByTagName('span')[0];
 
-            percent = (1 - item.hz / first.hz) * 100 || 0;
-            text = item == first ? 'fastest' : Math.floor(percent) + '% slower';
+            percent = (1 - test.hz / first.hz) * 100 || 0;
+            text = test == first ? 'fastest' : Math.floor(percent) + '% slower';
 
             if (elSpan) {
               elSpan.innerHTML = text;
@@ -382,17 +360,73 @@
             }
           }
           // mark fastest
-          $('results-' + first.id).className += ' fastest';
+          $(RESULTS_PREFIX + first.id).className += ' fastest';
 
           // mark slowest
-          $('results-' + last.id).className += ' slowest';
+          $(RESULTS_PREFIX + last.id).className += ' slowest';
         }
-        // send results to Browserscope
-        postBrowserscope(me);
+        // post results to Browserscope
+        me.browserscope.post(me.tests);
 
         // all tests are finished
         $('run').innerHTML = RUN_TEXT.RUN_AGAIN;
       }
+    }
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  function post(tests) {
+    var idoc,
+        test,
+        i = 0,
+        id = BROWSERSCOPE_ID + '_' + cache.counter++,
+        body = document.body,
+        result = { };
+
+    // populate result object
+    while (test = tests[i++]) {
+      if (test.count) {
+        result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
+      }
+    }
+    // create new beacon
+    try {
+      elIframe = createElement('<iframe name="' + id + '">');
+    } catch(e) {
+      (elIframe = createElement('iframe')).name = id;
+    }
+    // inject beacon
+    elIframe.id = id;
+    elIframe.style.display = 'none';
+    body.insertBefore(elIframe, body.firstChild);
+
+    // perform inception :3
+    if (ui._bTestKey) {
+      ui._bR = result;
+      idoc = global.frames[id].document;
+      idoc.write('<html><body><script>with(parent.ui){'+
+                 'var _bTestResults=_bR,' +
+                 '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
+                 '_bT=function(){trash(frameElement);browserscope.refresh()},' +
+                 '_bK=setTimeout(_bT,_bD),' +
+                 '_bP=setInterval(function(){if(frames[0]){' +
+                 'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD);}},10);' +
+                 '}<\/script><script src="//www.browserscope.org/user/beacon/' + ui._bTestKey +
+                 '"><\/script><\/body><\/html>');
+      idoc.close();
+      delete ui._bR;
+    }
+  }
+
+  function refresh() {
+    var parentNode,
+        elIframe = $(BROWSERSCOPE_ID);
+
+    if (elIframe) {
+      parentNode = elIframe.parentNode;
+      parentNode.insertBefore(elIframe.cloneNode(false), elIframe);
+      ui.trash(elIframe);
     }
   }
 
@@ -428,13 +462,24 @@
     'runTest' : runTest,
 
     // remove and render all tests from the run queue
-    'stop' : stop
+    'stop' : stop,
+
+    // remove elements from the document and avoid memory leaks
+    'trash': trash
+  };
+
+  ui.browserscope = {
+    // handles Browserscope reporting
+    'post': post,
+
+    // refreshes Browserscope results iframe
+    'refresh': refresh
   };
 
   /*--------------------------------------------------------------------------*/
 
   // signal JavaScript detected
-  document.documentElement.className = 'js';
+  document.documentElement.className = JS_CLASS;
 
   // don't let users alert / confirm / prompt / open new windows
   global.alert = global.confirm = global.prompt = global.open = Benchmark.noop;
@@ -458,11 +503,12 @@
   // http://mathiasbynens.be/notes/async-analytics-snippet
   (function(tag) {
     var script = createElement(tag),
-        s = document.getElementsByTagName(tag)[0];
+        sibling = document.getElementsByTagName(tag)[0];
+
+    global._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
     script.async = 1;
     script.src = '//www.google-analytics.com/ga.js';
-    global._gaq = [['_setAccount', 'UA-6065217-40'], ['_trackPageview']];
-    s.parentNode.insertBefore(script, s);
+    sibling.parentNode.insertBefore(script, sibling);
   }('script'));
 
 }(this, document));
