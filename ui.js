@@ -158,7 +158,7 @@
 
   // sets the status text
   function logStatus(text) {
-    setHTML($('status') || { }, text);
+    setHTML('status', text);
   }
 
   /*--------------------------------------------------------------------------*/
@@ -189,7 +189,7 @@
 
   function onLoad() {
     $('run').onclick = onRun;
-    ($('question') || { }).value = 'no';
+    $('question').value = 'no';
     setHTML('user-agent', Benchmark.getPlatform());
 
     // auto-run tests when the URL has #run
