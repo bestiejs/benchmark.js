@@ -25,8 +25,8 @@
    // the iframe id of the Browserscope results
    BROWSERSCOPE_ID = 'browserscope',
 
-   // time to wait before giving up on Browserscope (secs)
-   BROWSERSCOPE_TIMEOUT = 2,
+   // seconds to wait for each stage of the Browserscope posting process (3 stages)
+   BROWSERSCOPE_TIMEOUT = 2.5,
 
    // Google Analytics
    GA_ACCOUNT_ID = 'UA-6065217-40',
@@ -414,7 +414,7 @@
     // perform inception :3
     ui._bR = result;
     idoc = global.frames[id].document;
-    idoc.write('<html><body><script>with(parent.ui){'+
+    idoc.write('<html><body><script>with(parent.ui){' +
                'var _bTestResults=_bR,' +
                '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
                '_bT=function(){trash(frameElement);setTimeout(browserscope.refresh,_bD)},' +
