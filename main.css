@@ -264,7 +264,7 @@ footer{
   font-family:Monaco,'Courier New',monospace;
   font-size:.9em
 }
-#status span{
+#status span,#firebug{
   display:none
 }
 
@@ -278,7 +278,7 @@ footer{
   text-decoration:underline;
   cursor:pointer
 }
-.js #status span{
+.js #status span,#firebug.show{
   display:inline
 }
 
