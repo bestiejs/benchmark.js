@@ -49,16 +49,34 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // shortcut(s)
+  // dom utility methods
   function $(id) {
-    return document.getElementById(id);
+    return typeof id == 'string' ? document.getElementById(id) : id;
+  }
+
+  function addClass(element, className) {
+    if (!hasClass(element = $(element), className)) {
+      element.className += (element.className ? ' ' : '') + className;
+    }
+  }
+
+  function appendHTML(element, html) {
+    html != null && ($(element).innerHTML += html);
   }
 
   function createElement(tag) {
     return document.createElement(tag);
   }
 
-  // pretty print for numbers
+  function hasClass(element, className) {
+    return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
+  }
+
+  function setHTML(element, html) {
+    $(element).innerHTML = html == null ? '' : html;
+  }
+
+  // pretty print numbers
   function formatNumber(number) {
     var comma = ',',
         string = String(Math.max(0, Math.abs(number).toFixed(0))),
@@ -83,11 +101,6 @@
       }
     }
     return result;
-  }
-
-  // element className utility
-  function hasClass(element, className) {
-    return (' ' + element.className + ' ').indexOf(' ' + className + ' ') > -1;
   }
 
   // a cross-browser Array#indexOf solution
@@ -135,18 +148,17 @@
       cache.errors = [];
     }
     else {
-      text = text == null ? '' : text;
       if (indexOf(cache.errors, text) < 0) {
         cache.errors.push(text);
-        elDiv.className = SHOW_CLASS;
-        elDiv.innerHTML += text;
+        addClass(elDiv, SHOW_CLASS);
+        appendHTML(elDiv, text);
       }
     }
   }
 
   // sets the status text
   function logStatus(text) {
-    ($('status') || { }).innerHTML = text == null ? '' : text;
+    setHTML($('status') || { }, text);
   }
 
   /*--------------------------------------------------------------------------*/
@@ -178,7 +190,7 @@
   function onLoad() {
     $('run').onclick = onRun;
     ($('question') || { }).value = 'no';
-    $('user-agent').innerHTML = Benchmark.getPlatform();
+    setHTML('user-agent', Benchmark.getPlatform());
 
     // auto-run tests when the URL has #run
     if ('run' == location.hash.slice(1, 3)) {
@@ -245,30 +257,30 @@
         cell = $(RESULTS_PREFIX + test.id);
 
     if (test.error) {
-      cell.innerHTML = 'Error';
+      setHTML(cell, 'Error');
       if (!hasClass(cell, ERROR_CLASS)) {
-        cell.className += ' ' + ERROR_CLASS;
+        addClass(cell, ERROR_CLASS);
       }
       logError('<p>' + test.error + '.<\/p><ul><li>' + join(test.error, ': ', '<\/li><li>') + '<\/li><\/ul>');
     }
     else {
       if (test.running) {
-        cell.innerHTML = 'running&hellip;';
+        setHTML(cell, 'running&hellip;');
       }
       else if (indexOf(this.queue, test) > -1) {
-        cell.innerHTML = 'pending&hellip;';
+        setHTML(cell, 'pending&hellip;');
       }
       else if (test.count) {
         if (hz == Infinity) {
-          cell.innerHTML = '&infin;';
+          setHTML(cell, '&infin;');
           cell.title = 'Test is too fast to be recorded.';
         } else {
-          cell.innerHTML = formatNumber(hz);
+          setHTML(cell, formatNumber(hz));
           cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
         }
       }
       else {
-        cell.innerHTML = 'ready';
+        setHTML(cell, 'ready');
       }
     }
   }
@@ -280,7 +292,7 @@
         reversed = e && e.shiftKey,
         length = me.tests.length;
 
-    $('run').innerHTML = RUN_TEXT.RUNNING;
+    setHTML('run', RUN_TEXT.RUNNING);
     while (++i < length) {
       me.runTest(me.tests[reversed ? (length - i - 1) : i]);
     }
@@ -315,7 +327,7 @@
 
   function stop() {
     var me = this;
-    $('run').innerHTML = RUN_TEXT.STOPPED;
+    setHTML('run', RUN_TEXT.STOPPED);
 
     while (me.queue.length) {
       me.renderTest(me.queue.shift());
@@ -324,7 +336,7 @@
 
   function trash(element) {
     cache.trash.appendChild(element);
-    cache.trash.innerHTML = '';
+    setHTML(cache.trash, '');
   }
 
   function nextTest(me) {
@@ -373,22 +385,22 @@
             text = test == first ? 'fastest' : Math.floor(percent) + '% slower';
 
             if (elSpan) {
-              elSpan.innerHTML = text;
+              setHTML(elSpan, text);
             } else {
-              elResult.innerHTML += '<span>' + text + '<\/span>';
+              appendHTML(elResult, '<span>' + text + '<\/span>');
             }
           }
           // mark fastest
-          $(RESULTS_PREFIX + first.id).className += ' fastest';
+          addClass(RESULTS_PREFIX + first.id, 'fastest');
 
           // mark slowest
-          $(RESULTS_PREFIX + last.id).className += ' slowest';
+          addClass(RESULTS_PREFIX + last.id, 'slowest');
         }
         // post results to Browserscope
         me.browserscope.post(me.tests);
 
         // all tests are finished
-        $('run').innerHTML = RUN_TEXT.RUN_AGAIN;
+        setHTML('run', RUN_TEXT.RUN_AGAIN);
       }
     }
   }
@@ -483,7 +495,8 @@
     // remove and render all tests from the run queue
     'stop' : stop,
 
-    // remove elements from the document and avoid memory leaks
+    // remove elements from the document and avoid pseuddo memory leaks
+    // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
     'trash' : trash
   };
 
@@ -498,7 +511,7 @@
   /*--------------------------------------------------------------------------*/
 
   // signal JavaScript detected
-  document.documentElement.className = JS_CLASS;
+  addClass(document.documentElement, JS_CLASS);
 
   // don't let users alert / confirm / prompt / open new windows
   global.alert = global.confirm = global.prompt = global.open = Benchmark.noop;
