@@ -420,9 +420,9 @@
                '_bT=function(){trash(frameElement);setTimeout(browserscope.refresh,_bD)},' +
                '_bK=setTimeout(_bT,_bD),' +
                '_bP=setInterval(function(){if(frames[0]){' +
-               'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD);}},10);' +
+               'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}},10)' +
                '}<\/script>' +
-               (ui._bTestKey ? '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey + '"><\/script>' : '') +
+               (ui._bTestKey ? '<script src=//www.browserscope.org/user/beacon/' + ui._bTestKey + '><\/script>' : '') +
                '<\/body><\/html>');
     idoc.close();
     delete ui._bR;
