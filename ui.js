@@ -192,6 +192,11 @@
     $('question').value = 'no';
     setHTML('user-agent', Benchmark.getPlatform());
 
+    // show warning when Firebug is enabled
+    if (typeof global.console != 'undefined' && typeof console.firebug == 'string') {
+      addClass($('firebug'), 'show');
+    }
+
     // auto-run tests when the URL has #run
     if ('run' == location.hash.slice(1, 3)) {
       onRun();
