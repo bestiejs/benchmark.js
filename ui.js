@@ -7,24 +7,34 @@
 
 (function(global, document) {
 
+  // shortcut for typeof operators
   var FN = 'function',
 
+   // css clasName used for error styles
    ERROR_CLASS = 'error',
 
+   // css clasName used for `js enabled` styles
    JS_CLASS = 'js',
 
+   // css className used to display error-info
    SHOW_CLASS = 'show',
 
+   // css className used to reset result styles
    RESULTS_CLASS = 'results',
 
+   // the iframe id of the Browserscope results
    BROWSERSCOPE_ID = 'browserscope',
 
+   // time to wait before giving up on Browserscope (secs)
    BROWSERSCOPE_TIMEOUT = 2,
 
+   // Google Analytics
    GA_ACCOUNT_ID = 'UA-6065217-40',
 
+   // results element id prefix (e.g. `results-1`)
    RESULTS_PREFIX = 'results-',
 
+   // inner text for the various run button states
    RUN_TEXT = {
      'RUNNING' :   'Stop tests',
      'RUN_AGAIN' : 'Run tests again',
@@ -402,21 +412,20 @@
     body.insertBefore(elIframe, body.firstChild);
 
     // perform inception :3
-    if (ui._bTestKey) {
-      ui._bR = result;
-      idoc = global.frames[id].document;
-      idoc.write('<html><body><script>with(parent.ui){'+
-                 'var _bTestResults=_bR,' +
-                 '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
-                 '_bT=function(){trash(frameElement);browserscope.refresh()},' +
-                 '_bK=setTimeout(_bT,_bD),' +
-                 '_bP=setInterval(function(){if(frames[0]){' +
-                 'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD);}},10);' +
-                 '}<\/script><script src="//www.browserscope.org/user/beacon/' + ui._bTestKey +
-                 '"><\/script><\/body><\/html>');
-      idoc.close();
-      delete ui._bR;
-    }
+    ui._bR = result;
+    idoc = global.frames[id].document;
+    idoc.write('<html><body><script>with(parent.ui){'+
+               'var _bTestResults=_bR,' +
+               '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
+               '_bT=function(){trash(frameElement);browserscope.refresh()},' +
+               '_bK=setTimeout(_bT,_bD),' +
+               '_bP=setInterval(function(){if(frames[0]){' +
+               'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD);}},10);' +
+               '}<\/script>' +
+               (ui._bTestKey ? '<script src="//www.browserscope.org/user/beacon/' + ui._bTestKey + '"><\/script>' : '') +
+               '<\/body><\/html>');
+    idoc.close();
+    delete ui._bR;
   }
 
   function refresh() {
