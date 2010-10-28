@@ -411,9 +411,9 @@
                  '_bT=function(){trash(frameElement);browserscope.refresh()},' +
                  '_bK=setTimeout(_bT,_bD),' +
                  '_bP=setInterval(function(){if(frames[0]){' +
-                 'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD);}},10);' +
-                 '}<\/script><script src="//www.browserscope.org/user/beacon/' + ui._bTestKey +
-                 '"><\/script><\/body><\/html>');
+                 'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}},10)' +
+                 '}<\/script><script src=//www.browserscope.org/user/beacon/' + ui._bTestKey +
+                 '><\/script><\/body><\/html>');
       idoc.close();
       delete ui._bR;
     }
