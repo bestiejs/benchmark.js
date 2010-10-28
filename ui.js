@@ -241,7 +241,7 @@
   }
 
   function renderTest(test) {
-    var hz,
+    var hz = test.hz,
         cell = $(RESULTS_PREFIX + test.id);
 
     if (test.error) {
@@ -259,9 +259,13 @@
         cell.innerHTML = 'pending&hellip;';
       }
       else if (test.count) {
-        hz = Math.round(1 / test.period);
-        cell.innerHTML = hz == Infinity ? '&infin;' : formatNumber(hz);
-        cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds';
+        if (hz == Infinity) {
+          cell.innerHTML = '&infin;';
+          cell.title = 'Test is too fast to be recorded.';
+        } else {
+          cell.innerHTML = formatNumber(hz);
+          cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
+        }
       }
       else {
         cell.innerHTML = 'ready';
@@ -397,6 +401,7 @@
     // populate result object
     while (test = tests[i++]) {
       if (test.count) {
+        // hz of Infinity will be posted but not displayed in the results
         result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
       }
     }
