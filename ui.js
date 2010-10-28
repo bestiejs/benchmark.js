@@ -36,9 +36,9 @@
 
    // inner text for the various run button states
    RUN_TEXT = {
-     'RUNNING' :   'Stop tests',
+     'RUNNING' : 'Stop tests',
      'RUN_AGAIN' : 'Run tests again',
-     'STOPPED' :   'Run tests'
+     'STOPPED' : 'Run tests'
    },
 
    cache = {
