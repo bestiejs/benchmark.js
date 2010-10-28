@@ -302,6 +302,11 @@
           elResult.className = RESULTS_CLASS;
         }
       }
+      // reset test before running in case testing is aborted
+      // so previous results are not recorded
+      if (!test.error) {
+        test.reset();
+      }
       me.queue.push(test);
       me.renderTest(test);
       nextTest(me);
@@ -398,7 +403,7 @@
         body = document.body,
         result = { };
 
-    // populate result object
+    // populate result object (skipping unrun and errored tests)
     while (test = tests[i++]) {
       if (test.count) {
         // hz of Infinity will be posted but not displayed in the results

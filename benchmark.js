@@ -27,6 +27,7 @@
     // bypass calibrating the Calibration tests when they are run
     function run(count, synchronous) {
       var me = this;
+      me.reset();
       me.running = true;
       me.count = count || me.INIT_COUNT;
       me.onStart(me);
