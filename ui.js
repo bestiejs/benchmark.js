@@ -372,7 +372,7 @@
       test.run();
     }
     else {
-      // gather results
+      // populate result array (skipping unrun and errored tests)
       while (test = me.tests[i++]) {
         if (test.count) {
           result.push({ 'id': test.id, 'hz': test.hz });
@@ -388,25 +388,29 @@
         first = result[0];
         last = result[length - 1];
 
-        if (first.hz != last.hz) {
-          while (test = result[i++]) {
-            elResult = $(RESULTS_PREFIX + test.id);
-            elSpan = elResult.getElementsByTagName('span')[0];
+        while (test = result[i++]) {
+          elResult = $(RESULTS_PREFIX + test.id);
+          elSpan = elResult.getElementsByTagName('span')[0];
 
-            percent = (1 - test.hz / first.hz) * 100 || 0;
-            text = test == first ? 'fastest' : Math.floor(percent) + '% slower';
+          if (test.hz == first.hz) {
+            // mark fastest
+            text = 'fastest';
+            addClass(elResult, 'fastest');
+          }
+          else {
+            percent = Math.floor((1 - test.hz / first.hz) * 100 || 0);
+            text = percent && (percent + '% slower');
 
-            if (elSpan) {
-              setHTML(elSpan, text);
-            } else {
-              appendHTML(elResult, '<span>' + text + '<\/span>');
+            // mark slowest
+            if (text.hz == last.hz) {
+              addClass(elResult, 'slowest');
             }
           }
-          // mark fastest
-          addClass(RESULTS_PREFIX + first.id, 'fastest');
-
-          // mark slowest
-          addClass(RESULTS_PREFIX + last.id, 'slowest');
+          if (elSpan) {
+            setHTML(elSpan, text);
+          } else {
+            appendHTML(elResult, '<span>' + text + '<\/span>');
+          }
         }
         // post results to Browserscope
         me.browserscope.post(me.tests);
