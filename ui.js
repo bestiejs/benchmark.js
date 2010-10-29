@@ -196,13 +196,13 @@
   function onLoad() {
     $('run').onclick = onRun;
     $('question').value = 'no';
+
     setHTML('user-agent', Benchmark.getPlatform());
+    logStatus(STATUS_TEXT.READY);
 
     // show warning when Firebug is enabled
     if (typeof global.console != 'undefined' && typeof console.firebug == 'string') {
       addClass('firebug', 'show');
-    } else {
-      logStatus(STATUS_TEXT.READY);
     }
     // auto-run tests when the URL has #run
     if ('run' == location.hash.slice(1, 3)) {
@@ -425,6 +425,7 @@
 
   function post(tests) {
     var idoc,
+        key,
         test,
         i = 0,
         id = BROWSERSCOPE_ID + '_' + cache.counter++,
@@ -434,8 +435,9 @@
     // populate result object (skipping unrun and errored tests)
     while (test = tests[i++]) {
       if (test.count) {
-        // hz of Infinity will be posted but not displayed in the results
-        result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
+        // hz of Infinity will be converted to 1 billion
+        key = (test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ');
+        result[key] = test.hz == Infinity ? 1e9 : test.hz;
       }
     }
     // create new beacon
@@ -451,6 +453,7 @@
 
     // perform inception :3
     ui._bR = result;
+    key = ui._bTestKey;
     idoc = global.frames[id].document;
     idoc.write('<html><body><script>with(parent.ui){' +
                'var _bTestResults=_bR,' +
@@ -460,7 +463,7 @@
                '_bP=setInterval(function(){if(frames[0]){' +
                'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}},10)' +
                '}<\/script>' +
-               (ui._bTestKey ? '<script src=//www.browserscope.org/user/beacon/' + ui._bTestKey + '><\/script>' : '') +
+               (key ? '<script src=//www.browserscope.org/user/beacon/' + key + '><\/script>' : '') +
                '<\/body><\/html>');
     idoc.close();
     delete ui._bR;
