@@ -295,7 +295,7 @@
     'CYCLE_DELAY' : 0.2,
 
     // initial number of iterations
-    'INIT_COUNT' : 10,
+    'INIT_COUNT' : 100,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
     'MAX_COUNT' : 1e6, // 1 million
