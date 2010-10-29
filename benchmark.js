@@ -59,11 +59,11 @@
     }
   }
 
-  // clock the time it takes to execute a test N times
+  // clock the time it takes to execute a test N times (milliseconds)
   var clock;
   (function() {
 
-    var chrome = typeof global.chromium != 'undefined' ? chromium :
+    var co = typeof global.chromium != 'undefined' ? chromium :
       typeof global.chrome != 'undefined' ? chrome : null;
 
     clock = function(me) {
@@ -76,17 +76,19 @@
       me.time = (new Date).getTime() - start;
     };
 
-    if (chrome && typeof chrome.Interval == 'function') {
+    // enable benchmarking via the --enable-benchmarking flag
+    // in at least Chrome 7 to use chrome.Interval
+    if (co && typeof co.Interval == 'function') {
       clock = function(me) {
         var i = me.count,
             fn = me.fn,
-            timer = new chrome.Interval;
+            timer = new co.Interval;
         timer.start();
         while (i--) {
           fn();
         }
         timer.stop();
-        me.time = timer.microseconds();
+        me.time = timer.microseconds() / 1000;
       };
     }
     else if (typeof Date.now == 'function') {
