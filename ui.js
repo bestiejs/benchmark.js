@@ -398,11 +398,11 @@
             addClass(elResult, 'fastest');
           }
           else {
-            percent = Math.floor((1 - test.hz / first.hz) * 100 || 0);
-            text = percent && (percent + '% slower');
+            percent = Math.floor((1 - test.hz / first.hz) * 100);
+            text = first.hz != Infinity && percent && (percent + '% slower') || '';
 
             // mark slowest
-            if (text.hz == last.hz) {
+            if (test.hz == last.hz) {
               addClass(elResult, 'slowest');
             }
           }
