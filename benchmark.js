@@ -233,9 +233,7 @@
 
       // convert time from milliseconds to seconds and calibrate
       me.time = Math.max(0,
-        // avoid Infinity values if there is 0ms between start and end times
-        // by forcing at least 1 billionth of a millisecond
-        (Math.max(1e-9, me.time) / 1e3) -
+        (me.time / 1e3) -
         // subtract the base loop time
         (calPeriod ? calPeriod * me.count : 0));
 
@@ -295,7 +293,7 @@
     'CYCLE_DELAY' : 0.2,
 
     // initial number of iterations
-    'INIT_COUNT' : 100,
+    'INIT_COUNT' : 1e3,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
     'MAX_COUNT' : 1e6, // 1 million
