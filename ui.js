@@ -305,6 +305,7 @@
         length = me.tests.length;
 
     setHTML('run', RUN_TEXT.RUNNING);
+    Benchmark.CALIBRATION.reset();
     while (++i < length) {
       me.runTest(me.tests[reversed ? (length - i - 1) : i]);
     }
