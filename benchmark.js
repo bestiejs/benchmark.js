@@ -59,6 +59,49 @@
     }
   }
 
+  // clock the time it takes to execute a test N times
+  var clock;
+  (function() {
+
+    var chrome = typeof global.chromium != 'undefined' ? chromium :
+      typeof global.chrome != 'undefined' ? chrome : null;
+
+    clock = function(me) {
+      var i = me.count,
+          fn = me.fn,
+          start = (new Date).getTime();
+      while (i--) {
+        fn();
+      }
+      me.time = (new Date).getTime() - start;
+    };
+
+    if (chrome && typeof chrome.Interval == 'function') {
+      clock = function(me) {
+        var i = me.count,
+            fn = me.fn,
+            timer = new chrome.Interval;
+        timer.start();
+        while (i--) {
+          fn();
+        }
+        timer.stop();
+        me.time = timer.microseconds();
+      };
+    }
+    else if (typeof Date.now == 'function') {
+      clock = function(me) {
+        var i = me.count,
+            fn = me.fn,
+            start = Date.now();
+        while (i--) {
+          fn();
+        }
+        me.time = Date.now() - start;
+      };
+    }
+  }());
+
   /*--------------------------------------------------------------------------*/
 
   function getPlatform() {
@@ -180,22 +223,17 @@
 
   function _run(me, synchronous) {
     var start,
-        fn = me.fn,
-        i = me.count,
         calPeriod = Benchmark.CALIBRATION.period;
 
     try {
       // test execution loop
-      start = new Date;
-      while (i--) {
-        fn();
-      }
+      clock(me);
 
-      // get time test took (in secs)
+      // convert time from milliseconds to seconds and calibrate
       me.time = Math.max(0,
         // avoid Infinity values if there is 0ms between start
         // and end times by forcing at least 1ms
-        (Math.max(1, new Date - start) / 1e3) -
+        (Math.max(1, me.time) / 1e3) -
         // subtract the base loop time
         (calPeriod ? calPeriod * me.count : 0));
 
