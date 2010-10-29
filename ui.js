@@ -437,7 +437,7 @@
     while (test = tests[i++]) {
       if (test.count) {
         key = (test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ');
-        result[key] = test.hz == Infinity ? Number.MAX_VALUE : test.hz;
+        result[key] = test.hz;
       }
     }
     // create new beacon
