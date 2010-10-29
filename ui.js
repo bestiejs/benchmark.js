@@ -435,9 +435,8 @@
     // populate result object (skipping unrun and errored tests)
     while (test = tests[i++]) {
       if (test.count) {
-        // hz of Infinity will be converted to 1 billion
         key = (test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ');
-        result[key] = test.hz == Infinity ? 1e9 : test.hz;
+        result[key] = test.hz == Infinity ? Number.MAX_VALUE : test.hz;
       }
     }
     // create new beacon
