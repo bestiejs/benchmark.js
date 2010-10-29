@@ -285,7 +285,7 @@
       else if (test.count) {
         if (hz == Infinity) {
           setHTML(cell, '&infin;');
-          cell.title = 'Test is too fast to be recorded.';
+          cell.title = 'Test was too fast to be recorded. Please try again.';
         } else {
           setHTML(cell, formatNumber(hz));
           cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
@@ -433,9 +433,9 @@
         body = document.body,
         result = { };
 
-    // populate result object (skipping unrun and errored tests)
+    // populate result object (skipping unrun, errored, and Infinity hz tests)
     while (test = tests[i++]) {
-      if (test.count) {
+      if (test.count && test.hz != Infinity) {
         key = (test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ');
         result[key] = test.hz;
       }
