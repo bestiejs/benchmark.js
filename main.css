@@ -237,7 +237,7 @@ footer{
   margin-right:.3em
 }
 #run{
-  margin-top:-.4em;
+  margin-top:-2.75em;
   display:none
 }
 #faq{
@@ -259,16 +259,16 @@ footer{
   font-family:Monaco,'Courier New',monospace;
   font-size:.9em
 }
-#error-info.show,.meta strong,#status strong{
+#error-info.show,.meta strong,#status strong,#firebug strong{
   background:pink;
   border:1px solid #b00b00;
-  padding:1em
+  padding:.4em
 }
-#firebug{
+p#firebug{
   display:none
 }
 #firebug.show{
-  display:inline
+  display:block
 }
 
 .js #run{
