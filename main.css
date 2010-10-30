@@ -4,8 +4,8 @@ html, body, h1, h2, h3, fieldset, #faq, #faq dt, #faq dd, iframe {
   border: 0;
 }
 
-table, p, ul, h1, h2, h3, #error-info, iframe {
-  margin-bottom: 1em
+table, p, ul, h1, h2, h3, #error-info, iframe, form div, #faq {
+  margin-bottom: 1em;
 }
 
 button, input, textarea, a {
@@ -15,7 +15,7 @@ button, input, textarea, a {
 }
 
 html, input, textarea, button {
-  font: 1em/1.5 Helvetica, Arial, sans-serif
+  font: 1em/1.5 Helvetica, Arial, sans-serif;
 }
 
 html {
@@ -39,7 +39,7 @@ a {
 }
 
 a:hover, a:focus {
-  text-decoration: none
+  text-decoration: none;
 }
 
 table {
@@ -66,7 +66,7 @@ caption, #comments .meta {
 }
 
 thead th, caption {
-  font-weight: bold
+  font-weight: bold;
 }
 
 tbody th {
@@ -96,19 +96,19 @@ td.results {
 }
 
 tr:last-child td, tr:last-child th {
-  border-bottom: 0
+  border-bottom: 0;
 }
 
 td, th, caption {
-  padding: .2em .5em
+  padding: .2em .5em;
 }
 
 td.fastest {
-  background: #9cee82
+  background: #9cee82;
 }
 
-td.slowest, td.error {
-  background: pink
+td.slowest, td.error, :focus:invalid, .invalid {
+  background: pink;
 }
 
 td.error {
@@ -128,12 +128,12 @@ button, .submit {
   -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorStr='#ebebeb', EndColorStr='#b8b8b8')";
 }
 
-a:hover span, a:focus span {
-  color: #fff
+a:hover span, a:focus span, #comments .owner .meta a {
+  color: #fff;
 }
 
 #run, .buttons {
-  float: right
+  float: right;
 }
 
 button:hover, button:focus, .submit:hover, .submit:focus {
@@ -150,10 +150,6 @@ iframe {
   width: 100%;
   height: 450px;
   resize: vertical;
-}
-
-form div {
-  margin-bottom: 1em
 }
 
 label {
@@ -204,8 +200,8 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
   display: block;
 }
 
-.js .question {
-  display: none
+.js .question, hgroup h2, p#firebug, #run {
+  display: none;
 }
 
 pre {
@@ -229,29 +225,20 @@ mark {
   padding: .2em .1em;
 }
 
-:focus:invalid, .invalid {
-  background: pink
-}
-
 .error {
-  color: #b00b00
+  color: #b00b00;
 }
 
 #add-test {
-  margin-right: .3em
+  margin-right: .3em;
 }
 
 #run {
   margin-top: -2.75em;
-  display: none;
 }
 
-.js #run {
-  display: block
-}
-
-#faq {
-  margin-bottom: 1em
+.js #run, #firebug.show {
+  display: block;
 }
 
 #faq dt {
@@ -260,7 +247,7 @@ mark {
 }
 
 #faq dt:target, #faq dt:target + dd {
-  background: lightgreen;
+  background: #90ee85;
   padding: .5em .8em 0 .8em;
 }
 
@@ -285,17 +272,13 @@ h1 {
   font-size: 1.4em;
 }
 
-hgroup h2 {
-  display: none
-}
-
 form h3 {
   padding-top: .2em;
   padding-bottom: .2em;
 }
 
 h1 em {
-  font-style: normal
+  font-style: normal;
 }
 
 h1 strong {
@@ -304,15 +287,7 @@ h1 strong {
 }
 
 li.current a {
-  background: lightgreen
-}
-
-p#firebug {
-  display: none
-}
-
-#firebug.show {
-  display: block
+  background: #90ee85;
 }
 
 #comments .meta, #comments .meta img {
@@ -339,10 +314,6 @@ p#firebug {
   color: #555;
 }
 
-#comments .owner .meta a {
-  color: #fff
-}
-
 #comments article div {
   margin-top: 30px;
   padding: .2em 1em 0;
@@ -356,7 +327,7 @@ p#firebug {
 }
 
 #comments article:target {
-  background: #dde4ea
+  background: #dde4ea;
 }
 
 footer {
@@ -372,53 +343,49 @@ footer {
 }
 
 .co1, .co2, .coMULTI {
-  font-style: italic
+  font-style: italic;
 }
 
 .imp {
-  color: red
+  color: red;
 }
 
 .kw1, .kw3 {
-  color: #006
+  color: #006;
 }
 
 .kw2 {
-  color: #036
+  color: #036;
 }
 
-.co1 {
-  color: #060
+.co1, .coMULTI {
+  color: #060;
 }
 
 .co2 {
-  color: #096
-}
-
-.coMULTI {
-  color: #060
+  color: #096;
 }
 
 .es0 {
-  color: #009
+  color: #009;
 }
 
 .br0 {
-  color: #090
+  color: #090;
 }
 
 .sy0 {
-  color: #393
+  color: #393;
 }
 
 .st0 {
-  color: #36c
+  color: #36c;
 }
 
 .nu0 {
-  color: #c00
+  color: #c00;
 }
 
 .me1 {
-  color: #606
+  color: #606;
 }
