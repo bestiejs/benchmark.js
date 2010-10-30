@@ -429,7 +429,7 @@
         key,
         test,
         i = 0,
-        id = BROWSERSCOPE_ID + '_' + cache.counter++,
+        id = BROWSERSCOPE_ID + '-' + cache.counter++,
         body = document.body,
         result = { };
 
