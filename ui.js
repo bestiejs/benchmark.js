@@ -442,7 +442,7 @@
     }
     // create new beacon
     try {
-      elIframe = createElement('<iframe name="' + id + '">');
+      elIframe = createElement('<iframe name=' + id + '>');
     } catch(e) {
       (elIframe = createElement('iframe')).name = id;
     }
