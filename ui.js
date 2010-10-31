@@ -36,21 +36,21 @@
 
    // inner text for the various run button states
    RUN_TEXT = {
-     'RUNNING' : 'Stop tests',
-     'RUN_AGAIN' : 'Run tests again',
-     'STOPPED' : 'Run tests'
+     'RUNNING': 'Stop tests',
+     'RUN_AGAIN': 'Run tests again',
+     'STOPPED': 'Run tests'
    },
 
    // common status values
    STATUS_TEXT = {
-     'READY' : 'Ready to run tests.',
-     'READY_AGAIN' : 'Done. Ready to run tests again.'
+     'READY': 'Ready to run tests.',
+     'READY_AGAIN': 'Done. Ready to run tests again.'
    },
 
    cache = {
-     'counter' : 0,
-     'errors' : [],
-     'trash' : createElement('div')
+     'counter': 0,
+     'errors': [],
+     'trash': createElement('div')
    };
 
   /*--------------------------------------------------------------------------*/
@@ -173,6 +173,12 @@
     ui.runTest(getTestById(this.id.split('-')[1]));
   }
 
+  function onComplete() {
+    logStatus(STATUS_TEXT.READY_AGAIN);
+    ui.currentTest = null;
+    nextTest(ui);
+  }
+
   function onCycle(test) {
     onStart(test);
     ui.renderTest(test);
@@ -218,13 +224,7 @@
   }
 
   function onStart(test) {
-    logStatus(test.name + ' &times; ' + formatNumber(test.count));
-  }
-
-  function onStop() {
-    logStatus(STATUS_TEXT.READY_AGAIN);
-    ui.currentTest = null;
-    nextTest(ui);
+    isFinite(test.count) && logStatus(test.name + ' &times; ' + formatNumber(test.count));
   }
 
   /*--------------------------------------------------------------------------*/
@@ -233,11 +233,11 @@
     var me = this,
         elTitle = $('title-' + id),
         test = new Benchmark(fn, {
-          'id' : id,
-          'name' : name,
-          'onCycle' : onCycle,
-          'onStart' : onStart,
-          'onStop' : onStop
+          'id': id,
+          'name': name,
+          'onComplete': onComplete,
+          'onCycle': onCycle,
+          'onStart': onStart
         });
 
     elTitle.tabIndex = 0;
@@ -268,6 +268,7 @@
     var hz = test.hz,
         cell = $(RESULTS_PREFIX + test.id);
 
+    cell.title = '';
     if (test.error) {
       setHTML(cell, 'Error');
       if (!hasClass(cell, ERROR_CLASS)) {
@@ -341,10 +342,9 @@
     while (test = me.queue.pop()) {
       me.renderTest(test);
     }
-    // kill current test if still calibrating
-    test = me.currentTest;
-    if (test && !Benchmark.CALIBRATION.cycles) {
-      test.reset();
+    // stop current test
+    if (test = me.currentTest) {
+      test.stop();
       me.renderTest(test);
     }
     setHTML('run', RUN_TEXT.STOPPED);
@@ -403,7 +403,7 @@
           }
           else {
             percent = Math.floor((1 - test.hz / first.hz) * 100);
-            text = percent && (percent + '% slower') || '';
+            text = percent + '% slower';
 
             // mark slowest
             if (test.hz == last.hz) {
@@ -486,46 +486,46 @@
   // expose
   global.ui = {
     // HTML elements that will hold the results
-    'elResults' : [],
+    'elResults': [],
 
     // parsed query parameters of the current page URL
-    'params' : {},
+    'params': {},
 
     // queue of tests that need to run
-    'queue' : [],
+    'queue': [],
 
     // list of all tests that have been registered with benchmark.test
-    'tests' : [],
+    'tests': [],
 
     // create a new test
-    'addTest' : addTest,
+    'addTest': addTest,
 
     // parse query params into ui.params[] hash
-    'parseHash' : parseHash,
+    'parseHash': parseHash,
 
     // (re)render the results for a specific test
-    'renderTest' : renderTest,
+    'renderTest': renderTest,
 
     // add all tests to the run queue
-    'runAll' : runAll,
+    'runAll': runAll,
 
     // add a test to the run queue
-    'runTest' : runTest,
+    'runTest': runTest,
 
-    // remove and render all tests from the run queue
-    'stop' : stop,
+    // stop, dequeue, and render all tests
+    'stop': stop,
 
     // remove elements from the document and avoid pseuddo memory leaks
     // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
-    'trash' : trash
+    'trash': trash
   };
 
   ui.browserscope = {
     // handles Browserscope reporting
-    'post' : post,
+    'post': post,
 
     // refreshes Browserscope results iframe
-    'refresh' : refresh
+    'refresh': refresh
   };
 
   /*--------------------------------------------------------------------------*/
