@@ -107,7 +107,12 @@ td.fastest {
   background: #9cee82;
 }
 
-td.slowest, td.error, :focus:invalid, .invalid {
+td.slowest, td.error, .invalid {
+  background: pink;
+}
+
+/* must have :invalid on its own rule because of buggy IE */
+:focus:invalid {
   background: pink;
 }
 
