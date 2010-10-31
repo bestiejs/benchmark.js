@@ -44,14 +44,24 @@
   function calibrate(deferredTest) {
     var cal = Benchmark.CALIBRATION;
     if (!cal.count) {
-      cal.onStop = deferredTest;
+      cal.onComplete = deferredTest;
       cal.bestOf(3);
       return true;
     }
     return false;
   }
 
-  // copy properties
+  // copy test results from the source to the destination test
+  function copyResults(destination, source) {
+    destination.count = source.count;
+    destination.cycles = source.cycles;
+    destination.error = source.error;
+    destination.hz = source.hz;
+    destination.period = source.period;
+    return destination;
+  }
+
+  // map source object properties to the destination object
   function extend(destination, source) {
     source || (source = { });
     for (var key in source) {
@@ -146,6 +156,7 @@
 
   function bestOf(times, count, synchronous) {
     var best,
+        stopped,
         finished = 0,
         i = times,
         me = this;
@@ -156,21 +167,26 @@
 
     while (i--) {
       (function() {
-        var clone = me.clone(),
-            onStart = me.onStart,
-            onStop = me.onStop;
-
+        var clone = me.clone();
         clone.onCycle =
-        clone.onStart = me.onCycle || noop;
-        clone.onStop = function() {
+        clone.onStart = function() {
+          if (!me.running) {
+            i = 0;
+            stopped = true;
+            clone.stop();
+          } else {
+            me.onCycle(copyResults(me, clone));
+          }
+        };
+        clone.onComplete = function() {
           if (!best || clone.period < best.period) {
             best = clone;
           }
-          if (++finished == times) {
-            extend(me, best);
-            me.onStart = onStart;
-            me.onStop = onStop;
-            me.onStop(me);
+          if (stopped) {
+            me.onComplete(me);
+          }
+          else if (++finished == times) {
+            me.onComplete(copyResults(me, best));
           }
         };
         clone.run(count, synchronous);
@@ -193,6 +209,17 @@
     return result;
   }
 
+  function stop() {
+    var me = this,
+        error = me.error;
+
+    if (me.running) {
+      me.reset();
+      me.error = error;
+      me.onStop(me);
+    }
+  }
+
   function reset() {
     var me = this,
         proto = this.constructor.prototype;
@@ -204,6 +231,7 @@
     me.period = proto.period;
     me.running = proto.running;
     me.time = proto.time;
+    me.onReset(me);
   }
 
   function run(count, synchronous) {
@@ -220,6 +248,7 @@
             } else {
               me.onStart(me);
               me.onStop(me);
+              me.onComplete(me);
             }
           }
           if (synchronous) {
@@ -247,69 +276,72 @@
         max = me.MAX_COUNT,
         min = me.MIN_TIME;
 
-    if (cycles) {
-      cycles = ++me.cycles;
-    } else {
-      cycles = me.cycles = 1;
-    }
+    // continue if not stopped in between cycles
+    if (me.running) {
 
-    try {
-      // clock executions of me.fn
-      clock(me);
+      if (cycles) {
+        cycles = ++me.cycles;
+      } else {
+        cycles = me.cycles = 1;
+      }
+      try {
+        // clock executions of me.fn
+        clock(me);
 
-      time = me.time =
-        // ensure positive numbers
-        Math.max(0,
-        // convert time from milliseconds to seconds
-        (me.time / 1e3) -
-        // calibrate by subtracting the base loop time
-        (calPeriod ? calPeriod * count : 0));
+        time = me.time =
+          // ensure positive numbers
+          Math.max(0,
+          // convert time from milliseconds to seconds
+          (me.time / 1e3) -
+          // calibrate by subtracting the base loop time
+          (calPeriod ? calPeriod * count : 0));
 
-      // per-operation time
-      period = me.period = time / count;
+        // per-operation time
+        period = me.period = time / count;
 
-      // ops per second
-      me.hz = period ? Math.round(1 / period) : Number.MAX_VALUE;
+        // ops per second
+        me.hz = period ? Math.round(1 / period) : Number.MAX_VALUE;
 
-      // do we need to do another cycle?
-      me.running = time < min;
+        // do we need to do another cycle?
+        me.running = time < min;
 
-      // if so, compute the iteration count needed
-      if (me.running) {
-        // tests may return an initial time of 0 when INIT_COUNT is a small number,
-        // to avoid that we set its count to something a bit higher
-        if (!time && cycles == 1) {
-          // try the smaller of the calibration count or 1/4 the max count
-          max = Math.floor(max / 4);
-          count = Math.min(calCount || max, max);
-        }
-        else if (!time && cycles == 2) {
-          // try the smaller of the calibration count, if not previously used, or the full max count
-          count = Math.min(count != calCount ? calCount || max : max, max);
-        }
-        else if (!time && cycles == 3 && count != max) {
-          // if not already, take it to the max
-          count = max;
-        }
-        else {
-          // calculate how many more iterations it will take to achive the min testing time
-          count += Math.ceil((min - time) / period);
+        // if so, compute the iteration count needed
+        if (me.running) {
+          // tests may return an initial time of 0 when INIT_COUNT is a small number,
+          // to avoid that we set its count to something a bit higher
+          if (!time && cycles == 1) {
+            // try the smaller of the calibration count or 1/4 the max count
+            max = Math.floor(max / 4);
+            count = Math.min(calCount || max, max);
+          }
+          else if (!time && cycles == 2) {
+            // try the smaller of the calibration count, if not previously used, or the full max count
+            count = Math.min(count != calCount ? calCount || max : max, max);
+          }
+          else if (!time && cycles == 3 && count != max) {
+            // if not already, take it to the max
+            count = max;
+          }
+          else {
+            // calculate how many more iterations it will take to achive the min testing time
+            count += Math.ceil((min - time) / period);
 
-          // to avoid freezing the browser stop running if the
-          // next cycle would exceed the max count allowed
-          if (count > max) {
-            me.running = false;
+            // to avoid freezing the browser stop running if the
+            // next cycle would exceed the max count allowed
+            if (count > max) {
+              me.running = false;
+            }
           }
         }
+        me.count = count;
       }
-      me.count = count;
-    }
-    catch(e) {
-      me.reset();
-      me.error = e;
-    }
+      catch(e) {
+        me.reset();
+        me.error = e;
+      }
 
-    me.onCycle(me);
+      me.onCycle(me);
+    }
 
     // figure out what to do next
     if (me.running) {
@@ -324,7 +356,7 @@
       }
     }
     else {
-      me.onStop(me);
+      me.onComplete(me);
     }
   }
 
@@ -339,58 +371,67 @@
 
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
-    'CYCLE_DELAY' : 0.2,
+    'CYCLE_DELAY': 0.2,
 
     // initial number of iterations
-    'INIT_COUNT' : 10,
+    'INIT_COUNT': 10,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
-    'MAX_COUNT' : 1e6, // 1 million
+    'MAX_COUNT': 1e6, // 1 million
 
     // minimum time a test should take to get valid results (secs)
-    'MIN_TIME' : 0.2,
+    'MIN_TIME': 0.2,
 
     // number of times a test was executed
-    'count' : null,
+    'count': null,
 
     // number of cycles performed during testing
-    'cycles' : null,
+    'cycles': null,
 
     // an error object if the test failed
-    'error' : null,
+    'error': null,
 
     // number of test executions per second
-    'hz' : null,
+    'hz': null,
 
     // time a test takes to do one execution (secs)
-    'period' : null,
+    'period': null,
 
     // flag to indicate if the test is running
-    'running' : false,
+    'running': false,
 
     // time a test takes to do the `count` number of executions (secs)
-    'time' : null,
+    'time': null,
+
+    // callback invoked when testing is complete
+    'onComplete': noop,
 
     // callback invoked when one test cycle ends
-    'onCycle' : noop,
+    'onCycle': noop,
 
-    // callback invoked when test is started
-    'onStart' : noop,
+    // callback invoked when test is reset
+    'onReset': noop,
 
-    // callback invoked when test is finished
-    'onStop' : noop,
+    // callback invoked when testing is started
+    'onStart': noop,
+
+    // callback invoked when testing is stopped
+    'onStop': noop,
 
     // runs the test accepting the best of `n` attempts
-    'bestOf' : bestOf,
+    'bestOf': bestOf,
 
     // create new benchmark with the same test function and options
-    'clone' : clone,
+    'clone': clone,
 
     // reset test state
-    'reset' : reset,
+    'reset': reset,
 
     // run the test
-    'run' : run
+    'run': run,
+
+    // stop testing (does not record times)
+    'stop': stop
   });
 
   // expose
