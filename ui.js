@@ -233,11 +233,11 @@
     var me = this,
         elTitle = $('title-' + id),
         test = new Benchmark(fn, {
-          'id': id,
-          'name': name,
-          'onCycle': onCycle,
-          'onStart': onStart,
-          'onStop': onStop
+          'id' : id,
+          'name' : name,
+          'onCycle' : onCycle,
+          'onStart' : onStart,
+          'onStop' : onStop
         });
 
     elTitle.tabIndex = 0;
@@ -337,10 +337,8 @@
     var test,
         me = this;
 
-    setHTML('run', RUN_TEXT.STOPPED);
-
-    // clear the queue
-    while (test = me.queue.shift()) {
+    // clear queue
+    while (test = me.queue.pop()) {
       me.renderTest(test);
     }
     // kill current test if still calibrating
@@ -349,6 +347,7 @@
       test.reset();
       me.renderTest(test);
     }
+    setHTML('run', RUN_TEXT.STOPPED);
   }
 
   function trash(element) {

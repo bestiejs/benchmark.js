@@ -183,6 +183,7 @@
         me = this,
         result = new me.constructor(me.fn, me.options);
 
+    // copy manually added properties
     for (key in me) {
       if (!result[key]) {
         result[key] = me[key];
