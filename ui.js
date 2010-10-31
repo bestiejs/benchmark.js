@@ -232,18 +232,18 @@
   function addTest(name, id, fn) {
     var me = this,
         elTitle = $('title-' + id),
-        test = new Benchmark(fn);
+        test = new Benchmark(fn, {
+          'id': id,
+          'name': name,
+          'onCycle': onCycle,
+          'onStart': onStart,
+          'onStop': onStop
+        });
 
     elTitle.tabIndex = 0;
     elTitle.title = 'Click to run this test again.';
     elTitle.onclick = onClick;
     elTitle.onkeyup = onKeyUp;
-
-    test.id = id;
-    test.name = name;
-    test.onCycle = onCycle;
-    test.onStart = onStart;
-    test.onStop = onStop;
 
     me.tests.push(test);
     me.elResults.push($(RESULTS_PREFIX + id));
@@ -282,14 +282,9 @@
       else if (indexOf(this.queue, test) > -1) {
         setHTML(cell, 'pending&hellip;');
       }
-      else if (test.count) {
-        if (hz == Infinity) {
-          setHTML(cell, '&infin;');
-          cell.title = 'Test was too fast to be recorded. Please try again.';
-        } else {
-          setHTML(cell, formatNumber(hz));
-          cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
-        }
+      else if (test.cycles) {
+        setHTML(cell, formatNumber(hz));
+        cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
       }
       else {
         setHTML(cell, 'ready');
@@ -339,11 +334,20 @@
   }
 
   function stop() {
-    var me = this;
+    var test,
+        me = this;
+
     setHTML('run', RUN_TEXT.STOPPED);
 
-    while (me.queue.length) {
-      me.renderTest(me.queue.shift());
+    // clear the queue
+    while (test = me.queue.shift()) {
+      me.renderTest(test);
+    }
+    // kill current test if still calibrating
+    test = me.currentTest;
+    if (test && !Benchmark.CALIBRATION.cycles) {
+      test.reset();
+      me.renderTest(test);
     }
   }
 
@@ -370,12 +374,12 @@
     else if (test = me.queue.shift()) {
       // run the next test from the queue
       me.currentTest = test;
-      test.run();
+      setTimeout(function() { test.run(); }, test.CYCLE_DELAY);
     }
     else {
       // populate result array (skipping unrun and errored tests)
       while (test = me.tests[i++]) {
-        if (test.count) {
+        if (test.cycles) {
           result.push({ 'id': test.id, 'hz': test.hz });
         }
       }
@@ -400,7 +404,7 @@
           }
           else {
             percent = Math.floor((1 - test.hz / first.hz) * 100);
-            text = first.hz != Infinity && percent && (percent + '% slower') || '';
+            text = percent && (percent + '% slower') || '';
 
             // mark slowest
             if (test.hz == last.hz) {
@@ -426,18 +430,17 @@
 
   function post(tests) {
     var idoc,
-        key,
         test,
         i = 0,
         id = BROWSERSCOPE_ID + '_' + cache.counter++,
+        key = ui._bTestKey,
         body = document.body,
         result = { };
 
-    // populate result object (skipping unrun, errored, and Infinity hz tests)
+    // populate result object (skipping unrun and errored tests)
     while (test = tests[i++]) {
-      if (test.count && test.hz != Infinity) {
-        key = (test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ');
-        result[key] = test.hz;
+      if (test.cycles) {
+        result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
       }
     }
     // create new beacon
@@ -453,7 +456,6 @@
 
     // perform inception :3
     ui._bR = result;
-    key = ui._bTestKey;
     idoc = global.frames[id].document;
     idoc.write('<html><body><script>with(parent.ui){' +
                'var _bTestResults=_bR,' +
