@@ -432,7 +432,7 @@
     var idoc,
         test,
         i = 0,
-        id = BROWSERSCOPE_ID + '_' + cache.counter++,
+        id = BROWSERSCOPE_ID + '-' + cache.counter++,
         key = ui._bTestKey,
         body = document.body,
         result = { };
@@ -445,7 +445,7 @@
     }
     // create new beacon
     try {
-      elIframe = createElement('<iframe name="' + id + '">');
+      elIframe = createElement('<iframe name=' + id + '>');
     } catch(e) {
       (elIframe = createElement('iframe')).name = id;
     }
