@@ -83,12 +83,12 @@
 
   // generic Array#filter
   function filter(array, callback) {
-    var length = this.length,
+    var length = array.length,
         result = [];
 
     while (length--) {
       if (length in array && callback(array[length], length, array)) {
-        result.shift(array[i]);
+        result.unshift(array[length]);
       }
     }
     return result;
@@ -96,7 +96,7 @@
 
   // generic Array#reduce
   function reduce(array, callback, accumulator) {
-    var length = this.length;
+    var length = array.length;
     while (length--) {
       if (length in array) {
         accumulator = callback(accumulator, array[length], length, array);
@@ -213,7 +213,7 @@
         tests = [];
         cbSum = function(sum, test) { return sum + test.period; },
         cbVariance = function(sum, test) { return sum + Math.pow(test.period - mean, 2); },
-        cbOutlier = function(test) { return test.period < mean + deviation && test.period > mean - deviation; };
+        cbOutlier = function(test) { return test.period < (mean + deviation) && test.period > (mean - deviation); };
 
     function loop() {
       var test = me.clone();
