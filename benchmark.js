@@ -87,7 +87,7 @@
         result = [];
 
     while (length--) {
-      if (length in array && callback.call(global, array[length], length, array)) {
+      if (length in array && callback(array[length], length, array)) {
         result.shift(array[i]);
       }
     }
@@ -99,7 +99,7 @@
     var length = this.length;
     while (length--) {
       if (length in array) {
-        accumulator = callback.call(global, accumulator, array[length], length, array);
+        accumulator = callback(accumulator, array[length], length, array);
       }
     }
     return accumulator;
@@ -399,7 +399,6 @@
         me.reset();
         me.error = e;
       }
-
       me.onCycle(me);
     }
 

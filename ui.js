@@ -79,6 +79,30 @@
     $(element).innerHTML = html == null ? '' : html;
   }
 
+  // generic Array#forEach
+  function forEach(array, callback) {
+    var i = -1,
+        length = array.length;
+
+    while (++i < length) {
+      if (i in array && callback(array[i], i, array) === false) {
+        break;
+      }
+    }
+  }
+
+  // generic Array#indexOf
+  function indexOf(array, value) {
+    var result = -1;
+    forEach(array, function(v, i) {
+      if (v === value) {
+        result = i;
+        return false;
+      }
+    });
+    return result;
+  }
+
   // pretty print numbers
   function formatNumber(number) {
     var comma = ',',
@@ -92,31 +116,13 @@
 
   // grabs the test from the ui object that matches the id
   function getTestById(id) {
-    var test,
-        i = 0,
-        result = null,
-        tests = ui.tests;
-
-    while (test = tests[i++]) {
+    var result = null;
+    forEach(ui.tests, function(test) {
       if (test.id == id) {
         result = test;
-        break;
+        return false;
       }
-    }
-    return result;
-  }
-
-  // generic Array#indexOf
-  function indexOf(array, value) {
-    var length = this.length,
-        result = -1;
-
-    while (length--) {
-      if (length in array && array[length] === value) {
-        result = length;
-        break;
-      }
-    }
+    });
     return result;
   }
 
@@ -204,7 +210,7 @@
       addClass('firebug', 'show');
     }
     // auto-run tests when the URL has #run
-    if ('run' == location.hash.slice(1, 3)) {
+    if ('run' == location.hash.slice(1, 4)) {
       onRun();
     }
     if (typeof global.init == 'function') {
@@ -244,17 +250,13 @@
   }
 
   function parseHash() {
-    var pair,
-        hashes = location.hash.slice(1).split('&'),
-        length = hashes.length,
+    var hashes = location.hash.slice(1).split('&'),
         params = this.params = { };
 
-    if (hashes[0]) {
-      while (length--) {
-        pair = hashes[length].split('=');
-        params[pair[0]] = pair[1];
-      }
-    }
+    forEach(hashes[0] && hashes, function(hash) {
+      var pair = hashes[length].split('=');
+      params[pair[0]] = pair[1];
+    });
   }
 
   function renderTest(test) {
@@ -287,35 +289,27 @@
   }
 
   function runAll(e) {
-    e || (e = global.event);
-    var i = -1,
-        me = this,
-        reversed = e && e.shiftKey,
-        length = me.tests.length;
-
+    var me = this;
+    e || (e = global.event || { });
     setHTML('run', RUN_TEXT.RUNNING);
     Benchmark.CALIBRATION.reset();
-    while (++i < length) {
-      me.runTest(me.tests[reversed ? (length - i - 1) : i]);
-    }
+
+    forEach(e.shiftKey ? me.tests.reverse() : me.tests, function(test) {
+      me.runTest(test);
+    });
   }
 
   function runTest(test) {
-    var elResult,
-        i = 0,
-        me = this,
-        elResults = me.elResults;
-
+    var me = this;
     if (indexOf(me.queue, test) < 0) {
       // clear error log
       logError(false);
-
       // reset result classNames
-      while (elResult = elResults[i++]) {
+      forEach(me.elResults, function(elResult) {
         if (!hasClass(elResult, ERROR_CLASS)) {
           elResult.className = RESULTS_CLASS;
         }
-      }
+      });
       // reset test before (re)running in case testing is aborted
       // so previous results are not recorded
       if (!test.error) {
@@ -349,45 +343,37 @@
   }
 
   function nextTest(me) {
-    var elResult,
-        elSpan,
-        first,
+    var first,
         last,
-        length,
-        percent,
-        test,
-        text,
-        i = 0,
         result = [];
 
     if (me.currentTest) {
       // do nothing when running another test
     }
-    else if (test = me.queue.shift()) {
+    else if (me.currentTest = me.queue.shift()) {
       // run the next test from the queue
-      me.currentTest = test;
-      setTimeout(function() { test.run(); }, test.CYCLE_DELAY);
+      setTimeout(function() { me.currentTest.run(); }, me.currentTest.CYCLE_DELAY);
     }
     else {
       // populate result array (skipping unrun and errored tests)
-      while (test = me.tests[i++]) {
+      forEach(me.tests, function(test) {
         if (test.cycles) {
           result.push({ 'id': test.id, 'hz': test.hz });
         }
-      }
-      // print results
-      length = result.length;
-      if (length > 1) {
+      });
+
+      if (result.length > 1) {
         // sort descending by hz (highest hz / fastest first)
         result.sort(function(a, b) { return b.hz - a.hz; });
-
-        i = 0;
         first = result[0];
-        last = result[length - 1];
+        last  = result[result.length - 1];
 
-        while (test = result[i++]) {
-          elResult = $(RESULTS_PREFIX + test.id);
-          elSpan = elResult.getElementsByTagName('span')[0];
+        // print results
+        forEach(result, function(test) {
+          var percent,
+              text,
+              elResult = $(RESULTS_PREFIX + test.id),
+              elSpan = elResult.getElementsByTagName('span')[0];
 
           if (test.hz == first.hz) {
             // mark fastest
@@ -408,7 +394,8 @@
           } else {
             appendHTML(elResult, '<span>' + text + '<\/span>');
           }
-        }
+        });
+
         // post results to Browserscope
         me.browserscope.post(me.tests);
 
@@ -422,19 +409,18 @@
 
   function post(tests) {
     var idoc,
-        test,
-        i = 0,
         id = BROWSERSCOPE_ID + '-' + cache.counter++,
         key = ui._bTestKey,
         body = document.body,
         result = { };
 
     // populate result object (skipping unrun and errored tests)
-    while (test = tests[i++]) {
+    forEach(tests, function(test) {
       if (test.cycles) {
         result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
       }
-    }
+    });
+
     // create new beacon
     try {
       elIframe = createElement('<iframe name=' + id + '>');
