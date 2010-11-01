@@ -52,7 +52,7 @@
     var cal = Benchmark.CALIBRATION;
     if (!cal.cycles) {
       cal.onComplete = callback;
-      cal.average(32); // (normal population n > 30)
+      cal.average(30);
       return true;
     }
     return false;
@@ -225,9 +225,9 @@
         else if (++finished == times) {
           copyResults(me, test);
           if (!me.error) {
-            // compute average period and standard deviation (population)
+            // compute average period and sample standard deviation
             mean = reduce(tests, cbSum, 0) / tests.length;
-            deviation = Math.sqrt(reduce(tests, cbVariance, 0) / tests.length);
+            deviation = Math.sqrt(reduce(tests, cbVariance, 0) / (tests.length - 1));
 
             // define period range limits
             max = mean + deviation;
