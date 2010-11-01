@@ -109,7 +109,7 @@
     return result;
   }
 
-  // a cross-browser Array#indexOf solution
+  // generic Array#indexOf
   function indexOf(array, value) {
     var i = -1,
         length = this.length,
