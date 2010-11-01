@@ -219,28 +219,30 @@
         }
       };
       test.onComplete = function() {
-        if (stopped) {
-          me.onComplete(me);
-        }
-        else if (++finished == times) {
-          copyResults(me, test);
-          if (!me.error) {
-            // compute average period and sample standard deviation
-            mean = reduce(tests, cbSum, 0) / tests.length;
-            deviation = Math.sqrt(reduce(tests, cbVariance, 0) / (tests.length - 1));
+        if (stopped || ++finished == times) {
+          if (!stopped) {
+            copyResults(me, test);
+            if (!me.error) {
+              // compute average period and sample standard deviation
+              mean = reduce(tests, cbSum, 0) / tests.length;
+              deviation = Math.sqrt(reduce(tests, cbVariance, 0) / (tests.length - 1));
 
-            // define period range limits
-            max = mean + deviation;
-            min = mean - deviation;
+              if (deviation) {
+                // define period range limits
+                max = mean + deviation;
+                min = mean - deviation;
 
-            // remove outliers and compute average period on filtered results
-            tests = filter(tests, cbOutlier, 0);
-            mean = me.period = reduce(tests, cbSum, 0) / tests.length;
-
-            // compute other results
-            me.time = mean * me.count;
-            me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+                // remove outliers and compute average period on filtered results
+                tests = filter(tests, cbOutlier, 0);
+                mean = me.period = reduce(tests, cbSum, 0) / tests.length;
+              }
+              // compute other results
+              me.time = mean * me.count;
+              me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+            }
           }
+          me.running = false;
+          me.onCycle(me);
           me.onComplete(me);
         }
         else if (!synchronous) {
