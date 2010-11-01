@@ -7,11 +7,8 @@
 
 (function(global, document) {
 
-  // shortcut for typeof operators
-  var FN = 'function',
-
-   // css clasName used for error styles
-   ERROR_CLASS = 'error',
+  // css clasName used for error styles
+  var ERROR_CLASS = 'error',
 
    // css clasName used for `js enabled` styles
    JS_CLASS = 'js',
@@ -111,16 +108,12 @@
 
   // generic Array#indexOf
   function indexOf(array, value) {
-    var i = -1,
-        length = this.length,
-        result = i;
+    var length = this.length,
+        result = -1;
 
-    if (typeof array.indexOf == FN) {
-      return array.indexOf(value);
-    }
-    while (++i < length) {
-      if (i in array && array[i] === value) {
-        result = i;
+    while (length--) {
+      if (length in array && array[length] === value) {
+        result = length;
         break;
       }
     }
@@ -186,7 +179,7 @@
 
   function onHashChange() {
     ui.parseHash();
-    if (typeof global.init == FN) {
+    if (typeof global.init == 'function') {
       init();
     }
   }
@@ -214,7 +207,7 @@
     if ('run' == location.hash.slice(1, 3)) {
       onRun();
     }
-    if (typeof global.init == FN) {
+    if (typeof global.init == 'function') {
       init();
     }
   }

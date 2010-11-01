@@ -6,13 +6,10 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-(function(global, undefined) {
+(function(global) {
 
-  // shortcut for typeof operators
-  var FN = 'function',
-
-   // MAX_COUNT divisors used to avoid hz of Infinity
-   CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
+  // MAX_COUNT divisors used to avoid hz of Infinity
+  var CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
 
   /*--------------------------------------------------------------------------*/
 
@@ -32,7 +29,7 @@
   Klass.prototype = Benchmark.prototype;
 
   (function(proto) {
-    // bypass calibrating the Calibration tests when they are run
+    // bypass calibrating the Calibration tests
     function run(count, synchronous) {
       var me = this;
       me.reset();
@@ -58,6 +55,13 @@
     return false;
   }
 
+  // call a method either sync or async (to allow UI redraws)
+  function call(me, callback, synchronous) {
+    synchronous
+      ? callback(me, synchronous)
+      : setTimeout(function() { callback(me); }, me.CYCLE_DELAY * 1e3);
+  }
+
   // copies results from the source to the destination test
   function copyResults(destination, source) {
     destination.count = source.count;
@@ -79,16 +83,12 @@
 
   // generic Array#filter
   function filter(array, callback) {
-    var i = -1,
-        length = this.length,
+    var length = this.length,
         result = [];
 
-    if (typeof array.filter == FN) {
-      return array.filter(callback);
-    }
-    while (++i < length) {
-      if (i in array && callback.call(undefined, array[i], i, array)) {
-        result.push(array[i]);
+    while (length--) {
+      if (length in array && callback.call(global, array[length], length, array)) {
+        result.shift(array[i]);
       }
     }
     return result;
@@ -96,15 +96,10 @@
 
   // generic Array#reduce
   function reduce(array, callback, accumulator) {
-    var i = -1,
-        length = this.length;
-
-    if (typeof array.reduce == FN) {
-      return array.reduce(callback, accumulator);
-    }
-    while (++i < length) {
-      if (i in array) {
-        accumulator = callback.call(undefined, accumulator, array[i], i, array);
+    var length = this.length;
+    while (length--) {
+      if (length in array) {
+        accumulator = callback.call(global, accumulator, array[length], length, array);
       }
     }
     return accumulator;
@@ -128,7 +123,7 @@
 
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
-    if (co && typeof co.Interval == FN) {
+    if (co && typeof co.Interval == 'function') {
       clock = function(me) {
         var i = me.count,
             fn = me.fn,
@@ -141,7 +136,7 @@
         me.time = timer.microseconds() / 1000;
       };
     }
-    else if (typeof Date.now == FN) {
+    else if (typeof Date.now == 'function') {
       clock = function(me) {
         var i = me.count,
             fn = me.fn,
@@ -170,8 +165,7 @@
     mses = os && os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
     if (mses) {
       os = 'Windows ' + mses;
-    }
-    else if (/iP[ao]d|iPhone/.test(os)) {
+    } else if (/iP[ao]d|iPhone/.test(os)) {
       os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
       os = 'iOS' + (os ? ' ' + os : '');
     }
@@ -195,31 +189,28 @@
 
   function average(times, count, synchronous) {
     var deviation,
-        max,
-        min,
         mean,
         stopped,
-        finished = 0,
         i = times,
         me = this,
-        tests = [],
+        tests = [];
         cbSum = function(sum, test) { return sum + test.period; },
         cbVariance = function(sum, test) { return sum + Math.pow(test.period - mean, 2); },
-        cbOutlier = function(test) { return test.period < max && test.period > min; };
+        cbOutlier = function(test) { return test.period < mean + deviation && test.period > mean - deviation; };
 
     function loop() {
       var test = me.clone();
+      tests.push(test);
       test.onCycle =
       test.onStart = function() {
-        if (!me.running) {
-          stopped = true;
+        if (stopped = !me.running) {
           test.stop();
         } else {
           me.onCycle(copyResults(me, test));
         }
       };
       test.onComplete = function() {
-        if (stopped || ++finished == times) {
+        if (stopped || !--times) {
           if (!stopped) {
             copyResults(me, test);
             if (!me.error) {
@@ -228,10 +219,6 @@
               deviation = Math.sqrt(reduce(tests, cbVariance, 0) / (tests.length - 1));
 
               if (deviation) {
-                // define period range limits
-                max = mean + deviation;
-                min = mean - deviation;
-
                 // remove outliers and compute average period on filtered results
                 tests = filter(tests, cbOutlier, 0);
                 mean = me.period = reduce(tests, cbSum, 0) / tests.length;
@@ -246,23 +233,19 @@
           me.onComplete(me);
         }
         else if (!synchronous) {
-          setTimeout(function() { loop(); }, me.CYCLE_DELAY * 1e3);
+          call(test = tests[times], function() { test.run(); });
         }
       };
-
-      tests.push(test);
-      test.run(count, synchronous);
+      if (synchronous || !i) {
+        test.run(count, synchronous);
+      }
     }
 
     me.reset();
     me.running = true;
     me.onStart(me);
 
-    if (synchronous) {
-      while (i--) {
-        loop();
-      }
-    } else {
+    while (i--) {
       loop();
     }
   }
@@ -319,7 +302,7 @@
     // ensure calibration test has run
     if (!calibrate(function() {
           function rerun() {
-            // if not stopped during calibration, continue testing
+            // continue, if not stopped during calibration
             if (me.running) {
               me.run(count, synchronous);
             } else {
@@ -328,11 +311,7 @@
               me.onComplete(me);
             }
           }
-          if (synchronous) {
-            rerun();
-          } else {
-            setTimeout(function() { rerun(); }, me.CYCLE_DELAY * 1e3);
-          }
+          call(me, rerun, synchronous);
         })) {
       me.count = count || me.INIT_COUNT;
       me.onStart(me);
@@ -344,14 +323,12 @@
     var divisor,
         period,
         time,
-        cal = Benchmark.CALIBRATION,
-        calPeriod = cal.period,
         count = me.count,
         cycles = me.cycles,
         max = me.MAX_COUNT,
         min = me.MIN_TIME;
 
-    // continue if not stopped in between cycles
+    // continue, if not stopped between cycles
     if (me.running) {
 
       if (cycles) {
@@ -369,7 +346,7 @@
           // convert time from milliseconds to seconds
           (me.time / 1e3) -
           // calibrate by subtracting the base loop time
-          (calPeriod ? calPeriod * count : 0));
+          (Benchmark.CALIBRATION.period || 0) * count);
 
         // per-operation time
         period = me.period = time / count;
@@ -411,15 +388,8 @@
 
     // figure out what to do next
     if (me.running) {
-      // use a timeout to ensure the browser has time to render
-      // any UI changes made, like updating the status message
-      if (synchronous) {
-        _run(me, synchronous);
-      } else {
-        setTimeout(function() { _run(me); }, me.CYCLE_DELAY * 1e3);
-      }
-    }
-    else {
+      call(me, _run, synchronous);
+    } else {
       me.onComplete(me);
     }
   }
