@@ -113,28 +113,25 @@
   // variable names are prefixed with $ to replace during compilation
   (function() {
 
-    function interval($m) {
-      var $i = $m.count, $t = new $c.Interval;
-      $t.start(); while ($i--) { $f() } $t.stop();
-      $m.time = $t.microseconds() / 1000;
-    }
+    var interval = Function('$m,$c',
+          'var $i=$m.count,$t=new $c.Interval;' +
+          '$t.start();while($i--){$f()}$t.stop();' +
+          '$m.time=$t.microseconds()/1e3'),
 
-    function now($m) {
-      var $i = $m.count, $f = $m.fn, $t = Date.now();
-      while ($i--){ $f() }
-      $m.time = Date.now() - $t;
-    }
+        now = Function('$m',
+          'var $i=$m.count,$f=$m.fn,$t=Date.now();' +
+          'while($i--){$f()}' +
+          '$m.time=Date.now()-$t'),
 
-    function time($m) {
-      var $i = $m.count, $f = $m.fn, $t = (new Date).getTime();
-      while ($i--) { $f() }
-      $m.time = (new Date).getTime() - $t;
-    }
+        time = Function('$m',
+          'var $i=$m.count,$f=$m.fn,$t=(new Date).getTime();' +
+          'while($i--){$f()}' +
+          '$m.time=(new Date).getTime()-$t'),
 
-    // enable benchmarking via the --enable-benchmarking flag
-    // in at least Chrome 7 to use chrome.Interval
-    var $c = typeof global.chrome != 'undefined' ? chrome :
-      typeof global.chromium != 'undefined' ? chromium : null;
+        // enable benchmarking via the --enable-benchmarking flag
+        // in at least Chrome 7 to use chrome.Interval
+        $c = typeof global.chrome != 'undefined' ? chrome :
+          typeof global.chromium != 'undefined' ? chromium : null;
 
     // choose which timing api to use
     clock = ($c && typeof $c.Interval == 'function') ? interval :
@@ -147,8 +144,8 @@
           uid     = +new Date,
           fnToken = '$f' + uid + '()',
           fnArg   = '$m' + uid + ',$c' + uid,
-          fnBody  = ('(' + String(clock).replace(/interval|now|time/, '') +
-                    ')($m);return $m').replace(/(\$[a-z])/g, '$1' + uid);
+          fnBody  = ('(' + String(clock).replace('anonymous', '') +
+                    ')($m,$c);return $m').replace(/(\$[a-z])/g, '$1' + uid);
 
       if (Function(fnArg, fnBody)({ }, $c).time === 0) {
         clock = function(me) {

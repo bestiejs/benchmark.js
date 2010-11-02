@@ -435,13 +435,15 @@
     // perform inception :3
     ui._bR = result;
     idoc = global.frames[id].document;
-    idoc.write('<html><body><script>with(parent.ui){' +
+    idoc.write('<html><body><script>' +
+               'with(parent.ui){' +
                'var _bTestResults=_bR,' +
                '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
                '_bT=function(){parent.setTimeout(browserscope.refresh,_bD);trash(frameElement)},' +
                '_bK=setTimeout(_bT,_bD),' +
-               '_bP=setInterval(function(){if(frames[0]){' +
-               'clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}},10)' +
+               '_bP=setInterval(function(){' +
+               'if(frames[0]){clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}' +
+               '},10)' +
                '}<\/script>' +
                (key ? '<script src=//www.browserscope.org/user/beacon/' + key + '><\/script>' : '') +
                '<\/body><\/html>');
