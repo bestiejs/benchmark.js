@@ -144,9 +144,9 @@
     // TODO: check regexps in Safari 2.0.0
     try {
       var $clock  = clock,
-          uid     = (new Date).getTime(),
+          uid     = +new Date,
           fnToken = '$f' + uid + '()',
-          fnArg   = '$m' + uid + ',$c'  + uid,
+          fnArg   = '$m' + uid + ',$c' + uid,
           fnBody  = ('(' + String(clock).replace(/interval|now|time/, '') +
                     ')($m);return $m').replace(/(\$[a-z])/g, '$1' + uid);
 
