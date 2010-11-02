@@ -363,8 +363,8 @@
         cal = me.constructor.CALIBRATION,
         count = me.count,
         cycles = me.cycles,
-        max = me.MAX_COUNT,
-        min = me.MIN_TIME;
+        maxCount = me.MAX_COUNT,
+        minTime = me.MIN_TIME;
 
     // continue, if not stopped between cycles
     if (me.running) {
@@ -393,7 +393,7 @@
         me.hz = period ? Math.round(1 / period) : Number.MAX_VALUE;
 
         // do we need to do another cycle?
-        me.running = time < min;
+        me.running = time < minTime;
 
         // if so, compute the iteration count needed
         if (me.running) {
@@ -401,15 +401,18 @@
           // to avoid that we set its count to something a bit higher
           if (!time && (divisor = CYCLE_DIVISORS[cycles])) {
             // try a fraction of the MAX_COUNT
-            count = Math.floor(max / divisor);
+            count = Math.floor(maxCount / divisor);
           }
           else {
-            // calculate how many more iterations it will take to achive the min testing time
-            count += Math.ceil((min - time) / period);
+            count += period
+              // calculate how many more iterations it will take to achive the min testing time
+              ? Math.ceil((minTime - time) / period)
+              // when period is 0, make up a number greater than MAX_COUNT to trigger the kill switch
+              : maxCount + Math.floor(Math.random() * 999 + 1);
 
             // to avoid freezing the browser stop running if the
             // next cycle would exceed the max count allowed
-            if (count > max) {
+            if (count > maxCount) {
               me.running = false;
             }
           }
