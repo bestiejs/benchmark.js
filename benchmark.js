@@ -358,6 +358,7 @@
     var divisor,
         period,
         time,
+        cal = me.constructor.CALIBRATION,
         count = me.count,
         cycles = me.cycles,
         max = me.MAX_COUNT,
@@ -381,7 +382,7 @@
           // convert time from milliseconds to seconds
           (me.time / 1e3) -
           // calibrate by subtracting the base loop time
-          (Benchmark.CALIBRATION.period || 0) * count);
+          (cal && cal.period || 0) * count);
 
         // per-operation time
         period = me.period = time / count;
