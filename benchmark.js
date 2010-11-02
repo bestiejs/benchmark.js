@@ -114,7 +114,7 @@
   (function() {
 
     var interval = Function('$m,$c',
-          'var $i=$m.count,$t=new $c.Interval;' +
+          'var $i=$m.count,$f=$m.fn,$t=new $c.Interval;' +
           '$t.start();while($i--){$f()}$t.stop();' +
           '$m.time=$t.microseconds()/1e3'),
 
