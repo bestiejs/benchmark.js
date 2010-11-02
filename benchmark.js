@@ -133,8 +133,8 @@
 
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
-    var $c = typeof global.chromium != 'undefined' ? chromium :
-      typeof global.chrome != 'undefined' ? chrome : null;
+    var $c = typeof global.chrome != 'undefined' ? chrome :
+      typeof global.chromium != 'undefined' ? chromium : null;
 
     // choose which timing api to use
     clock = ($c && typeof $c.Interval == 'function') ? interval :
