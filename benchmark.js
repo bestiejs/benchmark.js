@@ -62,10 +62,10 @@
       : setTimeout(function() { callback(me); }, me.CYCLE_DELAY * 1e3);
   }
 
-  // copies results from the source to the destination test
-  function copyResults(destination, source) {
+  // merge source results with destinations
+  function merge(destination, source) {
     destination.count = source.count;
-    destination.cycles = source.cycles;
+    destination.cycles += source.cycles;
     destination.error = source.error;
     destination.hz = source.hz;
     destination.period = source.period;
@@ -151,7 +151,6 @@
           fnBody  = ('('  + String(clock) + ')(__m);return __m').replace(/(__[a-z])/g, '$1' + uid);
 
       if (Function(fnArg, fnBody)({ }, __c).time === 0) {
-
         clock = function(me) {
           // TODO: Test function body regexp matching in Safari 2.0.0
           var errored,
@@ -208,67 +207,81 @@
   /*--------------------------------------------------------------------------*/
 
   function average(times, count, synchronous) {
-    var deviation,
+    var clone,
+        deviation,
         mean,
         stopped,
+        clones = [],
         i = times,
-        me = this,
-        tests = [];
-        cbSum = function(sum, test) { return sum + test.period; },
-        cbVariance = function(sum, test) { return sum + Math.pow(test.period - mean, 2); },
-        cbOutlier = function(test) { return test.period < (mean + deviation) && test.period > (mean - deviation); };
+        me = this;
 
-    function loop() {
-      var test = me.clone();
-      tests.push(test);
-      test.onCycle =
-      test.onStart = function() {
+    function cbSum(sum, clone) {
+      return sum + clone.period;
+    }
+    function cbVariance(sum, clone) {
+      return sum + Math.pow(clone.period - mean, 2);
+    }
+    function cbOutlier(clone) {
+      return clone.period < (mean + deviation) && clone.period > (mean - deviation);
+    }
+
+    me.reset();
+    me.averaging = me.running = true;
+    me.onStart(me);
+
+    while (i--) {
+      // create clone and add to sample
+      clone = me.clone();
+      clone.averaging = true;
+      clones.push(clone);
+
+      // clone callbacks relay to host callbacks
+      clone.onCycle =
+      clone.onStart = function(clone) {
+        // stop clone and raise flag if host has stopped running
         if (stopped = !me.running) {
-          test.stop();
+          clone.stop();
         } else {
-          me.onCycle(copyResults(me, test));
+          // update host and fire its onCycle callback
+          me.onCycle(merge(me, clone));
         }
       };
-      test.onComplete = function() {
+      clone.onComplete = function(clone) {
+        // if host has stopped or this is the last clone to finish
         if (stopped || !--times) {
-          if (!stopped) {
-            copyResults(me, test);
-            if (!me.error) {
-              // compute average period and sample standard deviation
-              mean = reduce(tests, cbSum, 0) / tests.length;
-              deviation = Math.sqrt(reduce(tests, cbVariance, 0) / (tests.length - 1));
+          if (!stopped && !merge(me, clone).error) {
+            // compute average period and sample standard deviation
+            mean = reduce(clones, cbSum, 0) / clones.length;
+            deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
 
-              if (deviation) {
-                // remove outliers and compute average period on filtered results
-                tests = filter(tests, cbOutlier, 0);
-                mean = me.period = reduce(tests, cbSum, 0) / tests.length;
-              }
-              // compute other results
-              me.time = mean * me.count;
-              me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+            if (deviation) {
+              // remove outliers and compute average period on filtered results
+              clones = filter(clones, cbOutlier, 0);
+              mean = me.period = reduce(clones, cbSum, 0) / clones.length;
             }
+            // compute other host results
+            me.time = mean * me.count;
+            me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
           }
+          delete me.averaging;
           me.running = false;
           me.onCycle(me);
           me.onComplete(me);
         }
         else if (!synchronous) {
-          call(test = tests[times], function() { test.run(); });
+          // run next clone in the sample
+          clone = clones[times];
+          call(clone, function() { clone.run(); });
         }
       };
+      // run instantly if sync or init async
       if (synchronous || !i) {
-        test.run(count, synchronous);
+        clone.run(count, synchronous);
       }
     }
-
-    me.reset();
-    me.running = true;
-    me.onStart(me);
-
-    while (i--) {
-      loop();
-    }
   }
+
+  /*--------------------------------------------------------------------------*/
 
   function clone() {
     var key,
@@ -405,11 +418,15 @@
       me.onCycle(me);
     }
 
-    // figure out what to do next
     if (me.running) {
       call(me, _run, synchronous);
-    } else {
+    }
+    else if (me.averaging || me.error ||(me.time * me.DEFAULT_AVERAGE) > 1) {
       me.onComplete(me);
+    }
+    else {
+      // fast tests get their results averaged
+      me.average(me.DEFAULT_AVERAGE, count, synchronous);
     }
   }
 
@@ -425,6 +442,9 @@
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
     'CYCLE_DELAY': 0.01,
+
+    // number of runs to average for fast tests
+    'DEFAULT_AVERAGE': 30,
 
     // initial number of iterations
     'INIT_COUNT': 10,

@@ -31,9 +31,6 @@
    // results element id prefix (e.g. `results-1`)
    RESULTS_PREFIX = 'results-',
 
-   // number of runs to average for fast tests
-   RUNS_TO_AVERAGE = 30,
-
    // inner text for the various run button states
    RUN_TEXT = {
      'RUNNING': 'Stop tests',
@@ -176,17 +173,9 @@
   }
 
   function onComplete(test) {
-    // really fast tests will have their runs averaged
-    if (!test.error && !test.averaged && (test.time * RUNS_TO_AVERAGE) < 1) {
-      // add custom `averaged` flag to signal the test has been averaged
-      test.averaged = 1;
-      test.average(RUNS_TO_AVERAGE);
-    }
-    else {
-      logStatus(STATUS_TEXT.READY_AGAIN);
-      test.averaged = ui.currentTest = null;
-      nextTest(ui);
-    }
+    logStatus(STATUS_TEXT.READY_AGAIN);
+    ui.currentTest = null;
+    nextTest(ui);
   }
 
   function onCycle(test) {
