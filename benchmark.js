@@ -131,36 +131,41 @@
         // enable benchmarking via the --enable-benchmarking flag
         // in at least Chrome 7 to use chrome.Interval
         $c = typeof global.chrome != 'undefined' ? chrome :
-          typeof global.chromium != 'undefined' ? chromium : null;
+          typeof global.chromium != 'undefined' ? chromium : null,
 
-    // choose which timing api to use
-    clock = ($c && typeof $c.Interval == 'function') ? interval :
-      (typeof Date.now == 'function') ? now : time;
+        // choose which timing api to use
+        $clock = clock = ($c && typeof $c.Interval == 'function') ? interval :
+          (typeof Date.now == 'function') ? now : time,
+
+        // used for method compilation
+        uid     = +new Date,
+        fnToken = '$f' + uid + '()',
+        fnArg   = '$m' + uid + ',$c' + uid,
+        fnBody  = ('(' + String(clock).replace('anonymous', '') +
+                  ')($m,$c);return $m').replace(/(\$[a-z])/g, '$1' + uid);
 
     // if supported, compile tests to avoid extra function calls
-    // TODO: check regexps in Safari 2.0.0
-    try {
-      var $clock  = clock,
-          uid     = +new Date,
-          fnToken = '$f' + uid + '()',
-          fnArg   = '$m' + uid + ',$c' + uid,
-          fnBody  = ('(' + String(clock).replace('anonymous', '') +
-                    ')($m,$c);return $m').replace(/(\$[a-z])/g, '$1' + uid);
-
-      if (Function(fnArg, fnBody)({ }, $c).time === 0) {
-        clock = function(me) {
-          var embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
-          try {
-            Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, $c);
-          } catch(e) {
-            embed = false;
-          }
-          if (embed === false) {
-            $clock(me);
-          }
-        };
-      }
-    } catch(e) { }
+    if (function() {
+          try { return Function(fnArg, fnBody)({ }, $c).time; } catch(e) { }
+        }() != null) {
+      // TODO: check regexps in Safari 2.0.0
+      clock = function(me) {
+        var embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
+        try {
+          Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, $c);
+        } catch(e) {
+          embed = false;
+        }
+        if (embed === false) {
+          $clock(me, $c);
+        }
+      };
+    }
+    else {
+      clock = function(me) {
+        $clock(me, $c);
+      };
+    }
   }());
 
   /*--------------------------------------------------------------------------*/
