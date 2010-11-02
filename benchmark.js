@@ -207,8 +207,7 @@
   /*--------------------------------------------------------------------------*/
 
   function average(times, count, synchronous) {
-    var clone,
-        deviation,
+    var deviation,
         mean,
         stopped,
         clones = [],
@@ -218,11 +217,52 @@
     function cbSum(sum, clone) {
       return sum + clone.period;
     }
+
     function cbVariance(sum, clone) {
       return sum + Math.pow(clone.period - mean, 2);
     }
+
     function cbOutlier(clone) {
       return clone.period < (mean + deviation) && clone.period > (mean - deviation);
+    }
+
+    function onCycle(clone) {
+      // stop clone and raise flag if host has stopped running
+      if (stopped = !me.running) {
+        clone.stop();
+      } else {
+        // update host and fire its onCycle callback
+        me.onCycle(merge(me, clone));
+      }
+    }
+
+    function onComplete(clone) {
+      // if host has stopped or this is the last clone to finish
+      if (stopped || !--times) {
+        if (!stopped && !merge(me, clone).error) {
+          // compute average period and sample standard deviation
+          mean = reduce(clones, cbSum, 0) / clones.length;
+          deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
+
+          if (deviation) {
+            // remove outliers and compute average period on filtered results
+            clones = filter(clones, cbOutlier, 0);
+            mean = me.period = reduce(clones, cbSum, 0) / clones.length;
+          }
+          // compute other host results
+          me.time = mean * me.count;
+          me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+        }
+        delete me.averaging;
+        me.running = false;
+        me.onCycle(me);
+        me.onComplete(me);
+      }
+      else if (!synchronous) {
+        // run next clone in the sample
+        clone = clones[times];
+        call(clone, function() { clone.run(); });
+      }
     }
 
     me.reset();
@@ -231,62 +271,24 @@
 
     while (i--) {
       // create clone and add to sample
-      clone = me.clone();
-      clone.averaging = true;
-      clones.push(clone);
-
-      // clone callbacks relay to host callbacks
-      clone.onCycle =
-      clone.onStart = function(clone) {
-        // stop clone and raise flag if host has stopped running
-        if (stopped = !me.running) {
-          clone.stop();
-        } else {
-          // update host and fire its onCycle callback
-          me.onCycle(merge(me, clone));
-        }
-      };
-      clone.onComplete = function(clone) {
-        // if host has stopped or this is the last clone to finish
-        if (stopped || !--times) {
-          if (!stopped && !merge(me, clone).error) {
-            // compute average period and sample standard deviation
-            mean = reduce(clones, cbSum, 0) / clones.length;
-            deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
-
-            if (deviation) {
-              // remove outliers and compute average period on filtered results
-              clones = filter(clones, cbOutlier, 0);
-              mean = me.period = reduce(clones, cbSum, 0) / clones.length;
-            }
-            // compute other host results
-            me.time = mean * me.count;
-            me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
-          }
-          delete me.averaging;
-          me.running = false;
-          me.onCycle(me);
-          me.onComplete(me);
-        }
-        else if (!synchronous) {
-          // run next clone in the sample
-          clone = clones[times];
-          call(clone, function() { clone.run(); });
-        }
-      };
+      clones.push(me.clone({
+        'onStart': onCycle,
+        'onCycle': onCycle,
+        'onComplete': onComplete
+      }));
       // run instantly if sync or init async
       if (synchronous || !i) {
-        clone.run(count, synchronous);
+        clones[clones.length - 1].run(count, synchronous);
       }
     }
   }
 
   /*--------------------------------------------------------------------------*/
 
-  function clone() {
+  function clone(options) {
     var key,
         me = this,
-        result = new me.constructor(me.fn, me.options);
+        result = new me.constructor(me.fn, extend(extend({ }, me.options), options));
 
     // copy manually added properties
     for (key in me) {
@@ -421,7 +423,7 @@
     if (me.running) {
       call(me, _run, synchronous);
     }
-    else if (me.averaging || me.error ||(me.time * me.DEFAULT_AVERAGE) > 1) {
+    else if (me.averaging || me.error || (me.time * me.DEFAULT_AVERAGE) > 1) {
       me.onComplete(me);
     }
     else {
