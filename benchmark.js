@@ -430,7 +430,7 @@
     }
     else {
       // fast tests get their results averaged
-      me.average(me.DEFAULT_AVERAGE, count, synchronous);
+      me.average(null, null, synchronous);
     }
   }
 
