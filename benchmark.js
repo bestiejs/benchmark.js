@@ -44,18 +44,18 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // when uncalibrated it returns true and fires the callback after calibration
+  // fires callback after calibration or returns false
   function calibrate(callback) {
     var cal = Benchmark.CALIBRATION;
     if (!cal.cycles) {
       cal.onComplete = callback;
-      cal.average(30);
+      cal.average();
       return true;
     }
     return false;
   }
 
-  // call a method either sync or async (to allow UI redraws)
+  // call method sync or async (to allow UI redraws)
   function call(me, callback, synchronous) {
     synchronous
       ? callback(me, synchronous)
@@ -72,7 +72,7 @@
     return destination;
   }
 
-  // copies properties from the source to the destination object
+  // copies source properties to destination object
   function extend(destination, source) {
     source || (source = { });
     for (var key in source) {
@@ -105,63 +105,61 @@
     return accumulator;
   }
 
-  // clock the time it takes to execute a test N times (milliseconds)
-  var clock
+  /*--------------------------------------------------------------------------*/
+
+  // clock the time it takes to execute a function N times (milliseconds)
+  var clock;
+
+  // variable names are prefixed with $ to replace during compilation
   (function() {
+
+    function interval($m) {
+      var $i = $m.count, $t = new $c.Interval;
+      $t.start(); while ($i--) { $f() } $t.stop();
+      $m.time = $t.microseconds() / 1000;
+    }
+
+    function now($m) {
+      var $i = $m.count, $f = $m.fn, $t = Date.now();
+      while ($i--){ $f() }
+      $m.time = Date.now() - $t;
+    }
+
+    function time($m) {
+      var $i = $m.count, $f = $m.fn, $t = (new Date).getTime();
+      while ($i--) { $f() }
+      $m.time = (new Date).getTime() - $t;
+    }
+
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
-    var __c = typeof global.chromium != 'undefined' ? chromium :
+    var $c = typeof global.chromium != 'undefined' ? chromium :
       typeof global.chrome != 'undefined' ? chrome : null;
 
-    if (__c && typeof __c.Interval == 'function') {
-      clock = function(__m) {
-        var __i = __m.count,
-            __f = __m.fn,
-            __t = new __c.Interval;
-        __t.start();
-        while (__i--) { __f() }
-        __t.stop();
-        __m.time = __t.microseconds() / 1000;
-      };
-    }
-    else if (typeof Date.now == 'function') {
-      clock = function(__m) {
-        var __i = __m.count,
-            __f = __m.fn,
-            __t = Date.now();
-        while (__i--){ __f() }
-        __m.time = Date.now() - __t;
-      };
-    }
-    else {
-      clock = function(__m) {
-        var __i = __m.count,
-            __f = __m.fn,
-            __t = (new Date).getTime();
-        while (__i--) { __f() }
-        __m.time = (new Date).getTime() - __t;
-      };
-    }
-    // if supported, compile tests to avoid extra function calls
-    try {
-      var __clock = clock,
-          uid     = (new Date).getTime(),
-          fnToken = '__f' + uid + '()',
-          fnArg   = '__m' + uid + ',__c'  + uid,
-          fnBody  = ('('  + String(clock) + ')(__m);return __m').replace(/(__[a-z])/g, '$1' + uid);
+    // choose which timing api to use
+    clock = ($c && typeof $c.Interval == 'function') ? interval :
+      (typeof Date.now == 'function') ? now : time;
 
-      if (Function(fnArg, fnBody)({ }, __c).time === 0) {
+    // if supported, compile tests to avoid extra function calls
+    // TODO: check regexps in Safari 2.0.0
+    try {
+      var $clock  = clock,
+          uid     = (new Date).getTime(),
+          fnToken = '$f' + uid + '()',
+          fnArg   = '$m' + uid + ',$c'  + uid,
+          fnBody  = ('(' + String(clock).replace(/interval|now|time/, '') +
+                    ')($m);return $m').replace(/(\$[a-z])/g, '$1' + uid);
+
+      if (Function(fnArg, fnBody)({ }, $c).time === 0) {
         clock = function(me) {
-          // TODO: Test function body regexp matching in Safari 2.0.0
-          var errored,
-              embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
+          var embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
           try {
-            Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, __c);
+            Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, $c);
           } catch(e) {
-            errored = 1;
+            embed = false;
           }
-          if (errored) {
-            __clock(me);
+          if (embed === false) {
+            $clock(me);
           }
         };
       }
@@ -202,17 +200,15 @@
     };
   }
 
-  function noop() { }
-
   /*--------------------------------------------------------------------------*/
 
   function average(times, count, synchronous) {
     var deviation,
         mean,
         stopped,
+        me = this,
         clones = [],
-        i = times,
-        me = this;
+        i = times || (times = me.DEFAULT_AVERAGE);
 
     function cbSum(sum, clone) {
       return sum + clone.period;
@@ -298,6 +294,10 @@
     }
     result.reset();
     return result;
+  }
+
+  function noop() {
+    // no operation performed
   }
 
   function stop() {
@@ -420,6 +420,7 @@
       me.onCycle(me);
     }
 
+    // figure out what to do next
     if (me.running) {
       call(me, _run, synchronous);
     }
