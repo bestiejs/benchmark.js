@@ -106,14 +106,15 @@
   }
 
   // clock the time it takes to execute a test N times (milliseconds)
-  var clock = (function() {
+  var clock
+  (function() {
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     var __c = typeof global.chromium != 'undefined' ? chromium :
       typeof global.chrome != 'undefined' ? chrome : null;
 
     if (__c && typeof __c.Interval == 'function') {
-      clock = function clock(__m) {
+      clock = function(__m) {
         var __i = __m.count,
             __f = __m.fn,
             __t = new __c.Interval;
@@ -124,7 +125,7 @@
       };
     }
     else if (typeof Date.now == 'function') {
-      clock = function clock(__m) {
+      clock = function(__m) {
         var __i = __m.count,
             __f = __m.fn,
             __t = Date.now();
@@ -133,7 +134,7 @@
       };
     }
     else {
-      clock = function clock(__m) {
+      clock = function(__m) {
         var __i = __m.count,
             __f = __m.fn,
             __t = (new Date).getTime();
@@ -141,29 +142,31 @@
         __m.time = (new Date).getTime() - __t;
       };
     }
-    // if supported, dynamically create tests to avoid extra function calls
+    // if supported, compile tests to avoid extra function calls
     try {
       var __clock = clock,
-          code = String(clock);
-      if (Function('x,__c', code + 'clock(x);return x')({ }, __c).time === 0) {
-        clock = function(__m) {
-          var errored;
+          uid     = (new Date).getTime(),
+          fnToken = '__f' + uid + '()',
+          fnArg   = '__m' + uid + ',__c'  + uid,
+          fnBody  = ('('  + String(clock) + ')(__m);return __m').replace(/(__[a-z])/g, '$1' + uid);
+
+      if (Function(fnArg, fnBody)({ }, __c).time === 0) {
+
+        clock = function(me) {
+          // TODO: Test function body regexp matching in Safari 2.0.0
+          var errored,
+              embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
           try {
-            // embed test body in while loop
-            Function('__m,__c',
-              code.replace('__f()',
-              (String(__m.fn).match(/^[^{]+{([^\x00]*)}\s*$/) || [])[1]) +
-              'clock(__m)')(__m, __c);
+            Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, __c);
           } catch(e) {
             errored = 1;
           }
           if (errored) {
-            __clock(__m);
+            __clock(me);
           }
         };
       }
     } catch(e) { }
-    return clock;
   }());
 
   /*--------------------------------------------------------------------------*/
