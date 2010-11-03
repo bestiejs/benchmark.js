@@ -409,15 +409,17 @@
 
   function post(tests) {
     var idoc,
+        key,
         id = BROWSERSCOPE_ID + '-' + cache.counter++,
-        key = ui._bTestKey,
         body = document.body,
         result = { };
 
     // populate result object (skipping unrun and errored tests)
     forEach(tests, function(test) {
       if (test.cycles) {
-        result[(test.name.match(/[a-z0-9]+/ig) || [test.id]).join(' ')] = test.hz;
+        // duplicate and non alphanumeric test names get their ids appended
+        key = (test.name.match(/[a-z0-9]+/ig) || []).join(' ');
+        result[key && !result[key] ? key : key + test.id ] = test.hz;
       }
     });
 
@@ -434,6 +436,7 @@
 
     // perform inception :3
     ui._bR = result;
+    key = ui._bTestKey;
     idoc = global.frames[id].document;
     idoc.write('<html><body><script>' +
                'with(parent.ui){' +
