@@ -128,6 +128,12 @@
           'while($i--){$f()}' +
           '$m.time=(new Date).getTime()-$t'),
 
+        // create a new function with fn's body embedded into $clock's while-loop
+        embed = function(fn) {
+          var snippet = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
+          return Function(fnArg, fnBody.replace(fnToken, snippet && snippet[1]));
+        },
+
         // enable benchmarking via the --enable-benchmarking flag
         // in at least Chrome 7 to use chrome.Interval
         $c = typeof global.chrome != 'undefined' ? chrome :
@@ -141,22 +147,22 @@
         uid     = +new Date,
         fnToken = '$f' + uid + '()',
         fnArg   = '$m' + uid + ',$c' + uid,
-        fnBody  = ('(' + String($clock).replace('anonymous', '') +
-                  ')($m,$c);return $m').replace(/(\$[a-z])/g, '$1' + uid);
+        fnBody  = ('return(' + String($clock).replace('anonymous', '') +
+                  ')($m,$c)').replace(/(\$[a-z])/g, '$1' + uid);
 
     // if supported, compile tests to avoid extra function calls
     if (function() {
-          try { return Function(fnArg, fnBody)({ }, $c).time; } catch(e) { }
-        }() != null) {
-      // TODO: check regexps in Safari 2.0.0
+          try { return embed(function() { return 1; })({ 'count': 1 }, $c); } catch(e) { }
+        }()) {
+
       clock = function(me) {
-        var embed = String(me.fn).match(/^[^{]+{((?:.|\n)*)}\s*$/) || '';
+        var error;
         try {
-          Function(fnArg, fnBody.replace(fnToken, embed && embed[1]))(me, $c);
+          embed(me.fn)(me, $c);
         } catch(e) {
-          embed = false;
+          error = 1;
         }
-        if (embed === false) {
+        if (error) {
           $clock(me, $c);
         }
       };
@@ -452,7 +458,7 @@
 
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
-    'CYCLE_DELAY': 0.2,
+    'CYCLE_DELAY': 0.01,
 
     // number of runs to average for fast tests
     'DEFAULT_AVERAGE': 30,
@@ -464,7 +470,7 @@
     'MAX_COUNT': 1e6, // 1 million
 
     // minimum time a test should take to get valid results (secs)
-    'MIN_TIME': 1.0,
+    'MIN_TIME': 0.2,
 
     // number of times a test was executed
     'count': null,
