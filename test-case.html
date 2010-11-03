@@ -174,8 +174,10 @@
   &bull; by <a href="http://mathiasbynens.be/" title="Mathias Bynens, front-end web developer">@mathias</a>
 </footer>
 <script>
-  var arr = [1, 5, 4, 2, 3],
-      i = 1;
+  try {
+    var arr = [1, 5, 4, 2, 3],
+        i = 1;
+  } catch(e) { }
 
   ui.addTest("Sort ascending", 1, function() {
     var x = arr;
