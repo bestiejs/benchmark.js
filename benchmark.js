@@ -452,7 +452,7 @@
 
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
-    'CYCLE_DELAY': 0.01,
+    'CYCLE_DELAY': 0.2,
 
     // number of runs to average for fast tests
     'DEFAULT_AVERAGE': 30,
