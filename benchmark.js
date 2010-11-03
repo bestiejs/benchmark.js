@@ -237,7 +237,7 @@
     function onComplete(clone) {
       // if host has stopped or this is the last clone to finish
       if (stopped || !--times) {
-        if (!stopped && !merge(me, clone).error) {
+        if (!stopped && !me.error) {
           // compute average period and sample standard deviation
           mean = reduce(clones, cbSum, 0) / clones.length;
           deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
@@ -245,13 +245,14 @@
           if (deviation) {
             // remove outliers and compute average period on filtered results
             clones = filter(clones, cbOutlier, 0);
-            mean = me.period = reduce(clones, cbSum, 0) / clones.length;
+            mean = reduce(clones, cbSum, 0) / clones.length;
           }
-          // compute other host results
-          me.time = mean * me.count;
+          // set host results
+          me.count = clones[0].count;
           me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+          me.period = mean;
+          me.time = mean * me.count;
         }
-        delete me.averaging;
         me.running = false;
         me.onCycle(me);
         me.onComplete(me);
@@ -264,17 +265,18 @@
     }
 
     me.reset();
-    me.averaging = me.running = true;
+    me.running = true;
     me.onStart(me);
 
     while (i--) {
       // create clone and add to sample
       clones.push(me.clone({
+        'averaging': true,
         'onStart': onCycle,
         'onCycle': onCycle,
         'onComplete': onComplete
       }));
-      // run instantly if sync or init async
+      // run instantly if synchronous or initiate asynchronous averaging
       if (synchronous || !i) {
         clones[clones.length - 1].run(count, synchronous);
       }
