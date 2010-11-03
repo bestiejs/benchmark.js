@@ -449,7 +449,7 @@
     }
     else {
       // fast tests get their results averaged
-      me.average(null, null, synchronous);
+      me.average(Math.max(me.DEFAULT_AVERAGE, Math.floor(1 / me.time)), null, synchronous);
     }
   }
 
@@ -466,8 +466,8 @@
     // delay between test cycles (secs)
     'CYCLE_DELAY': 0.01,
 
-    // number of runs to average for fast tests
-    'DEFAULT_AVERAGE': 30,
+    // number of runs to average
+    'DEFAULT_AVERAGE': 10,
 
     // initial number of iterations
     'INIT_COUNT': 10,
