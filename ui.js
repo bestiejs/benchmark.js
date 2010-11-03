@@ -444,11 +444,9 @@
                '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
                '_bT=function(){parent.setTimeout(browserscope.refresh,_bD);trash(frameElement)},' +
                '_bK=setTimeout(_bT,_bD),' +
-               '_bP=setInterval(function(){' +
-               'if(frames[0]){clearInterval(_bP);clearTimeout(_bK);setTimeout(_bT,_bD)}' +
-               '},10)' +
+               '_bP=function(){clearTimeout(_bK);setTimeout(_bT,_bD)}' +
                '}<\/script>' +
-               (key ? '<script src=//www.browserscope.org/user/beacon/' + key + '><\/script>' : '') +
+               (key ? '<script src=//www.browserscope.org/user/beacon/' + key + '?callback=_bP><\/script>' : '') +
                '<\/body><\/html>');
     idoc.close();
     delete ui._bR;
