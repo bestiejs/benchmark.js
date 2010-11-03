@@ -177,7 +177,7 @@
   /*--------------------------------------------------------------------------*/
 
   function getPlatform() {
-    var result,
+    var build,
         description = [],
         ua = navigator.userAgent,
         os = (ua.match(/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
@@ -194,14 +194,20 @@
       os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
       os = 'iOS' + (os ? ' ' + os : '');
     }
-    if (name && !version) {
+    // detect non Opera versions
+    if (!version) {
       version = typeof document.documentMode == 'number'
         ? document.documentMode
         : (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
     }
+    // detect early Safari versions
+    if (parseInt(version) > 45) {
+      build = (ua.match(/AppleWebKit\/(\d+)/) || [])[1] || Infinity;
+      version = build < 400 ? '1.x' : build < 500 ? '2.x' : version;
+    }
     return {
       'name':        name ? description.push(name) && name : null,
-      'version':     version ? description.push(version) && version : null,
+      'version':     name && version ? description.push(version) && version : null,
       'os':          os ? description.push('on ' + (os = os.replace(/_/g, '.'))) && os : null,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString':    function() { return this.description; }
