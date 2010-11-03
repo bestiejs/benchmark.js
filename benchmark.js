@@ -406,11 +406,8 @@
             count = Math.floor(maxCount / divisor);
           }
           else {
-            count += period
-              // calculate how many more iterations it will take to achive the min testing time
-              ? Math.ceil((minTime - time) / period)
-              // when period is 0, make up a number greater than MAX_COUNT to trigger the kill switch
-              : maxCount + Math.floor(Math.random() * 999 + 1);
+            // calculate how many more iterations it will take to achive the min testing time
+            count += Math.ceil((minTime - time) / period)
 
             // to avoid freezing the browser stop running if the
             // next cycle would exceed the max count allowed
@@ -418,8 +415,11 @@
               me.running = false;
             }
           }
+          // update count for next cycle
+          if (me.running) {
+            me.count = count;
+          }
         }
-        me.count = count;
       }
       catch(e) {
         me.reset();
@@ -464,7 +464,7 @@
     'MAX_COUNT': 1e6, // 1 million
 
     // minimum time a test should take to get valid results (secs)
-    'MIN_TIME': 0.2,
+    'MIN_TIME': 1.0,
 
     // number of times a test was executed
     'count': null,

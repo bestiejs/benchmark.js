@@ -368,7 +368,7 @@
         first = result[0];
         last  = result[result.length - 1];
 
-        // print results
+        // print contextual information
         forEach(result, function(test) {
           var percent,
               text,
