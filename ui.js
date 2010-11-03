@@ -223,7 +223,7 @@
   }
 
   function onStart(test) {
-    isFinite(test.count) && logStatus(test.name + ' &times; ' + formatNumber(test.count));
+    test.count && logStatus(test.name + ' &times; ' + formatNumber(test.count));
   }
 
   /*--------------------------------------------------------------------------*/
@@ -294,7 +294,7 @@
     setHTML('run', RUN_TEXT.RUNNING);
     Benchmark.CALIBRATION.reset();
 
-    forEach(e.shiftKey ? me.tests.reverse() : me.tests, function(test) {
+    forEach(e.shiftKey ? me.tests.slice(0).reverse() : me.tests, function(test) {
       me.runTest(test);
     });
   }
