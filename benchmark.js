@@ -244,7 +244,7 @@
 
           if (deviation) {
             // remove outliers and compute average period on filtered results
-            clones = filter(clones, cbOutlier, 0);
+            clones = filter(clones, cbOutlier);
             mean = reduce(clones, cbSum, 0) / clones.length;
           }
           // set host results
