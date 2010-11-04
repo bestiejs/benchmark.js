@@ -108,70 +108,65 @@
   /*--------------------------------------------------------------------------*/
 
   // clock the time it takes to execute a function N times (milliseconds)
-  var clock;
+  var clock = (function() {
+    var fallback,
+        supported,
+        uid = +new Date,
+        args = 'm' + uid + ',c' + uid,
+        code = 'var r$,i$=m$.count,f$=m$.fn,#{0};while(i$--){f$()}#{1};m$.time=r$;return"$"',
+        co = typeof global.chrome != 'undefined' ? chrome : typeof global.chromium != 'undefined' ? chromium : { };
 
-  // variable names are prefixed with $ to replace during compilation
-  (function() {
-
-    var interval = Function('$m,$c',
-          'var $i=$m.count,$f=$m.fn,$t=new $c.Interval;' +
-          '$t.start();while($i--){$f()}$t.stop();' +
-          '$m.time=$t.microseconds()/1e3'),
-
-        now = Function('$m',
-          'var $i=$m.count,$f=$m.fn,$t=Date.now();' +
-          'while($i--){$f()}' +
-          '$m.time=Date.now()-$t'),
-
-        time = Function('$m',
-          'var $i=$m.count,$f=$m.fn,$t=(new Date).getTime();' +
-          'while($i--){$f()}' +
-          '$m.time=(new Date).getTime()-$t'),
-
-        // create a new function with fn's body embedded into $clock's while-loop
-        embed = function(fn) {
-          var snippet = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
-          return Function(fnArg, fnBody.replace(fnToken, snippet && snippet[1]));
-        },
-
-        // enable benchmarking via the --enable-benchmarking flag
-        // in at least Chrome 7 to use chrome.Interval
-        $c = typeof global.chrome != 'undefined' ? chrome :
-          typeof global.chromium != 'undefined' ? chromium : null,
-
-        // choose which timing api to use
-        $clock = ($c && typeof $c.Interval == 'function') ? interval :
-          (typeof Date.now == 'function') ? now : time,
-
-        // used for method compilation
-        uid     = +new Date,
-        fnToken = '$f' + uid + '()',
-        fnArg   = '$m' + uid + ',$c' + uid,
-        fnBody  = ('return(' + String($clock).replace('anonymous', '') +
-                  ')($m,$c)').replace(/(\$[a-z])/g, '$1' + uid);
-
-    // if supported, compile tests to avoid extra function calls
-    if (function() {
-          try { return embed(function() { return 1; })({ 'count': 1 }, $c); } catch(e) { }
-        }()) {
-
-      clock = function(me) {
-        var error;
+    function clock(me) {
+      var errored,
+          result;
+      if (supported) {
         try {
-          embed(me.fn)(me, $c);
+          result = embed(me.fn)(me, co);
         } catch(e) {
-          error = 1;
+          errored = 1;
         }
-        if (error) {
-          $clock(me, $c);
+        // did test exit early?
+        if (result != uid) {
+          errored = 1;
         }
-      };
+      }
+      if (errored || !supported) {
+        fallback(me, co);
+      }
+    }
+
+    function embed(fn) {
+      var body = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
+      return Function(args, code.replace('f' + uid + '()', body && body[1]));
+    }
+
+    // enable benchmarking via the --enable-benchmarking flag
+    // in at least Chrome 7 to use chrome.Interval
+    if (typeof co.Interval == 'function') {
+      code = code.replace('#{0}', 't$=new c$.Interval;t$.start()')
+        .replace('#{1}', 't$.stop();r$=t$.microseconds()/1e3');
+    }
+    else if (typeof Date.now == 'function') {
+      code = code.replace('#{0}', 't$=Date.now()')
+        .replace('#{1}', 'r$=Date.now()-t$');
     }
     else {
-      clock = function(me) {
-        $clock(me, $c);
-      };
+      code = code.replace('#{0}', 't$=(new Date).getTime()')
+        .replace('#{1}', 'r$=(new Date).getTime()-t$');
     }
+
+    // inject uid into variable names to avoid collisions with embedded tests
+    code = code.replace(/\$/g, uid);
+
+    // non embeding fallback
+    fallback = Function(args, code);
+
+    // is embedding supported?
+    try {
+      supported = embed(function() { return 1; })({ 'count': 1 }, co);
+    } catch(e) { }
+
+    return clock;
   }());
 
   /*--------------------------------------------------------------------------*/
