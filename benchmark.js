@@ -451,7 +451,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // test to establish iteration loop overhead
+  // benchmark to establish iteration overhead
   Benchmark.CALIBRATION = new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 });
 
   Benchmark.getPlatform = getPlatform;
@@ -462,16 +462,16 @@
     // delay between test cycles (secs)
     'CYCLE_DELAY': 0.01,
 
-    // number of runs to average
+    // default sample of runs averaged
     'INIT_AVERAGE_COUNT': 20,
 
-    // initial number of iterations
+    // default number of runs
     'INIT_RUN_COUNT': 10,
 
-    // max iterations allowed per cycle (used avoid locking up the browser)
+    // max runs allowed per cycle (used to avoid freezing the browser)
     'MAX_RUN_COUNT': 1e6, // 1 million
 
-    // minimum time a test should take to get valid results (secs)
+    // minimum time a test should take to get results (secs)
     'MIN_TIME': 0.2,
 
     // number of times a test was executed
@@ -483,16 +483,16 @@
     // an error object if the test failed
     'error': null,
 
-    // number of test executions per second
+    // number of runs per second
     'hz': null,
 
-    // time a test takes to do one execution (secs)
+    // time a test takes to run once (secs)
     'period': null,
 
     // flag to indicate if the test is running
     'running': false,
 
-    // time a test takes to do the `count` number of executions (secs)
+    // time a test takes to do the `count` number of runs (secs)
     'time': null,
 
     // callback invoked when testing is complete
@@ -510,19 +510,19 @@
     // callback invoked when testing is stopped
     'onStop': noop,
 
-    // runs the test `n` times and returns the averaged test results
+    // runs the test `n` times and computes the averaged test results
     'average': average,
 
     // create new benchmark with the same test function and options
     'clone': clone,
 
-    // reset test state
+    // reset state properties
     'reset': reset,
 
-    // run the test
+    // run the benchmark
     'run': run,
 
-    // stop testing (does not record times)
+    // stops benchmark (does not record times)
     'stop': stop
   });
 
