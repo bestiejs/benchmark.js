@@ -8,7 +8,7 @@
 
 (function(global) {
 
-  // MAX_COUNT divisors used to avoid hz of Infinity
+  // MAX_RUN_COUNT divisors used to avoid hz of Infinity
   var CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
 
   /*--------------------------------------------------------------------------*/
@@ -34,7 +34,7 @@
       var me = this;
       me.reset();
       me.running = true;
-      me.count = count || me.INIT_COUNT;
+      me.count = count || me.INIT_RUN_COUNT;
       me.onStart(me);
       _run(me, synchronous);
     }
@@ -211,13 +211,13 @@
 
   /*--------------------------------------------------------------------------*/
 
-  function average(times, count, synchronous) {
+  function average(count, runCount, synchronous) {
     var deviation,
         mean,
         stopped,
         me = this,
         clones = [],
-        i = times || (times = me.DEFAULT_AVERAGE);
+        i = count || (count = me.INIT_AVERAGE_COUNT);
 
     function cbSum(sum, clone) {
       return sum + clone.period;
@@ -243,7 +243,7 @@
 
     function onComplete(clone) {
       // if host has stopped or this is the last clone to finish
-      if (stopped || !--times) {
+      if (stopped || !--count) {
         if (!stopped && !me.error) {
           // compute average period and sample standard deviation
           mean = reduce(clones, cbSum, 0) / clones.length;
@@ -266,7 +266,7 @@
       }
       else if (!synchronous) {
         // run next clone in the sample
-        clone = clones[times];
+        clone = clones[count];
         call(clone, function() { clone.run(); });
       }
     }
@@ -285,7 +285,7 @@
       }));
       // run instantly if synchronous or initiate asynchronous averaging
       if (synchronous || !i) {
-        clones[clones.length - 1].run(count, synchronous);
+        clones[clones.length - 1].run(runCount, synchronous);
       }
     }
   }
@@ -359,7 +359,7 @@
           }
           call(me, rerun, synchronous);
         })) {
-      me.count = count || me.INIT_COUNT;
+      me.count = count || me.INIT_RUN_COUNT;
       me.onStart(me);
       _run(me, synchronous);
     }
@@ -372,7 +372,8 @@
         cal = me.constructor.CALIBRATION,
         count = me.count,
         cycles = me.cycles,
-        maxCount = me.MAX_COUNT,
+        avgCount = me.INIT_AVERAGE_COUNT,
+        maxCount = me.MAX_RUN_COUNT,
         minTime = me.MIN_TIME;
 
     // continue, if not stopped between cycles
@@ -406,10 +407,10 @@
 
         // if so, compute the iteration count needed
         if (me.running) {
-          // tests may return an initial time of 0 when INIT_COUNT is a small number,
+          // tests may return a time of 0 when INIT_RUN_COUNT is a small number,
           // to avoid that we set its count to something a bit higher
           if (!time && (divisor = CYCLE_DIVISORS[cycles])) {
-            // try a fraction of the MAX_COUNT
+            // try a fraction of the MAX_RUN_COUNT
             count = Math.floor(maxCount / divisor);
           }
           else {
@@ -439,19 +440,19 @@
     if (me.running) {
       call(me, _run, synchronous);
     }
-    else if (me.averaging || me.error || (me.time * me.DEFAULT_AVERAGE) > 1) {
+    else if (me.averaging || me.error || (me.time * avgCount) > 1) {
       me.onComplete(me);
     }
     else {
       // fast tests get their results averaged
-      me.average(Math.max(me.DEFAULT_AVERAGE, Math.floor(1 / me.time)), null, synchronous);
+      me.average(Math.max(avgCount, Math.floor(1 / me.time)), null, synchronous);
     }
   }
 
   /*--------------------------------------------------------------------------*/
 
   // test to establish iteration loop overhead
-  Benchmark.CALIBRATION = new Calibration(noop, { 'INIT_COUNT': 3e3 });
+  Benchmark.CALIBRATION = new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 });
 
   Benchmark.getPlatform = getPlatform;
 
@@ -462,13 +463,13 @@
     'CYCLE_DELAY': 0.01,
 
     // number of runs to average
-    'DEFAULT_AVERAGE': 10,
+    'INIT_AVERAGE_COUNT': 20,
 
     // initial number of iterations
-    'INIT_COUNT': 10,
+    'INIT_RUN_COUNT': 10,
 
     // max iterations allowed per cycle (used avoid locking up the browser)
-    'MAX_COUNT': 1e6, // 1 million
+    'MAX_RUN_COUNT': 1e6, // 1 million
 
     // minimum time a test should take to get valid results (secs)
     'MIN_TIME': 0.2,
