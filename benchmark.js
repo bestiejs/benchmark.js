@@ -8,71 +8,164 @@
 
 (function(global) {
 
-  // MAX_RUN_COUNT divisors used to avoid hz of Infinity
+  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity  */ 
   var CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
 
   /*--------------------------------------------------------------------------*/
 
+ /**
+  * Base benchmark class.
+  * @constructor
+  * @param {Function} fn Test to benchmark.
+  * @param {Object} [options={ }] Options object.
+  */
   function Benchmark(fn, options) {
     options = extend({ }, options);
     extend(this, options);
     this.fn = fn;
+    this.times = { };
     this.options = options;
   }
 
+ /**
+  * Subclass of Benchmark used specifically for calibration.
+  * @private
+  * @constructor
+  * @base Benchmark
+  * @param {Function} fn Test to benchmark.
+  * @param {Object} [options={ }] Options object.
+  */
   function Calibration(fn, options) {
     Benchmark.call(this, fn, options);
   }
 
-  function Klass() { }
+  (function() {
 
-  Klass.prototype = Benchmark.prototype;
-
-  (function(proto) {
-    // bypass calibrating the Calibration tests
+   /**
+    * Runs the calibration benchmark and avoids calibrating itself.
+    * @member Calibration
+    * @param {Number} [count=INIT_RUN_COUNT] Intial iterations to clock.
+    * @param {Boolean} [synchronous=false] Flag to run synchronously.
+    */
     function run(count, synchronous) {
       var me = this;
       me.reset();
       me.running = true;
       me.count = count || me.INIT_RUN_COUNT;
+      me.times.start = +new Date;
       me.onStart(me);
       _run(me, synchronous);
     }
-    proto.constructor = Calibration;
-    proto.run = run;
-  }(Calibration.prototype = new Klass));
+
+    function Klass() { }
+    Klass.prototype = Benchmark.prototype;
+    extend(Calibration.prototype = new Klass, {
+      'constructor': Calibration,
+      'run': run
+    });
+  }());
 
   /*--------------------------------------------------------------------------*/
 
-  // fires callback after calibration or returns false
-  function calibrate(callback) {
-    var cal = Benchmark.CALIBRATION;
-    if (!cal.cycles) {
-      cal.onComplete = callback;
-      cal.average();
-      return true;
+ /**
+  * Checks if calibration is needed and, if so, fires the callback after
+  * calibration.
+  * @private
+  * @param {Function} callcack Function executed after calibration.
+  * @returns {Boolean} Returns true if calibration is needed else false.
+  */
+  function calibrate(callback, synchronous) {
+    var result,
+        cals = Benchmark.CALIBRATIONS,
+        last = cals.length - 1;
+
+    function onInvoke(cal) {
+      cal.average(null, null, synchronous);
     }
-    return false;
+
+    function onComplete(cal, index) {
+      if (index == last) {
+        callback();
+      }
+    }
+
+    if (result = !!filter(cals, function(cal) { return !cal.cycles; }).length) {
+      eachTest(cals, {
+        'onInvoke': onInvoke,
+        'onComplete': onComplete,
+        'synchronous': synchronous
+      });
+    }
+    return result;
   }
 
-  // call method sync or async (to allow UI redraws)
-  function call(me, callback, synchronous) {
+ /**
+  * Executes a function asynchronously, to allow UI redraws, or synchronously.
+  * @private
+  * @param {Object} me Benchmark/Calibration instance.
+  * @param {Function} fn Function to be executed.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
+  */
+  function call(me, fn, synchronous) {
     synchronous
-      ? callback(me, synchronous)
-      : setTimeout(function() { callback(me); }, me.CYCLE_DELAY * 1e3);
+      ? fn(me, synchronous)
+      : setTimeout(function() { fn(me); }, me.CYCLE_DELAY * 1e3);
   }
 
-  // merge source results with destinations
-  function merge(destination, source) {
-    destination.count = source.count;
-    destination.cycles += source.cycles;
-    destination.error = source.error;
-    destination.hz = source.hz;
-    destination.period = source.period;
-    return destination;
+ /**
+  * Similar to each(), it iterates over a collection of benchmarks executing a
+  * callback against each.
+  * @private
+  * @param {Array} array The array to iterate over.
+  * @param {Object} options An object containing the synchronous flag and
+  * event handlers used during iteration.
+  */
+  function eachTest(tests, options) {
+    var i = 0,
+        backups = [],
+        length = tests.length;
+
+    function onInvoke(me) {
+      var key,
+          backup = { };
+      for (key in options) {
+        if (/^on[A-Z]/.test(key)) {
+          backup[key] = me[key];
+          me[key] = options[key];
+        }
+      }
+      backups.push(backup);
+      me.onComplete = onComplete;
+      me.onInvoke(me);
+    }
+
+    function onComplete(me) {
+      var key,
+          backup = backups[i];
+      for (key in backup) {
+        me[key] = backup[key];
+      }
+      if (options.onComplete.call(me, me, i, tests) !== false && !me.aborted && ++i < length) {
+        call(tests[i], onInvoke, options.synchronous);
+      }
+    }
+
+    options = extend({
+      'onInvoke': noop,
+      'onCycle': noop,
+      'onComplete': noop
+    }, options);
+
+    tests[0] && onInvoke(tests[0]);
   }
 
-  // copies source properties to destination object
+ /**
+  * Copies source properties to the destination object.
+  * @private
+  * @param {Object} destination The destination object.
+  * @param {Object} source The source object.
+  * @returns {Object} The destination object.
+  */
   function extend(destination, source) {
     source || (source = { });
     for (var key in source) {
@@ -81,7 +174,13 @@
     return destination;
   }
 
-  // generic Array#filter
+  /**
+  * A generic Array#filter solution.
+  * @private
+  * @param {Array} array The array to iterate over.
+  * @param {Function} callback The function called per iteration.
+  * @returns {Array} A new array of values that passed the filter.
+  */
   function filter(array, callback) {
     var length = array.length,
         result = [];
@@ -94,7 +193,30 @@
     return result;
   }
 
-  // generic Array#reduce
+ /**
+  * Merges the source benchmark results with the destination's results.
+  * @private
+  * @param {Object} destination The destination object.
+  * @param {Object} source The source object.
+  * @returns {Object} The destination object.
+  */
+  function merge(destination, source) {
+    destination.count = source.count;
+    destination.cycles += source.cycles;
+    destination.error = source.error;
+    destination.hz = source.hz;
+    extend(destination.times, source.times);
+    return destination;
+  }
+
+  /**
+  * A generic Array#reduce solution.
+  * @private
+  * @param {Array} array The array to iterate over.
+  * @param {Function} callback The function called per iteration.
+  * @param {Mixed} accumulator Initial value of the accumulator.
+  * @returns {Mixed} The accumulator.
+  */
   function reduce(array, callback, accumulator) {
     var length = array.length;
     while (length--) {
@@ -105,20 +227,31 @@
     return accumulator;
   }
 
-  /*--------------------------------------------------------------------------*/
-
-  // clock the time it takes to execute a function N times (milliseconds)
+ /**
+  * Clock the time it takes to execute a benchmark.count times (seconds).
+  * @private
+  * @param {Object} me Benchmark/Calibration instance.
+  * @returns {Number} The cycle time of the instance.
+  */
   var clock = (function() {
     var fallback,
         supported,
         uid = +new Date,
         args = 'm' + uid + ',c' + uid,
-        code = 'var r$,i$=m$.count,f$=m$.fn,#{0};while(i$--){f$()}#{1};m$.time=r$;return"$"',
+        code = 'var r$,i$=m$.count,f$=m$.fn,t$=#{0};while(i$--){f$()}#{1};m$.times.cycle=r$;return"$"',
         co = typeof global.chrome != 'undefined' ? chrome : typeof global.chromium != 'undefined' ? chromium : { };
+
+    function embed(fn) {
+      var body = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
+      return Function(args, code.replace('f' + uid + '()', body && body[1]));
+    }
 
     function clock(me) {
       var errored,
-          result;
+          result,
+          times = me.times,
+          cals = me.constructor.CALIBRATIONS || [];
+
       if (supported) {
         try {
           result = embed(me.fn)(me, co);
@@ -131,34 +264,39 @@
         }
       }
       if (errored || !supported) {
+        cals = cals[1];
         fallback(me, co);
+      } else {
+        cals = cals[0];
       }
-    }
-
-    function embed(fn) {
-      var body = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
-      return Function(args, code.replace('f' + uid + '()', body && body[1]));
+      return (times.cycle =
+        // ensure positive numbers
+        Math.max(0,
+        // convert time from milliseconds to seconds
+        (times.cycle / 1e3) -
+        // calibrate by subtracting the base loop time
+        (cals && cals.times.period || 0) * me.count));
     }
 
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     if (typeof co.Interval == 'function') {
-      code = code.replace('#{0}', 't$=new c$.Interval;t$.start()')
+      code = code.replace('#{0}', 'new c$.Interval;t$.start()')
         .replace('#{1}', 't$.stop();r$=t$.microseconds()/1e3');
     }
     else if (typeof Date.now == 'function') {
-      code = code.replace('#{0}', 't$=Date.now()')
+      code = code.replace('#{0}', 'Date.now()')
         .replace('#{1}', 'r$=Date.now()-t$');
     }
     else {
-      code = code.replace('#{0}', 't$=(new Date).getTime()')
+      code = code.replace('#{0}', '(new Date).getTime()')
         .replace('#{1}', 'r$=(new Date).getTime()-t$');
     }
 
     // inject uid into variable names to avoid collisions with embedded tests
     code = code.replace(/\$/g, uid);
 
-    // non embeding fallback
+    // non embedding fallback
     fallback = Function(args, code);
 
     // is embedding supported?
@@ -171,6 +309,41 @@
 
   /*--------------------------------------------------------------------------*/
 
+ /**
+  * A generic no operation function.
+  * @static
+  * @member Benchmark
+  */
+  function noop() {
+    // no operation performed
+  }
+
+ /**
+  * A generic Array#forEach solution that allows loop breaking if callbacks
+  * explicitly return false.
+  * @static
+  * @member Benchmark
+  * @param {Array} array The array to iterate over.
+  * @param {Function} callback The function called per iteration.
+  */
+  function each(array, callback) {
+    var i = -1,
+        length = array.length;
+
+    while (++i < length) {
+      if (i in array && callback(array[i], i, array) === false) {
+        break;
+      }
+    }
+  }
+
+ /**
+  * Retrieves the platform information of the current environment.
+  * @static
+  * @member Benchmark
+  * @returns {Object} Object containing the browser name, browser version, and
+  * operating system.
+  */
   function getPlatform() {
     var build,
         description = [],
@@ -184,8 +357,11 @@
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
     mses = os && os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
     if (mses) {
+      // resolve Windows name
       os = 'Windows ' + mses;
-    } else if (/iP[ao]d|iPhone/.test(os)) {
+    }
+    else if (/iP[ao]d|iPhone/.test(os)) {
+      // resolve iOS version
       os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
       os = 'iOS' + (os ? ' ' + os : '');
     }
@@ -211,40 +387,72 @@
 
   /*--------------------------------------------------------------------------*/
 
+ /**
+  * Abort benchmark without recording times.
+  * @member Benchmark
+  */
+  function abort() {
+    var me = this,
+        error = me.error;
+
+    if (me.running) {
+      if (me.constructor != Calibration) {
+        each(Benchmark.CALIBRATIONS, function(cal) {
+          cal.abort();
+        });
+      }
+      me.running = NaN;
+      me.reset();
+
+      me.error = error;
+      me.aborted = true;
+      me.onStop(me);
+    }
+  }
+
+ /**
+  * Computes benchmark results based on averaging a sample of runs.
+  * @member Benchmark
+  * @param {Number} [count=INIT_AVERAGE_COUNT] Number of runs to average.
+  * @param {Number} [runCount=INIT_RUN_COUNT] Initial iteration count per benchmark.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
+  */
   function average(count, runCount, synchronous) {
     var deviation,
         mean,
-        stopped,
         me = this,
         clones = [],
-        i = count || (count = me.INIT_AVERAGE_COUNT);
+        last = (count || (count = me.INIT_AVERAGE_COUNT)) - 1;
 
     function cbSum(sum, clone) {
-      return sum + clone.period;
+      return sum + clone.times.period;
     }
 
     function cbVariance(sum, clone) {
-      return sum + Math.pow(clone.period - mean, 2);
+      return sum + Math.pow(clone.times.period - mean, 2);
     }
 
     function cbOutlier(clone) {
-      return clone.period < (mean + deviation) && clone.period > (mean - deviation);
+      var period = clone.times.period;
+      return period < (mean + deviation) && period > (mean - deviation);
+    }
+
+    function onInvoke(clone) {
+      clone.run(runCount, synchronous);
     }
 
     function onCycle(clone) {
-      // stop clone and raise flag if host has stopped running
-      if (stopped = !me.running) {
-        clone.stop();
+      if (me.aborted) {
+        clone.abort();
       } else {
-        // update host and fire its onCycle callback
         me.onCycle(merge(me, clone));
       }
     }
 
-    function onComplete(clone) {
-      // if host has stopped or this is the last clone to finish
-      if (stopped || !--count) {
-        if (!stopped && !me.error) {
+    function onComplete(clone, index) {
+      var times = me.times;
+      if (clone.aborted || index == last) {
+        if (!clone.aborted && !clone.error) {
           // compute average period and sample standard deviation
           mean = reduce(clones, cbSum, 0) / clones.length;
           deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
@@ -257,17 +465,12 @@
           // set host results
           me.count = clones[0].count;
           me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
-          me.period = mean;
-          me.time = mean * me.count;
+          times.period = mean;
+          times.cycle = mean * me.count;
         }
         me.running = false;
         me.onCycle(me);
         me.onComplete(me);
-      }
-      else if (!synchronous) {
-        // run next clone in the sample
-        clone = clones[count];
-        call(clone, function() { clone.run(); });
       }
     }
 
@@ -275,23 +478,24 @@
     me.running = true;
     me.onStart(me);
 
-    while (i--) {
-      // create clone and add to sample
-      clones.push(me.clone({
-        'averaging': true,
-        'onStart': onCycle,
-        'onCycle': onCycle,
-        'onComplete': onComplete
-      }));
-      // run instantly if synchronous or initiate asynchronous averaging
-      if (synchronous || !i) {
-        clones[clones.length - 1].run(runCount, synchronous);
-      }
+    while (count--) {
+      clones.push(me.clone({ 'averaging': true }));
     }
+    eachTest(clones, {
+      'onInvoke': onInvoke,
+      'onStart': onCycle,
+      'onCycle': onCycle,
+      'onComplete': onComplete,
+      'synchronous': synchronous
+    });
   }
 
-  /*--------------------------------------------------------------------------*/
-
+ /**
+  * Retrieves the platform information of the current environment.
+  * @member Benchmark
+  * @param {Object} options Customize clone with its own options.
+  * @returns {Object} Cloned instance.
+  */
   function clone(options) {
     var key,
         me = this,
@@ -307,39 +511,37 @@
     return result;
   }
 
-  function noop() {
-    // no operation performed
-  }
-
-  function stop() {
-    var me = this,
-        cal = Benchmark.CALIBRATION,
-        error = me.error;
+  function reset() {
+    var changed,
+        keys = 'count cycles error hz running aborted'.split(' '),
+        me = this,
+        proto = me.constructor.prototype;
 
     if (me.running) {
-      if (me != cal && cal.running) {
-        cal.stop();
+      // no worries, reset() is called within abort()
+      me.abort();
+    }
+    else {
+      delete me.times;
+      each(keys, function(key) {
+        if (me[key] != proto[key]) {
+          changed = true;
+          me[key] = proto[key];
+        }
+      });
+      me.times = { };
+      if (changed) {
+        me.onReset(me);
       }
-      me.reset();
-      me.error = error;
-      me.onStop(me);
     }
   }
 
-  function reset() {
-    var me = this,
-        proto = this.constructor.prototype;
-
-    me.count = proto.count;
-    me.cycles = proto.cycles;
-    me.error = proto.error;
-    me.hz = proto.hz;
-    me.period = proto.period;
-    me.running = proto.running;
-    me.time = proto.time;
-    me.onReset(me);
-  }
-
+ /**
+  * Start running a benchmark.
+  * @member Benchmark
+  * @param {Number} [count=INIT_RUN_COUNT] Intial iterations to clock.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
+  */
   function run(count, synchronous) {
     var me = this;
     me.reset();
@@ -348,7 +550,7 @@
     // ensure calibration test has run
     if (!calibrate(function() {
           function rerun() {
-            // continue, if not stopped during calibration
+            // continue, if not aborted during calibration
             if (me.running) {
               me.run(count, synchronous);
             } else {
@@ -358,25 +560,33 @@
             }
           }
           call(me, rerun, synchronous);
-        })) {
+        }, synchronous)) {
       me.count = count || me.INIT_RUN_COUNT;
+      me.times.start = +new Date;
       me.onStart(me);
       _run(me, synchronous);
     }
   }
 
+ /**
+  * Performs the run cycles initiated by run().
+  * @private
+  * @param {Object} me Benchmark/Calibration instance.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
+  */
   function _run(me, synchronous) {
-    var divisor,
+    var clocked,
+        divisor,
         period,
-        time,
-        cal = me.constructor.CALIBRATION,
+        avgInit = me.INIT_AVERAGE_COUNT,
         count = me.count,
         cycles = me.cycles,
-        avgCount = me.INIT_AVERAGE_COUNT,
+        delay = me.CYCLE_DELAY,
         maxCount = me.MAX_RUN_COUNT,
-        minTime = me.MIN_TIME;
+        minTime = me.MIN_TIME,
+        times = me.times;
 
-    // continue, if not stopped between cycles
+    // continue, if not aborted between cycles
     if (me.running) {
 
       if (cycles) {
@@ -386,36 +596,28 @@
       }
       try {
         // clock executions of me.fn
-        clock(me);
+        clocked = clock(me);
 
-        time = me.time =
-          // ensure positive numbers
-          Math.max(0,
-          // convert time from milliseconds to seconds
-          (me.time / 1e3) -
-          // calibrate by subtracting the base loop time
-          (cal && cal.period || 0) * count);
-
-        // per-operation time
-        period = me.period = time / count;
+        // seconds per operation
+        period = times.period = clocked / count;
 
         // ops per second
         me.hz = period ? Math.round(1 / period) : Number.MAX_VALUE;
 
         // do we need to do another cycle?
-        me.running = time < minTime;
+        me.running = clocked < minTime;
 
         // if so, compute the iteration count needed
         if (me.running) {
-          // tests may return a time of 0 when INIT_RUN_COUNT is a small number,
+          // tests may clock at 0 when INIT_RUN_COUNT is a small number,
           // to avoid that we set its count to something a bit higher
-          if (!time && (divisor = CYCLE_DIVISORS[cycles])) {
+          if (!clocked && (divisor = CYCLE_DIVISORS[cycles])) {
             // try a fraction of the MAX_RUN_COUNT
             count = Math.floor(maxCount / divisor);
           }
           else {
-            // calculate how many more iterations it will take to achive the min testing time
-            count += Math.ceil((minTime - time) / period)
+            // calculate how many more iterations it will take to achive the MIN_TIME
+            count += Math.ceil((minTime - clocked) / period)
 
             // to avoid freezing the browser stop running if the
             // next cycle would exceed the max count allowed
@@ -440,30 +642,39 @@
     if (me.running) {
       call(me, _run, synchronous);
     }
-    else if (me.averaging || me.error || (me.time * avgCount) > 1) {
-      me.onComplete(me);
-    }
     else {
-      // fast tests get their results averaged
-      me.average(Math.max(avgCount, Math.floor(1 / me.time)), null, synchronous);
+      times.stop = +new Date;
+      times.elapsed = (times.stop - times.start) / 1e3;
+
+      if (me.averaging || me.aborted || me.error || (times.elapsed * avgInit)  > 1) {
+        me.onComplete(me);
+      }
+      else {
+        // fast tests get their results averaged
+        me.average(Math.max(avgInit, Math.floor(1 / times.elapsed)), null, synchronous);
+      }
     }
   }
 
   /*--------------------------------------------------------------------------*/
 
-  // benchmark to establish iteration overhead
-  Benchmark.CALIBRATION = new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 });
-
-  Benchmark.getPlatform = getPlatform;
-
-  Benchmark.noop = noop;
+  extend(Benchmark, {
+    // benchmarks to establish iteration overhead
+    'CALIBRATIONS': [
+      new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 }),
+      new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 })
+    ],
+    'each': each,
+    'getPlatform': getPlatform,
+    'noop': noop
+  });
 
   extend(Benchmark.prototype, {
     // delay between test cycles (secs)
     'CYCLE_DELAY': 0.01,
 
     // default sample of runs averaged
-    'INIT_AVERAGE_COUNT': 20,
+    'INIT_AVERAGE_COUNT': 3,
 
     // default number of runs
     'INIT_RUN_COUNT': 10,
@@ -486,14 +697,14 @@
     // number of runs per second
     'hz': null,
 
-    // time a test takes to run once (secs)
-    'period': null,
-
     // flag to indicate if the test is running
     'running': false,
 
-    // time a test takes to do the `count` number of runs (secs)
-    'time': null,
+    // flag to indicate if the test is aborted
+    'aborted': false,
+
+    // object of timing data including cycle, elapsed, period, start, and stop (secs)
+    'times': null,
 
     // callback invoked when testing is complete
     'onComplete': noop,
@@ -507,7 +718,7 @@
     // callback invoked when testing is started
     'onStart': noop,
 
-    // callback invoked when testing is stopped
+    // callback invoked when testing is aborted
     'onStop': noop,
 
     // runs the test `n` times and computes the averaged test results
@@ -522,8 +733,8 @@
     // run the benchmark
     'run': run,
 
-    // stops benchmark (does not record times)
-    'stop': stop
+    // aborts benchmark (does not record times)
+    'abort': abort
   });
 
   // expose

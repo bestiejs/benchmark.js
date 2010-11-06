@@ -48,7 +48,9 @@
      'counter': 0,
      'errors': [],
      'trash': createElement('div')
-   };
+   },
+
+   each = Benchmark.each;
 
   /*--------------------------------------------------------------------------*/
 
@@ -79,22 +81,10 @@
     $(element).innerHTML = html == null ? '' : html;
   }
 
-  // generic Array#forEach
-  function forEach(array, callback) {
-    var i = -1,
-        length = array.length;
-
-    while (++i < length) {
-      if (i in array && callback(array[i], i, array) === false) {
-        break;
-      }
-    }
-  }
-
   // generic Array#indexOf
   function indexOf(array, value) {
     var result = -1;
-    forEach(array, function(v, i) {
+    each(array, function(v, i) {
       if (v === value) {
         result = i;
         return false;
@@ -117,7 +107,7 @@
   // grabs the test from the ui object that matches the id
   function getTestById(id) {
     var result = null;
-    forEach(ui.tests, function(test) {
+    each(ui.tests, function(test) {
       if (test.id == id) {
         result = test;
         return false;
@@ -219,7 +209,7 @@
   }
 
   function onRun(e) {
-    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'stop' : 'runAll'](e);
+    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'abort' : 'runAll'](e);
   }
 
   function onStart(test) {
@@ -253,7 +243,7 @@
     var hashes = location.hash.slice(1).split('&'),
         params = this.params = { };
 
-    forEach(hashes[0] && hashes, function(hash) {
+    each(hashes[0] && hashes, function(hash) {
       var pair = hashes[length].split('=');
       params[pair[0]] = pair[1];
     });
@@ -280,7 +270,7 @@
       }
       else if (test.cycles) {
         setHTML(cell, formatNumber(hz));
-        cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.time + ' seconds.';
+        cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.times.cycle + ' seconds.';
       }
       else {
         setHTML(cell, 'ready');
@@ -292,9 +282,12 @@
     var me = this;
     e || (e = global.event || { });
     setHTML('run', RUN_TEXT.RUNNING);
-    Benchmark.CALIBRATION.reset();
 
-    forEach(e.shiftKey ? me.tests.slice(0).reverse() : me.tests, function(test) {
+    each(Benchmark.CALIBRATIONS, function(cal) {
+      cal.reset();
+    });
+
+    each(e.shiftKey ? me.tests.slice(0).reverse() : me.tests, function(test) {
       me.runTest(test);
     });
   }
@@ -305,7 +298,7 @@
       // clear error log
       logError(false);
       // reset result classNames
-      forEach(me.elResults, function(elResult) {
+      each(me.elResults, function(elResult) {
         if (!hasClass(elResult, ERROR_CLASS)) {
           elResult.className = RESULTS_CLASS;
         }
@@ -321,7 +314,7 @@
     }
   }
 
-  function stop() {
+  function abort() {
     var test,
         me = this;
 
@@ -329,9 +322,9 @@
     while (test = me.queue.pop()) {
       me.renderTest(test);
     }
-    // stop current test
+    // abort current test
     if (test = me.currentTest) {
-      test.stop();
+      test.abort();
       me.renderTest(test);
     }
     setHTML('run', RUN_TEXT.STOPPED);
@@ -356,7 +349,7 @@
     }
     else {
       // populate result array (skipping unrun and errored tests)
-      forEach(me.tests, function(test) {
+      each(me.tests, function(test) {
         if (test.cycles) {
           result.push({ 'id': test.id, 'hz': test.hz });
         }
@@ -369,7 +362,7 @@
         last  = result[result.length - 1];
 
         // print contextual information
-        forEach(result, function(test) {
+        each(result, function(test) {
           var percent,
               text,
               elResult = $(RESULTS_PREFIX + test.id),
@@ -415,7 +408,7 @@
         result = { };
 
     // populate result object (skipping unrun and errored tests)
-    forEach(tests, function(test) {
+    each(tests, function(test) {
       if (test.cycles) {
         // duplicate and non alphanumeric test names get their ids appended
         key = (test.name.match(/[a-z0-9]+/ig) || []).join(' ');
@@ -494,8 +487,8 @@
     // add a test to the run queue
     'runTest': runTest,
 
-    // stop, dequeue, and render all tests
-    'stop': stop,
+    // abort, dequeue, and render all tests
+    'abort': abort,
 
     // remove elements from the document and avoid pseuddo memory leaks
     // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
@@ -528,10 +521,10 @@
   ui.parseHash();
 
   // customize calibration test
-  (function(cal) {
+  each(Benchmark.CALIBRATIONS, function(cal) {
     cal.name = 'Calibrating loop';
     cal.onCycle = cal.onStart = onStart;
-  }(Benchmark.CALIBRATION));
+  });
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
