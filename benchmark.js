@@ -112,12 +112,13 @@
   * @param {String} methodName Name of method to invoke.
   * @param {Array} args Arguments to invoke the method with.
   * @param {Object} options Object for benchmark options.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
-  function invoke(benchmarks, methodName, args, options) {
+  function invoke(benchmarks, methodName, args, options, synchronous) {
     var i = 0,
         backups = [],
-        length = benchmarks.length,
-        synchronous = args[args.length - 1] === true;
+        juggling = arguments.length,
+        length = benchmarks.length;
 
     function onInvoke(me) {
       var key,
@@ -128,7 +129,7 @@
       }
       backups.push(backup);
       me.onComplete = onComplete;
-      me[methodName].apply(me, args);
+      me[methodName].apply(me, args || []);
     }
 
     function onComplete(me) {
@@ -143,8 +144,26 @@
       }
     }
 
-    options = extend({ }, options);
-    benchmarks[0] && onInvoke(benchmarks[0]);
+    if (length) {
+      // juggle arguments
+      if (juggling == 3 && {}.toString.call(args) != '[object Array]') {
+        if (typeof args == 'object') {
+          options = args;
+        } else {
+          synchronous = args;
+        }
+        args = [];
+      }
+      else if (juggling == 4 && typeof options != 'object') {
+        synchronous = options;
+        options = { };
+      }
+      if (synchronous == null) {
+        synchronous = args[args.length - 1] === true;
+      }
+      options = extend({ 'onComplete': noop }, options);
+      onInvoke(benchmarks[0]);
+    }
   }
 
  /**
@@ -493,16 +512,17 @@
   */
   function reset() {
     var changed,
-        keys = 'count cycles error hz running aborted'.split(' '),
+        keys = 'aborted count cycles error hz running'.split(' '),
         me = this,
         proto = me.constructor.prototype;
 
     if (me.running) {
       // no worries, reset() is called within abort()
       me.abort();
+      me.error = proto.error;
+      me.aborted = proto.aborted;
     }
     else {
-      delete me.times;
       each(keys, function(key) {
         if (me[key] != proto[key]) {
           changed = true;
@@ -640,9 +660,11 @@
   /*--------------------------------------------------------------------------*/
 
   // benchmarks to establish iteration overhead
-  each(Benchmark.CALIBRATIONS = [1, 2], function(value, index, cals) {
-    cals[index] = new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 });
-  });
+  (function(options) {
+    Benchmark.CALIBRATIONS = [
+      new Calibration(noop, options),
+      new Calibration(function() { return; }, options)];
+  }({ 'INIT_RUN_COUNT': 3e3 }));
 
   extend(Benchmark, {
     // iteration utility used by Benchmark and UI
@@ -660,7 +682,7 @@
     'CYCLE_DELAY': 0.01,
 
     // default sample of runs averaged
-    'INIT_AVERAGE_COUNT': 3,
+    'INIT_AVERAGE_COUNT': 20,
 
     // default number of runs
     'INIT_RUN_COUNT': 10,
