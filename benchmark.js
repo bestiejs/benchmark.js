@@ -8,23 +8,23 @@
 
 (function(global) {
 
-  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity  */ 
+  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity  */
   var CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
 
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Base benchmark class.
+  * Benchmark constructor.
   * @constructor
   * @param {Function} fn Test to benchmark.
-  * @param {Object} [options={ }] Options object.
+  * @param {Object} [options={}] Options object.
   */
   function Benchmark(fn, options) {
     options = extend({ }, options);
     extend(this, options);
     this.fn = fn;
-    this.times = { };
     this.options = options;
+    this.times = { };
   }
 
  /**
@@ -33,7 +33,7 @@
   * @constructor
   * @base Benchmark
   * @param {Function} fn Test to benchmark.
-  * @param {Object} [options={ }] Options object.
+  * @param {Object} [options={}] Options object.
   */
   function Calibration(fn, options) {
     Benchmark.call(this, fn, options);
@@ -42,25 +42,30 @@
   (function() {
 
    /**
-    * Runs the calibration benchmark and avoids calibrating itself.
+    * Runs calibration benchmarks without calibrating itself.
     * @member Calibration
-    * @param {Number} [count=INIT_RUN_COUNT] Intial iterations to clock.
+    * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
     * @param {Boolean} [synchronous=false] Flag to run synchronously.
     */
     function run(count, synchronous) {
       var me = this;
       me.reset();
-      me.running = true;
       me.count = count || me.INIT_RUN_COUNT;
+      me.running = true;
       me.times.start = +new Date;
       me.onStart(me);
       _run(me, synchronous);
     }
 
+    // Calibration inherits from Benchmark
     function Klass() { }
     Klass.prototype = Benchmark.prototype;
-    extend(Calibration.prototype = new Klass, {
+    Calibration.prototype = new Klass;
+
+    extend(Calibration.prototype, {
+      // point to the correct constructor
       'constructor': Calibration,
+      // custom run method to avoid calibrating itself
       'run': run
     });
   }());
@@ -68,41 +73,37 @@
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Checks if calibration is needed and, if so, fires the callback after
-  * calibration.
+  * Checks if calibration(s) have completed and fires a callback when completed.
   * @private
-  * @param {Function} callcack Function executed after calibration.
+  * @param {Function} callback Function executed after calibration.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
   * @returns {Boolean} Returns true if calibration is needed else false.
   */
   function calibrate(callback, synchronous) {
     var result,
-        cals = Benchmark.CALIBRATIONS,
-        last = cals.length - 1;
+        cals = Benchmark.CALIBRATIONS;
 
     function onInvoke(cal) {
       cal.average(null, null, synchronous);
     }
 
     function onComplete(cal, index) {
-      if (index == last) {
-        callback();
-      }
+      index == cals.length - 1 && callback();
     }
-
+    // rerun all calibrations if one is unrun
     if (result = !!filter(cals, function(cal) { return !cal.cycles; }).length) {
       eachTest(cals, {
         'onInvoke': onInvoke,
-        'onComplete': onComplete,
-        'synchronous': synchronous
-      });
+        'onComplete': onComplete
+      }, synchronous);
     }
     return result;
   }
 
  /**
-  * Executes a function asynchronously, to allow UI redraws, or synchronously.
+  * Executes a function asynchronously or synchronously.
   * @private
-  * @param {Object} me Benchmark/Calibration instance.
+  * @param {Object} me The benchmark instance.passed to the function.
   * @param {Function} fn Function to be executed.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
@@ -113,26 +114,23 @@
   }
 
  /**
-  * Similar to each(), it iterates over a collection of benchmarks executing a
-  * callback against each.
+  * Iterates over an array of benchmarks executing an initial onInvoke callback.
   * @private
-  * @param {Array} array The array to iterate over.
-  * @param {Object} options An object containing the synchronous flag and
-  * event handlers used during iteration.
+  * @param {Array} benchmarks Array of benchmarks to iterate over.
+  * @param {Object} options Object for benchmark options.
+  * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
-  function eachTest(tests, options) {
+  function eachTest(benchmarks, options, synchronous) {
     var i = 0,
         backups = [],
-        length = tests.length;
+        length = benchmarks.length;
 
     function onInvoke(me) {
       var key,
           backup = { };
       for (key in options) {
-        if (/^on[A-Z]/.test(key)) {
-          backup[key] = me[key];
-          me[key] = options[key];
-        }
+        backup[key] = me[key];
+        me[key] = options[key];
       }
       backups.push(backup);
       me.onComplete = onComplete;
@@ -145,25 +143,21 @@
       for (key in backup) {
         me[key] = backup[key];
       }
-      if (options.onComplete.call(me, me, i, tests) !== false && !me.aborted && ++i < length) {
-        call(tests[i], onInvoke, options.synchronous);
+      if (options.onComplete.call(me, me, i, benchmarks) !== false &&
+          !me.aborted && ++i < length) {
+        call(benchmarks[i], onInvoke, options.synchronous);
       }
     }
 
-    options = extend({
-      'onInvoke': noop,
-      'onCycle': noop,
-      'onComplete': noop
-    }, options);
-
-    tests[0] && onInvoke(tests[0]);
+    options = extend({ }, options);
+    benchmarks[0] && onInvoke(benchmarks[0]);
   }
 
  /**
   * Copies source properties to the destination object.
   * @private
   * @param {Object} destination The destination object.
-  * @param {Object} source The source object.
+  * @param {Object} [source={}] The source object.
   * @returns {Object} The destination object.
   */
   function extend(destination, source) {
@@ -175,11 +169,11 @@
   }
 
   /**
-  * A generic Array#filter solution.
+  * A generic bare-bones Array#filter solution.
   * @private
   * @param {Array} array The array to iterate over.
   * @param {Function} callback The function called per iteration.
-  * @returns {Array} A new array of values that passed the filter.
+  * @returns {Array} A new array of values that passed callback filter.
   */
   function filter(array, callback) {
     var length = array.length,
@@ -210,7 +204,7 @@
   }
 
   /**
-  * A generic Array#reduce solution.
+  * A generic bare-bones Array#reduce solution.
   * @private
   * @param {Array} array The array to iterate over.
   * @param {Function} callback The function called per iteration.
@@ -228,9 +222,9 @@
   }
 
  /**
-  * Clock the time it takes to execute a benchmark.count times (seconds).
+  * Clocks the time taken to execute a test per cycle (seconds).
   * @private
-  * @param {Object} me Benchmark/Calibration instance.
+  * @param {Object} me The benchmark instance.
   * @returns {Number} The cycle time of the instance.
   */
   var clock = (function() {
@@ -250,7 +244,7 @@
       var errored,
           result,
           times = me.times,
-          cals = me.constructor.CALIBRATIONS || [];
+          cal = me.constructor.CALIBRATIONS || [];
 
       if (supported) {
         try {
@@ -264,10 +258,10 @@
         }
       }
       if (errored || !supported) {
-        cals = cals[1];
+        cal = cal[1];
         fallback(me, co);
       } else {
-        cals = cals[0];
+        cal = cal[0];
       }
       return (times.cycle =
         // ensure positive numbers
@@ -275,7 +269,7 @@
         // convert time from milliseconds to seconds
         (times.cycle / 1e3) -
         // calibrate by subtracting the base loop time
-        (cals && cals.times.period || 0) * me.count));
+        (cal && cal.times.period || 0) * me.count));
     }
 
     // enable benchmarking via the --enable-benchmarking flag
@@ -319,8 +313,8 @@
   }
 
  /**
-  * A generic Array#forEach solution that allows loop breaking if callbacks
-  * explicitly return false.
+  * A generic bare-bones Array#forEach solution.
+  * Callbacks may terminate the loop by explicitly returning false.
   * @static
   * @member Benchmark
   * @param {Array} array The array to iterate over.
@@ -341,40 +335,31 @@
   * Retrieves the platform information of the current environment.
   * @static
   * @member Benchmark
-  * @returns {Object} Object containing the browser name, browser version, and
-  * operating system.
+  * @returns {Object} Properties include browser name, version, and operating system.
   */
   function getPlatform() {
-    var build,
-        description = [],
+    var description = [],
         ua = navigator.userAgent,
         os = (ua.match(/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
         name = (ua.match(/Chrome|MSIE|Safari|Opera|Firefox|Minefield/) || [])[0],
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
-        mses = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
+        data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     // IE platform tokens
     // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-    mses = os && os.indexOf('Windows') > -1 && mses[(os.match(/[456]\.\d/) || [])[0]];
-    if (mses) {
-      // resolve Windows name
-      os = 'Windows ' + mses;
+    if (/Windows/.test(os) && (data = data[os.match(/[456]\.\d/)])) {
+      os = 'Windows ' + data;
     }
     else if (/iP[ao]d|iPhone/.test(os)) {
-      // resolve iOS version
-      os = (ua.match(/\bOS ([\d_]+)/) || [])[1];
-      os = 'iOS' + (os ? ' ' + os : '');
+      os = 'iOS' + ((data = ua.match(/\bOS ([\d_]+)/)) ? ' ' + data[1] : '');
     }
-    // detect non Opera versions
     if (!version) {
-      version = typeof document.documentMode == 'number'
-        ? document.documentMode
-        : (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
+      version = typeof document.documentMode == 'number' ? document.documentMode :
+        (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
     }
-    // detect early Safari versions
     if (parseInt(version) > 45) {
-      build = (ua.match(/AppleWebKit\/(\d+)/) || [])[1] || Infinity;
-      version = build < 400 ? '1.x' : build < 500 ? '2.x' : version;
+      data = (ua.match(/AppleWebKit\/(\d+)/) || [])[1] || Infinity;
+      version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
     }
     return {
       'name':        name ? description.push(name) && name : null,
@@ -388,7 +373,7 @@
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Abort benchmark without recording times.
+  * Aborts the benchmark as well as in progress calibrations without recording times.
   * @member Benchmark
   */
   function abort() {
@@ -401,20 +386,22 @@
           cal.abort();
         });
       }
+      // set running as NaN so reset() will detect it as falsey and *not* call abort(),
+      // but *will* detect it as a change and fire the onReset() callback
       me.running = NaN;
       me.reset();
 
       me.error = error;
       me.aborted = true;
-      me.onStop(me);
+      me.onAbort(me);
     }
   }
 
  /**
-  * Computes benchmark results based on averaging a sample of runs.
+  * Computes the average benchmark results based on the specified number of runs.
   * @member Benchmark
-  * @param {Number} [count=INIT_AVERAGE_COUNT] Number of runs to average.
-  * @param {Number} [runCount=INIT_RUN_COUNT] Initial iteration count per benchmark.
+  * @param {Number} [count=Benchmark#INIT_AVERAGE_COUNT] Number of runs to average.
+  * @param {Number} [runCount=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
   function average(count, runCount, synchronous) {
@@ -422,7 +409,8 @@
         mean,
         me = this,
         clones = [],
-        last = (count || (count = me.INIT_AVERAGE_COUNT)) - 1;
+        last = (count || (count = me.INIT_AVERAGE_COUNT)) - 1,
+        times = me.times;
 
     function cbSum(sum, clone) {
       return sum + clone.times.period;
@@ -450,7 +438,6 @@
     }
 
     function onComplete(clone, index) {
-      var times = me.times;
       if (clone.aborted || index == last) {
         if (!clone.aborted && !clone.error) {
           // compute average period and sample standard deviation
@@ -469,6 +456,9 @@
           times.cycle = mean * me.count;
         }
         me.running = false;
+        times.stop = +new Date;
+        times.elapsed = (times.stop - times.start) / 1e3;
+
         me.onCycle(me);
         me.onComplete(me);
       }
@@ -476,6 +466,7 @@
 
     me.reset();
     me.running = true;
+    times.start = +new Date;
     me.onStart(me);
 
     while (count--) {
@@ -485,15 +476,14 @@
       'onInvoke': onInvoke,
       'onStart': onCycle,
       'onCycle': onCycle,
-      'onComplete': onComplete,
-      'synchronous': synchronous
-    });
+      'onComplete': onComplete
+    }, synchronous);
   }
 
  /**
-  * Retrieves the platform information of the current environment.
+  * Creates a cloned benchmark with the same test function and options.
   * @member Benchmark
-  * @param {Object} options Customize clone with its own options.
+  * @param {Object} options Overwrite cloned options.
   * @returns {Object} Cloned instance.
   */
   function clone(options) {
@@ -511,6 +501,10 @@
     return result;
   }
 
+ /**
+  * Reset properties and abort if running.
+  * @member Benchmark
+  */
   function reset() {
     var changed,
         keys = 'count cycles error hz running aborted'.split(' '),
@@ -537,9 +531,9 @@
   }
 
  /**
-  * Start running a benchmark.
+  * Start running the benchmark.
   * @member Benchmark
-  * @param {Number} [count=INIT_RUN_COUNT] Intial iterations to clock.
+  * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
   function run(count, synchronous) {
@@ -547,7 +541,7 @@
     me.reset();
     me.running = true;
 
-    // ensure calibration test has run
+    // ensure calibration benchmarks have run
     if (!calibrate(function() {
           function rerun() {
             // continue, if not aborted during calibration
@@ -555,12 +549,13 @@
               me.run(count, synchronous);
             } else {
               me.onStart(me);
-              me.onStop(me);
+              me.onAbort(me);
               me.onComplete(me);
             }
           }
           call(me, rerun, synchronous);
         }, synchronous)) {
+      // continue, if already calibrated
       me.count = count || me.INIT_RUN_COUNT;
       me.times.start = +new Date;
       me.onStart(me);
@@ -569,9 +564,9 @@
   }
 
  /**
-  * Performs the run cycles initiated by run().
+  * Executes each run cycle and computes results.
   * @private
-  * @param {Object} me Benchmark/Calibration instance.
+  * @param {Object} me The benchmark instance.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
   function _run(me, synchronous) {
@@ -658,14 +653,19 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // benchmarks to establish iteration overhead
+  each(Benchmark.CALIBRATIONS = [1, 2], function(value, index, cals) {
+    cals[index] = new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 });
+  });
+
   extend(Benchmark, {
-    // benchmarks to establish iteration overhead
-    'CALIBRATIONS': [
-      new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 }),
-      new Calibration(noop, { 'INIT_RUN_COUNT': 3e3 })
-    ],
+    // iteration utility used by Benchmark and UI
     'each': each,
+
+    // gets browser name, version, and OS
     'getPlatform': getPlatform,
+
+    // no operation utility used by Benchmark and UI
     'noop': noop
   });
 
@@ -688,7 +688,7 @@
     // number of times a test was executed
     'count': null,
 
-    // number of cycles performed during testing
+    // number of cycles performed while benchmarking
     'cycles': null,
 
     // an error object if the test failed
@@ -697,29 +697,32 @@
     // number of runs per second
     'hz': null,
 
-    // flag to indicate if the test is running
+    // flag to indicate if the benchmark is running
     'running': false,
 
-    // flag to indicate if the test is aborted
+    // flag to indicate if the benchmark is aborted
     'aborted': false,
 
     // object of timing data including cycle, elapsed, period, start, and stop (secs)
     'times': null,
 
-    // callback invoked when testing is complete
+    // callback invoked when a benchmark is aborted
+    'onAbort': noop,
+
+    // callback invoked when the benchmark is complete
     'onComplete': noop,
 
-    // callback invoked when one test cycle ends
+    // callback invoked when a test cycle ends
     'onCycle': noop,
 
-    // callback invoked when test is reset
+    // callback invoked when a benchmark is reset
     'onReset': noop,
 
-    // callback invoked when testing is started
+    // callback invoked when a benchmark is started
     'onStart': noop,
 
-    // callback invoked when testing is aborted
-    'onStop': noop,
+    // aborts benchmark (does not record times)
+    'abort': abort,
 
     // runs the test `n` times and computes the averaged test results
     'average': average,
@@ -727,14 +730,11 @@
     // create new benchmark with the same test function and options
     'clone': clone,
 
-    // reset state properties
+    // reset benchmark properties
     'reset': reset,
 
     // run the benchmark
-    'run': run,
-
-    // aborts benchmark (does not record times)
-    'abort': abort
+    'run': run
   });
 
   // expose
