@@ -60,14 +60,12 @@
     // Calibration inherits from Benchmark
     function Klass() { }
     Klass.prototype = Benchmark.prototype;
-    Calibration.prototype = new Klass;
+    var proto = Calibration.prototype = new Klass;
 
-    extend(Calibration.prototype, {
-      // point to the correct constructor
-      'constructor': Calibration,
-      // custom run method to avoid calibrating itself
-      'run': run
-    });
+    // point to the correct constructor
+    proto.constructor = Calibration;
+    // custom run method to avoid calibrating itself
+    proto.run = run;
   }());
 
   /*--------------------------------------------------------------------------*/
