@@ -81,19 +81,13 @@
     var result,
         cals = Benchmark.CALIBRATIONS;
 
-    function onInvoke(cal) {
-      cal.average(null, null, synchronous);
-    }
-
     function onComplete(cal, index) {
       index == cals.length - 1 && callback();
     }
     // rerun all calibrations if one is unrun
     if (result = !!filter(cals, function(cal) { return !cal.cycles; }).length) {
-      eachTest(cals, {
-        'onInvoke': onInvoke,
-        'onComplete': onComplete
-      }, synchronous);
+      invoke(cals, 'average', [null, null, synchronous],
+        { 'onComplete': onComplete });
     }
     return result;
   }
@@ -112,16 +106,18 @@
   }
 
  /**
-  * Iterates over an array of benchmarks executing an initial onInvoke callback.
+  * Invokes a given method, with arguments, on all benchmarks in the array.
   * @private
   * @param {Array} benchmarks Array of benchmarks to iterate over.
+  * @param {String} methodName Name of method to invoke.
+  * @param {Array} args Arguments to invoke the method with.
   * @param {Object} options Object for benchmark options.
-  * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
-  function eachTest(benchmarks, options, synchronous) {
+  function invoke(benchmarks, methodName, args, options) {
     var i = 0,
         backups = [],
-        length = benchmarks.length;
+        length = benchmarks.length,
+        synchronous = args[args.length - 1] === true;
 
     function onInvoke(me) {
       var key,
@@ -132,7 +128,7 @@
       }
       backups.push(backup);
       me.onComplete = onComplete;
-      me.onInvoke(me);
+      me[methodName].apply(me, args);
     }
 
     function onComplete(me) {
@@ -143,7 +139,7 @@
       }
       if (options.onComplete.call(me, me, i, benchmarks) !== false &&
           !me.aborted && ++i < length) {
-        call(benchmarks[i], onInvoke, options.synchronous);
+        call(benchmarks[i], onInvoke, synchronous);
       }
     }
 
@@ -423,10 +419,6 @@
       return period < (mean + deviation) && period > (mean - deviation);
     }
 
-    function onInvoke(clone) {
-      clone.run(runCount, synchronous);
-    }
-
     function onCycle(clone) {
       if (me.aborted) {
         clone.abort();
@@ -470,12 +462,8 @@
     while (count--) {
       clones.push(me.clone({ 'averaging': true }));
     }
-    eachTest(clones, {
-      'onInvoke': onInvoke,
-      'onStart': onCycle,
-      'onCycle': onCycle,
-      'onComplete': onComplete
-    }, synchronous);
+    invoke(clones, 'run', [runCount, synchronous],
+      { 'onStart': onCycle, 'onCycle': onCycle, 'onComplete': onComplete });
   }
 
  /**
@@ -704,19 +692,19 @@
     // object of timing data including cycle, elapsed, period, start, and stop (secs)
     'times': null,
 
-    // callback invoked when a benchmark is aborted
+    // callback fired when a benchmark is aborted
     'onAbort': noop,
 
-    // callback invoked when the benchmark is complete
+    // callback fired when the benchmark is complete
     'onComplete': noop,
 
-    // callback invoked when a test cycle ends
+    // callback fired when a test cycle ends
     'onCycle': noop,
 
-    // callback invoked when a benchmark is reset
+    // callback fired when a benchmark is reset
     'onReset': noop,
 
-    // callback invoked when a benchmark is started
+    // callback fired when a benchmark is started
     'onStart': noop,
 
     // aborts benchmark (does not record times)
