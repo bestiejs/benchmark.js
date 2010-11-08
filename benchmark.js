@@ -71,23 +71,22 @@
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Checks if calibration(s) have completed and fires a callback when completed.
+  * Checks if calibrations have completed and, if not, fires a callback when completed.
   * @private
   * @param {Function} callback Function executed after calibration.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
-  * @returns {Boolean} Returns true if calibration is needed else false.
+  * @returns {Boolean} Returns true if calibrated, false if not.
   */
-  function calibrate(callback, synchronous) {
-    var result,
-        cals = Benchmark.CALIBRATIONS;
-
-    function onComplete(cal, index) {
-      index == cals.length - 1 && callback();
-    }
-    // rerun all calibrations if one is unrun
-    if (result = !!filter(cals, function(cal) { return !cal.cycles; }).length) {
-      invoke(cals, 'average', [null, null, synchronous],
-        { 'onComplete': onComplete });
+  function isCalibrated(callback, synchronous) {
+    var cals = Benchmark.CALIBRATIONS,
+        result = !filter(cals, function(cal) { return !cal.cycles; }).length;
+    // calibrate all if one has not ran
+    if (!result) {
+      invoke(cals, {
+        'methodName': 'average',
+        'args': [null, null, synchronous],
+        'onComplete': callback
+      });
     }
     return result;
   }
@@ -95,7 +94,7 @@
  /**
   * Executes a function asynchronously or synchronously.
   * @private
-  * @param {Object} me The benchmark instance.passed to the function.
+  * @param {Object} me The benchmark instance passed to `fn`.
   * @param {Function} fn Function to be executed.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
@@ -103,67 +102,6 @@
     synchronous
       ? fn(me, synchronous)
       : setTimeout(function() { fn(me); }, me.CYCLE_DELAY * 1e3);
-  }
-
- /**
-  * Invokes a given method, with arguments, on all benchmarks in the array.
-  * @private
-  * @param {Array} benchmarks Array of benchmarks to iterate over.
-  * @param {String} methodName Name of method to invoke.
-  * @param {Array} args Arguments to invoke the method with.
-  * @param {Object} options Object for benchmark options.
-  * @param {Boolean} [synchronous=false] Flag to run synchronously.
-  */
-  function invoke(benchmarks, methodName, args, options, synchronous) {
-    var i = 0,
-        backups = [],
-        juggling = arguments.length,
-        length = benchmarks.length;
-
-    function onInvoke(me) {
-      var key,
-          backup = { };
-      for (key in options) {
-        backup[key] = me[key];
-        me[key] = options[key];
-      }
-      backups.push(backup);
-      me.onComplete = onComplete;
-      me[methodName].apply(me, args || []);
-    }
-
-    function onComplete(me) {
-      var key,
-          backup = backups[i];
-      for (key in backup) {
-        me[key] = backup[key];
-      }
-      if (options.onComplete.call(me, me, i, benchmarks) !== false &&
-          !me.aborted && ++i < length) {
-        call(benchmarks[i], onInvoke, synchronous);
-      }
-    }
-
-    if (length) {
-      // juggle arguments
-      if (juggling == 3 && {}.toString.call(args) != '[object Array]') {
-        if (typeof args == 'object') {
-          options = args;
-        } else {
-          synchronous = args;
-        }
-        args = [];
-      }
-      else if (juggling == 4 && typeof options != 'object') {
-        synchronous = options;
-        options = { };
-      }
-      if (synchronous == null) {
-        synchronous = args[args.length - 1] === true;
-      }
-      options = extend({ 'onComplete': noop }, options);
-      onInvoke(benchmarks[0]);
-    }
   }
 
  /**
@@ -317,15 +255,6 @@
   /*--------------------------------------------------------------------------*/
 
  /**
-  * A generic no operation function.
-  * @static
-  * @member Benchmark
-  */
-  function noop() {
-    // no operation performed
-  }
-
- /**
   * A generic bare-bones Array#forEach solution.
   * Callbacks may terminate the loop by explicitly returning false.
   * @static
@@ -383,6 +312,74 @@
     };
   }
 
+ /**
+  * Invokes a given method, with arguments, on all benchmarks in an array.
+  * @static
+  * @member Benchmark
+  * @param {Array} benchmarks Array of benchmarks to iterate over.
+  * @param {String|Object} methodName Name of method to invoke or options object.
+  * @param {Array} args Arguments to invoke the method with.
+  */
+  function invoke(benchmarks, methodName, args) {
+    var backup,
+        queued,
+        i = 0,
+        length = benchmarks.length,
+        options = { 'onComplete': noop };
+
+    function onInvoke(me) {
+      backup = me.onComplete;
+      me.onComplete = onComplete;
+      me[methodName].apply(me, args || []);
+    }
+
+    function onComplete(me) {
+      var next;
+      me.onComplete = backup;
+      me.onComplete(me);
+
+      if (queued) {
+        next = benchmarks.shift();
+      } else if (++i < length) {
+        next = benchmarks[i];
+      }
+      if (next) {
+        call(next, onInvoke, synchronous);
+      } else {
+        options.onComplete(me);
+      }
+    }
+
+    if (length) {
+
+      // juggle arguments
+      if (arguments.length == 2 && typeof methodName == 'object') {
+        options = extend(options, methodName);
+        methodName = options.methodName;
+        queued = options.queued;
+
+        args = options.args || [];
+        if ({}.toString.call(args) != '[object Array]') {
+          args = [args];
+        }
+        synchronous = args[args.length - 1] === true;
+        if ('synchronous' in options) {
+          synchronous = options.synchronous;
+        }
+      }
+      onInvoke(benchmarks[0]);
+    }
+  }
+
+ /**
+  * A generic no operation function.
+  * @static
+  * @member Benchmark
+  */
+  function noop() {
+    // no operation performed
+  }
+
   /*--------------------------------------------------------------------------*/
 
  /**
@@ -407,6 +404,7 @@
       me.error = error;
       me.aborted = true;
       me.onAbort(me);
+      me.onComplete(me);
     }
   }
 
@@ -422,7 +420,6 @@
         mean,
         me = this,
         clones = [],
-        last = (count || (count = me.INIT_AVERAGE_COUNT)) - 1,
         times = me.times;
 
     function cbSum(sum, clone) {
@@ -446,31 +443,29 @@
       }
     }
 
-    function onComplete(clone, index) {
-      if (clone.aborted || index == last) {
-        if (!clone.aborted && !clone.error) {
-          // compute average period and sample standard deviation
+    function onComplete(clone) {
+      if (!clone.aborted && !clone.error) {
+        // compute average period and sample standard deviation
+        mean = reduce(clones, cbSum, 0) / clones.length;
+        deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
+
+        if (deviation) {
+          // remove outliers and compute average period on filtered results
+          clones = filter(clones, cbOutlier);
           mean = reduce(clones, cbSum, 0) / clones.length;
-          deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
-
-          if (deviation) {
-            // remove outliers and compute average period on filtered results
-            clones = filter(clones, cbOutlier);
-            mean = reduce(clones, cbSum, 0) / clones.length;
-          }
-          // set host results
-          me.count = clones[0].count;
-          me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
-          times.period = mean;
-          times.cycle = mean * me.count;
         }
-        me.running = false;
-        times.stop = +new Date;
-        times.elapsed = (times.stop - times.start) / 1e3;
-
-        me.onCycle(me);
-        me.onComplete(me);
+        // set host results
+        me.count = clones[0].count;
+        me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
+        times.period = mean;
+        times.cycle = mean * me.count;
       }
+      me.running = false;
+      times.stop = +new Date;
+      times.elapsed = (times.stop - times.start) / 1e3;
+
+      me.onCycle(me);
+      me.onComplete(me);
     }
 
     me.reset();
@@ -478,11 +473,24 @@
     times.start = +new Date;
     me.onStart(me);
 
+    // create clones
+    count || (count = me.INIT_AVERAGE_COUNT);
     while (count--) {
-      clones.push(me.clone({ 'averaging': true }));
+      clones.push(me.clone({
+        'averaging': true,
+        'onComplete': noop,
+        'onAbort': noop,
+        'onReset': noop,
+        'onCycle': onCycle,
+        'onStart': onCycle
+      }));
     }
-    invoke(clones, 'run', [runCount, synchronous],
-      { 'onStart': onCycle, 'onCycle': onCycle, 'onComplete': onComplete });
+    // run them
+    invoke(clones, {
+      'methodName': 'run',
+      'args': [runCount, synchronous],
+      'onComplete': onComplete
+    });
   }
 
  /**
@@ -512,8 +520,8 @@
   */
   function reset() {
     var changed,
-        keys = 'aborted count cycles error hz running'.split(' '),
         me = this,
+        keys = 'aborted count cycles error hz running'.split(' '),
         proto = me.constructor.prototype;
 
     if (me.running) {
@@ -537,31 +545,33 @@
   }
 
  /**
-  * Start running the benchmark.
+  * Starts running the benchmark.
   * @member Benchmark
   * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
   * @param {Boolean} [synchronous=false] Flag to run synchronously.
   */
   function run(count, synchronous) {
     var me = this;
-    me.reset();
     me.running = true;
 
-    // ensure calibration benchmarks have run
-    if (!calibrate(function() {
-          function rerun() {
-            // continue, if not aborted during calibration
-            if (me.running) {
-              me.run(count, synchronous);
-            } else {
-              me.onStart(me);
-              me.onAbort(me);
-              me.onComplete(me);
-            }
-          }
-          call(me, rerun, synchronous);
-        }, synchronous)) {
-      // continue, if already calibrated
+    function onCalibrate(cal) {
+      if (cal.aborted) {
+        me.abort();
+      } else if (me.running) {
+        call(me, rerun, synchronous);
+      }
+    }
+
+    function rerun() {
+      me.run(count, synchronous);
+    }
+
+    if (isCalibrated(onCalibrate, synchronous)) {
+      // set running to false so reset() won't call abort()
+      me.running = false;
+      me.reset();
+      me.running = true;
+
       me.count = count || me.INIT_RUN_COUNT;
       me.times.start = +new Date;
       me.onStart(me);
@@ -662,8 +672,11 @@
   // benchmarks to establish iteration overhead
   (function(options) {
     Benchmark.CALIBRATIONS = [
+      // embedded calibration
       new Calibration(noop, options),
-      new Calibration(function() { return; }, options)];
+      // fallback calibration
+      new Calibration(function() { return; }, options)
+    ];
   }({ 'INIT_RUN_COUNT': 3e3 }));
 
   extend(Benchmark, {
@@ -672,6 +685,9 @@
 
     // gets browser name, version, and OS
     'getPlatform': getPlatform,
+
+    // invokes a method of each benchmark in a collection
+    'invoke': invoke,
 
     // no operation utility used by Benchmark and UI
     'noop': noop
