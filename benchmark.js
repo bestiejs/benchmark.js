@@ -8,8 +8,8 @@
 
 (function(global) {
 
-  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity  */
-  var CYCLE_DIVISORS = { '1': 8, '2': 6, '3': 4, '4': 2, '5': 1 };
+  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
+  var CYCLE_DIVISORS = { '1': 32, '2': 16, '3': 8, '4': 4, '5': 2, '6': 1 };
 
   /*--------------------------------------------------------------------------*/
 
@@ -83,7 +83,7 @@
     // calibrate all if one has not ran
     if (!result) {
       invoke(cals, {
-        'methodName': 'average',
+        'methodName': 'run',
         'args': [null, null, synchronous],
         'onComplete': callback
       });
@@ -287,19 +287,26 @@
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
-    // IE platform tokens
-    // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
     if (/Windows/.test(os) && (data = data[os.match(/[456]\.\d/)])) {
+      // platform tokens defined at
+      // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
       os = 'Windows ' + data;
     }
     else if (/iP[ao]d|iPhone/.test(os)) {
+      // normalize iOS
       os = 'iOS' + ((data = ua.match(/\bOS ([\d_]+)/)) ? ' ' + data[1] : '');
     }
     if (!version) {
-      version = typeof document.documentMode == 'number' ? document.documentMode :
-        (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
+      // detect non Opera versions
+      version = (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
+    }
+    if (typeof document.documentMode == 'number' && (data = ua.match(/Trident\/(\d+)/))) {
+      // detect IE compatibility modes
+      version = document.documentMode;
+      version = (data = +data[1] + 4) != version ? data + ' (' + version + ' Compatibility Mode)' : version;
     }
     if (parseInt(version) > 45) {
+      // detect older Safari versions
       data = (ua.match(/AppleWebKit\/(\d+)/) || [])[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
     }
