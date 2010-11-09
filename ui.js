@@ -44,13 +44,16 @@
      'READY_AGAIN': 'Done. Ready to run tests again.'
    },
 
+   /** Internal cache used by various methods */
    cache = {
      'counter': 0,
      'errors': [],
      'trash': createElement('div')
    },
 
-   each = Benchmark.each;
+   each = Benchmark.each,
+
+   invoke = Benchmark.invoke;
 
   /*--------------------------------------------------------------------------*/
 
@@ -480,11 +483,8 @@
     e || (e = global.event || { });
 
     me.abort();
+    invoke(Benchmark.CALIBRATIONS, 'reset');
     logError(false);
-
-    each(Benchmark.CALIBRATIONS, function(cal) {
-      cal.reset();
-    });
 
     each(e.shiftKey ? me.tests.slice(0).reverse() : me.tests, function(test) {
       me.runTest(test);
@@ -518,7 +518,8 @@
 
         if (queue.length == 1) {
           setHTML('run', RUN_TEXT.RUNNING);
-          Benchmark.invoke(queue, {
+          invoke(queue, {
+            'async': true,
             'methodName': 'run',
             'queued': true,
             'onComplete': onQueueComplete
@@ -660,6 +661,9 @@
 
   // parse location hash string
   ui.parseHash();
+
+  // force benchmark methods to run asynchronously for a more responsive UI
+  Benchmark.prototype.DEFAULT_ASYNC = true;
 
   // customize calibration test
   each(Benchmark.CALIBRATIONS, function(cal) {
