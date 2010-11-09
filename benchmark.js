@@ -99,7 +99,7 @@
   * @param {Boolean} [async=false] Flag to run asynchronously.
   */
   function call(me, fn, async) {
-    async && typeof global.setTimeout == 'function'
+    async && !/^(boolean|number|string|undefined)$/.test(typeof global.setTimeout)
       ? setTimeout(function() { fn(me, async); }, me.CYCLE_DELAY * 1e3)
       : fn(me);
   }
