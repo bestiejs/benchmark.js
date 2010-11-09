@@ -748,7 +748,7 @@
      * The default sample of runs averaged.
      * @member Benchmark
      */
-    'INIT_AVERAGE_COUNT': 18,
+    'INIT_AVERAGE_COUNT': 10,
 
     /**
      * The default number of times to execute a test on a benchmark's first cycle.

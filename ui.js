@@ -597,7 +597,7 @@
     if (elIframe) {
       parentNode = elIframe.parentNode;
       parentNode.insertBefore(elIframe.cloneNode(false), elIframe);
-      ui.trash(elIframe);
+      ui.destroyElement(elIframe);
     }
   }
 
@@ -611,7 +611,7 @@
     // parsed query parameters of the current page URL
     'params': {},
 
-    // queue of tests that need to run
+    // queue of tests to run
     'queue': [],
 
     // flag to indicate if the benchmarks are running
