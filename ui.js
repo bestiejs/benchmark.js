@@ -33,15 +33,15 @@
 
    /**  Inner text for the various run button states */
    RUN_TEXT = {
-     'RUNNING': 'Stop tests',
-     'RUN_AGAIN': 'Run tests again',
-     'STOPPED': 'Run tests'
+     'READY': 'Run tests',
+     'READY_AGAIN': 'Run again',
+     'RUNNING': 'Stop running'
    },
 
    /** Common status values */
    STATUS_TEXT = {
-     'READY': 'Ready to run tests.',
-     'READY_AGAIN': 'Done. Ready to run tests again.'
+     'READY': 'Ready to run.',
+     'READY_AGAIN': 'Done. Ready to run again.'
    },
 
    /** Internal cache used by various methods */
@@ -100,6 +100,22 @@
   }
 
  /**
+  * Converts a number to a more readable string representation.
+  * @private
+  * @param {Number} number The number to convert.
+  * @returns {String} The more readable string representation.
+  */
+  function formatNumber(number) {
+    var comma = ',',
+        string = String(Math.max(0, Math.abs(number).toFixed(0))),
+        length = string.length,
+        end = /^\d{4,}$/.test(string) ? length % 3 : 0;
+
+    return (end ? string.slice(0, end) + comma : '') +
+      string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
+  }
+
+ /**
   * Checks if an element is assigned the given class name.
   * @private
   * @param {Object} element The element.
@@ -108,16 +124,6 @@
   */
   function hasClass(element, className) {
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
-  }
-
- /**
-  * Set an element's innerHTML property.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} html The HTML to set.
-  */
-  function setHTML(element, html) {
-    $(element).innerHTML = html == null ? '' : html;
   }
 
  /**
@@ -139,36 +145,13 @@
   }
 
  /**
-  * Converts a number to a more readable string representation.
+  * Determines if the given value is an array.
   * @private
-  * @param {Number} number The number to convert.
-  * @returns {String} The more readable string representation.
+  * @param {Mixed} value The value to check.
+  * @returns {Boolean} If the value is an array return true, else false.
   */
-  function formatNumber(number) {
-    var comma = ',',
-        string = String(Math.max(0, Math.abs(number).toFixed(0))),
-        length = string.length,
-        end = /^\d{4,}$/.test(string) ? length % 3 : 0;
-
-    return (end ? string.slice(0, end) + comma : '') +
-      string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
-  }
-
- /**
-  * Retrieves the test from the `ui` object that matches the given id.
-  * @private
-  * @param {String} id The id of the test to retrieve.
-  * @returns {Object} The test, if found, else null.
-  */
-  function getTestById(id) {
-    var result = null;
-    each(ui.tests, function(test) {
-      if (test.id == id) {
-        result = test;
-        return false;
-      }
-    });
-    return result;
+  function isArray(value) {
+    return cache.toString.call(value) == '[object Array]';
   }
 
  /**
@@ -218,45 +201,22 @@
   }
 
  /**
+  * Set an element's innerHTML property.
+  * @private
+  * @param {Object} element The element.
+  * @param {String} html The HTML to set.
+  */
+  function setHTML(element, html) {
+    $(element).innerHTML = html == null ? '' : html;
+  }
+
+ /**
   * Sets the status text.
   * @private
   * @param {String} text The text write to the status.
   */
-  function logStatus(text) {
+  function setStatus(text) {
     setHTML('status', text);
-  }
-
- /**
-  * Renders the results table cell of the corresponding benchmark.
-  * @private
-  * @param {Object} test The benchmark instance.
-  */
-  function renderTest(test) {
-    var cell = $(RESULTS_PREFIX + test.id);
-    cell.title = '';
-
-    if (test.error) {
-      setHTML(cell, 'Error');
-      if (!hasClass(cell, ERROR_CLASS)) {
-        addClass(cell, ERROR_CLASS);
-      }
-      logError('<p>' + test.error + '.<\/p><ul><li>' + join(test.error, ': ', '<\/li><li>') + '<\/li><\/ul>');
-    }
-    else {
-      if (test.running) {
-        setHTML(cell, 'running&hellip;');
-      }
-      else if (test.cycles) {
-        setHTML(cell, formatNumber(test.hz));
-        cell.title = 'Looped ' + formatNumber(test.count) + ' times in ' + test.times.cycle + ' seconds.';
-      }
-      else if (indexOf(this.queue, test) > -1) {
-        setHTML(cell, 'pending&hellip;');
-      }
-      else {
-        setHTML(cell, 'ready');
-      }
-    }
   }
 
   /*--------------------------------------------------------------------------*/
@@ -266,27 +226,33 @@
   * @private
   */
   function onClick() {
-    ui.runTest(getTestById(this.id.split('-')[1]));
+    var id = this.id.split('-')[1];
+    each(ui.benchmarks, function(benchmark) {
+      if (benchmark.id == id) {
+        ui.run(benchmark);
+        return false;
+      }
+    });
   }
 
  /**
   * The onComplete callback assigned to new benchmarks.
   * @private
-  * @param {Object} test The benchmark instance.
+  * @param {Object} benchmark The benchmark.
   */
-  function onComplete(test) {
-    logStatus(STATUS_TEXT.READY_AGAIN);
-    ui.renderTest(test);
+  function onComplete(benchmark) {
+    setStatus(STATUS_TEXT.READY_AGAIN);
+    ui.render(benchmark);
   }
 
  /**
   * The onCycle callback, used for onStart as well, assigned to new benchmarks.
   * @private
-  * @param {Object} test The benchmark instance.
+  * @param {Object} benchmark The benchmark.
   */
-  function onCycle(test) {
-    if (!test.aborted) {
-      logStatus(test.name + ' &times; ' + formatNumber(test.count));
+  function onCycle(benchmark) {
+    if (!benchmark.aborted) {
+      setStatus(benchmark.name + ' &times; ' + formatNumber(benchmark.count));
     }
   }
 
@@ -319,19 +285,22 @@
     $('run').onclick = onRun;
     $('question').value = 'no';
 
+    addClass('run', 'show');
+    setHTML('run', RUN_TEXT.READY);
     setHTML('user-agent', Benchmark.getPlatform());
-    logStatus(STATUS_TEXT.READY);
+    setStatus(STATUS_TEXT.READY);
 
     // show warning when Firebug is enabled
     if (typeof global.console != 'undefined' && typeof console.firebug == 'string') {
       addClass('firebug', 'show');
     }
-    // auto-run tests when the URL has #run
-    if ('run' == location.hash.slice(1, 4)) {
-      onRun();
-    }
+    // call user provided init() function
     if (typeof global.init == 'function') {
       init();
+    }
+    // auto-run benchmarks when the URL has #run
+    if ('run' == location.hash.slice(1, 4)) {
+      onRun();
     }
   }
 
@@ -344,10 +313,10 @@
         last,
         result = [];
 
-    // populate result array (skipping unrun and errored tests)
-    each(ui.tests, function(test) {
-      if (test.cycles) {
-        result.push({ 'id': test.id, 'hz': test.hz });
+    // populate result array (skipping unrun and errored benchmarks)
+    each(ui.benchmarks, function(benchmark) {
+      if (benchmark.cycles) {
+        result.push({ 'id': benchmark.id, 'hz': benchmark.hz });
       }
     });
 
@@ -358,23 +327,23 @@
       last  = result[result.length - 1];
 
       // print contextual information
-      each(result, function(test) {
+      each(result, function(benchmark) {
         var percent,
             text,
-            elResult = $(RESULTS_PREFIX + test.id),
+            elResult = $(RESULTS_PREFIX + benchmark.id),
             elSpan = elResult.getElementsByTagName('span')[0];
 
-        if (test.hz == first.hz) {
+        if (benchmark.hz == first.hz) {
           // mark fastest
           text = 'fastest';
           addClass(elResult, 'fastest');
         }
         else {
-          percent = Math.floor((1 - test.hz / first.hz) * 100);
+          percent = Math.floor((1 - benchmark.hz / first.hz) * 100);
           text = percent + '% slower';
 
           // mark slowest
-          if (test.hz == last.hz) {
+          if (benchmark.hz == last.hz) {
             addClass(elResult, 'slowest');
           }
         }
@@ -386,12 +355,12 @@
       });
 
       // post results to Browserscope
-      ui.browserscope.post(ui.tests);
+      ui.browserscope.post(ui.benchmarks);
     }
 
-    // all tests are finished
+    // all benchmarks are finished
     ui.running = false;
-    setHTML('run', RUN_TEXT.RUN_AGAIN);
+    setHTML('run', RUN_TEXT.READY_AGAIN);
   }
 
  /**
@@ -399,30 +368,40 @@
   * @private
   */
   function onRun(e) {
-    ui[$('run').innerHTML == RUN_TEXT.RUNNING ? 'abort' : 'runAll'](e);
+    var benchmarks = ui.benchmarks,
+        run = $('run').innerHTML != RUN_TEXT.RUNNING;
+
+    ui.abort();
+    if (run) {
+      logError(false);
+      invoke(Benchmark.CALIBRATIONS, 'reset');
+      ui.run((e || global.event).shiftKey
+        ? benchmarks.slice(0).reverse()
+        : benchmarks);
+    }
   }
 
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Aborts any running benchmarks and clears the run queue.
+  * Aborts any running benchmarks, clears the run queue, and renders results.
   * @static
-  * @member Benchmark
+  * @member ui
   */
   function abort() {
-    var me = this;
+    var me = this,
+        benchmarks = me.benchmarks;
+
     me.queue.length = 0;
-    each(me.tests, function(test) {
-      test.abort();
-      me.renderTest(test);
-    });
-    setHTML('run', RUN_TEXT.STOPPED);
+    me.render(benchmarks);
+    invoke(benchmarks.concat(Benchmark.CALIBRATIONS), 'abort');
+    setHTML('run', RUN_TEXT.READY);
   }
 
  /**
   * Adds a benchmark the the collection.
   * @static
-  * @member Benchmark
+  * @member ui
   * @param {String} name The name assigned to the benchmark.
   * @param {String} id The id assigned to the benchmark.
   * @param {Function} fn The function to benchmark.
@@ -430,7 +409,7 @@
   function addTest(name, id, fn) {
     var me = this,
         elTitle = $('title-' + id),
-        test = new Benchmark(fn, {
+        benchmark = new Benchmark(fn, {
           'id': id,
           'name': name,
           'onStart': onCycle,
@@ -443,15 +422,15 @@
     elTitle.onclick = onClick;
     elTitle.onkeyup = onKeyUp;
 
-    me.tests.push(test);
+    me.benchmarks.push(benchmark);
     me.elResults.push($(RESULTS_PREFIX + id));
-    me.renderTest(test);
+    me.render(benchmark);
   }
 
  /**
   * Moves the given element to a detached div and destroys it.
   * @static
-  * @member Benchmark
+  * @member ui
   * @param {Object} element The element to destroy.
   */
   function destroyElement(element) {
@@ -462,7 +441,7 @@
  /**
   * Parses the window.location.hash value into an object assigned to `ui.params`.
   * @static
-  * @member Benchmark
+  * @member ui
   */
   function parseHash() {
     var hashes = location.hash.slice(1).split('&'),
@@ -475,48 +454,67 @@
   }
 
  /**
-  * Queues all benchmarks in the collection and runs them.
+  * Renders the results table cell of the corresponding benchmark(s).
   * @static
-  * @member Benchmark
-  * @param {Object} e The event object.
+  * @member ui
+  * @param {Array|Object} benchmarks A single benchmark or array of benchmarks.
   */
-  function runAll(e) {
-    var me = this;
-    e || (e = global.event || { });
+  function render(benchmarks) {
+    var queue = this.queue;
+    if (!isArray(benchmarks)) {
+      benchmarks = [benchmarks];
+    }
+    each(benchmarks, function(benchmark) {
+      var cell = $(RESULTS_PREFIX + benchmark.id);
+      cell.title = '';
 
-    me.abort();
-    invoke(Benchmark.CALIBRATIONS, 'reset');
-    logError(false);
-
-    each(e.shiftKey ? me.tests.slice(0).reverse() : me.tests, function(test) {
-      me.runTest(test);
+      if (benchmark.error) {
+        setHTML(cell, 'Error');
+        if (!hasClass(cell, ERROR_CLASS)) {
+          addClass(cell, ERROR_CLASS);
+        }
+        logError('<p>' + benchmark.error + '.<\/p><ul><li>' + join(benchmark.error, ': ', '<\/li><li>') + '<\/li><\/ul>');
+      }
+      else {
+        if (benchmark.running) {
+          setHTML(cell, 'running&hellip;');
+        }
+        else if (benchmark.cycles) {
+          setHTML(cell, formatNumber(benchmark.hz));
+          cell.title = 'Looped ' + formatNumber(benchmark.count) + ' times in ' + benchmark.times.cycle + ' seconds.';
+        }
+        else if (indexOf(queue, benchmark) > -1) {
+          setHTML(cell, 'pending&hellip;');
+        }
+        else {
+          setHTML(cell, 'ready');
+        }
+      }
     });
   }
 
  /**
-  * Adds given benchmark to the queue and runs it.
+  * Adds given benchmark(s) to the queue and runs.
   * @static
-  * @member Benchmark
-  * @param {Object} test The benchmark instance.
+  * @member ui
+  * @param {Array|Object} benchmarks A single benchmark or array of benchmarks.
   */
-  function runTest(test) {
-    var me = this,
+  function run(benchmarks) {
+    var added,
+        me = this,
         queue = me.queue;
 
-    if (indexOf(queue, test) < 0) {
-      // reset result classNames
-      each(me.elResults, function(elResult) {
-        if (!hasClass(elResult, ERROR_CLASS)) {
-          elResult.className = RESULTS_CLASS;
-        }
-      });
-
-      if (!test.error) {
-        // reset before (re)running in case testing is aborted
-        // so previous results are not recorded
-        test.reset();
-        queue.push(test);
-        me.renderTest(test);
+    if (!isArray(benchmarks)) {
+      benchmarks = [benchmarks];
+    }
+    each(benchmarks, function(benchmark) {
+      if (!benchmark.error && indexOf(queue, benchmark) < 0) {
+        // reset before (re)running so the previous run's results are
+        // not re-recorded if the operation is aborted mid queue
+        benchmark.reset();
+        queue.push(benchmark);
+        me.render(benchmark);
+        added = true;
 
         if (!me.running) {
           me.running = true;
@@ -529,6 +527,15 @@
           });
         }
       }
+    });
+
+    // reset result classNames
+    if (added) {
+      each(me.elResults, function(elResult) {
+        if (!hasClass(elResult, ERROR_CLASS)) {
+          elResult.className = RESULTS_CLASS;
+        }
+      });
     }
   }
 
@@ -537,22 +544,22 @@
  /**
   * Creates a Browserscope beacon and posts the benchmark results.
   * @static
-  * @member Benchmark.browserscope
-  * @param {Array} tests A collection of completed benchmarks.
+  * @member ui.browserscope
+  * @param {Array} benchmarks A collection of completed benchmarks.
   */
-  function post(tests) {
+  function post(benchmarks) {
     var idoc,
         key,
         id = BROWSERSCOPE_ID + '-' + cache.counter++,
         body = document.body,
         result = { };
 
-    // populate result object (skipping unrun and errored tests)
-    each(tests, function(test) {
-      if (test.cycles) {
-        // duplicate and non alphanumeric test names get their ids appended
-        key = (test.name.match(/[a-z0-9]+/ig) || []).join(' ');
-        result[key && !result[key] ? key : key + test.id ] = test.hz;
+    // populate result object (skipping unrun and errored benchmarks)
+    each(benchmarks, function(benchmark) {
+      if (benchmark.cycles) {
+        // duplicate and non alphanumeric benchmark names get their ids appended
+        key = (benchmark.name.match(/[a-z0-9]+/ig) || []).join(' ');
+        result[key && !result[key] ? key : key + benchmark.id ] = benchmark.hz;
       }
     });
 
@@ -588,7 +595,7 @@
  /**
   * Refreshes the Browserscope results iframe.
   * @static
-  * @member Benchmark.browserscope
+  * @member ui.browserscope
   */
   function refresh() {
     var parentNode,
@@ -605,25 +612,40 @@
 
   // expose
   global.ui = {
-    // HTML elements that will hold the results
+    /**
+     * An array of table cells used to display benchmark results.
+     * @member ui
+     */
     'elResults': [],
 
-    // parsed query parameters of the current page URL
+    /**
+     * The parsed query parameters of the pages url hash.
+     * @member ui
+     */
     'params': {},
 
-    // queue of tests to run
+    /**
+     * The queue of benchmarks to run.
+     * @member ui
+     */
     'queue': [],
 
-    // flag to indicate if the benchmarks are running
+    /**
+     * A flag to indicate if the benchmarks are running.
+     * @member ui
+     */
     'running': false,
 
-    // list of all tests that have been registered with benchmark.test
-    'tests': [],
+    /**
+     * An array of benchmarks created from test cases.
+     * @member ui
+     */
+    'benchmarks': [],
 
-    // abort, dequeue, and render all tests
+    // abort, dequeue, and render results
     'abort': abort,
 
-    // create a new test
+    // create a new benchmark from a test case
     'addTest': addTest,
 
     // remove elements from the document and avoid pseuddo memory leaks
@@ -633,16 +655,16 @@
     // parse query params into ui.params[] hash
     'parseHash': parseHash,
 
-    // (re)render the results for a specific test
-    'renderTest': renderTest,
+    // (re)render the results of one or more benchmarks
+    'render': render,
 
-    // add all tests to the run queue
-    'runAll': runAll,
-
-    // add a test to the run queue
-    'runTest': runTest
+    // add one or more benchmarks to the queue and run
+    'run': run
   };
 
+ /**
+  * @namespace Keep Browserscope methods separate.
+  */
   ui.browserscope = {
     // handles Browserscope reporting
     'post': post,
@@ -659,7 +681,7 @@
   // don't let users alert / confirm / prompt / open new windows
   global.alert = global.confirm = global.prompt = global.open = Benchmark.noop;
 
-  // re-parse query params when hash changes
+  // re-parse hash query params when it changes
   global.onhashchange = onHashChange;
 
   // bootstrap onload
@@ -671,7 +693,7 @@
   // force benchmark methods to run asynchronously for a more responsive UI
   Benchmark.prototype.DEFAULT_ASYNC = true;
 
-  // customize calibration test
+  // customize calibration benchmarks
   each(Benchmark.CALIBRATIONS, function(cal) {
     cal.name = 'Calibrating loop';
     cal.onCycle = cal.onStart = onCycle;
