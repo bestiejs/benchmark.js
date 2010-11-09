@@ -242,7 +242,7 @@ mark {
   margin-top: -2.75em;
 }
 
-.js #run, #firebug.show {
+#run.show, #firebug.show {
   display: block;
 }
 
