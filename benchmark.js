@@ -73,18 +73,22 @@
  /**
   * Checks if calibrations have completed and, if not, fires a callback when completed.
   * @private
+  * @param {Object} me The benchmark instance waiting for calibrations to complete.
   * @param {Function} callback Function executed after calibration.
   * @param {Boolean} [async=false] Flag to run asynchronously.
   * @returns {Boolean} Returns true if calibrated, false if not.
   */
-  function isCalibrated(callback, async) {
+  function isCalibrated(me, callback, async) {
     var cals = Benchmark.CALIBRATIONS,
+        onCycle = function(cal) { return !(cal.aborted || me.aborted); },
         result = !filter(cals, function(cal) { return !cal.cycles; }).length;
+
     // calibrate all if one has not ran
     if (!result) {
       invoke(cals, {
         'async': async,
         'methodName': 'run',
+        'onCycle': onCycle,
         'onComplete': callback
       });
     }
@@ -337,7 +341,7 @@
         async = false,
         first = benchmarks[0],
         length = benchmarks.length,
-        options = { 'onComplete': noop },
+        options = { 'onComplete': noop, 'onCycle': noop },
         toString = {}.toString;
 
     function onInvoke(me) {
@@ -345,6 +349,7 @@
         backup = me.onComplete;
         me.onComplete = onComplete;
       }
+      // execute method
       me[methodName].apply(me, args || []);
       if (!async) {
         onComplete(me);
@@ -357,10 +362,13 @@
         me.onComplete = backup;
         me.onComplete(me);
       }
-      if (queued) {
-        next = benchmarks.shift();
-      } else if (++i < length) {
-        next = benchmarks[i];
+      // choose next benchmark if not exiting early
+      if (options.onCycle(me) !== false) {
+        if (queued) {
+          next = benchmarks.shift();
+        } else if (++i < length) {
+          next = benchmarks[i];
+        }
       }
       if (next) {
         call(next, onInvoke, async);
@@ -462,8 +470,8 @@
 
     function onCycle(clone) {
       if (me.aborted) {
-        clone.abort();
-      } else {
+        return false;
+      } else if (clone.cycles) {
         me.onCycle(merge(me, clone));
       }
     }
@@ -484,11 +492,11 @@
         me.hz = mean ? Math.round(1 / mean) : Number.MAX_VALUE;
         times.period = mean;
         times.cycle = mean * me.count;
-      }
-      me.running = false;
-      times.stop = +new Date;
-      times.elapsed = (times.stop - times.start) / 1e3;
 
+        me.running = false;
+        times.stop = +new Date;
+        times.elapsed = (times.stop - times.start) / 1e3;
+      }
       me.onCycle(me);
       me.onComplete(me);
     }
@@ -514,6 +522,7 @@
       'async': async,
       'methodName': 'run',
       'args': runCount,
+      'onCycle': onCycle,
       'onComplete': onComplete
     });
   }
@@ -592,7 +601,7 @@
       me.run(count, async);
     }
 
-    if (isCalibrated(onCalibrate, async)) {
+    if (isCalibrated(me, onCalibrate, async)) {
       // set running to false so reset() won't call abort()
       me.running = false;
       me.reset();
@@ -673,7 +682,10 @@
         me.error = e;
         me.onError(me);
       }
-      me.onCycle(me);
+      // should we exit early?
+      if (me.onCycle(me) === false) {
+        me.abort();
+      }
     }
 
     // figure out what to do next
@@ -727,7 +739,7 @@
   extend(Benchmark.prototype, {
 
     /**
-     * The index of the Benchmark.CALIBRATIONS benchmark used for result calibration.
+     * The index of the calibration benchmark to use when computing results.
      * @member Benchmark
      */
     'CALIBRATION_INDEX': 0,
@@ -739,7 +751,7 @@
     'CYCLE_DELAY': 0.01,
 
     /**
-     * Choose to run asynchronous by default.
+     * A flag to indicate methods will run asynchronously by default.
      * @member Benchmark
      */
     'DEFAULT_ASYNC': false,
