@@ -671,6 +671,7 @@
       catch(e) {
         me.reset();
         me.error = e;
+        me.onError(me);
       }
       me.onCycle(me);
     }
@@ -817,6 +818,9 @@
 
     // callback fired when a test cycle ends
     'onCycle': noop,
+
+    // callback fired when a benchmark errors
+    'onError': noop,
 
     // callback fired when a benchmark is reset
     'onReset': noop,
