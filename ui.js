@@ -388,7 +388,9 @@
       // post results to Browserscope
       ui.browserscope.post(ui.tests);
     }
+
     // all tests are finished
+    ui.running = false;
     setHTML('run', RUN_TEXT.RUN_AGAIN);
   }
 
@@ -516,7 +518,8 @@
         queue.push(test);
         me.renderTest(test);
 
-        if (queue.length == 1) {
+        if (!me.running) {
+          me.running = true;
           setHTML('run', RUN_TEXT.RUNNING);
           invoke(queue, {
             'async': true,
@@ -610,6 +613,9 @@
 
     // queue of tests that need to run
     'queue': [],
+
+    // flag to indicate if the benchmarks are running
+    'running': false,
 
     // list of all tests that have been registered with benchmark.test
     'tests': [],

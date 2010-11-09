@@ -391,7 +391,7 @@
           }
         }
       }
-      onInvoke(first);
+      onInvoke(queued ? benchmarks.shift() : first);
     }
   }
 
