@@ -550,8 +550,8 @@
   function post(benchmarks) {
     var idoc,
         key,
-        id = BROWSERSCOPE_ID + '-' + cache.counter++,
         body = document.body,
+        name = BROWSERSCOPE_ID + '-' + cache.counter++,
         result = { };
 
     // populate result object (skipping unrun and errored benchmarks)
@@ -565,19 +565,18 @@
 
     // create new beacon
     try {
-      elIframe = createElement('<iframe name=' + id + '>');
+      elIframe = createElement('<iframe name=' + name + '>');
     } catch(e) {
-      (elIframe = createElement('iframe')).name = id;
+      (elIframe = createElement('iframe')).name = name;
     }
     // inject beacon
-    elIframe.id = id;
-    elIframe.style.display = 'none';
     body.insertBefore(elIframe, body.firstChild);
+    idoc = global.frames[name].document;
+    elIframe.style.display = 'none';
 
     // perform inception :3
     ui._bR = result;
     key = ui._bTestKey;
-    idoc = global.frames[id].document;
     idoc.write('<html><body><script>' +
                'with(parent.ui){' +
                'var _bTestResults=_bR,' +
@@ -678,7 +677,7 @@
   // signal JavaScript detected
   addClass(document.documentElement, JS_CLASS);
 
-  // don't let users alert / confirm / prompt / open new windows
+  // don't let users alert, confirm, prompt, or open new windows
   global.alert = global.confirm = global.prompt = global.open = Benchmark.noop;
 
   // re-parse hash query params when it changes
