@@ -289,8 +289,8 @@
   function getPlatform() {
     var description = [],
         ua = navigator.userAgent,
-        os = (ua.match(/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/) || [])[0],
-        name = (ua.match(/Chrome|Firefox|Minefield|MSIE|Opera|RockMelt|Safari/) || [])[0],
+        os = (/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/.exec(ua) || 0)[0],
+        name = (/Chrome|Firefox|Minefield|IE|Opera|RockMelt|Safari/.exec(ua) || 0)[0],
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
@@ -299,18 +299,21 @@
       // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
       os = 'Windows ' + data;
     }
-    else if (/iP[ao]d|iPhone/.test(os)) {
+    else if (data = /iP[ao]d|iPhone/.exec(os)) {
       // normalize iOS
-      os = 'iOS' + ((data = ua.match(/\bOS ([\d_]+)/)) ? ' ' + data[1] : '');
+      os = data + ' iOS' + ((data = ua.match(/\bOS ([\d_]+)/)) ? ' ' + data[1] : '');
     }
     if (!version) {
       // detect non Opera versions
-      version = (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || [])[1];
+      version = (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || 0)[1];
     }
     if (typeof document.documentMode == 'number' && (data = ua.match(/Trident\/(\d+)/))) {
-      // detect IE compatibility modes
+      // detect IE compatibility mode and release phases
       version = document.documentMode;
-      version = (data = +data[1] + 4) != version ? data + ' (' + version + ' Compatibility Mode)' : version;
+      version = (data = +data[1] + 4) != version ? [data, ,'running as IE ' + version] : [version];
+      version[0]+= (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
+      version[1] = (typeof global.external == 'object' && external) ? '' : 'platform preview';
+      version = version[0] + ((data = version.slice(version[1] ? 1 : 2).join(' ')) ? ' (' + data + ')' : '');
     }
     if (parseInt(version) > 45) {
       // detect older Safari versions
