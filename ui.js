@@ -571,7 +571,7 @@
     }
     // inject beacon
     body.insertBefore(elIframe, body.firstChild);
-    idoc = global.frames[name].document;
+    idoc = frames[name].document;
     elIframe.style.display = 'none';
 
     // perform inception :3

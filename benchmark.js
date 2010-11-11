@@ -288,42 +288,47 @@
   */
   function getPlatform() {
     var description = [],
-        ua = navigator.userAgent,
-        os = (/(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)(?:[^);]| )*/.exec(ua) || 0)[0],
-        name = (/Chrome|Firefox|Minefield|IE|Opera|RockMelt|Safari/.exec(ua) || 0)[0],
+        doc = typeof global.document != 'undefined' && document || {},
+        ua = typeof global.navigator != 'undefined' && (navigator || {}).userAgent,
+        os = /(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)[^);]*/.exec(ua),
+        name = /Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari/.exec(ua),
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
-    if (/Windows/.test(os) && (data = data[os.match(/[456]\.\d/)])) {
+    if (/Windows/.test(os) && (data = data[/[456]\.\d/.exec(os)])) {
       // platform tokens defined at
       // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
       os = 'Windows ' + data;
     }
-    else if (data = /iP[ao]d|iPhone/.exec(os)) {
+    if (data = /iP[ao]d|iPhone/.exec(os)) {
       // normalize iOS
-      os = data + ' iOS' + ((data = ua.match(/\bOS ([\d_]+)/)) ? ' ' + data[1] : '');
+      os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
+    }
+    if (os) {
+      // cleanup
+      os = String(os).replace(' Mach-O', '').replace(/_/g, '.');
     }
     if (!version) {
       // detect non Opera versions
-      version = (ua.match(RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i')) || 0)[1];
+      version = (RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i').exec(ua) || 0)[1];
     }
-    if (typeof document.documentMode == 'number' && (data = ua.match(/Trident\/(\d+)/))) {
+    if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
       // detect IE compatibility mode and release phases
-      version = document.documentMode;
+      version = doc.documentMode;
       version = (data = +data[1] + 4) != version ? [data, ,'running as IE ' + version] : [version];
-      version[0]+= (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
+      version[0] += (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
       version[1] = (typeof global.external == 'object' && external) ? '' : 'platform preview';
       version = version[0] + ((data = version.slice(version[1] ? 1 : 2).join(' ')) ? ' (' + data + ')' : '');
     }
     if (parseInt(version) > 45) {
       // detect older Safari versions
-      data = (ua.match(/AppleWebKit\/(\d+)/) || [])[1] || Infinity;
+      data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
     }
     return {
-      'name':        name ? description.push(name) && name : null,
+      'name':        name && description.push(name) && name,
       'version':     name && version ? description.push(version) && version : null,
-      'os':          os ? description.push('on ' + (os = os.replace(/_/g, '.'))) && os : null,
+      'os':          os && description.push('on ' + os) && os,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString':    function() { return this.description; }
     };
