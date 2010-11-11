@@ -435,9 +435,7 @@
   * @member Benchmark
   */
   function abort() {
-    var me = this,
-        error = me.error;
-
+    var me = this;
     if (me.running) {
       if (me.constructor != Calibration) {
         invoke(Benchmark.CALIBRATIONS, 'abort');
@@ -446,11 +444,8 @@
       // but *will* detect it as a change and fire the onReset() callback
       me.running = NaN;
       me.reset();
-
-      me.error = error;
       me.aborted = true;
       me.onAbort(me);
-      me.onComplete(me);
     }
   }
 
@@ -486,6 +481,7 @@
 
     function onCycle(clone) {
       if (me.aborted) {
+        clones.length = 0;
         return false;
       } else if (clone.cycles) {
         me.onCycle(merge(me, clone));
@@ -493,7 +489,7 @@
     }
 
     function onComplete(clone) {
-      if (!clone.aborted && !clone.error) {
+      if (clones.length) {
         // compute average period and sample standard deviation
         mean = reduce(clones, cbSum, 0) / clones.length;
         deviation = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
@@ -502,6 +498,11 @@
           // remove outliers and compute average period on filtered results
           clones = filter(clones, cbOutlier);
           mean = reduce(clones, cbSum, 0) / clones.length;
+        }
+        // repeat if it was a bad batch
+        if (!clones.length) {
+          start();
+          return;
         }
         // set host results
         me.count = clones[0].count;
@@ -517,30 +518,34 @@
       me.onComplete(me);
     }
 
+    function start() {
+      // create clones
+      var i = count;
+      while (i--) {
+        clones.push(me.clone({
+          'averaging': true,
+          'onComplete': noop,
+          'onAbort': noop,
+          'onReset': noop,
+          'onCycle': onCycle,
+          'onStart': onCycle
+        }));
+      }
+      // run them
+      invoke(clones, {
+        'async': async,
+        'methodName': 'run',
+        'args': runCount,
+        'onCycle': onCycle,
+        'onComplete': onComplete
+      });
+    }
+
     me.reset();
     me.running = true;
     times.start = +new Date;
     me.onStart(me);
-
-    // create clones
-    while (count--) {
-      clones.push(me.clone({
-        'averaging': true,
-        'onComplete': noop,
-        'onAbort': noop,
-        'onReset': noop,
-        'onCycle': onCycle,
-        'onStart': onCycle
-      }));
-    }
-    // run them
-    invoke(clones, {
-      'async': async,
-      'methodName': 'run',
-      'args': runCount,
-      'onCycle': onCycle,
-      'onComplete': onComplete
-    });
+    start();
   }
 
  /**
@@ -608,6 +613,7 @@
     function onCalibrate(cal) {
       if (cal.aborted) {
         me.abort();
+        me.onComplete(me);
       } else if (me.running) {
         call(me, rerun, async);
       }
@@ -694,7 +700,7 @@
         }
       }
       catch(e) {
-        me.reset();
+        me.abort();
         me.error = e;
         me.onError(me);
       }
@@ -712,7 +718,7 @@
       times.stop = +new Date;
       times.elapsed = (times.stop - times.start) / 1e3;
 
-      if (me.averaging || me.aborted || me.error || (times.elapsed * avgInit)  > 1) {
+      if (me.averaging || me.aborted || (times.elapsed * avgInit)  > 1) {
         me.onComplete(me);
       }
       else {
