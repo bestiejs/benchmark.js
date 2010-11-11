@@ -282,7 +282,7 @@
         doc = typeof global.document != 'undefined' && document || {},
         ua = typeof global.navigator != 'undefined' && (navigator || {}).userAgent,
         name = 'Konqueror|Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
-        os = 'Android|iP[ao]d|iPhone|Linux|Mac OS X|Windows 98;|Windows ',
+        os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS X|Windows 98;|Windows ',
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
@@ -291,7 +291,7 @@
     });
 
     os = reduce(os.split('|'), function(os, guess) {
-      if (!os && (os = RegExp(guess + '[^);]*').exec(ua))) {
+      if (!os && (os = RegExp(guess + '[^);/]*').exec(ua))) {
         // platform tokens defined at
         // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
         if (/Windows/.test(os) && (data = data[/[456]\.\d/.exec(os)])) {
@@ -302,28 +302,33 @@
           os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
         }
         // cleanup
-        os = String(os).replace(' Mach-O', '').replace(/_/g, '.');
+        os = String(os).replace(' Mach-O', '').replace('/', ' ').replace(/_/g, '.');
       }
       return os;
     });
 
     // detect non Opera versions
-    if (!version) {
-      version = (RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i').exec(ua) || 0)[1];
-    }
-    // detect older Safari versions
+    version = reduce(/webOS/.test(os) ? [name] : ['version', name], function(version, guess) {
+      return version || (version = (RegExp(guess + '[ /]([^ ;]*)', 'i').exec(ua) || 0)[1]);
+    }, version);
+
+    // detect unspecified Safari versions
     if (parseInt(version) > 45) {
       data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
-      version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
+      version = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 534 ? '4+' : version;
     }
     // detect IE compatibility mode
     if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      version = String(doc.documentMode);
-      version = (data = String(+data[1] + 4)) != version ? [data, description.push('running as IE ' + version)][0] : version;
+      version = String(doc.documentMode.toFixed(1));
+      version = (data = +data[1] + 4) != version ? [String(data.toFixed(1)), description.push('running as IE ' + version)][0] : version;
     }
     // detect release phases
     if (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion)) {
       version = version.replace(RegExp(data + '$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
+    }
+    // detect mobile
+    if (name && !/Android| iOS/.test(os) && / mobi/i.test(ua)) {
+      name += ' Mobile';
     }
     // detect platform preview
     if (typeof global.external == 'object' && !external) {
