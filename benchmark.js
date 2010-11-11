@@ -281,7 +281,7 @@
     var description = [],
         doc = typeof global.document != 'undefined' && document || {},
         ua = typeof global.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
+        name = 'Konqueror|Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
         os = 'Android|iP[ao]d|iPhone|Linux|Mac OS X|Windows 98;|Windows ',
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
@@ -316,18 +316,22 @@
       data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
     }
-    // detect IE compatibility mode and release phases
+    // detect IE compatibility mode
     if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      version = doc.documentMode;
-      version = (data = +data[1] + 4) != version ? [data, description.push('running as IE ' + version)][0] : version;
-      version+= (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
-
-      if (!(typeof global.external == 'object' && external)) {
-        description.unshift('platform preview');
-      }
-      if (description.length) {
-        description = ['(' + description.join(' ') + ')'];
-      }
+      version = String(doc.documentMode);
+      version = (data = String(+data[1] + 4)) != version ? [data, description.push('running as IE ' + version)][0] : version;
+    }
+    // detect release phases
+    if (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion)) {
+      version = version.replace(RegExp(data + '$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
+    }
+    // detect platform preview
+    if (typeof global.external == 'object' && !external) {
+      description.unshift('platform preview');
+    }
+    // add contextual information
+    if (description.length) {
+      description = ['(' + description.join(' ') + ')'];
     }
     return {
       'version': name && version && description.unshift(version) && version,
