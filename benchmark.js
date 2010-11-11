@@ -131,15 +131,9 @@
   * @returns {Array} A new array of values that passed callback filter.
   */
   function filter(array, callback) {
-    var length = array.length,
-        result = [];
-
-    while (length--) {
-      if (length in array && callback(array[length], length, array)) {
-        result.unshift(array[length]);
-      }
-    }
-    return result;
+    return reduce(array, function(result, value, index) {
+      return callback(value, index, array) ? result.push(value) && result : result;
+    }, []);
   }
 
  /**
@@ -167,12 +161,9 @@
   * @returns {Mixed} The accumulator.
   */
   function reduce(array, callback, accumulator) {
-    var length = array.length;
-    while (length--) {
-      if (length in array) {
-        accumulator = callback(accumulator, array[length], length, array);
-      }
-    }
+    each(array, function(value, index) {
+      accumulator = callback(accumulator, value, index, array);
+    });
     return accumulator;
   }
 
@@ -290,47 +281,60 @@
     var description = [],
         doc = typeof global.document != 'undefined' && document || {},
         ua = typeof global.navigator != 'undefined' && (navigator || {}).userAgent,
-        os = /(?:Windows 98;|Windows |iP[ao]d|iPhone|Mac OS X|Linux)[^);]*/.exec(ua),
-        name = /Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari/.exec(ua),
+        name = 'Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
+        os = 'Android|iP[ao]d|iPhone|Linux|Mac OS X|Windows 98;|Windows ',
         version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
-    if (/Windows/.test(os) && (data = data[/[456]\.\d/.exec(os)])) {
-      // platform tokens defined at
-      // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-      os = 'Windows ' + data;
-    }
-    if (data = /iP[ao]d|iPhone/.exec(os)) {
-      // normalize iOS
-      os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
-    }
-    if (os) {
-      // cleanup
-      os = String(os).replace(' Mach-O', '').replace(/_/g, '.');
-    }
+    name = reduce(name.split('|'), function(name, guess) {
+      return name || (name = RegExp(guess).exec(ua) && guess);
+    });
+
+    os = reduce(os.split('|'), function(os, guess) {
+      if (!os && (os = RegExp(guess + '[^);]*').exec(ua))) {
+        // platform tokens defined at
+        // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
+        if (/Windows/.test(os) && (data = data[/[456]\.\d/.exec(os)])) {
+          os = 'Windows ' + data;
+        }
+        // normalize iOS
+        if (data = /iP[ao]d|iPhone/.exec(os)) {
+          os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
+        }
+        // cleanup
+        os = String(os).replace(' Mach-O', '').replace(/_/g, '.');
+      }
+      return os;
+    });
+
+    // detect non Opera versions
     if (!version) {
-      // detect non Opera versions
       version = (RegExp('(?:version|' + name + ')[ /]([^ ;]*)', 'i').exec(ua) || 0)[1];
     }
-    if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      // detect IE compatibility mode and release phases
-      version = doc.documentMode;
-      version = (data = +data[1] + 4) != version ? [data, ,'running as IE ' + version] : [version];
-      version[0] += (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
-      version[1] = (typeof global.external == 'object' && external) ? '' : 'platform preview';
-      version = version[0] + ((data = version.slice(version[1] ? 1 : 2).join(' ')) ? ' (' + data + ')' : '');
-    }
+    // detect older Safari versions
     if (parseInt(version) > 45) {
-      // detect older Safari versions
       data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : version;
     }
+    // detect IE compatibility mode and release phases
+    if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
+      version = doc.documentMode;
+      version = (data = +data[1] + 4) != version ? [data, description.push('running as IE ' + version)][0] : version;
+      version+= (data = /alpha|beta/i.exec(navigator.appMinorVersion)) ? /^b/i.test(data) ? '\u03b2' : '\u03b1' : '';
+
+      if (!(typeof global.external == 'object' && external)) {
+        description.unshift('platform preview');
+      }
+      if (description.length) {
+        description = ['(' + description.join(' ') + ')'];
+      }
+    }
     return {
-      'name':        name && description.push(name) && name,
-      'version':     name && version ? description.push(version) && version : null,
-      'os':          os && description.push('on ' + os) && os,
+      'version': name && version && description.unshift(version) && version,
+      'name': name && description.unshift(name) && name,
+      'os': os && description.push('on ' + os) && os,
       'description': description.length ? description.join(' ') : 'unknown platform',
-      'toString':    function() { return this.description; }
+      'toString': function() { return this.description; }
     };
   }
 
