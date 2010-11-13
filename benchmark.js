@@ -331,13 +331,13 @@
       version = (data = +data[1] + 4) != version ? [String(data.toFixed(1)), description.push('running as IE ' + version)][0] : version;
     }
     // detect release phases
-    if (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion)) {
+    if (version && (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion))) {
       version = version.replace(RegExp(data + '$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
     }
     // detect Firefox nightly
     if (name == 'Minefield') {
       name = 'Firefox';
-      version += /\u03b2|\u03b1/.test(version) ? '' : '\u03b1';
+      version = /\u03b1|\u03b2|null/.test(version) ? version : version + '\u03b1';
     }
     // detect mobile
     if (name && !/Android| iOS/.test(os) && /Fennec|Mobi/.test(ua)) {
