@@ -6,10 +6,13 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-(function(global) {
+(function(window) {
 
   /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
-  var CYCLE_DIVISORS = { '1': 32, '2': 16, '3': 8, '4': 4, '5': 2, '6': 1 };
+  var CYCLE_DIVISORS = { '1': 32, '2': 16, '3': 8, '4': 4, '5': 2, '6': 1 },
+
+   /** Helps to resolve an object's internal [[Class]] property */
+   toString = {}.toString;
 
   /*--------------------------------------------------------------------------*/
 
@@ -103,37 +106,9 @@
   * @param {Boolean} [async=false] Flag to run asynchronously.
   */
   function call(me, fn, async) {
-    async && !/^(boolean|number|string|undefined)$/.test(typeof global.setTimeout)
+    async && !/^(boolean|number|string|undefined)$/.test(typeof window.setTimeout)
       ? setTimeout(function() { fn(me, async); }, me.CYCLE_DELAY * 1e3)
       : fn(me);
-  }
-
- /**
-  * Copies source properties to the destination object.
-  * @private
-  * @param {Object} destination The destination object.
-  * @param {Object} [source={}] The source object.
-  * @returns {Object} The destination object.
-  */
-  function extend(destination, source) {
-    source || (source = { });
-    for (var key in source) {
-      destination[key] = source[key];
-    }
-    return destination;
-  }
-
-  /**
-  * A generic bare-bones Array#filter solution.
-  * @private
-  * @param {Array} array The array to iterate over.
-  * @param {Function} callback The function called per iteration.
-  * @returns {Array} A new array of values that passed callback filter.
-  */
-  function filter(array, callback) {
-    return reduce(array, function(result, value, index) {
-      return callback(value, index, array) ? result.push(value) && result : result;
-    }, []);
   }
 
  /**
@@ -152,21 +127,6 @@
     return destination;
   }
 
-  /**
-  * A generic bare-bones Array#reduce solution.
-  * @private
-  * @param {Array} array The array to iterate over.
-  * @param {Function} callback The function called per iteration.
-  * @param {Mixed} accumulator Initial value of the accumulator.
-  * @returns {Mixed} The accumulator.
-  */
-  function reduce(array, callback, accumulator) {
-    each(array, function(value, index) {
-      accumulator = callback(accumulator, value, index, array);
-    });
-    return accumulator;
-  }
-
  /**
   * Clocks the time taken to execute a test per cycle (seconds).
   * @private
@@ -179,7 +139,7 @@
         uid = +new Date,
         args = 'm' + uid + ',c' + uid,
         code = 'var r$,i$=m$.count,f$=m$.fn,t$=#{0};while(i$--){f$()}#{1};m$.times.cycle=r$;return"$"',
-        co = typeof global.chrome != 'undefined' ? chrome : typeof global.chromium != 'undefined' ? chromium : { };
+        co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
 
     function embed(fn) {
       var body = String(fn).match(/^[^{]+{([\s\S]*)}\s*$/);
@@ -272,6 +232,53 @@
   }
 
  /**
+  * Copies source properties to the destination object.
+  * @static
+  * @member Benchmark
+  * @param {Object} destination The destination object.
+  * @param {Object} [source={}] The source object.
+  * @returns {Object} The destination object.
+  */
+  function extend(destination, source) {
+    source || (source = { });
+    for (var key in source) {
+      destination[key] = source[key];
+    }
+    return destination;
+  }
+
+  /**
+  * A generic bare-bones Array#filter solution.
+  * @static
+  * @member Benchmark
+  * @param {Array} array The array to iterate over.
+  * @param {Function} callback The function called per iteration.
+  * @returns {Array} A new array of values that passed callback filter.
+  */
+  function filter(array, callback) {
+    return reduce(array, function(result, value, index) {
+      return callback(value, index, array) ? result.push(value) && result : result;
+    }, []);
+  }
+
+ /**
+  * Converts a number to a more readable comma separated string representation.
+  * @static
+  * @member Benchmark
+  * @param {Number} number The number to convert.
+  * @returns {String} The more readable string representation.
+  */
+  function formatNumber(number) {
+    var comma = ',',
+        string = String(Math.max(0, Math.abs(number).toFixed(0))),
+        length = string.length,
+        end = /^\d{4,}$/.test(string) ? length % 3 : 0;
+
+    return (end ? string.slice(0, end) + comma : '') +
+      string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
+  }
+
+ /**
   * Retrieves the platform information of the current environment.
   * @static
   * @member Benchmark
@@ -279,11 +286,11 @@
   */
   function getPlatform() {
     var description = [],
-        doc = typeof global.document != 'undefined' && document || {},
-        ua = typeof global.navigator != 'undefined' && (navigator || {}).userAgent,
+        doc = typeof window.document != 'undefined' && document || {},
+        ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
         name = 'Konqueror|Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
         os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS X|Windows 98;|Windows ',
-        version = {}.toString.call(global.opera) == '[object Opera]' && opera.version(),
+        version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     name = reduce(name.split('|'), function(name, guess) {
@@ -331,7 +338,7 @@
       name += ' Mobile';
     }
     // detect platform preview
-    if (typeof global.external == 'object' && !external) {
+    if (typeof window.external == 'object' && !external) {
       description.unshift('platform preview');
     }
     // add contextual information
@@ -345,6 +352,25 @@
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString': function() { return this.description; }
     };
+  }
+
+ /**
+  * A generic bare-bones Array#indexOf solution.
+  * @static
+  * @member Benchmark
+  * @param {Array} array The array to iterate over.
+  * @param {Mixed} value The value to search for.
+  * @returns {Number} The index of the matched value or -1.
+  */
+  function indexOf(array, value) {
+    var result = -1;
+    each(array, function(v, i) {
+      if (v === value) {
+        result = i;
+        return false;
+      }
+    });
+    return result;
   }
 
  /**
@@ -362,8 +388,7 @@
         async = false,
         first = benchmarks[0],
         length = benchmarks.length,
-        options = { 'onComplete': noop, 'onCycle': noop },
-        toString = {}.toString;
+        options = { 'onComplete': noop, 'onCycle': noop };
 
     function onInvoke(me) {
       if (async) {
@@ -407,7 +432,7 @@
         queued = options.queued;
 
         args = options.args || [];
-        if (toString.call(args) != '[object Array]') {
+        if (!isArray(args)) {
           args = [args];
         }
         // allow asyncronous invoking of benchmark `average` and `run` methods
@@ -425,12 +450,65 @@
   }
 
  /**
-  * A generic no operation function.
+  * Determines if the given value is an array.
+  * @static
+  * @member Benchmark
+  * @param {Mixed} value The value to check.
+  * @returns {Boolean} If the value is an array return true, else false.
+  */
+  function isArray(value) {
+    return toString.call(value) == '[object Array]';
+  }
+
+ /**
+  * Creates a string of joined array values or object key-value pairs.
+  * @static
+  * @member Benchmark
+  * @param {Array|Object} object The object to operate on.
+  * @param {String} [separator1=','] The separator used between key-value pairs.
+  * @param {String} [separator2=': '] The separator used between keys and values.
+  * @returns {String} The joined result.
+  */
+  function join(object, separator1, separator2) {
+    var key,
+        pairs = [];
+
+    separator1 || (separator1 = ',');
+    separator2 || (separator2 = ': ');
+
+    if (!isArray(object)) {
+      for (key in object) {
+        pairs.push(key + separator2 + object[key]);
+      }
+    } else {
+      pairs = object;
+    }
+    return pairs.join(separator1);
+  }
+
+ /**
+  * A no operation function.
   * @static
   * @member Benchmark
   */
   function noop() {
     // no operation performed
+  }
+
+  /**
+  * A generic bare-bones Array#reduce solution.
+  * @static
+  * @member Benchmark
+  * @param {Array} array The array to iterate over.
+  * @param {Function} callback The function called per iteration.
+  * @param {Mixed} accumulator Initial value of the accumulator.
+  * @returns {Mixed} The accumulator.
+  */
+  function reduce(array, callback, accumulator) {
+    each(array, function(value, index) {
+      accumulator = callback(accumulator, value, index, array);
+    });
+    return accumulator;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -750,17 +828,38 @@
   }({ 'INIT_RUN_COUNT': 3e3 }));
 
   extend(Benchmark, {
-    // iteration utility used by Benchmark and UI
+    // generic Array#forEach
     'each': each,
 
-    // gets browser name, version, and OS
+    // copy properties to another object
+    'extend': extend,
+
+    // generic Array#filter
+    'filter': filter,
+
+    // converts a number to a comma separated string
+    'formatNumber': formatNumber,
+
+    // gets browser description, name, version, and OS
     'getPlatform': getPlatform,
+
+    // generic Array#indexOf
+    'indexOf': indexOf,
 
     // invokes a method of each benchmark in a collection
     'invoke': invoke,
 
-    // no operation utility used by Benchmark and UI
-    'noop': noop
+    // xbrowser Array.isArray
+    'isArray': isArray,
+
+    // generic Array#join for arrays and objects
+    'join': join,
+
+    // no operation
+    'noop': noop,
+
+    // generic Array#reduce
+    'reduce': reduce
   });
 
   extend(Benchmark.prototype, {
@@ -884,6 +983,6 @@
   });
 
   // expose
-  global.Benchmark = Benchmark;
+  window.Benchmark = Benchmark;
 
 }(this));

@@ -5,7 +5,7 @@
  * Available under MIT license <http://mths.be/mit>
  */
 
-(function(global, document) {
+(function(window, document) {
 
   /** CSS class name used for error styles */
   var ERROR_CLASS = 'error',
@@ -19,19 +19,13 @@
    /** CSS class name used to reset result styles */
    RESULTS_CLASS = 'results',
 
-   /** The id of the iframe containing the Browserscope results */
-   BROWSERSCOPE_ID = 'browserscope',
-
-   /** Seconds to wait for each stage of the Browserscope posting process (3 stages) */
-   BROWSERSCOPE_TIMEOUT = 2.5,
-
    /** Google Analytics account id */
    GA_ACCOUNT_ID = 'UA-6065217-40',
 
    /** Benchmark results element id prefix (e.g. `results-1`) */
    RESULTS_PREFIX = 'results-',
 
-   /**  Inner text for the various run button states */
+   /** Inner text for the various run button states */
    RUN_TEXT = {
      'READY': 'Run tests',
      'READY_AGAIN': 'Run again',
@@ -44,16 +38,20 @@
      'READY_AGAIN': 'Done. Ready to run again.'
    },
 
-   /** Internal cache used by various methods */
+   /** Cache of error messages */
    cache = {
-     'counter': 0,
-     'errors': [],
-     'trash': createElement('div')
+     'errors': []
    },
 
    each = Benchmark.each,
 
-   invoke = Benchmark.invoke;
+   formatNumber = Benchmark.formatNumber,
+
+   indexOf = Benchmark.indexOf,
+
+   invoke = Benchmark.invoke,
+
+   isArray = Benchmark.isArray;
 
   /*--------------------------------------------------------------------------*/
 
@@ -100,22 +98,6 @@
   }
 
  /**
-  * Converts a number to a more readable string representation.
-  * @private
-  * @param {Number} number The number to convert.
-  * @returns {String} The more readable string representation.
-  */
-  function formatNumber(number) {
-    var comma = ',',
-        string = String(Math.max(0, Math.abs(number).toFixed(0))),
-        length = string.length,
-        end = /^\d{4,}$/.test(string) ? length % 3 : 0;
-
-    return (end ? string.slice(0, end) + comma : '') +
-      string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
-  }
-
- /**
   * Checks if an element is assigned the given class name.
   * @private
   * @param {Object} element The element.
@@ -124,52 +106,6 @@
   */
   function hasClass(element, className) {
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
-  }
-
- /**
-  * A generic bare-bones Array#indexOf solution.
-  * @private
-  * @param {Array} array The array to iterate over.
-  * @param {Mixed} value The value to search for.
-  * @returns {Number} The index of the matched value or -1.
-  */
-  function indexOf(array, value) {
-    var result = -1;
-    each(array, function(v, i) {
-      if (v === value) {
-        result = i;
-        return false;
-      }
-    });
-    return result;
-  }
-
- /**
-  * Determines if the given value is an array.
-  * @private
-  * @param {Mixed} value The value to check.
-  * @returns {Boolean} If the value is an array return true, else false.
-  */
-  function isArray(value) {
-    return cache.toString.call(value) == '[object Array]';
-  }
-
- /**
-  * Creates a string of joined object key-value pairs.
-  * @private
-  * @param {Object} object The object to operate on.
-  * @param {String} delimit1 The delimiter used between keys and values.
-  * @param {String} delimit2 The delimiter used between key-value pairs.
-  * @returns {String} The joined result.
-  */
-  function join(object, delimit1, delimit2) {
-    var key,
-        pairs = [];
-
-    for (key in object) {
-      pairs.push(key + delimit1 + object[key]);
-    }
-    return pairs.join(delimit2);
   }
 
  /**
@@ -262,7 +198,7 @@
   */
   function onHashChange() {
     ui.parseHash();
-    if (typeof global.init == 'function') {
+    if (typeof window.init == 'function') {
       init();
     }
   }
@@ -272,7 +208,7 @@
   * @private
   */
   function onKeyUp(e) {
-    if (13 == (e || global.event).keyCode) {
+    if (13 == (e || window.event).keyCode) {
       onClick.call(this);
     }
   }
@@ -291,11 +227,11 @@
     setStatus(STATUS_TEXT.READY);
 
     // show warning when Firebug is enabled
-    if (typeof global.console != 'undefined' && typeof console.firebug == 'string') {
+    if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
       addClass('firebug', 'show');
     }
     // call user provided init() function
-    if (typeof global.init == 'function') {
+    if (typeof window.init == 'function') {
       init();
     }
     // auto-run benchmarks when the URL has #run
@@ -355,7 +291,7 @@
       });
 
       // post results to Browserscope
-      ui.browserscope.post(ui.benchmarks);
+      ui.browserscope.post();
     }
 
     // all benchmarks are finished
@@ -375,7 +311,7 @@
     if (run) {
       logError(false);
       invoke(Benchmark.CALIBRATIONS, 'reset');
-      ui.run((e || global.event).shiftKey
+      ui.run((e || window.event).shiftKey
         ? benchmarks.slice(0).reverse()
         : benchmarks);
     }
@@ -428,17 +364,6 @@
   }
 
  /**
-  * Moves the given element to a detached div and destroys it.
-  * @static
-  * @member ui
-  * @param {Object} element The element to destroy.
-  */
-  function destroyElement(element) {
-    cache.trash.appendChild(element);
-    setHTML(cache.trash, '');
-  }
-
- /**
   * Parses the window.location.hash value into an object assigned to `ui.params`.
   * @static
   * @member ui
@@ -457,12 +382,14 @@
   * Renders the results table cell of the corresponding benchmark(s).
   * @static
   * @member ui
-  * @param {Array|Object} benchmarks A single benchmark or array of benchmarks.
+  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
   */
   function render(benchmarks) {
-    var queue = this.queue;
+    var me = this,
+        queue = me.queue;
+
     if (!isArray(benchmarks)) {
-      benchmarks = [benchmarks];
+      benchmarks = benchmarks ? [benchmarks] : me.benchmarks;
     }
     each(benchmarks, function(benchmark) {
       var cell = $(RESULTS_PREFIX + benchmark.id);
@@ -473,7 +400,8 @@
         if (!hasClass(cell, ERROR_CLASS)) {
           addClass(cell, ERROR_CLASS);
         }
-        logError('<p>' + benchmark.error + '.<\/p><ul><li>' + join(benchmark.error, ': ', '<\/li><li>') + '<\/li><\/ul>');
+        logError('<p>' + benchmark.error + '.<\/p><ul><li>' +
+          Benchmark.join(benchmark.error, '<\/li><li>') + '<\/li><\/ul>');
       }
       else {
         if (benchmark.running) {
@@ -497,7 +425,7 @@
   * Adds given benchmark(s) to the queue and runs.
   * @static
   * @member ui
-  * @param {Array|Object} benchmarks A single benchmark or array of benchmarks.
+  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
   */
   function run(benchmarks) {
     var added,
@@ -505,7 +433,7 @@
         queue = me.queue;
 
     if (!isArray(benchmarks)) {
-      benchmarks = [benchmarks];
+      benchmarks = benchmarks ? [benchmarks] : me.benchmarks;
     }
     each(benchmarks, function(benchmark) {
       if (!benchmark.error && indexOf(queue, benchmark) < 0) {
@@ -541,76 +469,8 @@
 
   /*--------------------------------------------------------------------------*/
 
- /**
-  * Creates a Browserscope beacon and posts the benchmark results.
-  * @static
-  * @member ui.browserscope
-  * @param {Array} benchmarks A collection of completed benchmarks.
-  */
-  function post(benchmarks) {
-    var idoc,
-        key,
-        body = document.body,
-        name = BROWSERSCOPE_ID + '-' + cache.counter++,
-        result = { };
-
-    // populate result object (skipping unrun and errored benchmarks)
-    each(benchmarks, function(benchmark) {
-      if (benchmark.cycles) {
-        // duplicate and non alphanumeric benchmark names get their ids appended
-        key = (benchmark.name.match(/[a-z0-9]+/ig) || []).join(' ');
-        result[key && !result[key] ? key : key + benchmark.id ] = benchmark.hz;
-      }
-    });
-
-    // create new beacon
-    try {
-      elIframe = createElement('<iframe name=' + name + '>');
-    } catch(e) {
-      (elIframe = createElement('iframe')).name = name;
-    }
-    // inject beacon
-    body.insertBefore(elIframe, body.firstChild);
-    idoc = frames[name].document;
-    elIframe.style.display = 'none';
-
-    // perform inception :3
-    ui._bR = result;
-    key = ui._bTestKey;
-    idoc.write('<html><body><script>' +
-               'with(parent.ui){' +
-               'var _bTestResults=_bR,' +
-               '_bD=1e3*' + BROWSERSCOPE_TIMEOUT + ',' +
-               '_bT=function(){parent.setTimeout(browserscope.refresh,_bD);destroyElement(frameElement)},' +
-               '_bK=setTimeout(_bT,_bD),' +
-               '_bP=function(){clearTimeout(_bK);setTimeout(_bT,_bD)}' +
-               '}<\/script>' +
-               (key ? '<script src=//www.browserscope.org/user/beacon/' + key + '?callback=_bP><\/script>' : '') +
-               '<\/body><\/html>');
-    idoc.close();
-    delete ui._bR;
-  }
-
- /**
-  * Refreshes the Browserscope results iframe.
-  * @static
-  * @member ui.browserscope
-  */
-  function refresh() {
-    var parentNode,
-        elIframe = $(BROWSERSCOPE_ID);
-
-    if (elIframe) {
-      parentNode = elIframe.parentNode;
-      parentNode.insertBefore(elIframe.cloneNode(false), elIframe);
-      ui.destroyElement(elIframe);
-    }
-  }
-
-  /*--------------------------------------------------------------------------*/
-
   // expose
-  global.ui = {
+  window.ui = {
     /**
      * An array of table cells used to display benchmark results.
      * @member ui
@@ -647,10 +507,6 @@
     // create a new benchmark from a test case
     'addTest': addTest,
 
-    // remove elements from the document and avoid pseuddo memory leaks
-    // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
-    'destroyElement': destroyElement,
-
     // parse query params into ui.params[] hash
     'parseHash': parseHash,
 
@@ -661,30 +517,19 @@
     'run': run
   };
 
- /**
-  * @namespace Keep Browserscope methods separate.
-  */
-  ui.browserscope = {
-    // handles Browserscope reporting
-    'post': post,
-
-    // refreshes Browserscope results iframe
-    'refresh': refresh
-  };
-
   /*--------------------------------------------------------------------------*/
 
   // signal JavaScript detected
   addClass(document.documentElement, JS_CLASS);
 
   // don't let users alert, confirm, prompt, or open new windows
-  global.alert = global.confirm = global.prompt = global.open = Benchmark.noop;
+  window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
 
   // re-parse hash query params when it changes
-  global.onhashchange = onHashChange;
+  window.onhashchange = onHashChange;
 
   // bootstrap onload
-  global.onload = onLoad;
+  window.onload = onLoad;
 
   // parse location hash string
   ui.parseHash();
@@ -704,7 +549,7 @@
     var script = createElement(tag),
         sibling = document.getElementsByTagName(tag)[0];
 
-    global._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
+    window._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
     script.async = 1;
     script.src = '//www.google-analytics.com/ga.js';
     sibling.parentNode.insertBefore(script, sibling);

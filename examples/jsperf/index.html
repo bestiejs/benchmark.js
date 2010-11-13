@@ -2,12 +2,14 @@
 <html>
 <head>
 <title>benchmark.js test page | jsPerf</title>
+<!-- http://jsperf.com/benchmark-js-test-page -->
 <meta charset="utf-8">
 <meta name="description" content="This is just a test document for benchmark.js.">
 <link rel="stylesheet" href="main.css">
 <!--[if lt IE 9]><script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-<script src="benchmark.js"></script>
+<script src="../../benchmark.js"></script>
 <script src="ui.js"></script>
+<script src="../../plugins/ui.browserscope.js"></script>
 </head>
 <body>
 <article>
@@ -156,6 +158,10 @@
     </tbody>
   </table>
 
+  <h2 id="results">Results</h2> 
+  <!-- 
+  <script src="http://www.browserscope.org/user/tests/table/<YOUR_API_KEY>?v=3&amp;o=js&amp;h=auto&amp;w=auto&amp;callback=ui.browserscope.refresh"></script>
+  -->
   <p>
     You can <a href="#" rel="nofollow">edit these tests or add even more tests to this page</a>
     by appending <code>/edit</code> to the URL.
@@ -174,37 +180,42 @@
   &bull; by <a href="http://mathiasbynens.be/" title="Mathias Bynens, front-end web developer">@mathias</a>
 </footer>
 <script>
+  // Browserscope API key
+  ui.browserscope.KEY = '';
+
+  /*--------------------------------------------------------------------------*/
+
   try {
     var arr = [1, 5, 4, 2, 3],
         i = 1;
   } catch(e) { }
 
-  ui.addTest("Sort ascending", 1, function() {
+  ui.addTest('Sort ascending', 1, function() {
     var x = arr;
     x.sort(function(a, b) {
       return a - b;
     });
   });
 
-  ui.addTest("Sort descending", 2, function() {
+  ui.addTest('Sort descending', 2, function() {
     var x = arr;
     x.sort(function(a, b) {
       return b - a;
     });
   });
 
-  ui.addTest("Don't sort at all", 3, function() {
+  ui.addTest('Don\'t sort at all', 3, function() {
     var foo, x = i;
     while (x--) {
-      foo = Array(x).join("-");
+      foo = Array(x).join('-');
     }
   });
 
-  ui.addTest("Error", 4, function() {
+  ui.addTest('Error', 4, function() {
     arr.foo(); // unknown method
   });
 
-  ui.addTest("Just another unrelated test", 5, function() {
+  ui.addTest('Just another unrelated test', 5, function() {
     var x = arr,
         y = ~~(Math.random() * 100);
     while (y--) {
@@ -218,22 +229,19 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // Browserscope API key
-  ui._bTestKey = "";
-
-  if (typeof window.console != "undefined" &&
-      typeof console.error == "function" &&
-      typeof console.profile == "function" &&
-      typeof console.profileEnd == "function") {
+  if (typeof window.console != 'undefined' &&
+      typeof console.error == 'function' &&
+      typeof console.profile == 'function' &&
+      typeof console.profileEnd == 'function') {
 
     (function() {
       try {
-        console.profile("Sort ascending");
+        console.profile('Sort ascending');
         var x = arr;
         x.sort(function(a, b) {
           return a - b;
         });
-        console.profileEnd("Sort ascending");
+        console.profileEnd('Sort ascending');
       } catch(e) {
         console.error(e);
       }
@@ -241,12 +249,12 @@
 
     (function() {
       try {
-        console.profile("Sort descending");
+        console.profile('Sort descending');
         var x = arr;
         x.sort(function(a, b) {
           return b - a;
         });
-        console.profileEnd("Sort descending");
+        console.profileEnd('Sort descending');
       } catch(e) {
         console.error(e);
       }
@@ -254,12 +262,12 @@
 
     (function() {
       try {
-        console.profile("Don't sort at all");
+        console.profile('Don\'t sort at all');
         var foo, x = i;
         while (x--) {
-          foo = Array(x).join("-");
+          foo = Array(x).join('-');
         }
-        console.profileEnd("Don't sort at all");
+        console.profileEnd('Don\'t sort at all');
       } catch(e) {
         console.error(e);
       }
@@ -267,9 +275,9 @@
 
     (function() {
       try {
-        console.profile("Error");
+        console.profile('Error');
         arr.foo(); // unknown method
-        console.profileEnd("Error");
+        console.profileEnd('Error');
       } catch(e) {
         console.error(e);
       }
@@ -277,7 +285,7 @@
 
     (function() {
       try {
-        console.profile("Just another unrelated test");
+        console.profile('Just another unrelated test');
         var x = arr,
             y = ~~(Math.random() * 100);
         while (y--) {
@@ -287,7 +295,7 @@
            // Boohoo
           }
         }
-        console.profileEnd("Just another unrelated test");
+        console.profileEnd('Just another unrelated test');
       } catch(e) {
         console.error(e);
       }
