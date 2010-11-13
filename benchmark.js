@@ -289,7 +289,7 @@
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
         name = 'Konqueror|Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
-        os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS X|Windows 98;|Windows ',
+        os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS(?: X)?|Windows 98;|Windows ',
         version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
@@ -298,18 +298,19 @@
     });
 
     os = reduce(os.split('|'), function(os, guess) {
-      if (!os && (os = RegExp(guess + '[^);/]*').exec(ua))) {
+      if (!os && (os = RegExp(guess + '[^-);/]*').exec(ua))) {
         // platform tokens defined at
         // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-        if (/Windows/.test(os) && (data = data[/[456]\.\d/.exec(os)])) {
+        if (/Windows/.test(os) && (data = data[0/*opera fix*/,/[456]\.\d/.exec(os)])) {
           os = 'Windows ' + data;
         }
         // normalize iOS
         if (data = /iP[ao]d|iPhone/.exec(os)) {
+          name || (name = 'Safari');
           os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
         }
         // cleanup
-        os = String(os).replace(' Mach-O', '').replace('/', ' ').replace(/_/g, '.');
+        os = String(os).replace(' Mach', '').replace(/\/(\d)/, ' $1').replace(/_/g, '.').split(' on ')[0];
       }
       return os;
     });
@@ -320,7 +321,7 @@
     }, version);
 
     // detect unspecified Safari versions
-    if (parseInt(version) > 45) {
+    if (!version || parseInt(version) > 45) {
       data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 534 ? '4+' : version;
     }
@@ -333,8 +334,13 @@
     if (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion)) {
       version = version.replace(RegExp(data + '$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
     }
+    // detect Firefox nightly
+    if (name == 'Minefield') {
+      name = 'Firefox';
+      version += /\u03b2|\u03b1/.test(version) ? '' : '\u03b1';
+    }
     // detect mobile
-    if (name && !/Android| iOS/.test(os) && / mobi/i.test(ua)) {
+    if (name && !/Android| iOS/.test(os) && /Fennec|Mobi/.test(ua)) {
       name += ' Mobile';
     }
     // detect platform preview
