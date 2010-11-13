@@ -1,5 +1,5 @@
 
-(function(window) {
+(function(window, document) {
 
  /** Cache used by various methods */
   var cache = {
@@ -97,11 +97,24 @@
   * @member ui.browserscope
   */
   function refresh(api) {
+    var me = this;
+    api || (api = { 'load': Benchmark.noop });
+
     function refresh() {
       api.load();
     }
+
+    if (!me.KEY) {
+      // auto detect api key
+      Benchmark.each(document.getElementsByTagName('script'), function(script) {
+        var src = script.src;
+        if ((src.match(/browserscope\.(?:org|refresh)/g) || []).length == 2) {
+          me.KEY = (/[^?/]+(?=\?)/.exec(src) || 0)[0];
+          return false;
+        }
+      });
+    }
     // lazy defined by Browserscope script callback
-    api || (api = { 'load': Benchmark.noop });
     ui.browserscope.refresh = refresh;
   }
 
@@ -114,7 +127,7 @@
     'KEY': '',
 
     /** Seconds to wait for each stage of the Browserscope posting process (3 stages) */
-    'TIMEOUT': 2.5,
+    'TIMEOUT': 3,
 
     // remove elements from the document and avoid pseudo memory leaks
     // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
@@ -130,4 +143,4 @@
     'refresh': refresh
   };
 
-}(this));
+}(this, document));
