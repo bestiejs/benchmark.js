@@ -61,12 +61,12 @@ test("user agent detection", function() {
       'ua': 'Mozilla/4.0 (compatible; MSIE 5.05; Windows NT 4.0)'
     },
 
-    'IE 6.0 on Windows 2000': {
-      'ua': 'Mozilla/4.0 (Windows; MSIE 6.0; Windows NT 5.0)'
-    },
-
     'IE 6.0\u03b2 on Windows ME': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 6.0b; Windows 98; Win 9x 4.90)'
+    },
+
+    'IE 6.0 on Windows 2000': {
+      'ua': 'Mozilla/4.0 (Windows; MSIE 6.0; Windows NT 5.0)'
     },
 
     'IE 8.0 on Windows XP': {
@@ -84,13 +84,13 @@ test("user agent detection", function() {
       'mode': 5
     },
 
+    'IE 9.0 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)'
+    },
+
     'IE 9.0 (running as IE 8.0) on Windows 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/5.0)',
       'mode': 8
-    },
-
-    'IE 9.0 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)'
     },
 
     'Konqueror 4.4 on Linux 2.6.32': {
@@ -130,10 +130,6 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (webOS/Palm webOS 1.2.9; U; en-US) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/1.0 Safari/525.27.1 Pixi/1.0'
     },
 
-    'Safari 3.1.1 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.17'
-    },
-
     'Safari 3.1.1 on iPhone iOS 2.0.1': {
       'ua': 'Mozilla/5.0 (Mozilla/5.0 (iPhone; U; CPU iPhone OS 2_0_1 like Mac OS X; fr-fr) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5G77 Safari/525.20'
     },
@@ -142,8 +138,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; de-de) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.20'
     },
 
-/*
+    'Safari 3.1.1 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.17'
+    },
 
+/*
     // More soon!
     // http://www.useragentstring.com/pages/Safari/
 
@@ -164,24 +163,20 @@ test("user agent detection", function() {
     },
 */
 
-    'Safari 3.1.2 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl-PL) AppleWebKit/525.19 (KHTML, like Gecko) Version/3.1.2 Safari/525.21'
-    },
-
     'Safari 3.1.2 on Mac OS X 10.5.6': {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_6; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.2 Safari/525.20.1'
     },
 
-    'Safari 3.2 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; hu-HU) AppleWebKit/525.26.2 (KHTML, like Gecko) Version/3.2 Safari/525.26.13'
+    'Safari 3.1.2 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl-PL) AppleWebKit/525.19 (KHTML, like Gecko) Version/3.1.2 Safari/525.21'
     },
 
     'Safari 3.2 on Mac OS X 10.5.5': {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_5; en-us) AppleWebKit/525.26.2 (KHTML, like Gecko) Version/3.2 Safari/525.26.12'
     },
 
-    'Safari 3.2.1 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; sv-SE) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1'
+    'Safari 3.2 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; hu-HU) AppleWebKit/525.26.2 (KHTML, like Gecko) Version/3.2 Safari/525.26.13'
     },
 
     'Safari 3.2.1 on Mac OS X 10.4.11': {
@@ -192,20 +187,20 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; it-it) AppleWebKit/528.8+ (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1'
     },
 
-    'Safari 3.2.2 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; de-DE) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
-    },
-
-    'Safari 3.2.2 on Windows Server 2003 / XP x64': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
+    'Safari 3.2.1 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; sv-SE) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1'
     },
 
     'Safari 3.2.2 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
     },
 
-    'Safari 3.2.3 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/525.28.3 (KHTML, like Gecko) Version/3.2.3 Safari/525.29'
+    'Safari 3.2.2 on Windows Server 2003 / XP x64': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
+    },
+
+    'Safari 3.2.2 on Windows 7': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; de-DE) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
     },
 
     'Safari 3.2.3 on Mac OS X 10.5.7': {
@@ -216,20 +211,8 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_8; ja-jp) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/3.2.3 Safari/525.28.3'
     },
 
-    'Safari 3.2.2 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; de-DE) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
-    },
-
-    'Safari 3.2.2 on Windows Server 2003 / XP x64': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
-    },
-
-    'Safari 3.2.2 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
-    },
-
-    'Safari 4.0\u03b1 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/526.9 (KHTML, like Gecko) Version/4.0dp1 Safari/526.8'
+    'Safari 3.2.3 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/525.28.3 (KHTML, like Gecko) Version/3.2.3 Safari/525.29'
     },
 
     'Safari 4.0\u03b1 on Mac OS X 10.4.11': {
@@ -244,12 +227,28 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-gb) AppleWebKit/528.10+ (KHTML, like Gecko) Version/4.0dp1 Safari/526.11.2'
     },
 
-    'Safari 4.0 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ru-RU) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
+    'Safari 4.0\u03b1 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/526.9 (KHTML, like Gecko) Version/4.0dp1 Safari/526.8'
     },
 
-    'Safari 4.0 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-TW) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
+    'Safari 4.0 on Android 2.2': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
+    },
+
+    'Safari 4.0 on iPhone iOS 3.0': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; ko-kr) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
+    },
+
+    'Safari 4.0 on iPod iOS 3.0': {
+      'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 3_0 like Mac OS X; ja-jp) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
+    },
+
+    'Safari 4.0 on iPhone iOS 3.1': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7C97d Safari/528.16'
+    },
+
+    'Safari 4.0 on iPhone iOS 4.1.1': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1_1 like Mac OS X; en-en) AppleWebKit/548.18 (KHTML, like Gecko) Version/4.0 Mobile/8F12 Safari/548.16'
     },
 
     'Safari 4.0 on Mac OS X 10.4.11': {
@@ -268,52 +267,36 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6; en-us) AppleWebKit/530.6+ (KHTML, like Gecko) Version/4.0 Safari/530.6'
     },
 
-    'Safari 4.0 on Android 2.2': {
-      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
+    'Safari 4.0 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-TW) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
     },
 
-    'Safari 4.0 on iPhone iOS 3.0': {
-      'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 3_0 like Mac OS X; ja-jp) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
-    },
-
-    'Safari 4.0 on iPhone iOS 4.1.1': {
-      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1_1 like Mac OS X; en-en) AppleWebKit/548.18 (KHTML, like Gecko) Version/4.0 Mobile/8F12 Safari/548.16'
-    },
-
-    'Safari 4.0 on iPhone iOS 3.0': {
-      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; ko-kr) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
-    },
-
-    'Safari 4.0 on iPhone iOS 3.1': {
-      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7C97d Safari/528.16'
+    'Safari 4.0 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ru-RU) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
     },
 
     'Safari 4.0.1 on Mac OS X 10.5.7': {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us) AppleWebKit/531.2+ (KHTML, like Gecko) Version/4.0.1 Safari/530.18'
     },
 
-    'Safari 4.0.2 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/532+ (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
-    },
-
-    'Safari 4.0.2 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
-    },
-
-    'Safari 4.0.2 on Windows Server 2003 / XP x64': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; de-DE) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
+    'Safari 4.0.2 on Mac OS X 10.5.7': {
+      'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_7; en-us) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19'
     },
 
     'Safari 4.0.2 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
-    'Safari 4.0.2 on Mac OS X 10.5.7': {
-      'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_7; en-us) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19'
+    'Safari 4.0.2 on Windows Server 2003 / XP x64': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; de-DE) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
-    'Safari 4.0.3 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+    'Safari 4.0.2 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
+    },
+
+    'Safari 4.0.2 on Windows 7': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/532+ (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
     'Safari 4.0.3 on Mac OS X 10.5.8': {
@@ -324,32 +307,16 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_1; nl-nl) AppleWebKit/532.3+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
     },
 
+    'Safari 4.0.3 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
+    },
+
     'Safari 4.0.4 on iPad iOS 3.2': {
-      'ua': 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10gin_lib.cc'
+      'ua': 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10'
     },
 
     'Safari 4.0.4 on iPhone iOS 3.2': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10'
-    },
-
-    'Safari 4.0.4 on iPhone iOS 3.2': {
-      'ua': 'Mozilla/5.0 (iPhone Simulator; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7D11 Safari/531.21.10'
-    },
-
-    'Safari 4.0.4 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ko-KR) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
-    },
-
-    'Safari 4.0.4 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
-    },
-
-    'Safari 4.0.4 on Windows Server 2003 / XP x64': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
-    },
-
-    'Safari 4.0.4 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de-DE) AppleWebKit/532+ (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
     'Safari 4.0.4 on Mac OS X 10.4.11': {
@@ -364,20 +331,24 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; en-us) AppleWebKit/531.21.11 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.4 on iPad iOS 3.2': {
-      'ua': 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10'
+    'Safari 4.0.4 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de-DE) AppleWebKit/532+ (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.5 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
+    'Safari 4.0.4 on Windows Server 2003 / XP x64': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.5 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
+    'Safari 4.0.4 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.5 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
+    'Safari 4.0.4 on Windows 7': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ko-KR) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
+    },
+
+    'Safari 4.0.5 on iPhone iOS 4.1': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7'
     },
 
     'Safari 4.0.5 on Mac OS X 10.4.11': {
@@ -396,12 +367,16 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; ja-jp) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
-    'Safari 4.0.5 on iPhone iOS 4.1': {
-      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7'
+    'Safari 4.0.5 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
-    'Safari 4+ on webOS 1.4.0': {
-      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
+    'Safari 4.0.5 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
+    },
+
+    'Safari 4.0.5 on Windows 7': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
     'Safari 4.1 on Mac OS X 10.4.11': {
@@ -412,16 +387,12 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7; en-us) AppleWebKit/533.4 (KHTML, like Gecko) Version/4.1 Safari/533.4'
     },
 
+    'Safari 4+ on webOS 1.4.0': {
+      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
+    },
+
     'Safari 5.0 on Linux x86.64': {
       'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; en-ca) AppleWebKit/531.2+ (KHTML, like Gecko) Version/5.0 Safari/531.2+'
-    },
-
-    'Safari 5.0 on Windows 7': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
-    },
-
-    'Safari 5.0 on Windows Vista': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
     },
 
     'Safari 5.0 on Mac OS X 10.5.8': {
@@ -436,8 +407,24 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; zh-cn) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
     },
 
+    'Safari 5.0 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
+    },
+
+    'Safari 5.0 on Windows 7': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
+    },
+
     'Safari 5.0.1 on Windows Server 2003 / XP x64': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/533.17.8 (KHTML, like Gecko) Version/5.0.1 Safari/533.17.8'
+    },
+
+    'Safari 5.0.2 on Mac OS X 10.5.8': {
+      'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; zh-cn) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
+    },
+
+    'Safari 5.0.2 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
     'Safari 5.0.2 on Windows Vista': {
@@ -446,14 +433,6 @@ test("user agent detection", function() {
 
     'Safari 5.0.2 on Windows 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-HK) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
-    },
-
-    'Safari 5.0.2 on Windows XP': {
-      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
-    },
-
-    'Safari 5.0.2 on Mac OS X 10.5.8': {
-      'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; zh-cn) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
     'Sleipnir 2.8.4 on Windows XP': {
