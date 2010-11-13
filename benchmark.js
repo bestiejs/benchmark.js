@@ -288,16 +288,16 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Konqueror|Minefield|Opera|RockMelt|Sleipnir|Chrome|Firefox|IE|Safari',
-        os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS(?: X)?|Windows 98;|Windows ',
+        name = '(?:Avant|Green|Slim) ?Browser,Flock,K-Meleon,Konqueror,Maxthon,Minefield,Opera,RockMelt,Sleipnir,Chrome,Firefox,IE,Safari',
+        os = 'Android,iP[ao]d,iPhone,webOS[ /]\\d,Linux,Mac OS(?: X)?,Windows 98;,Windows ',
         version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
-    name = reduce(name.split('|'), function(name, guess) {
+    name = reduce(name.split(','), function(name, guess) {
       return name || (name = RegExp(guess).exec(ua) && guess);
     });
 
-    os = reduce(os.split('|'), function(os, guess) {
+    os = reduce(os.split(','), function(os, guess) {
       if (!os && (os = RegExp(guess + '[^-);/]*').exec(ua))) {
         // platform tokens defined at
         // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
