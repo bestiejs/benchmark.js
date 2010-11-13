@@ -288,7 +288,7 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Konqueror|Minefield|Opera|RockMelt|Chrome|Firefox|IE|Safari',
+        name = 'Konqueror|Minefield|Opera|RockMelt|Sleipnir|Chrome|Firefox|IE|Safari',
         os = 'Android|iP[ao]d|iPhone|webOS[ /]\\d|Linux|Mac OS(?: X)?|Windows 98;|Windows ',
         version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
@@ -317,7 +317,7 @@
 
     // detect non Opera versions
     version = reduce(/webOS/.test(os) ? [name] : ['version', name], function(version, guess) {
-      return version || (version = (RegExp(guess + '[ /]([^ ;]*)', 'i').exec(ua) || 0)[1]);
+      return version || (version = (RegExp(guess + '[ /]([^ );]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
     // detect unspecified Safari versions
@@ -327,8 +327,9 @@
     }
     // detect IE compatibility mode
     if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      version = String(doc.documentMode.toFixed(1));
-      version = (data = +data[1] + 4) != version ? [String(data.toFixed(1)), description.push('running as IE ' + version)][0] : version;
+      version = [version, String(doc.documentMode.toFixed(1))];
+      version[1] = (data = +data[1] + 4) != version[1] ? [description.push('running as IE ' + version[1]), String(data.toFixed(1))][1] : version[1];
+      version = version[name == 'IE' ? 1 : 0];
     }
     // detect release phases
     if (version && (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion))) {

@@ -150,6 +150,20 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; tr-TR) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
+    'Sleipnir 2.8.4 on Windows XP': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; Sleipnir 2.8.4)'
+    },
+
+    'Sleipnir 2.9.4 (running as IE 7.0) on Windows Vista': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; Trident/4.0; Sleipnir/2.9.4)',
+      'mode': 7
+    },
+
+    'Sleipnir 2.9.6 on Windows 7': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Sleipnir/2.9.6)',
+      'mode': 8
+    },
+
     'unknown platform': {
       'ua': 'Mozilla/5.0 (PLAYSTATION 3; 2.00)'
     }
