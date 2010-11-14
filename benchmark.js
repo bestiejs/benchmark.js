@@ -288,17 +288,17 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = '(?:Avant|Green|Slim) ?Browser,Flock,K-Meleon,Konqueror,Maxthon,Minefield,Opera,RockMelt,Sleipnir,Chrome,Firefox,IE,Safari',
-        os = 'Android,iP[ao]d,iPhone,webOS[ /]\\d,Linux,Mac OS(?: X)?,Windows 98;,Windows ',
+        name = 'Avant Browser,Camino,Flock,GreenBrowser,iCab,K-Meleon,Konqueror,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
+        os = 'Android,iP[ao]d,iPhone,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     name = reduce(name.split(','), function(name, guess) {
-      return name || (name = RegExp(guess).exec(ua) && guess);
+      return name || (name = RegExp(guess + '\\b', 'i').exec(ua) && guess);
     });
 
     os = reduce(os.split(','), function(os, guess) {
-      if (!os && (os = RegExp(guess + '[^-);/]*').exec(ua))) {
+      if (!os && (os = RegExp(guess + '[^);/-]*').exec(ua))) {
         // platform tokens defined at
         // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
         if (/Windows/.test(os) && (data = data[0/*opera fix*/,/[456]\.\d/.exec(os)])) {
@@ -309,15 +309,22 @@
           name || (name = 'Safari');
           os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
         }
+        // linux <3's underscores
+        if (!/Linux/.test(os)) {
+          os = String(os).replace(/_/g, '.');
+        }
         // cleanup
-        os = String(os).replace(' Mach', '').replace(/\/(\d)/, ' $1').replace(/_/g, '.').split(' on ')[0];
+        if (/Mac/.test(os)) {
+          os = String(os).replace(/ Mach$/, '').replace('Macintosh', 'Mac OS');
+        }
+        os = String(os).replace(/\/(\d)/, ' $1').split(' on ')[0];
       }
       return os;
     });
 
     // detect non Opera versions
     version = reduce(/webOS/.test(os) ? [name] : ['version', name], function(version, guess) {
-      return version || (version = (RegExp(guess + '[ /]([^ );]*)', 'i').exec(ua) || 0)[1]);
+      return version || (version = (RegExp(guess + '[ /-]([^ ();-]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
     // detect unspecified Safari versions
@@ -327,13 +334,17 @@
     }
     // detect IE compatibility mode
     if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      version = [version, String(doc.documentMode.toFixed(1))];
-      version[1] = (data = +data[1] + 4) != version[1] ? [description.push('running as IE ' + version[1]), String(data.toFixed(1))][1] : version[1];
-      version = version[name == 'IE' ? 1 : 0];
+      version = [version, doc.documentMode];
+      version[1] = (data = +data[1] + 4) != version[1] ? (description.push('running in IE ' + version[1] + ' mode'), data) : version[1];
+      version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
     }
     // detect release phases
-    if (version && (data = /(?:[ab](?:\dpre)?|dp)\d?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion))) {
-      version = version.replace(RegExp(data + '$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
+    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion))) {
+      version = version.replace(RegExp(data + '(\\+)?$'), '$1') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
+    }
+    // detect Maxthon's unreliable version info
+    if (name == 'Maxthon' && version) {
+      version = version.replace(/\..*/, '.x');
     }
     // detect Firefox nightly
     if (name == 'Minefield') {
@@ -345,7 +356,7 @@
       name += ' Mobile';
     }
     // detect platform preview
-    if (typeof window.external == 'object' && !external) {
+    if (/\u03b1|\u03b2/.test(version) && typeof window.external == 'object' && !external) {
       description.unshift('platform preview');
     }
     // add contextual information
