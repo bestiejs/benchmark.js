@@ -562,10 +562,11 @@
         mean,
         me = this,
         clones = [],
+        initCount = me.INIT_AVERAGE_COUNT,
         times = me.times;
 
     async = async == null ? me.DEFAULT_ASYNC : async;
-    count || (count = me.INIT_AVERAGE_COUNT);
+    count || (count = initCount);
 
     function cbSum(sum, clone) {
       return sum + clone.times.period;
@@ -602,6 +603,7 @@
         }
         // repeat if it was a bad batch
         if (!clones.length) {
+          count += initCount;
           start();
           return;
         }
