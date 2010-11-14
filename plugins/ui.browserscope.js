@@ -3,6 +3,7 @@
 
  /** Cache used by various methods */
   var cache = {
+    'api': { 'load': Benchmark.noop, 'tableContainer_': createElement('div') },
     'counter': 0,
     'trash': createElement('div')
   };
@@ -17,6 +18,16 @@
   */
   function createElement(tagName) {
     return document.createElement(tagName);
+  }
+
+ /**
+  * Displays a loading message while waiting for results to update.
+  * @private
+  */
+  function standBy() {
+    var div = cache.api.tableContainer_;
+    div.className = 'rt-loading';
+    div.innerHTML = 'Loading Browserscope results data ...';
   }
 
   /*--------------------------------------------------------------------------*/
@@ -74,6 +85,9 @@
       idoc = frames[name].document;
       iframe.style.display = 'none';
 
+      // display loading message
+      standBy();
+
       // perform inception :3
       idoc.write('<html><body><script>' +
                  'with(parent.ui.browserscope){' +
@@ -98,10 +112,10 @@
   */
   function refresh(api) {
     var me = this;
-    api || (api = { 'load': Benchmark.noop });
+    api && (cache.api = api);
 
     function refresh() {
-      api.load();
+      cache.api.load();
     }
 
     if (!me.KEY) {

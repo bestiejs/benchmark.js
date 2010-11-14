@@ -309,7 +309,7 @@
           name || (name = 'Safari');
           os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
         }
-        // linux <3's underscores
+        // linux <3s underscores
         if (!/Linux/.test(os)) {
           os = String(os).replace(/_/g, '.');
         }
