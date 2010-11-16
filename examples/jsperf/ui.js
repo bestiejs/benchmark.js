@@ -176,8 +176,10 @@
   * The title table cell click event handler used to run the corresponding benchmark.
   * @private
   */
-  function onClick() {
-    var id = this.id.split('-')[1];
+  function onClick(e) {
+    e || (e = window.event);
+    var id = (e.target || e.srcElement).id.split('-')[1];
+
     each(ui.benchmarks, function(benchmark) {
       if (benchmark.id == id) {
         ui.run(benchmark);
