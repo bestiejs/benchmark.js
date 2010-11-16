@@ -78,6 +78,21 @@
   }
 
  /**
+  * Registers an event listener on an element.
+  * @private
+  * @param {Object} element The element.
+  * @param {String} eventName The name of the event to listen to.
+  * @param {Function} handler The event handler.
+  */
+  function addListener(element, eventName, handler) {
+    if (typeof element.addEventListener != 'undefined') {
+      element.addEventListener(eventName, handler, false);
+    } else if (element.attachEvent != 'undefined') {
+      element.attachEvent('on' + eventName, handler);
+    }
+  }
+
+ /**
   * Appends to an element's innerHTML property.
   * @private
   * @param {Object} element The element.
@@ -355,8 +370,9 @@
 
     elTitle.tabIndex = 0;
     elTitle.title = 'Click to run this test again.';
-    elTitle.onclick = onClick;
-    elTitle.onkeyup = onKeyUp;
+
+    addListener(elTitle, 'click', onClick);
+    addListener(elTitle, 'keyup', onKeyUp);
 
     me.benchmarks.push(benchmark);
     me.elResults.push($(RESULTS_PREFIX + id));
@@ -526,10 +542,10 @@
   window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
 
   // re-parse hash query params when it changes
-  window.onhashchange = onHashChange;
+  addListener(window, 'hashchange', onHashChange);
 
   // bootstrap onload
-  window.onload = onLoad;
+  addListener(window, 'load', onLoad);
 
   // parse location hash string
   ui.parseHash();

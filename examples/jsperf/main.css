@@ -295,6 +295,60 @@ li.current a {
   background: #90ee85;
 }
 
+#bs-logo {
+  margin: 0;
+}
+
+#bs-logo span {
+  position: absolute;
+  top: -9999px;
+}
+
+#bs-logo a {
+  display: block;
+  width: 232px;
+  height: 39px;
+  filter: none;
+  -ms-filter: none;
+  background: url(//www.browserscope.org/static/img/logo.png) 0 0 no-repeat;
+}
+
+#bs-ua {
+  padding: 0.5em 0.5em 0;
+  color: #555;
+}
+
+#bs-results .bs-rt {
+  font-size: 10pt;
+  padding: 0.5em;
+  background:#ddd;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+}
+
+#bs-results td {
+  border: 1px solid #ddd;
+  padding: 0.4em;
+  white-space: nowrap;
+}
+
+#bs-results .rt-ua-cur {
+  font-style:italic;
+  font-weight:bold;
+}
+
+#bs-results .bs-rt-loading {
+  padding: 3em;
+  text-align: center;
+  font-weight: bold;
+  color: #555;
+}
+
+#bs-results .google-visualization-table-tr-head td {
+  white-space: normal;
+}
+
 #comments .meta, #comments .meta img {
   position: absolute;
   left: 0;

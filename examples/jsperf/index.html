@@ -10,6 +10,7 @@
 <script src="../../benchmark.js"></script>
 <script src="ui.js"></script>
 <script src="../../plugins/ui.browserscope.js"></script>
+
 </head>
 <body>
 <article>
@@ -159,9 +160,8 @@
   </table>
 
   <h2 id="results">Results</h2>
-  <!--
-  <script src="http://www.browserscope.org/user/tests/table/<YOUR_API_KEY>?v=3&amp;o=js&amp;h=auto&amp;w=auto&amp;callback=ui.browserscope.refresh"></script>
-  -->
+  <div id="bs-results"></div>
+
   <p>
     You can <a href="#" rel="nofollow">edit these tests or add even more tests to this page</a>
     by appending <code>/edit</code> to the URL.
@@ -180,6 +180,12 @@
   &bull; by <a href="http://mathiasbynens.be/" title="Mathias Bynens, front-end web developer">@mathias</a>
 </footer>
 <script>
+  // Setup Browserscope plugin
+  ui.browserscope.KEY = '';
+  ui.browserscope.PLACEHOLDER_SELECTOR = '';
+
+  /*--------------------------------------------------------------------------*/
+
   try {
     var arr = [1, 5, 4, 2, 3],
         i = 1;
