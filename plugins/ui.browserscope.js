@@ -67,6 +67,15 @@
   }
 
  /**
+  * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
+  * @private
+  * @returns {Number} Number of milliseconds.
+  */
+  function now() {
+    return +new Date;
+  }
+
+ /**
   * Queries the document for elements by id or tagName.
   * @private
   * @param {String} selector The css selector to match.
@@ -134,7 +143,7 @@
 
         // destroy the element to prevent pseudo memory leaks.
         // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
-        if (+new Date > expire || /browserscope\.org/.test(element.src)) {
+        if (now() > expire || /browserscope\.org/.test(element.src)) {
           trash.appendChild(element);
           trash.innerHTML = '';
         }
@@ -208,7 +217,8 @@
         'o=gviz_data&' +
         'highlight=&' +
         'score=&' +
-        'tqx=reqId:0',
+        'tqx=reqId:0&' +
+        'rid=' + now(),
         {'sendMethod': 'scriptInjection'}))
         .send(onComplete);
     }
@@ -225,7 +235,7 @@
         body = document.body,
         me = this,
         key = me.KEY,
-        name = 'browserscope-' + (cache.counter++) + '-' + (+new Date),
+        name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot();
 
     if (key && snapshot) {
