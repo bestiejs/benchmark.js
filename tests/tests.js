@@ -34,6 +34,34 @@ test("user agent detection", function() {
       'mode': 7
     },
 
+    'Android Browser 3.1.2 (WebKit) on Android 1.6': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 1.6; en-us; HTC_TATTOO_A3288 Build/DRC79) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1'
+    },
+
+    'Android Browser (WebKit) on Android 2.1': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; Sprint APA9292KT Build/ERE27) AppleWebKit/530.17 (KHTML, like Gecko)'
+    },
+
+    'Android Browser 4.0 (WebKit) on Android 2.2': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
+    },
+
+    'Android Browser 4.0 (WebKit) on Android 2.2.1': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
+    },
+
+    'BlackBerry Browser 4.0.0 on BlackBerry 7250': {
+      'ua': 'BlackBerry7250/4.0.0 Profile/MIDP-2.0 Configuration/CLDC-1.1'
+    },
+
+    'BlackBerry Browser 4.5.1.231 on BlackBerry 8900': {
+      'ua': 'BlackBerry8900/4.5.1.231 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/100'
+    },
+
+    'BlackBerry Browser 6.0.0.91 (WebKit) on BlackBerry 9800': {
+      'ua': 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9800; en-US) AppleWebKit/534.1  (KHTML, like Gecko) Version/6.0.0.91 Mobile Safari/534.1 ,gzip(gfe),gzip(gfe)'
+    },
+
     'Camino 0.7 on Mac OS X': {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.0.1) Gecko/20030306 Camino/0.7'
     },
@@ -242,6 +270,14 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)'
     },
 
+    'Iron 0.2.152.0 on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Iron/0.2.152.0 Safari/41562480.525'
+    },
+
+    'Iron 7.0.520.1 on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Iron/7.0.520.1 Chrome/7.0.520.1 Safari/534.7'
+    },
+
     'K-Meleon 1.5.0\u03b2 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080406 K-Meleon/1.5.0b2'
     },
@@ -254,7 +290,24 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (compatible; Konqueror/4.4; Linux 2.6.32-22-generic; X11; en_US) KHTML/4.4.3 (like Gecko) Kubuntu'
     },
 
-    'Maxthon 2.x on Windows XP': {
+    'Lunascape 5.0\u03b1 on Windows Server 2003 / XP x64': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.2; Lunascape 5.0 alpha3)'
+    },
+
+    'Lunascape 6.1.7.21880 (Trident) on Windows 7': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Lunascape 6.1.7.21880)',
+      'mode': 8
+    },
+
+    'Lunascape 6.2.1.22445 (Gecko) on Windows Vista': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.13) Gecko/20100917 Firefox/3.5.13 Lunascape/6.2.1.22445'
+    },
+
+    'Lunascape 6.3.2.22803 (WebKit) on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Lunascape/6.3.2.22803 Safari/533.3'
+    },
+
+    'Maxthon 2.x (Trident) on Windows XP': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; Maxthon 2.0)',
       'mode': 8
     },
@@ -264,7 +317,7 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Maxthon 3.x on Windows XP': {
+    'Maxthon 3.x (WebKit) on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.9 (KHTML, like Gecko) Maxthon/3.0 Safari/533.9'
     },
 
@@ -385,10 +438,6 @@ test("user agent detection", function() {
 
     'Safari 4.0\u03b1 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/526.9 (KHTML, like Gecko) Version/4.0dp1 Safari/526.8'
-    },
-
-    'Safari 4.0 on Android 2.2': {
-      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
     'Safari 4.0 on iPhone iOS 3.0': {
@@ -616,7 +665,7 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Sleipnir 2.9.6 on Windows 7': {
+    'Sleipnir 2.9.6 (Trident) on Windows 7': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Sleipnir/2.9.6)',
       'mode': 8
     },

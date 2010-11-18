@@ -288,13 +288,19 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Avant Browser,Camino,Flock,GreenBrowser,iCab,K-Meleon,Konqueror,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
-        os = 'Android,iP[ao]d,iPhone,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
+        name = 'Avant Browser,Camino,Flock,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
+        os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
+        product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
+        layout = /Gecko|Trident|WebKit/.exec(ua),
         version = toString.call(window.opera) == '[object Opera]' && opera.version(),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
 
     name = reduce(name.split(','), function(name, guess) {
       return name || (name = RegExp(guess + '\\b', 'i').exec(ua) && guess);
+    });
+
+    product = reduce(product.split(','), function(product, guess) {
+      return product || (product = RegExp(guess + '[^);/]*').exec(ua));
     });
 
     os = reduce(os.split(','), function(os, guess) {
@@ -305,9 +311,13 @@
           os = 'Windows ' + data;
         }
         // normalize iOS
-        if (data = /iP[ao]d|iPhone/.exec(os)) {
+        else if (/^iP/.test(product)) {
           name || (name = 'Safari');
-          os = data + ' iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
+          os = 'iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
+        }
+        // avoid detecting an OS for products
+        else if (product) {
+          return null;
         }
         // linux <3s underscores
         if (!/Linux/.test(os)) {
@@ -323,41 +333,52 @@
     });
 
     // detect non Opera versions
-    version = reduce(/webOS/.test(os) ? [name] : ['version', name], function(version, guess) {
+    version = reduce(/webOS/.test(os) ? [name] : ['version', name, product], function(version, guess) {
       return version || (version = (RegExp(guess + '[ /-]([^ ();-]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
+    // cleanup product
+    product = product && String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0];
+
+    // detect non Safari WebKit based browsers
+    if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
+      name = /[a-z]+/i.exec(product) + ' Browser';
+    }
     // detect unspecified Safari versions
-    if (!version || parseInt(version) > 45) {
+    else if (name == 'Safari' && (!version || parseInt(version) > 45)) {
       data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
       version = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 534 ? '4+' : version;
     }
     // detect IE compatibility mode
-    if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
+    else if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
       version = [version, doc.documentMode];
-      version[1] = (data = +data[1] + 4) != version[1] ? (description.push('running in IE ' + version[1] + ' mode'), data) : version[1];
+      version[1] = (data = +data[1] + 4) != version[1] ? (layout = null, description.push('running in IE ' + version[1] + ' mode'), data) : version[1];
       version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
     }
     // detect release phases
-    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /alpha|beta/i.exec(navigator.appMinorVersion))) {
+    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /alpha|beta/i.exec(ua + ';' + navigator.appMinorVersion))) {
       version = version.replace(RegExp(data + '(\\+)?$'), '$1') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
     }
     // detect Maxthon's unreliable version info
-    if (name == 'Maxthon' && version) {
-      version = version.replace(/\..*/, '.x');
+    if (name == 'Maxthon') {
+      version = version && version.replace(/\..*/, '.x');
     }
     // detect Firefox nightly
-    if (name == 'Minefield') {
+    else if (name == 'Minefield') {
       name = 'Firefox';
       version = /\u03b1|\u03b2|null/.test(version) ? version : version + '\u03b1';
     }
     // detect mobile
-    if (name && !/Android| iOS/.test(os) && /Fennec|Mobi/.test(ua)) {
+    else if (name && !product && /Fennec|Mobi/.test(ua)) {
       name += ' Mobile';
     }
     // detect platform preview
     if (/\u03b1|\u03b2/.test(version) && typeof window.external == 'object' && !external) {
       description.unshift('platform preview');
+    }
+    // detect layout engines
+    if (layout && RegExp(/[a-z]+/i.exec(product) + '|Lunascape|Maxthon|Sleipnir').test(name)) {
+      description.push((/preview/.test(description) ? 'rendered by ' : '') + layout);
     }
     // add contextual information
     if (description.length) {
@@ -366,7 +387,8 @@
     return {
       'version': name && version && description.unshift(version) && version,
       'name': name && description.unshift(name) && name,
-      'os': os && description.push('on ' + os) && os,
+      'product': product && description.push('on ' + product) && product,
+      'os': os && description.push((product ? '' : 'on ') + os) && os,
       'description': description.length ? description.join(' ') : 'unknown platform',
       'toString': function() { return this.description; }
     };
