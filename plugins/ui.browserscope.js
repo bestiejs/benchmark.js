@@ -37,17 +37,18 @@
  /**
   * Creates Browserscope results object (skipping unrun and errored benchmarks).
   * @private
-  * @returns {Object} Browserscope results object.
+  * @returns {Object|Null} Browserscope results object or null.
   */
   function createSnapshot() {
     return Benchmark.reduce(ui.benchmarks, function(result, benchmark, key) {
       if (benchmark.cycles) {
         // duplicate and non alphanumeric benchmark names have their ids appended
         key = (benchmark.name.match(/[a-z0-9]+/ig) || []).join(' ');
+        result || (result = { });
         result[key && !result[key] ? key : key + benchmark.id ] = benchmark.hz;
       }
       return result;
-    }, { });
+    }, null);
   }
 
  /**
@@ -120,6 +121,7 @@
   function onCleanup() {
     var expire, name
         me = ui.browserscope,
+        delay = me.CLEANUP_INTERVAL * 1e3,
         trash = cache.trash;
 
     // remove injected scripts and old iframes
@@ -128,7 +130,7 @@
 
         // check if element is expired
         name = element.name;
-        expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] + (me.POST_TIMEOUT * 3e3);
+        expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] + delay;
 
         // destroy the element to prevent pseudo memory leaks.
         // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
@@ -139,7 +141,7 @@
       });
     }
     // schedule another round
-    onCleanup.id = setTimeout(onCleanup, me.CLEANUP_INTERVAL * 1e3);
+    onCleanup.id = setTimeout(onCleanup, delay);
   }
 
  /**
@@ -223,9 +225,10 @@
         body = document.body,
         me = this,
         key = me.KEY,
-        name = 'browserscope-' + (cache.counter++) + '-' + (+new Date);
+        name = 'browserscope-' + (cache.counter++) + '-' + (+new Date),
+        snapshot = createSnapshot();
 
-    if (key) {
+    if (key && snapshot) {
       // create new beacon
       try {
         iframe = createElement('<iframe name=' + name + '>');
@@ -240,19 +243,16 @@
       // display "stand by" message
       standBy();
 
-      // create snapshot of the benchmark results
-      me.snapshot = createSnapshot();
+      // expose snapshot of benchmark results
+      me.snapshot = snapshot;
 
       // perform inception :3
       idoc.write('<html><body><script>' +
                  'with(parent.ui.browserscope){' +
                  'var _bTestResults=snapshot,' +
-                 '_bD=1e3*' + me.POST_TIMEOUT + ',' +
-                 '_bT=function(){parent.setTimeout(load,_bD);},' +
-                 '_bK=setTimeout(_bT,_bD),' +
-                 '_bP=function(){clearTimeout(_bK);setTimeout(_bT,_bD)}' +
+                 '_bC=function(){parent.setTimeout(load,' + me.REFRESH_DELAY + '*1e3)}' +
                  '}<\/script>' +
-                 '<script src=//www.browserscope.org/user/beacon/' + key + '?callback=_bP><\/script>' +
+                 '<script src=//www.browserscope.org/user/beacon/' + key + '?callback=_bC><\/script>' +
                  '<\/body><\/html>');
       idoc.close();
     }
@@ -300,11 +300,11 @@
     /** The delay between removing abandoned script elements and iframes (secs) */
     'CLEANUP_INTERVAL': 10,
 
+    /** The delay before refreshing the cumulative results after posting (secs) */
+    'REFRESH_DELAY': 3,
+
     /** The delay beteen load attempts (secs) */
     'RETRY_INTERVAL': 10,
-
-    /** Seconds to wait for each stage of the Browserscope posting process (3 stages) */
-    'POST_TIMEOUT': 3,
 
     /** Text shown when the cumulative results data cannot be retrieved */
     'ERROR_TEXT': 'An error occurred while retrieving the Browserscope data :(',
