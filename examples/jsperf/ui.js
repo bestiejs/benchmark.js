@@ -282,14 +282,13 @@
       // print contextual information
       each(result, function(benchmark) {
         var percent,
-            text,
+            text = 'fastest',
             elResult = $(RESULTS_PREFIX + benchmark.id),
             elSpan = elResult.getElementsByTagName('span')[0];
 
         if (benchmark.hz == first.hz) {
           // mark fastest
-          text = 'fastest';
-          addClass(elResult, 'fastest');
+          addClass(elResult, text);
         }
         else {
           percent = Math.floor((1 - benchmark.hz / first.hz) * 100);

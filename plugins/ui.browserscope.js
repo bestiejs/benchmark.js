@@ -4,6 +4,7 @@
  /** Cache used by various methods */
   var cache = {
     'counter': 0,
+    'lastAction': 'load',
     'trash': createElement('div')
   };
 
@@ -35,7 +36,7 @@
   }
 
  /**
-  * Creates Browserscope results object (skipping unrun and errored benchmarks).
+  * Creates a Browserscope results object (skipping unrun and errored benchmarks).
   * @private
   * @returns {Object|Null} Browserscope results object or null.
   */
@@ -97,34 +98,46 @@
   * @private
   * @param {Object} element The element.
   * @param {String} html The HTML to set.
-  * @param {Object} template The template object used to modify the html
+  * @param {Object} object The template object used to modify the html.
   */
-  function setHTML(element, html, template) {
-    html = html == null ? '' : html;
-    template || (template = { });
-    for (var key in template) {
-      html = html.replace(RegExp('#\\{' + key + '\\}', 'g'), template[key]);
-    }
-    element.innerHTML = html;
+  function setHTML(element, html, object) {
+    element.innerHTML = template(html, object);
   }
 
  /**
-  * Displays a loading message in the results element.
+  * Displays a message in the "results" element.
   * @private
+  * @param {String} text The text to display.
   */
-  function standBy() {
+  function setMessage(text) {
     var me = ui.browserscope,
         cont = me.container;
     if (cont) {
-      cont.className = 'bs-rt-loading';
-      cont.innerHTML = me.STAND_BY_TEXT;
+      cont.className = 'bs-rt-message';
+      cont.innerHTML = text;
     }
+  }
+
+ /**
+  * Modify a string by replacing named tokens with matching object property values.
+  * @private
+  * @param {String} string The string to modify.
+  * @param {Object} object The template object.
+  * @returns {String} The modified string.
+  */
+  function template(string, object) {
+    string = string == null ? '' : string;
+    object || (object = { });
+    for (var key in object) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), object[key]);
+    }
+    return string;
   }
 
   /*--------------------------------------------------------------------------*/
 
  /**
-  * Periodically executed callback that removes injected script elements and old iframes.
+  * Periodically executed callback that removes injected script and iframe elements.
   * @private
   */
   function onCleanup() {
@@ -139,7 +152,8 @@
 
         // check if element is expired
         name = element.name;
-        expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] + delay;
+        expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] +
+                 Math.max(delay, me.REQUEST_TIMEOUT * 1e3);
 
         // destroy the element to prevent pseudo memory leaks.
         // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
@@ -198,17 +212,18 @@
   */
   function load() {
     var me = ui.browserscope,
-        cont = me.container;
+        cont = me.container,
+        timer = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
 
     function onComplete(response) {
+      clearTimeout(timer);
       me.render(response);
     }
 
-    // display "stand by" message
-    standBy();
-
     // request data
     if (cont) {
+      setMessage(me.LOADING_TEXT);
+      cache.lastAction = 'load';
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?' +
         'category=usertest_' + me.KEY + '&' +
@@ -233,7 +248,7 @@
     var idoc,
         iframe,
         body = document.body,
-        me = this,
+        me = ui.browserscope,
         key = me.KEY,
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot();
@@ -250,20 +265,29 @@
       idoc = frames[name].document;
       iframe.style.display = 'none';
 
-      // display "stand by" message
-      standBy();
-
-      // expose snapshot of benchmark results
+      // expose results snapshot
       me.snapshot = snapshot;
 
+      setMessage(me.POST_TEXT);
+      cache.lastAction = 'post';
+
       // perform inception :3
-      idoc.write('<html><body><script>' +
-                 'with(parent.ui.browserscope){' +
-                 'var _bTestResults=snapshot,' +
-                 '_bC=function(){parent.setTimeout(load,' + me.REFRESH_DELAY + '*1e3)}' +
-                 '}<\/script>' +
-                 '<script src=//www.browserscope.org/user/beacon/' + key + '?callback=_bC><\/script>' +
-                 '<\/body><\/html>');
+      idoc.write(template(
+        '<html><body><script>' +
+        'with(parent.ui.browserscope){' +
+        'var _bTestResults=snapshot,' +
+        '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
+        '_bT=setTimeout(function(){document.body.innerHTML=render()},#{timeout}*1e3)' +
+        '}<\/script>' +
+        '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
+        '<\/body><\/html>',
+        {
+          'key': key,
+          'refresh': me.REFRESH_DELAY,
+          'timeout': me.REQUEST_TIMEOUT
+        }
+      ));
+
       idoc.close();
     }
   }
@@ -281,7 +305,7 @@
     // visualization table options
     // http://code.google.com/apis/visualization/documentation/gallery/table.html
     if (cont) {
-      if (!response.isError()) {
+      if (response && !response.isError()) {
         cont.className = '';
         (new google.visualization.Table(cont)).draw(response.getDataTable(), {
           'width': 'auto',
@@ -290,8 +314,8 @@
         });
       }
       else {
-        setHTML(cont, me.ERROR_TEXT);
-        setTimeout(load, me.RETRY_INTERVAL * 1e3);
+        setMessage(me.ERROR_TEXT);
+        setTimeout(me[cache.lastAction], me.RETRY_INTERVAL * 1e3);
       }
     }
   }
@@ -307,20 +331,26 @@
     /** Selector of the element used for displaying the cumulative results table */
     'PLACEHOLDER_SELECTOR': '',
 
-    /** The delay between removing abandoned script elements and iframes (secs) */
+    /** The delay between removing abandoned script and iframe elements (secs) */
     'CLEANUP_INTERVAL': 10,
 
     /** The delay before refreshing the cumulative results after posting (secs) */
     'REFRESH_DELAY': 3,
 
-    /** The delay beteen load attempts (secs) */
-    'RETRY_INTERVAL': 10,
+    /** The time to wait for a request to finish (secs) */
+    'REQUEST_TIMEOUT': 10,
+
+    /** The delay between load attempts (secs) */
+    'RETRY_INTERVAL': 5,
 
     /** Text shown when the cumulative results data cannot be retrieved */
-    'ERROR_TEXT': 'An error occurred while retrieving the Browserscope data :(',
+    'ERROR_TEXT': 'The get/post request has failed :(',
 
-    /** Text shown while waiting for the cumulative results data */
-    'STAND_BY_TEXT': 'Loading Browserscope data&hellip;',
+    /** Text shown while waiting for the cumulative results data to load */
+    'LOADING_TEXT': 'Loading cumulative results data&hellip;',
+
+    /** Text shown while posting the results snapshot to Browserscope */
+    'POST_TEXT': 'Posting results snapshot&hellip;',
 
     // loads cumulative results table
     'load': load,

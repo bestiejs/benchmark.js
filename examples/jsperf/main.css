@@ -338,7 +338,7 @@ li.current a {
   font-weight:bold;
 }
 
-#bs-results .bs-rt-loading {
+#bs-results .bs-rt-message {
   padding: 3em;
   text-align: center;
   font-weight: bold;
