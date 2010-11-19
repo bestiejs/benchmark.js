@@ -333,8 +333,8 @@
     });
 
     // detect non Opera versions
-    version = reduce(/webOS/.test(os) ? [name] : ['version', name, product], function(version, guess) {
-      return version || (version = (RegExp(guess + '[ /-]([^ ();-]*)', 'i').exec(ua) || 0)[1]);
+    version = reduce(/webOS/.test(os) ? [name] : ['version', name, product], function(version, guess, i) {
+      return version || (version = (RegExp(guess + (i == 1 ? '[ /-]' : '/') + '([^ ();-]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
     // cleanup product

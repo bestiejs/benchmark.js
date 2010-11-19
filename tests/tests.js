@@ -348,16 +348,16 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS; en-en) AppleWebKit/412 (KHTML, like Gecko) Safari/412'
     },
 
-    'Safari 3.0 on iPod iOS': {
-      'ua': 'Mozila/5.0 (iPod; U; CPU like Mac OS X; en) AppleWebKit/420.1 (KHTML, like Geckto) Version/3.0 Mobile/3A101a Safari/419.3'
-    },
-
     'Safari 3.x on iPod iOS 2.2.1': {
       'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 2_2_1 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Mobile/5H11a'
     },
 
     'Safari 3.x on webOS 1.2.9': {
       'ua': 'Mozilla/5.0 (webOS/Palm webOS 1.2.9; U; en-US) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/1.0 Safari/525.27.1 Pixi/1.0'
+    },
+
+    'Safari 3.0 on iPod iOS': {
+      'ua': 'Mozila/5.0 (iPod; U; CPU like Mac OS X; en) AppleWebKit/420.1 (KHTML, like Geckto) Version/3.0 Mobile/3A101a Safari/419.3'
     },
 
     'Safari 3.1.1 on iPhone iOS 2.0.1': {
@@ -424,6 +424,18 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/525.28.3 (KHTML, like Gecko) Version/3.2.3 Safari/525.29'
     },
 
+    'Safari 4+ on iPhone iOS 3.1': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Mobile/7E18,gzip(gfe),gzip(gfe)'
+    },
+
+    'Safari 4+ on iPhone iOS 4.1': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Mobile/8B117'
+    },
+
+    'Safari 4+ on webOS 1.4.0': {
+      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
+    },
+
     'Safari 4.0\u03b1 on Mac OS X 10.4.11': {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_4_11; tr) AppleWebKit/528.4+ (KHTML, like Gecko) Version/4.0dp1 Safari/526.11.2'
     },
@@ -450,6 +462,10 @@ test("user agent detection", function() {
 
     'Safari 4.0 on iPhone iOS 3.1': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7C97d Safari/528.16'
+    },
+
+    'Safari 4.0 on iPhone iOS 3.1.3': {
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1_3 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7E18 Safari/528.16'
     },
 
     'Safari 4.0 on iPhone iOS 4.1.1': {
@@ -590,10 +606,6 @@ test("user agent detection", function() {
 
     'Safari 4.1 on Mac OS X 10.7': {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_7; en-us) AppleWebKit/533.4 (KHTML, like Gecko) Version/4.1 Safari/533.4'
-    },
-
-    'Safari 4+ on webOS 1.4.0': {
-      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
     },
 
     'Safari 5.0 on Linux x86_64': {
