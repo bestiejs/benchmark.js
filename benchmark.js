@@ -288,7 +288,7 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Avant Browser,Camino,Flock,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
+        name = 'Avant Browser,Camino,Fennec,Flock,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
         os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
         layout = /Gecko|Trident|WebKit/.exec(ua),
@@ -356,8 +356,8 @@
       version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
     }
     // detect release phases
-    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /alpha|beta/i.exec(ua + ';' + navigator.appMinorVersion))) {
-      version = version.replace(RegExp(data + '(\\+)?$'), '$1') + (/^b/i.test(data) ? '\u03b2' : '\u03b1');
+    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /(?:alpha|beta) ?\d?/i.exec(ua + ';' + navigator.appMinorVersion))) {
+      version = version.replace(RegExp(data + '\\+?$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1') + (/\d+\+?/.exec(data) || '');
     }
     // detect Maxthon's unreliable version info
     if (name == 'Maxthon') {
@@ -369,7 +369,7 @@
       version = /\u03b1|\u03b2|null/.test(version) ? version : version + '\u03b1';
     }
     // detect mobile
-    else if (name && !product && /Fennec|Mobi/.test(ua)) {
+    else if (name && !product && /Mobi/.test(ua)) {
       name += ' Mobile';
     }
     // detect platform preview
