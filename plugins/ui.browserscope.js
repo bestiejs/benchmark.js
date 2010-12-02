@@ -38,10 +38,14 @@
  /**
   * Creates a Browserscope results object (skipping unrun and errored benchmarks).
   * @private
+  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
   * @returns {Object|Null} Browserscope results object or null.
   */
-  function createSnapshot() {
-    return Benchmark.reduce(ui.benchmarks, function(result, benchmark, key) {
+  function createSnapshot(benchmarks) {
+    if (!Benchmark.isArray(benchmarks)) {
+      benchmarks = benchmarks ? [benchmarks] : ui.benchmarks;
+    }
+    return Benchmark.reduce(benchmarks, function(result, benchmark, key) {
       if (benchmark.cycles) {
         // duplicate and non alphanumeric benchmark names have their ids appended
         key = (benchmark.name.match(/[a-z0-9]+/ig) || []).join(' ');
@@ -243,15 +247,16 @@
   * Creates a Browserscope beacon and posts the benchmark results.
   * @static
   * @member ui.browserscope
+  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
   */
-  function post() {
+  function post(benchmarks) {
     var idoc,
         iframe,
         body = document.body,
         me = ui.browserscope,
         key = me.KEY,
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
-        snapshot = createSnapshot();
+        snapshot = createSnapshot(benchmarks);
 
     if (key && snapshot) {
       // create new beacon
