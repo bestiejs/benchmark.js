@@ -53,7 +53,7 @@
 
    isArray = Benchmark.isArray;
 
-  /*--------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
  /**
   * Shortcut for document.getElementById().
@@ -170,7 +170,7 @@
     setHTML('status', text);
   }
 
-  /*--------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
  /**
   * The title table cell click event handler used to run the corresponding benchmark.
@@ -242,7 +242,7 @@
 
     addClass('run', 'show');
     setHTML('run', RUN_TEXT.READY);
-    setHTML('user-agent', Benchmark.getPlatform());
+    setHTML('user-agent', Benchmark.platform);
     setStatus(STATUS_TEXT.READY);
 
     // show warning when Firebug is enabled
@@ -333,7 +333,7 @@
     }
   }
 
-  /*--------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
  /**
   * Aborts any running benchmarks, clears the run queue, and renders results.
@@ -402,38 +402,44 @@
   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
   */
   function render(benchmarks) {
-    var me = this,
-        queue = me.queue;
-
+    var me = this;
     if (!isArray(benchmarks)) {
       benchmarks = benchmarks ? [benchmarks] : me.benchmarks;
     }
     each(benchmarks, function(benchmark) {
-      var cell = $(RESULTS_PREFIX + benchmark.id);
+      var cell = $(RESULTS_PREFIX + benchmark.id),
+          error = benchmark.error,
+          hz = benchmark.hz;
+
       cell.title = '';
 
-      if (benchmark.error) {
+      // status: error
+      if (error) {
         setHTML(cell, 'Error');
         if (!hasClass(cell, ERROR_CLASS)) {
           addClass(cell, ERROR_CLASS);
         }
-        logError('<p>' + benchmark.error + '.<\/p><ul><li>' +
-          Benchmark.join(benchmark.error, '<\/li><li>') + '<\/li><\/ul>');
+        logError('<p>' + error + '.<\/p><ul><li>' +
+          Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
       }
       else {
+        // status: running
         if (benchmark.running) {
           setHTML(cell, 'running&hellip;');
         }
+        // status: finished
         else if (benchmark.cycles) {
-          setHTML(cell, formatNumber(benchmark.hz));
-          cell.title = 'Ran ' + formatNumber(benchmark.count) +
-                       ' times in ' + benchmark.times.cycle.toFixed(2) +
-                       ' seconds.\n      (' + benchmark.RME.toFixed(2) +
-                       '% margin of error)';
+          setHTML(cell, formatNumber(hz));
+          cell.title = 'Ran ' + formatNumber(benchmark.count) + ' times in ' +
+                       benchmark.times.cycle.toFixed(2) + ' seconds.' +
+                       (hz == Infinity ? '' : ' (' +
+                       benchmark.RME.toFixed(2) + '% margin of error)');
         }
-        else if (indexOf(queue, benchmark) > -1) {
+        // status: pending
+        else if (indexOf(me.queue, benchmark) > -1) {
           setHTML(cell, 'pending&hellip;');
         }
+        // status: ready
         else {
           setHTML(cell, 'ready');
         }
@@ -487,7 +493,7 @@
     }
   }
 
-  /*--------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
   // expose
   window.ui = {
@@ -537,7 +543,7 @@
     'run': run
   };
 
-  /*--------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
   // signal JavaScript detected
   addClass(document.documentElement, JS_CLASS);
