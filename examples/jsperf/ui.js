@@ -205,7 +205,9 @@
   */
   function onCycle(benchmark) {
     if (!benchmark.aborted) {
-      setStatus(benchmark.name + ' &times; ' + formatNumber(benchmark.count));
+      setStatus(benchmark.name + ' &times; ' +
+                formatNumber(benchmark.count) + ' (' +
+                benchmark.cycles + ' cycles)');
     }
   }
 
@@ -327,9 +329,7 @@
     if (run) {
       logError(false);
       invoke(Benchmark.CALIBRATIONS, 'reset');
-      ui.run((e || window.event).shiftKey
-        ? benchmarks.slice(0).reverse()
-        : benchmarks);
+      ui.run((e || window.event).shiftKey ? benchmarks.slice(0).reverse() : benchmarks);
     }
   }
 
@@ -426,7 +426,10 @@
         }
         else if (benchmark.cycles) {
           setHTML(cell, formatNumber(benchmark.hz));
-          cell.title = 'Looped ' + formatNumber(benchmark.count) + ' times in ' + benchmark.times.cycle + ' seconds.';
+          cell.title = 'Ran ' + formatNumber(benchmark.count) +
+                       ' times in ' + benchmark.times.cycle.toFixed(2) +
+                       ' seconds.\n      (' + benchmark.RME.toFixed(2) +
+                       '% margin of error)';
         }
         else if (indexOf(queue, benchmark) > -1) {
           setHTML(cell, 'pending&hellip;');
@@ -556,7 +559,7 @@
 
   // customize calibration benchmarks
   each(Benchmark.CALIBRATIONS, function(cal) {
-    cal.name = 'Calibrating loop';
+    cal.name = 'Calibrating';
     cal.onCycle = cal.onStart = onCycle;
   });
 
