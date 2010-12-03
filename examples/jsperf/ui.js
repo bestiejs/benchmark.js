@@ -20,7 +20,7 @@
    RESULTS_CLASS = 'results',
 
    /** Google Analytics account id */
-   GA_ACCOUNT_ID = 'UA-6065217-40',
+   GA_ACCOUNT_ID = '',
 
    /** Benchmark results element id prefix (e.g. `results-1`) */
    RESULTS_PREFIX = 'results-',
@@ -572,14 +572,16 @@
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
-  (function(tag) {
-    var script = createElement(tag),
-        sibling = document.getElementsByTagName(tag)[0];
+  if (GA_ACCOUNT_ID) {
+    (function() {
+      var tag = 'script',
+          script = createElement(tag),
+          sibling = document.getElementsByTagName(tag)[0];
 
-    window._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
-    script.async = 1;
-    script.src = '//www.google-analytics.com/ga.js';
-    sibling.parentNode.insertBefore(script, sibling);
-  }('script'));
-
+      window._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
+      script.async = 1;
+      script.src = '//www.google-analytics.com/ga.js';
+      sibling.parentNode.insertBefore(script, sibling);
+    }());
+  }
 }(this, document));
