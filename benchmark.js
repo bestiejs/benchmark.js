@@ -276,7 +276,7 @@
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
-        // Firefox may return extremely high margins of error for compiled methods
+        // Firefox may return an extremely high margin of error for compiled methods
         if (!curr && rme > 30) {
           me.fn.uncompilable = uncompilable = true;
           me.INIT_RUN_COUNT = Benchmark.prototype.INIT_RUN_COUNT;
@@ -1035,7 +1035,11 @@
      * @static
      * @member Benchmark
      */
-    'CALIBRATIONS': [new Calibration(function() { return; })],
+    'CALIBRATIONS': (function() {
+      var cal = new Calibration(function() { });
+      cal.uncompilable = true;
+      return [cal];
+    }()),
 
     // generic Array#forEach
     'each': each,
