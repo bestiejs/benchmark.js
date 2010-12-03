@@ -207,7 +207,8 @@
     if (!benchmark.aborted) {
       setStatus(benchmark.name + ' &times; ' +
                 formatNumber(benchmark.count) + ' (' +
-                benchmark.cycles + ' cycles)');
+                (benchmark.cycles == 1 ? '1 cycle' : benchmark.cycles + ' cycles') +
+                ')');
     }
   }
 
