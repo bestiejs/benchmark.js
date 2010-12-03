@@ -8,7 +8,7 @@
 
 (function(window) {
 
- /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
+  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
   var CYCLE_DIVISORS = {
     '1': 128,
     '2': 32,
@@ -17,10 +17,10 @@
     '5': 0
   },
 
- /**
-  * T-Distribution critical values for 95% confidence
-  * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
-  */
+  /**
+   * T-Distribution critical values for 95% confidence
+   * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
+   */
   T_DISTRIBUTION = {
     '1':  12.706,'2':  4.303, '3':  3.182, '4':  2.776, '5':  2.571, '6':  2.447,
     '7':  2.365, '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
@@ -50,14 +50,14 @@
   /** Helps to resolve an object's internal [[Class]] property */
   toString = cache.toString;
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Benchmark constructor.
-  * @constructor
-  * @param {Function} fn Test to benchmark.
-  * @param {Object} [options={}] Options object.
-  */
+  /**
+   * Benchmark constructor.
+   * @constructor
+   * @param {Function} fn Test to benchmark.
+   * @param {Object} [options={}] Options object.
+   */
   function Benchmark(fn, options) {
     options = extend({ }, options);
     extend(this, options);
@@ -66,26 +66,26 @@
     this.times = { };
   }
 
- /**
-  * Subclass of Benchmark used specifically for calibration.
-  * @private
-  * @constructor
-  * @base Benchmark
-  * @param {Function} fn Test to benchmark.
-  * @param {Object} [options={}] Options object.
-  */
+  /**
+   * Subclass of Benchmark used specifically for calibration.
+   * @private
+   * @constructor
+   * @base Benchmark
+   * @param {Function} fn Test to benchmark.
+   * @param {Object} [options={}] Options object.
+   */
   function Calibration(fn, options) {
     Benchmark.call(this, fn, options);
   }
 
   (function() {
 
-   /**
-    * Runs calibration benchmarks without calibrating itself.
-    * @member Calibration
-    * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
-    * @param {Boolean} [async=false] Flag to run asynchronously.
-    */
+    /**
+     * Runs calibration benchmarks without calibrating itself.
+     * @member Calibration
+     * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
+     * @param {Boolean} [async=false] Flag to run asynchronously.
+     */
     function run(count, async) {
       var me = this;
       me.reset();
@@ -107,16 +107,16 @@
     proto.run = run;
   }());
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Checks if calibrations have completed and, if not, fires a callback when completed.
-  * @private
-  * @param {Object} me The benchmark instance waiting for calibrations to complete.
-  * @param {Function} callback Function executed after calibration.
-  * @param {Boolean} [async=false] Flag to run asynchronously.
-  * @returns {Boolean} Returns true if calibrated, false if not.
-  */
+  /**
+   * Checks if calibrations have completed and, if not, fires a callback when completed.
+   * @private
+   * @param {Object} me The benchmark instance waiting for calibrations to complete.
+   * @param {Function} callback Function executed after calibration.
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @returns {Boolean} Returns true if calibrated, false if not.
+   */
   function isCalibrated(me, callback, async) {
     var cals = Benchmark.CALIBRATIONS,
         onCycle = function(cal) { return !(cal.aborted || me.aborted); },
@@ -134,13 +134,13 @@
     return result;
   }
 
- /**
-  * Executes a function asynchronously or synchronously.
-  * @private
-  * @param {Object} me The benchmark instance passed to `fn`.
-  * @param {Function} fn Function to be executed.
-  * @param {Boolean} [async=false] Flag to run asynchronously.
-  */
+  /**
+   * Executes a function asynchronously or synchronously.
+   * @private
+   * @param {Object} me The benchmark instance passed to `fn`.
+   * @param {Function} fn Function to be executed.
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   */
   function call(me, fn, async) {
     if (async && isHostType(window, 'setTimeout')) {
       me.timerId = setTimeout(function() {
@@ -153,11 +153,11 @@
     }
   }
 
- /**
-  * Clears cached compiled code for a given test function.
-  * @private
-  * @param {Object} me The benchmark instance used to resolve the cache entry.
-  */
+  /**
+   * Clears cached compiled code for a given test function.
+   * @private
+   * @param {Object} me The benchmark instance used to resolve the cache entry.
+   */
   function clearCompiled(me) {
     var uid = me.fn.uid,
         compiled = cache.compiled;
@@ -170,12 +170,12 @@
     }
   }
 
- /**
-  * Performs statistical calculations on benchmark results.
-  * @private
-  * @param {Object} me The benchmark instance.
-  * @param {Boolean} [async=false] Flag to run asynchronously.
-  */
+  /**
+   * Performs statistical calculations on benchmark results.
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   */
   function compute(me, async) {
     var elapsed,
         last,
@@ -318,14 +318,14 @@
     });
   }
 
- /**
-  * Repeat a string a given number of times using the `Exponentiation by squaring` algorithm.
-  * http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
-  * @private
-  * @param {String} string The string to repeat.
-  * @param {Number} count The number of times to repeat the string.
-  * @returns {String} The repeated string.
-  */
+  /**
+   * Repeat a string a given number of times using the `Exponentiation by squaring` algorithm.
+   * http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
+   * @private
+   * @param {String} string The string to repeat.
+   * @param {Number} count The number of times to repeat the string.
+   * @returns {String} The repeated string.
+   */
   function repeat(string, count) {
     if (count < 1) return '';
     if (count % 2) return repeat(string, count - 1) + string;
@@ -333,12 +333,12 @@
     return half + half;
   }
 
- /**
-  * Clocks the time taken to execute a test per cycle (seconds).
-  * @private
-  * @param {Object} me The benchmark instance.
-  * @returns {Number} The cycle time of the instance.
-  */
+  /**
+   * Clocks the time taken to execute a test per cycle (seconds).
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @returns {Number} The cycle time of the instance.
+   */
   var clock = (function() {
     var fallback,
         supported,
@@ -454,16 +454,16 @@
     return clock;
   }());
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * A generic bare-bones Array#forEach solution.
-  * Callbacks may terminate the loop by explicitly returning false.
-  * @static
-  * @member Benchmark
-  * @param {Array} array The array to iterate over.
-  * @param {Function} callback The function called per iteration.
-  */
+  /**
+   * A generic bare-bones Array#forEach solution.
+   * Callbacks may terminate the loop by explicitly returning false.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   */
   function each(array, callback) {
     var i = -1,
         length = array.length;
@@ -475,14 +475,14 @@
     }
   }
 
- /**
-  * Copies source properties to the destination object.
-  * @static
-  * @member Benchmark
-  * @param {Object} destination The destination object.
-  * @param {Object} [source={}] The source object.
-  * @returns {Object} The destination object.
-  */
+  /**
+   * Copies source properties to the destination object.
+   * @static
+   * @member Benchmark
+   * @param {Object} destination The destination object.
+   * @param {Object} [source={}] The source object.
+   * @returns {Object} The destination object.
+   */
   function extend(destination, source) {
     source || (source = { });
     for (var key in source) {
@@ -492,26 +492,26 @@
   }
 
   /**
-  * A generic bare-bones Array#filter solution.
-  * @static
-  * @member Benchmark
-  * @param {Array} array The array to iterate over.
-  * @param {Function} callback The function called per iteration.
-  * @returns {Array} A new array of values that passed callback filter.
-  */
+   * A generic bare-bones Array#filter solution.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   * @returns {Array} A new array of values that passed callback filter.
+   */
   function filter(array, callback) {
     return reduce(array, function(result, value, index) {
       return callback(value, index, array) ? result.push(value) && result : result;
     }, []);
   }
 
- /**
-  * Converts a number to a more readable comma separated string representation.
-  * @static
-  * @member Benchmark
-  * @param {Number} number The number to convert.
-  * @returns {String} The more readable string representation.
-  */
+  /**
+   * Converts a number to a more readable comma separated string representation.
+   * @static
+   * @member Benchmark
+   * @param {Number} number The number to convert.
+   * @returns {String} The more readable string representation.
+   */
   function formatNumber(number) {
     var comma = ',',
         string = String(Math.max(0, Math.abs(number).toFixed(0))),
@@ -522,14 +522,14 @@
       string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
   }
 
- /**
-  * A generic bare-bones Array#indexOf solution.
-  * @static
-  * @member Benchmark
-  * @param {Array} array The array to iterate over.
-  * @param {Mixed} value The value to search for.
-  * @returns {Number} The index of the matched value or -1.
-  */
+  /**
+   * A generic bare-bones Array#indexOf solution.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {Mixed} value The value to search for.
+   * @returns {Number} The index of the matched value or -1.
+   */
   function indexOf(array, value) {
     var result = -1;
     each(array, function(v, i) {
@@ -541,14 +541,14 @@
     return result;
   }
 
- /**
-  * Invokes a given method, with arguments, on all benchmarks in an array.
-  * @static
-  * @member Benchmark
-  * @param {Array} benchmarks Array of benchmarks to iterate over.
-  * @param {String|Object} methodName Name of method to invoke or options object.
-  * @param {Array} args Arguments to invoke the method with.
-  */
+  /**
+   * Invokes a given method, with arguments, on all benchmarks in an array.
+   * @static
+   * @member Benchmark
+   * @param {Array} benchmarks Array of benchmarks to iterate over.
+   * @param {String|Object} methodName Name of method to invoke or options object.
+   * @param {Array} args Arguments to invoke the method with.
+   */
   function invoke(benchmarks, methodName, args) {
     var async,
         backup,
@@ -615,40 +615,40 @@
     }
   }
 
- /**
-  * Determines if the given value is an array.
-  * @static
-  * @member Benchmark
-  * @param {Mixed} value The value to check.
-  * @returns {Boolean} If the value is an array return true, else false.
-  */
+  /**
+   * Determines if the given value is an array.
+   * @static
+   * @member Benchmark
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} If the value is an array return true, else false.
+   */
   function isArray(value) {
     return toString.call(value) == '[object Array]';
   }
 
- /**
-  * Host objects can return type values that are different from their actual
-  * data type. The objects we are concerned with usually return non-primitive
-  * types of object, function, or unknown.
-  * @static
-  * @member Benchmark
-  * @param {Mixed} object The owner of the property.
-  * @param {String} property The property name to check.
-  * @returns {Boolean} If the property value is a non-primitive return true, else false.
-  */
+  /**
+   * Host objects can return type values that are different from their actual
+   * data type. The objects we are concerned with usually return non-primitive
+   * types of object, function, or unknown.
+   * @static
+   * @member Benchmark
+   * @param {Mixed} object The owner of the property.
+   * @param {String} property The property name to check.
+   * @returns {Boolean} If the property value is a non-primitive return true, else false.
+   */
   function isHostType(object, property) {
     return !/^(boolean|number|string|undefined)$/.test(typeof object[property]) && !!object[property];
   }
 
- /**
-  * Creates a string of joined array values or object key-value pairs.
-  * @static
-  * @member Benchmark
-  * @param {Array|Object} object The object to operate on.
-  * @param {String} [separator1=','] The separator used between key-value pairs.
-  * @param {String} [separator2=': '] The separator used between keys and values.
-  * @returns {String} The joined result.
-  */
+  /**
+   * Creates a string of joined array values or object key-value pairs.
+   * @static
+   * @member Benchmark
+   * @param {Array|Object} object The object to operate on.
+   * @param {String} [separator1=','] The separator used between key-value pairs.
+   * @param {String} [separator2=': '] The separator used between keys and values.
+   * @returns {String} The joined result.
+   */
   function join(object, separator1, separator2) {
     var key,
         pairs = [];
@@ -664,24 +664,24 @@
     return pairs.join(separator1 || ',');
   }
 
- /**
-  * A no operation function.
-  * @static
-  * @member Benchmark
-  */
+  /**
+   * A no operation function.
+   * @static
+   * @member Benchmark
+   */
   function noop() {
     // no operation performed
   }
 
   /**
-  * A generic bare-bones Array#reduce solution.
-  * @static
-  * @member Benchmark
-  * @param {Array} array The array to iterate over.
-  * @param {Function} callback The function called per iteration.
-  * @param {Mixed} accumulator Initial value of the accumulator.
-  * @returns {Mixed} The accumulator.
-  */
+   * A generic bare-bones Array#reduce solution.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   * @param {Mixed} accumulator Initial value of the accumulator.
+   * @returns {Mixed} The accumulator.
+   */
   function reduce(array, callback, accumulator) {
     each(array, function(value, index) {
       accumulator = callback(accumulator, value, index, array);
@@ -689,12 +689,12 @@
     return accumulator;
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Aborts the benchmark as well as in progress calibrations without recording times.
-  * @member Benchmark
-  */
+  /**
+   * Aborts the benchmark as well as in progress calibrations without recording times.
+   * @member Benchmark
+   */
   function abort() {
     var me = this;
     if (me.running) {
@@ -714,12 +714,12 @@
     }
   }
 
- /**
-  * Creates a cloned benchmark with the same test function and options.
-  * @member Benchmark
-  * @param {Object} options Overwrite cloned options.
-  * @returns {Object} Cloned instance.
-  */
+  /**
+   * Creates a cloned benchmark with the same test function and options.
+   * @member Benchmark
+   * @param {Object} options Overwrite cloned options.
+   * @returns {Object} Cloned instance.
+   */
   function clone(options) {
     var key,
         me = this,
@@ -735,10 +735,10 @@
     return result;
   }
 
- /**
-  * Reset properties and abort if running.
-  * @member Benchmark
-  */
+  /**
+   * Reset properties and abort if running.
+   * @member Benchmark
+   */
   function reset() {
     var changed,
         me = this,
@@ -765,11 +765,11 @@
     }
   }
 
- /**
-  * Starts running the benchmark.
-  * @member Benchmark
-  * @param {Boolean} [async=false] Flag to run asynchronously.
-  */
+  /**
+   * Starts running the benchmark.
+   * @member Benchmark
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   */
   function run(async) {
     var me = this,
         uncompilable = me.fn.uncompilable;
@@ -804,12 +804,12 @@
     }
   }
 
- /**
-  * Executes each run cycle and computes results.
-  * @private
-  * @param {Object} me The benchmark instance.
-  * @param {Boolean} [async=false] Flag to run asynchronously.
-  */
+  /**
+   * Executes each run cycle and computes results.
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   */
   function _run(me, async) {
     var clocked,
         divisor,
@@ -896,13 +896,13 @@
     }
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Platform object containing browser name, version, and operating system.
-  * @static
-  * @member Benchmark
-  */
+  /**
+   * Platform object containing browser name, version, and operating system.
+   * @static
+   * @member Benchmark
+   */
   Benchmark.platform = (function() {
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
@@ -1013,7 +1013,7 @@
     };
   }());
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   extend(Benchmark, {
 
@@ -1058,7 +1058,7 @@
     'reduce': reduce
   });
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   extend(Benchmark.prototype, {
 
@@ -1102,35 +1102,35 @@
      * The time a benchmark should take to get a relative uncertainty of 1% (secs).
      * @member Benchmark
      */
-     'MIN_TIME': (function() {
-       var unit, start = +new Date;
-       while(!(unit = +new Date - start));
-       return unit / 20; // (unit / 2) / 0.01 / 1e3
-     }()),
+    'MIN_TIME': (function() {
+      var unit, start = +new Date;
+      while(!(unit = +new Date - start));
+      return unit / 20; // (unit / 2) / 0.01 / 1e3
+    }()),
 
     /**
      * The margin of error.
      * @member Benchmark
      */
-     'MoE': NaN,
+    'MoE': NaN,
 
     /**
      * The relative margin of error (expressed as a percentage of the mean).
      * @member Benchmark
      */
-     'RME': NaN,
+    'RME': NaN,
 
     /**
      * The sample standard deviation.
      * @member Benchmark
      */
-     'SD': NaN,
+    'SD': NaN,
 
     /**
      * The standard error of the mean.
      * @member Benchmark
      */
-     'SEM': NaN,
+    'SEM': NaN,
 
     /**
      * The number of times a test was executed.

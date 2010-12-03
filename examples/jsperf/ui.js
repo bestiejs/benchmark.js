@@ -53,37 +53,37 @@
 
    isArray = Benchmark.isArray;
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Shortcut for document.getElementById().
-  * @private
-  * @param {String|Object} id The id of the element to retrieve.
-  * @returns {Object} The element, if found, or null.
-  */
+  /**
+   * Shortcut for document.getElementById().
+   * @private
+   * @param {String|Object} id The id of the element to retrieve.
+   * @returns {Object} The element, if found, or null.
+   */
   function $(id) {
     return typeof id == 'string' ? document.getElementById(id) : id;
   }
 
- /**
-  * Adds a css class name to an element's className property.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} className The class name.
-  */
+  /**
+   * Adds a css class name to an element's className property.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} className The class name.
+   */
   function addClass(element, className) {
     if (!hasClass(element = $(element), className)) {
       element.className += (element.className ? ' ' : '') + className;
     }
   }
 
- /**
-  * Registers an event listener on an element.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} eventName The name of the event to listen to.
-  * @param {Function} handler The event handler.
-  */
+  /**
+   * Registers an event listener on an element.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} eventName The name of the event to listen to.
+   * @param {Function} handler The event handler.
+   */
   function addListener(element, eventName, handler) {
     if (typeof element.addEventListener != 'undefined') {
       element.addEventListener(eventName, handler, false);
@@ -92,42 +92,42 @@
     }
   }
 
- /**
-  * Appends to an element's innerHTML property.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} html The HTML to append.
-  */
+  /**
+   * Appends to an element's innerHTML property.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} html The HTML to append.
+   */
   function appendHTML(element, html) {
     html != null && ($(element).innerHTML += html);
   }
 
- /**
-  * Shortcut for document.createElement().
-  * @private
-  * @param {String} tag The tag name of the element to create.
-  * @returns {Object} A new of the given tag name element.
-  */
+  /**
+   * Shortcut for document.createElement().
+   * @private
+   * @param {String} tag The tag name of the element to create.
+   * @returns {Object} A new of the given tag name element.
+   */
   function createElement(tagName) {
     return document.createElement(tagName);
   }
 
- /**
-  * Checks if an element is assigned the given class name.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} className The class name.
-  * @returns {Boolean} If assigned the class name return true, else false.
-  */
+  /**
+   * Checks if an element is assigned the given class name.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} className The class name.
+   * @returns {Boolean} If assigned the class name return true, else false.
+   */
   function hasClass(element, className) {
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
   }
 
- /**
-  * Appends to or clears the error log.
-  * @private
-  * @param {String|Boolean} text The the text to append or false to clear.
-  */
+  /**
+   * Appends to or clears the error log.
+   * @private
+   * @param {String|Boolean} text The the text to append or false to clear.
+   */
   function logError(text) {
     var elTable,
         elDiv = $('error-info');
@@ -151,31 +151,31 @@
     }
   }
 
- /**
-  * Set an element's innerHTML property.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} html The HTML to set.
-  */
+  /**
+   * Set an element's innerHTML property.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} html The HTML to set.
+   */
   function setHTML(element, html) {
     $(element).innerHTML = html == null ? '' : html;
   }
 
- /**
-  * Sets the status text.
-  * @private
-  * @param {String} text The text write to the status.
-  */
+  /**
+   * Sets the status text.
+   * @private
+   * @param {String} text The text write to the status.
+   */
   function setStatus(text) {
     setHTML('status', text);
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * The title table cell click event handler used to run the corresponding benchmark.
-  * @private
-  */
+  /**
+   * The title table cell click event handler used to run the corresponding benchmark.
+   * @private
+   */
   function onClick(e) {
     e || (e = window.event);
     var id = (e.target || e.srcElement).id.split('-')[1];
@@ -188,21 +188,21 @@
     });
   }
 
- /**
-  * The onComplete callback assigned to new benchmarks.
-  * @private
-  * @param {Object} benchmark The benchmark.
-  */
+  /**
+   * The onComplete callback assigned to new benchmarks.
+   * @private
+   * @param {Object} benchmark The benchmark.
+   */
   function onComplete(benchmark) {
     setStatus(STATUS_TEXT.READY_AGAIN);
     ui.render(benchmark);
   }
 
- /**
-  * The onCycle callback, used for onStart as well, assigned to new benchmarks.
-  * @private
-  * @param {Object} benchmark The benchmark.
-  */
+  /**
+   * The onCycle callback, used for onStart as well, assigned to new benchmarks.
+   * @private
+   * @param {Object} benchmark The benchmark.
+   */
   function onCycle(benchmark) {
     if (!benchmark.aborted) {
       setStatus(benchmark.name + ' &times; ' +
@@ -211,10 +211,10 @@
     }
   }
 
- /**
-  * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
-  * @private
-  */
+  /**
+   * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
+   * @private
+   */
   function onHashChange() {
     ui.parseHash();
     if (typeof window.init == 'function') {
@@ -222,20 +222,20 @@
     }
   }
 
- /**
-  * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
-  * @private
-  */
+  /**
+   * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
+   * @private
+   */
   function onKeyUp(e) {
     if (13 == (e || window.event).keyCode) {
       onClick.call(this);
     }
   }
 
- /**
-  * The window load event handler used to initialize the UI.
-  * @private
-  */
+  /**
+   * The window load event handler used to initialize the UI.
+   * @private
+   */
   function onLoad() {
     $('run').onclick = onRun;
     $('question').value = 'no';
@@ -259,10 +259,10 @@
     }
   }
 
- /**
-  * The callback fired when the run queue is complete.
-  * @private
-  */
+  /**
+   * The callback fired when the run queue is complete.
+   * @private
+   */
   function onQueueComplete() {
     var first,
         last,
@@ -317,10 +317,10 @@
     setHTML('run', RUN_TEXT.READY_AGAIN);
   }
 
- /**
-  * The "run" button click event handler used to run or abort the benchmarks.
-  * @private
-  */
+  /**
+   * The "run" button click event handler used to run or abort the benchmarks.
+   * @private
+   */
   function onRun(e) {
     var benchmarks = ui.benchmarks,
         run = $('run').innerHTML != RUN_TEXT.RUNNING;
@@ -333,13 +333,13 @@
     }
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Aborts any running benchmarks, clears the run queue, and renders results.
-  * @static
-  * @member ui
-  */
+  /**
+   * Aborts any running benchmarks, clears the run queue, and renders results.
+   * @static
+   * @member ui
+   */
   function abort() {
     var me = this,
         benchmarks = me.benchmarks;
@@ -350,14 +350,14 @@
     setHTML('run', RUN_TEXT.READY);
   }
 
- /**
-  * Adds a benchmark the the collection.
-  * @static
-  * @member ui
-  * @param {String} name The name assigned to the benchmark.
-  * @param {String} id The id assigned to the benchmark.
-  * @param {Function} fn The function to benchmark.
-  */
+  /**
+   * Adds a benchmark the the collection.
+   * @static
+   * @member ui
+   * @param {String} name The name assigned to the benchmark.
+   * @param {String} id The id assigned to the benchmark.
+   * @param {Function} fn The function to benchmark.
+   */
   function addTest(name, id, fn) {
     var me = this,
         elTitle = $('title-' + id),
@@ -380,11 +380,11 @@
     me.render(benchmark);
   }
 
- /**
-  * Parses the window.location.hash value into an object assigned to `ui.params`.
-  * @static
-  * @member ui
-  */
+  /**
+   * Parses the window.location.hash value into an object assigned to `ui.params`.
+   * @static
+   * @member ui
+   */
   function parseHash() {
     var hashes = location.hash.slice(1).split('&'),
         params = this.params = { };
@@ -395,12 +395,12 @@
     });
   }
 
- /**
-  * Renders the results table cell of the corresponding benchmark(s).
-  * @static
-  * @member ui
-  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
-  */
+  /**
+   * Renders the results table cell of the corresponding benchmark(s).
+   * @static
+   * @member ui
+   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   */
   function render(benchmarks) {
     var me = this;
     if (!isArray(benchmarks)) {
@@ -447,12 +447,12 @@
     });
   }
 
- /**
-  * Adds given benchmark(s) to the queue and runs.
-  * @static
-  * @member ui
-  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
-  */
+  /**
+   * Adds given benchmark(s) to the queue and runs.
+   * @static
+   * @member ui
+   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   */
   function run(benchmarks) {
     var added,
         me = this,
@@ -493,10 +493,11 @@
     }
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   // expose
   window.ui = {
+
     /**
      * An array of table cells used to display benchmark results.
      * @member ui
@@ -543,7 +544,7 @@
     'run': run
   };
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   // signal JavaScript detected
   addClass(document.documentElement, JS_CLASS);

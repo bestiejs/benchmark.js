@@ -1,22 +1,22 @@
 
 (function(window, document) {
 
- /** Cache used by various methods */
+  /** Cache used by various methods */
   var cache = {
     'counter': 0,
     'lastAction': 'load',
     'trash': createElement('div')
   };
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Registers an event listener.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} eventName The name of the event to listen to.
-  * @param {Function} handler The event handler.
-  */
+  /**
+   * Registers an event listener.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} eventName The name of the event to listen to.
+   * @param {Function} handler The event handler.
+   */
   function addListener(element, eventName, handler) {
     if (typeof element.addEventListener != 'undefined') {
       element.addEventListener(eventName, handler, false);
@@ -25,22 +25,22 @@
     }
   }
 
- /**
-  * Shortcut for document.createElement().
-  * @private
-  * @param {String} tag The tag name of the element to create.
-  * @returns {Object} A new of the given tag name element.
-  */
+  /**
+   * Shortcut for document.createElement().
+   * @private
+   * @param {String} tag The tag name of the element to create.
+   * @returns {Object} A new of the given tag name element.
+   */
   function createElement(tagName) {
     return document.createElement(tagName);
   }
 
- /**
-  * Creates a Browserscope results object (skipping unrun and errored benchmarks).
-  * @private
-  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
-  * @returns {Object|Null} Browserscope results object or null.
-  */
+  /**
+   * Creates a Browserscope results object (skipping unrun and errored benchmarks).
+   * @private
+   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   * @returns {Object|Null} Browserscope results object or null.
+   */
   function createSnapshot(benchmarks) {
     if (!Benchmark.isArray(benchmarks)) {
       benchmarks = benchmarks ? [benchmarks] : ui.benchmarks;
@@ -56,13 +56,13 @@
     }, null);
   }
 
- /**
-  * Injects a script into the document.
-  * @private
-  * @param {String} src The external script source.
-  * @param {Object} sibling The element to inject the script after.
-  * @returns {Object} The new script element.
-  */
+  /**
+   * Injects a script into the document.
+   * @private
+   * @param {String} src The external script source.
+   * @param {Object} sibling The element to inject the script after.
+   * @returns {Object} The new script element.
+   */
   function loadScript(src, sibling) {
     var script = createElement('script'),
         nextSibling = sibling ? sibling.nextSibling : query('script').pop();
@@ -71,21 +71,21 @@
     return (sibling || nextSibling).parentNode.insertBefore(script,  nextSibling);
   }
 
- /**
-  * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
-  * @private
-  * @returns {Number} Number of milliseconds.
-  */
+  /**
+   * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
+   * @private
+   * @returns {Number} Number of milliseconds.
+   */
   function now() {
     return +new Date;
   }
 
- /**
-  * Queries the document for elements by id or tagName.
-  * @private
-  * @param {String} selector The css selector to match.
-  * @returns {Array} The array of results.
-  */
+  /**
+   * Queries the document for elements by id or tagName.
+   * @private
+   * @param {String} selector The css selector to match.
+   * @returns {Array} The array of results.
+   */
   function query(selector) {
     var i = -1,
         result = [],
@@ -97,22 +97,22 @@
     return result.length-- && result;
   }
 
- /**
-  * Set an element's innerHTML property.
-  * @private
-  * @param {Object} element The element.
-  * @param {String} html The HTML to set.
-  * @param {Object} object The template object used to modify the html.
-  */
+  /**
+   * Set an element's innerHTML property.
+   * @private
+   * @param {Object} element The element.
+   * @param {String} html The HTML to set.
+   * @param {Object} object The template object used to modify the html.
+   */
   function setHTML(element, html, object) {
     element.innerHTML = template(html, object);
   }
 
- /**
-  * Displays a message in the "results" element.
-  * @private
-  * @param {String} text The text to display.
-  */
+  /**
+   * Displays a message in the "results" element.
+   * @private
+   * @param {String} text The text to display.
+   */
   function setMessage(text) {
     var me = ui.browserscope,
         cont = me.container;
@@ -122,13 +122,13 @@
     }
   }
 
- /**
-  * Modify a string by replacing named tokens with matching object property values.
-  * @private
-  * @param {String} string The string to modify.
-  * @param {Object} object The template object.
-  * @returns {String} The modified string.
-  */
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   * @private
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   */
   function template(string, object) {
     string = string == null ? '' : string;
     object || (object = { });
@@ -138,12 +138,12 @@
     return string;
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Periodically executed callback that removes injected script and iframe elements.
-  * @private
-  */
+  /**
+   * Periodically executed callback that removes injected script and iframe elements.
+   * @private
+   */
   function onCleanup() {
     var expire, name
         me = ui.browserscope,
@@ -171,10 +171,10 @@
     onCleanup.id = setTimeout(onCleanup, delay);
   }
 
- /**
-  * The window load event handler used to initialize the results table.
-  * @private
-  */
+  /**
+   * The window load event handler used to initialize the results table.
+   * @private
+   */
   function onLoad() {
     var cont,
         me = ui.browserscope,
@@ -207,13 +207,13 @@
     onCleanup();
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
- /**
-  * Loads Browserscope's cumulative results table.
-  * @static
-  * @member ui.browserscope
-  */
+  /**
+   * Loads Browserscope's cumulative results table.
+   * @static
+   * @member ui.browserscope
+   */
   function load() {
     var me = ui.browserscope,
         cont = me.container,
@@ -243,12 +243,12 @@
     }
   }
 
- /**
-  * Creates a Browserscope beacon and posts the benchmark results.
-  * @static
-  * @member ui.browserscope
-  * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
-  */
+  /**
+   * Creates a Browserscope beacon and posts the benchmark results.
+   * @static
+   * @member ui.browserscope
+   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   */
   function post(benchmarks) {
     var idoc,
         iframe,
@@ -297,12 +297,12 @@
     }
   }
 
- /**
-  * Renders the cumulative results table.
-  * @static
-  * @member ui.browserscope
-  * @param {Object} response The data object.
-  */
+  /**
+   * Renders the cumulative results table.
+   * @static
+   * @member ui.browserscope
+   * @param {Object} response The data object.
+   */
   function render(response) {
     var me = this,
         cont = me.container;
@@ -325,7 +325,7 @@
     }
   }
 
- /*---------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   // expose
   ui.browserscope = {
