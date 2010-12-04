@@ -298,11 +298,8 @@
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
-        // switch to uncompiled testing if Firefox returns an extremely high
-        // margin of error for compiled tests
-        if (!curr && rme > 30) {
-          me.fn.uncompilable = uncompilable = true;
-          clearCompiled(me);
+        // start over if we get a bad batch
+        if (rme > 99) {
           init();
         }
         else {
