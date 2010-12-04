@@ -145,7 +145,8 @@
    * @private
    */
   function onCleanup() {
-    var expire, name
+    var expire,
+        name,
         me = ui.browserscope,
         delay = me.CLEANUP_INTERVAL * 1e3,
         trash = cache.trash;

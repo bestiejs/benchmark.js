@@ -64,7 +64,7 @@
     extend(this, options);
     this.fn = fn;
     this.options = options;
-    this.times = { };
+    this.times = extend({ }, this.times);
   }
 
   /**
@@ -94,7 +94,13 @@
       me.running = true;
       me.times.start = +new Date;
       me.onStart(me);
-      _run(me, async == null ? me.DEFAULT_ASYNC : async);
+
+      async = async == null ? me.DEFAULT_ASYNC : async;
+      if (me.computing) {
+        _run(me, async);
+      } else {
+        compute(me, async);
+      }
     }
 
     // Calibration inherits from Benchmark
@@ -189,8 +195,8 @@
         count = 5,
         clones = [],
         queue = [],
-        times = me.times,
-        uncompilable = me.fn.uncompilable;
+        fn = me.fn,
+        uncompilable = fn.uncompilable;
 
     function cbSum(sum, clone) {
       return sum + clone.times.period;
@@ -230,13 +236,20 @@
         queue.length = clones.length = 0;
         clone.abort();
       }
-      else if (me.running && clone.cycles) {
-        me.count = clone.count;
-        me.cycles += clone.cycles;
-        me.error = clone.error;
-        me.hz = clone.hz;
-        me.times.period = clone.times.period;
-        me.onCycle(me);
+      else if (me.running) {
+        // map changes from clone to host
+        if (clone.cycles) {
+          me.count = clone.count;
+          me.cycles += clone.cycles;
+          me.hz = clone.hz;
+          me.times.period = clone.times.period;
+          me.onCycle(me);
+        }
+        else if (clone.error) {
+          me.abort();
+          me.error = clone.error;
+          me.onError(me);
+        }
       }
     }
 
@@ -246,9 +259,18 @@
     }
 
     function onInvokeCycle(clone) {
-      var aborted = me.aborted,
-          curr = me.fn.uncompilable;
+      var index = me.CALIBRATION_INDEX,
+          aborted = me.aborted,
+          curr = fn.uncompilable,
+          cals = me.constructor.CALIBRATIONS || [],
+          cal = curr && index < 1 ? cals[0] : cals[index],
+          times = me.times;
 
+      // avoid computing unclockable tests
+      if (fn.unclockable) {
+        queue.length = clones.length = 0;
+        lastClone = clone;
+      }
       // exit early if aborted
       if (aborted) {
         queue.length = clones.length = 0;
@@ -266,20 +288,20 @@
         elapsed = (now - times.start) / 1e3;
 
         // compute values
-        mean = reduce(clones, cbSum, 0) / clones.length;
+        mean = reduce(clones, cbSum, 0) / clones.length || 0;
         // standard deviation
-        sd = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1));
+        sd = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1)) || 0;
         // standard error of the mean
-        sem =  sd / Math.sqrt(clones.length);
+        sem =  sd / Math.sqrt(clones.length) || 0;
         // margin of error
         moe = sem * (T_DISTRIBUTION[clones.length - 1] || T_DISTRIBUTION.Infinity);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
-        // Firefox may return an extremely high margin of error for compiled methods
+        // switch to uncompiled testing if Firefox returns an extremely high
+        // margin of error for compiled tests
         if (!curr && rme > 30) {
           me.fn.uncompilable = uncompilable = true;
-          me.INIT_RUN_COUNT = Benchmark.prototype.INIT_RUN_COUNT;
           clearCompiled(me);
           init();
         }
@@ -297,6 +319,9 @@
             me.RME = rme;
             me.SD  = sd;
             me.SEM = sem;
+
+            // calibrate by subtracting iteration overhead
+            mean = Math.max(0, mean - (cal && cal.times.period || 0));
 
             // set host results
             me.count = lastClone.count;
@@ -389,10 +414,7 @@
     }
 
     function clock(me) {
-      var index = me.CALIBRATION_INDEX,
-          cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[index];
-          count = me.count,
+      var count = me.count,
           fn = me.fn,
           times = me.times,
           uncompilable = !supported || fn.uncompilable;
@@ -413,10 +435,6 @@
           }
         }
         if (uncompilable) {
-          // use fallback calibration
-          if (index < 1) {
-            cal = cals[0];
-          }
           fn.uncompilable = true;
           fallback(me, co);
         }
@@ -424,14 +442,7 @@
         // unclockable benchmarks (e.g. empty tests)
         times.cycle = 0;
       }
-
-      return (times.cycle =
-        // ensure positive numbers
-        Math.max(0,
-        // convert time from milliseconds to seconds
-        (times.cycle / 1e3) -
-        // calibrate by subtracting iteration overhead
-        (cal && cal.times.period || 0) * me.count));
+      return times.cycle;
     }
 
     // enable benchmarking via the --enable-benchmarking flag
@@ -439,15 +450,15 @@
     code = code.join('|');
     if (typeof co.Interval == 'function') {
       code = code.replace('#{0}', 'new c$.Interval;t$.start()')
-        .replace('#{1}', 't$.stop();r$=t$.microseconds()/1e3');
+        .replace('#{1}', 't$.stop();r$=t$.microseconds()/1e6');
     }
     else if (typeof Date.now == 'function') {
       code = code.replace('#{0}', 'Date.now()')
-        .replace('#{1}', 'r$=Date.now()-t$');
+        .replace('#{1}', 'r$=(Date.now()-t$)/1e3');
     }
     else {
       code = code.replace('#{0}', '(new Date).getTime()')
-        .replace('#{1}', 'r$=(new Date).getTime()-t$');
+        .replace('#{1}', 'r$=((new Date).getTime()-t$)/1e3');
     }
 
     // inject uid into variable names to avoid collisions with embedded tests
@@ -755,6 +766,8 @@
     var changed,
         me = this,
         keys = 'MoE RME SD SEM aborted count cycles error hz running'.split(' '),
+        timeKeys = 'cycle elapsed period start stop'.split(' '),
+        times = me.times,
         proto = me.constructor.prototype;
 
     if (me.running) {
@@ -764,13 +777,20 @@
       me.aborted = proto.aborted;
     }
     else {
+      // check if properties have changed and reset them
       each(keys, function(key) {
         if (me[key] != proto[key]) {
           changed = true;
           me[key] = proto[key];
         }
       });
-      me.times = { };
+      each(timeKeys, function(key) {
+        if (times[key] != proto.times[key]) {
+          changed = true;
+          me[key] = proto.times[key];
+        }
+      });
+
       if (changed) {
         me.onReset(me);
       }
@@ -791,7 +811,6 @@
         me.abort();
         me.onComplete(me);
       } else if (me.running) {
-        me.INIT_RUN_COUNT = Benchmark.prototype.INIT_RUN_COUNT;
         call(me, rerun, async);
       }
     }
@@ -808,12 +827,17 @@
       me.running = false;
       me.reset();
       me.running = true;
-
       me.count = me.INIT_RUN_COUNT;
       me.times.start = +new Date;
       me.onStart(me);
-      _run(me, async);
+
+      if (me.computing) {
+        _run(me, async);
+      } else {
+        compute(me, async);
+      }
     }
+
   }
 
   /**
@@ -865,7 +889,6 @@
             // give up and declare the test unclockable
             if (!(me.running = count <= maxCount)) {
               fn.unclockable = true;
-              me.INIT_RUN_COUNT = Benchmark.prototype.INIT_RUN_COUNT;
               clearCompiled(me);
             }
           }
@@ -899,13 +922,8 @@
     // figure out what to do next
     if (me.running) {
       call(me, _run, async);
-    }
-    else if (me.computing || me.aborted || fn.unclockable) {
+    } else {
       me.onComplete(me);
-    }
-    else {
-      me.running = true;
-      compute(me, async);
     }
   }
 
@@ -1101,7 +1119,7 @@
      * The default number of times to execute a test on a benchmark's first cycle.
      * @member Benchmark
      */
-    'INIT_RUN_COUNT': 10,
+    'INIT_RUN_COUNT': 5,
 
     /**
      * The maximum test executions allowed per cycle (used to avoid freezing the browser).
@@ -1129,25 +1147,25 @@
      * The margin of error.
      * @member Benchmark
      */
-    'MoE': NaN,
+    'MoE': 0,
 
     /**
      * The relative margin of error (expressed as a percentage of the mean).
      * @member Benchmark
      */
-    'RME': NaN,
+    'RME': 0,
 
     /**
      * The sample standard deviation.
      * @member Benchmark
      */
-    'SD': NaN,
+    'SD': 0,
 
     /**
      * The standard error of the mean.
      * @member Benchmark
      */
-    'SEM': NaN,
+    'SEM': 0,
 
     /**
      * The number of times a test was executed.
@@ -1186,10 +1204,25 @@
     'aborted': false,
 
     /**
-     * An object of timing data including cycle, elapsed, period, start, and stop (secs).
+     * An object of timing data including cycle, elapsed, period, start, and stop.
      * @member Benchmark
      */
-    'times': null,
+    'times': {
+      // time taken to complete the last cycle (secs).
+      'cycle': 0,
+
+      // time taken to complete the benchmark (secs).
+      'elapsed': 0,
+
+      // time taken to execute the test once (secs).
+      'period': 0,
+
+      // timestamp of when the benchmark started (ms).
+      'start': 0,
+
+      // timestamp of when the benchmark finished (ms).
+      'stop': 0
+    },
 
     // callback fired when a benchmark is aborted
     'onAbort': noop,
