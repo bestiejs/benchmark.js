@@ -117,21 +117,20 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Checks if calibrations have completed and, if not, fires a callback when completed.
+   * Runs calibration benchmarks, if not needed, and fires a callback when completed.
    * @private
    * @param {Object} me The benchmark instance waiting for calibrations to complete.
    * @param {Function} callback Function executed after calibration.
    * @param {Boolean} [async=false] Flag to run asynchronously.
    * @returns {Boolean} Returns true if calibrated, false if not.
    */
-  function isCalibrated(me, callback, async) {
-    var cals = Benchmark.CALIBRATIONS,
-        onCycle = function(cal) { return !(cal.aborted || me.aborted); },
-        result = !filter(cals, function(cal) { return !cal.cycles; }).length;
+  function calibrate(me, callback, async) {
+    var result = isCalibrated(),
+        onCycle = function(cal) { return !(cal.aborted || me.aborted); };
 
     // calibrate all if one has not ran
     if (!result) {
-      invoke(cals, {
+      invoke(Benchmark.CALIBRATIONS, {
         'async': async,
         'methodName': 'run',
         'onCycle': onCycle,
@@ -196,6 +195,7 @@
         clones = [],
         queue = [],
         fn = me.fn,
+        calibrated = isCalibrated(),
         uncompilable = fn.uncompilable;
 
     function cbSum(sum, clone) {
@@ -219,6 +219,7 @@
 
     function init() {
       var i = count;
+      me.times.start = +new Date;
       me.cycles = clones.length = queue.length = 0;
       while (i--) {
         lastClone = createClone();
@@ -229,6 +230,9 @@
 
     function onComplete(clone) {
       me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
+      if (uncompilable == null) {
+        uncompilable = me.fn.uncompilable;
+      }
     }
 
     function onCycle(clone) {
@@ -254,6 +258,13 @@
     }
 
     function onStart(clone) {
+      // reset start time if tests where interrupted by calibration benchmarks
+      var curr = isCalibrated();
+      if (curr != calibrated) {
+        calibrated = curr;
+        me.times.start = +new Date;
+      }
+      // ensure clones start at the last successful run count
       clone.count = clone.INIT_RUN_COUNT = me.INIT_RUN_COUNT;
       onCycle(clone);
     }
@@ -299,12 +310,14 @@
         rme = (moe / mean) * 100 || 0;
 
         // start over if we get a bad batch
-        if (rme > 99) {
+        if (rme > 50) {
+          count *= 2;
           init();
         }
         else {
           // increase sample size to reduce the margin of error
           if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || me.constructor == Calibration)) {
+            count++;
             lastClone = createClone();
             clones.push(lastClone);
             queue.push(lastClone);
@@ -351,6 +364,15 @@
   }
 
   /**
+   * Checks if calibration benchmarks have completed.
+   * @private
+   * @returns {Boolean} Returns true if calibrated, false if not.
+   */
+  function isCalibrated() {
+    return !filter(Benchmark.CALIBRATIONS, function(cal) { return !cal.cycles; }).length;
+  }
+
+  /**
    * Repeat a string a given number of times using the `Exponentiation by squaring` algorithm.
    * http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
    * @private
@@ -380,11 +402,11 @@
         code = ['var r$,i$=m$.count,f$=m$.fn,t$=#{0};\n', '#{1};m$.times.cycle=r$;return"$"'],
         co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
 
-    function embed(benchmark) {
+    function embed(me) {
       var into,
           pre = '',
-          fn = benchmark.fn,
-          count = benchmark.count,
+          fn = me.fn,
+          count = me.count,
           uid = fn.uid || (fn.uid = ++cache.counter),
           lastCycle = cache.compiled[uid] || { },
           lastCount = lastCycle.count,
@@ -419,20 +441,20 @@
       if (!fn.unclockable) {
         if (!uncompilable) {
           try {
-            me.count = 1;
-            uncompilable = embed(me)(me, co) != uid;
-            me.count = count;
-
+            if (uncompilable == null) {
+              me.count = 1;
+              uncompilable = fn.uncompilable = embed(me)(me, co) != uid;
+              me.count = count;
+            }
             if (!uncompilable) {
               embed(me)(me, co);
             }
           } catch(e) {
             me.count = count;
-            uncompilable = true;
+            uncompilable = fn.uncompilable = true;
           }
         }
         if (uncompilable) {
-          fn.uncompilable = true;
           fallback(me, co);
         }
       } else {
@@ -819,7 +841,7 @@
     async = async == null ? me.DEFAULT_ASYNC : async;
     me.running = true;
 
-    if (!uncompilable || (uncompilable && isCalibrated(me, onCalibrate, async))) {
+    if (!uncompilable || (uncompilable && calibrate(me, onCalibrate, async))) {
       // set running to false so reset() won't call abort()
       me.running = false;
       me.reset();
@@ -1052,7 +1074,7 @@
      */
     'CALIBRATIONS': (function() {
       var cal = new Calibration(function() { });
-      cal.uncompilable = true;
+      cal.fn.uncompilable = true;
       return [cal];
     }()),
 
