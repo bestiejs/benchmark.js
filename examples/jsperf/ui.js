@@ -204,11 +204,11 @@
    * @param {Object} benchmark The benchmark.
    */
   function onCycle(benchmark) {
+    var cycles = benchmark.cycles;
     if (!benchmark.aborted) {
       setStatus(benchmark.name + ' &times; ' +
                 formatNumber(benchmark.count) + ' (' +
-                (benchmark.cycles == 1 ? '1 cycle' : benchmark.cycles + ' cycles') +
-                ')');
+                cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
     }
   }
 

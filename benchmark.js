@@ -183,65 +183,48 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function compute(me, async) {
-    var elapsed,
-        lastClone,
-        mean,
-        now,
-        moe,
-        rme,
-        sd,
-        sem,
-        count = 5,
-        clones = [],
-        queue = [],
+    var calibrating = me.constructor == Calibration,
         fn = me.fn,
-        calibrated = isCalibrated(),
-        uncompilable = fn.uncompilable;
+        initSampleSize = 5,
+        queue = [],
+        sample = [],
+        state = { 'calibrated': isCalibrated(), 'uncompilable': fn.uncompilable };
 
-    function cbSum(sum, clone) {
-      return sum + clone.times.period;
-    }
-
-    function cbVariance(sum, clone) {
-      return sum + Math.pow(clone.times.period - mean, 2);
-    }
-
-    function createClone() {
-      return me.clone({
-        'computing': queue,
-        'onAbort': noop,
-        'onReset': noop,
-        'onComplete': onComplete,
-        'onCycle': onCycle,
-        'onStart': onStart
-      });
-    }
-
-    function init() {
-      var i = count;
+    function initialize() {
+      me.cycles = 0;
       me.times.start = +new Date;
-      me.cycles = clones.length = queue.length = 0;
-      while (i--) {
-        lastClone = createClone();
-        clones.push(lastClone);
-        queue.push(lastClone);
+      clearQueue();
+      enqueue(initSampleSize);
+    }
+
+    function clearQueue() {
+      queue.length = sample.length = 0;
+    }
+
+    function enqueue(count) {
+      while (count--) {
+        sample.push(queue[queue.push(me.clone({
+          'computing': queue,
+          'onAbort': noop,
+          'onReset': noop,
+          'onComplete': onComplete,
+          'onCycle': onCycle,
+          'onStart': onStart
+        })) - 1]);
       }
     }
 
     function onComplete(clone) {
+      // update run count and init uncompilable state
       me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
-      if (uncompilable == null) {
-        uncompilable = me.fn.uncompilable;
+      if (state.uncompilable == null) {
+        state.uncompilable = fn.uncompilable;
       }
     }
 
     function onCycle(clone) {
-      if (me.aborted) {
-        queue.length = clones.length = 0;
-        clone.abort();
-      }
-      else if (me.running) {
-        // map changes from clone to host
+      // map changes from clone to host
+      if (me.running) {
         if (clone.cycles) {
           me.count = clone.count;
           me.cycles += clone.cycles;
@@ -255,104 +238,104 @@
           me.onError(me);
         }
       }
+      else if (me.aborted) {
+        clone.abort();
+      }
     }
 
     function onStart(clone) {
-      // reset start time if tests where interrupted by calibration benchmarks
-      var curr = isCalibrated();
-      if (curr != calibrated) {
-        calibrated = curr;
+      // reset timer if interrupted by calibrations
+      if (!calibrating && !state.calibrated && isCalibrated()) {
+        state.calibrated = true;
         me.times.start = +new Date;
       }
-      // ensure clones start at the last successful run count
+      // update run count
       clone.count = clone.INIT_RUN_COUNT = me.INIT_RUN_COUNT;
       onCycle(clone);
     }
 
     function onInvokeCycle(clone) {
-      var index = me.CALIBRATION_INDEX,
+      var mean,
+          moe,
+          rme,
+          sd,
+          sem,
+          now = +new Date,
+          times = me.times,
+          uncompilable = fn.uncompilable,
           aborted = me.aborted,
-          curr = fn.uncompilable,
           cals = me.constructor.CALIBRATIONS || [],
-          cal = curr && index < 1 ? cals[0] : cals[index],
-          times = me.times;
+          cal = cals[uncompilable && me.CALIBRATION_INDEX],
+          elapsed = (now - times.start) / 1e3,
+          sampleSize = sample.length,
+          sumOf = function(sum, clone) { return sum + clone.times.period; },
+          varianceOf = function(sum, clone) { return sum + Math.pow(clone.times.period - mean, 2); };
 
       // avoid computing unclockable tests
       if (fn.unclockable) {
-        queue.length = clones.length = 0;
-        lastClone = clone;
+        clearQueue();
       }
       // exit early if aborted
       if (aborted) {
-        queue.length = clones.length = 0;
+        clearQueue();
         me.onComplete(me);
       }
-      // start over if switching from compilable to uncompilable
-      else if (curr != uncompilable) {
-        uncompilable = curr;
+      // start over if switching compilable state
+      else if (state.uncompilable != uncompilable) {
+        state.uncompilable = uncompilable;
         clearCompiled(me);
-        init();
+        initialize();
       }
-      // simulate onComplete to add more to queue if needed
-      else if (clone == lastClone) {
-        now = +new Date;
-        elapsed = (now - times.start) / 1e3;
-
+      // simulate onComplete and enqueue runs if needed
+      else if (!queue.length || sampleSize > initSampleSize) {
         // compute values
-        mean = reduce(clones, cbSum, 0) / clones.length || 0;
+        mean = reduce(sample, sumOf, 0) / sampleSize || 0;
         // standard deviation
-        sd = Math.sqrt(reduce(clones, cbVariance, 0) / (clones.length - 1)) || 0;
+        sd = Math.sqrt(reduce(sample, varianceOf, 0) / (sampleSize - 1)) || 0;
         // standard error of the mean
-        sem =  sd / Math.sqrt(clones.length) || 0;
+        sem =  sd / Math.sqrt(sampleSize) || 0;
         // margin of error
-        moe = sem * (T_DISTRIBUTION[clones.length - 1] || T_DISTRIBUTION.Infinity);
+        moe = sem * (T_DISTRIBUTION[sampleSize - 1] || T_DISTRIBUTION.Infinity);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
-        // start over if we get a bad batch
-        if (rme > 50) {
-          count *= 2;
-          init();
+        // if time permits, or calibrating, increase sample size to reduce the margin of error
+        if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || calibrating || queue.length)) {
+          if (!queue.length) {
+            // quadruple sample size to cut the margin of error in half
+            enqueue(rme > 50 ? sampleSize * 3 : 1);
+          }
         }
+        // finish up
         else {
-          // increase sample size to reduce the margin of error
-          if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || me.constructor == Calibration)) {
-            count++;
-            lastClone = createClone();
-            clones.push(lastClone);
-            queue.push(lastClone);
-          }
-          // finish up
-          else {
-            // set host statistical data
-            me.MoE = moe;
-            me.RME = rme;
-            me.SD  = sd;
-            me.SEM = sem;
+          // set host statistical data
+          me.MoE = moe;
+          me.RME = rme;
+          me.SD  = sd;
+          me.SEM = sem;
 
-            // calibrate by subtracting iteration overhead
-            mean = Math.max(0, mean - (cal && cal.times.period || 0));
+          // calibrate by subtracting iteration overhead
+          mean = Math.max(0, mean - (cal && cal.times.period || 0));
 
-            // set host results
-            me.count = lastClone.count;
-            me.hz = Math.round(1 / mean);
-            me.running = false;
+          // set host results
+          me.count = clone.count;
+          me.hz = Math.round(1 / mean);
+          me.running = false;
 
-            times.period = mean;
-            times.cycle = mean * me.count;
-            times.stop = now;
-            times.elapsed = elapsed;
+          times.period = mean;
+          times.cycle = mean * me.count;
+          times.stop = now;
+          times.elapsed = elapsed;
 
-            clearCompiled(me);
-            me.onComplete(me);
-          }
+          clearCompiled(me);
+          me.onComplete(me);
         }
       }
       return !aborted;
     }
 
-    // create clones
-    init();
+    // init queue, sample, and timer
+    initialize();
 
     // run them
     invoke(queue, {
@@ -1120,7 +1103,7 @@
      * The index of the calibration benchmark to use when computing results.
      * @member Benchmark
      */
-    'CALIBRATION_INDEX': -1,
+    'CALIBRATION_INDEX': 0,
 
     /**
      * The delay between test cycles (secs).
@@ -1153,7 +1136,7 @@
     'MAX_TIME_ELAPSED': 8,
 
     /**
-     * The time a benchmark should take to get a relative uncertainty of 1% (secs).
+     * The minimum time needed to reduce the percent uncetainty of measurement to 1% (secs).
      * @member Benchmark
      */
     'MIN_TIME': (function() {
