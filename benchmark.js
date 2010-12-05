@@ -117,7 +117,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Runs calibration benchmarks, if not needed, and fires a callback when completed.
+   * Runs calibration benchmarks, if needed, and fires a callback when completed.
    * @private
    * @param {Object} me The benchmark instance waiting for calibrations to complete.
    * @param {Function} callback Function executed after calibration.
