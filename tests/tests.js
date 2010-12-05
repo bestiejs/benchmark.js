@@ -3,16 +3,33 @@ module("getPlatform()");
 test("user agent detection", function() {
 
   var getPlatform = (function() {
-    var reduce = Benchmark.reduce,
-        toString = {}.toString,
+    var compiled,
+        xhr,
+        isHostType = Benchmark.isHostType,
+        reduce = Benchmark.reduce,
+        toString = {}.toString;
+
+    if (isHostType(window, 'ActiveXObject')) {
+      xhr = new ActiveXObject('Microsoft.XMLHTTP');
+    } else if (isHostType(window, 'XMLHttpRequest')) {
+      xhr = new XMLHttpRequest;
+    }
+
+    Benchmark.each(document.getElementsByTagName('script'), function(element) {
+      var src = element.src;
+      if (/benchmark\.js/.test(src)) {
+        xhr.open('get', src, false);
+        xhr.send();
         compiled = Function('reduce,toString,ua,options',
-                   String(Benchmark.getPlatform)
-                   .replace(/ua\s*=[^,]+,/,'')
-                   .replace(/navigator\.appMinorVersion/g, 'options.appMinorVersion')
-                   .replace(/version\s*=[^,]+,/,'version=options.opera,')
-                   .replace(/(?:window\.)?external/g,'options.external')
-                   .replace(/doc\.documentMode/g, 'options.mode') +
-                   'return getPlatform()');
+          'return ' +
+          (/(\s*)Benchmark.platform\s*=((?:.|\n)*?)\1}/.exec(xhr.responseText)[2] + '}())')
+            .replace(/ua\s*=[^,]+,/, '')
+            .replace(/navigator\.appMinorVersion/g, 'options.appMinorVersion')
+            .replace(/version\s*=[^,]+,/, 'version=options.opera,')
+            .replace(/(?:window\.)?external/g, 'options.external')
+            .replace(/doc\.documentMode/g, 'options.mode'));
+      }
+    });
 
     return function(options) {
       // http://www.howtocreate.co.uk/operaStuff/operaObject.html
