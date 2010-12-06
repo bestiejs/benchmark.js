@@ -1,4 +1,4 @@
-module("getPlatform()");
+module("Benchmark.platform");
 
 test("user agent detection", function() {
 

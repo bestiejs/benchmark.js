@@ -154,7 +154,6 @@
     // remove injected scripts and old iframes
     if (onCleanup.id) {
       Benchmark.each(query('script').concat(query('iframe')), function(element) {
-
         // check if element is expired
         name = element.name;
         expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] +

@@ -191,8 +191,8 @@
 
     function initialize() {
       me.cycles = 0;
-      me.times.start = +new Date;
       clearQueue();
+      clearCompiled(me);
       enqueue(initSampleSize);
     }
 
@@ -277,12 +277,13 @@
       // exit early if aborted
       if (aborted) {
         clearQueue();
+        clearCompiled(me);
         me.onComplete(me);
       }
       // start over if switching compilable state
       else if (state.uncompilable != uncompilable) {
         state.uncompilable = uncompilable;
-        clearCompiled(me);
+        times.start = +new Date;
         initialize();
       }
       // simulate onComplete and enqueue runs if needed
@@ -333,7 +334,7 @@
       return !aborted;
     }
 
-    // init queue, sample, and timer
+    // init queue and sample
     initialize();
 
     // run them
@@ -838,7 +839,6 @@
         compute(me, async);
       }
     }
-
   }
 
   /**
