@@ -10,12 +10,11 @@
 
   /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
   var CYCLE_DIVISORS = {
-    '1': 512,
-    '2': 128,
-    '3': 32,
+    '1': 4096,
+    '2': 512,
+    '3': 64,
     '4': 8,
-    '5': 2,
-    '6': 0
+    '5': 0
   },
 
   /**
