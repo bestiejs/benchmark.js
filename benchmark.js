@@ -267,8 +267,8 @@
           cal = cals[uncompilable && me.CALIBRATION_INDEX],
           elapsed = (now - times.start) / 1e3,
           sampleSize = sample.length,
-          sumOf = function(sum, clone) { return sum + clone.times.period; },
-          varianceOf = function(sum, clone) { return sum + Math.pow(clone.times.period - mean, 2); };
+          sumOf = function(sum, clone) { return sum + clone.hz; },
+          varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
 
       // avoid computing unclockable tests
       if (fn.unclockable) {
@@ -319,11 +319,11 @@
 
           // set host results
           me.count = clone.count;
-          me.hz = Math.round(1 / mean);
+          me.hz = mean;
           me.running = false;
 
-          times.period = mean;
-          times.cycle = mean * me.count;
+          times.period = 1 / mean;
+          times.cycle = times.period * me.count;
           times.stop = now;
           times.elapsed = elapsed;
 
@@ -570,17 +570,17 @@
    * Invokes a given method, with arguments, on all benchmarks in an array.
    * @static
    * @member Benchmark
-   * @param {Array} benchmarks Array of benchmarks to iterate over.
+   * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} methodName Name of method to invoke or options object.
    * @param {Array} args Arguments to invoke the method with.
    */
-  function invoke(benchmarks, methodName, args) {
+  function invoke(benches, methodName, args) {
     var async,
         backup,
         queued,
         i = 0,
-        first = benchmarks[0],
-        length = benchmarks.length,
+        first = benches[0],
+        length = benches.length,
         options = { 'onComplete': noop, 'onCycle': noop };
 
     function onInvoke(me) {
@@ -604,9 +604,9 @@
       // choose next benchmark if not exiting early
       if (options.onCycle(me) !== false) {
         if (queued) {
-          next = benchmarks.shift();
+          next = benches.shift();
         } else if (++i < length) {
-          next = benchmarks[i];
+          next = benches[i];
         }
       }
       if (next) {
@@ -636,7 +636,7 @@
           }
         }
       }
-      onInvoke(queued ? benchmarks.shift() : first);
+      onInvoke(queued ? benches.shift() : first);
     }
   }
 
@@ -761,6 +761,20 @@
   }
 
   /**
+   * Determines if the benchmark's hertz is higher than another.
+   * @static
+   * @member Benchmark
+   * @param {Object} other The benchmark to compare.
+   * @returns {Number} Returns 1 if higher, -1 if lower, and 0 if indeterminate.
+   */
+  function compare(other) {
+    var me = this,
+        a = { 'lower': me.hz - me.MoE,       'upper': me.hz + me.MoE },
+        b = { 'lower': other.hz - other.MoE, 'upper': other.hz + other.MoE };
+    return a.lower <= b.upper && a.upper >= b.lower ? 0 : a.lower > b.lower ? 1 : -1;
+  }
+
+  /**
    * Reset properties and abort if running.
    * @member Benchmark
    */
@@ -874,7 +888,7 @@
         period = me.times.period = clocked / count;
 
         // ops per second
-        me.hz = Math.round(1 / period);
+        me.hz = 1 / period;
 
         // do we need to do another cycle?
         me.running = !fn.unclockable && clocked < minTime;
@@ -1172,7 +1186,7 @@
      * The number of times a test was executed.
      * @member Benchmark
      */
-    'count': null,
+    'count': 0,
 
     /**
      * The number of cycles performed while benchmarking.
@@ -1190,7 +1204,7 @@
      * The number of executions per second.
      * @member Benchmark
      */
-    'hz': null,
+    'hz': 0,
 
     /**
      * A flag to indicate if the benchmark is running.
@@ -1248,6 +1262,9 @@
 
     // create new benchmark with the same test function and options
     'clone': clone,
+
+    // compares benchmark's hertz with another
+    'compare': compare,
 
     // reset benchmark properties
     'reset': reset,

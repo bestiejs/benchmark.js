@@ -180,9 +180,9 @@
     e || (e = window.event);
     var id = (e.target || e.srcElement).id.split('-')[1];
 
-    each(ui.benchmarks, function(benchmark) {
-      if (benchmark.id == id) {
-        ui.run(benchmark);
+    each(ui.benchmarks, function(bench) {
+      if (bench.id == id) {
+        ui.run(bench);
         return false;
       }
     });
@@ -191,23 +191,23 @@
   /**
    * The onComplete callback assigned to new benchmarks.
    * @private
-   * @param {Object} benchmark The benchmark.
+   * @param {Object} bench The benchmark.
    */
-  function onComplete(benchmark) {
+  function onComplete(bench) {
     setStatus(STATUS_TEXT.READY_AGAIN);
-    ui.render(benchmark);
+    ui.render(bench);
   }
 
   /**
    * The onCycle callback, used for onStart as well, assigned to new benchmarks.
    * @private
-   * @param {Object} benchmark The benchmark.
+   * @param {Object} bench The benchmark.
    */
-  function onCycle(benchmark) {
-    var cycles = benchmark.cycles;
-    if (!benchmark.aborted) {
-      setStatus(benchmark.name + ' &times; ' +
-                formatNumber(benchmark.count) + ' (' +
+  function onCycle(bench) {
+    var cycles = bench.cycles;
+    if (!bench.aborted) {
+      setStatus(bench.name + ' &times; ' +
+                formatNumber(bench.count) + ' (' +
                 cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
     }
   }
@@ -265,16 +265,10 @@
    * @private
    */
   function onQueueComplete() {
+    // populate result array (skipping unrun and errored benchmarks)
     var first,
         last,
-        result = [];
-
-    // populate result array (skipping unrun and errored benchmarks)
-    each(ui.benchmarks, function(benchmark) {
-      if (benchmark.cycles) {
-        result.push({ 'id': benchmark.id, 'hz': benchmark.hz });
-      }
-    });
+        result = Benchmark.filter(ui.benchmarks, function(bench) { return bench.cycles; });
 
     if (result.length > 1) {
       // sort descending by hz (highest hz / fastest first)
@@ -283,22 +277,22 @@
       last  = result[result.length - 1];
 
       // print contextual information
-      each(result, function(benchmark) {
+      each(result, function(bench) {
         var percent,
             text = 'fastest',
-            elResult = $(RESULTS_PREFIX + benchmark.id),
+            elResult = $(RESULTS_PREFIX + bench.id),
             elSpan = elResult.getElementsByTagName('span')[0];
 
-        if (benchmark.hz == first.hz) {
+        if (!bench.compare(first)) {
           // mark fastest
           addClass(elResult, text);
         }
         else {
-          percent = Math.floor((1 - benchmark.hz / first.hz) * 100);
+          percent = Math.floor((1 - bench.hz / first.hz) * 100);
           text = percent + '% slower';
 
           // mark slowest
-          if (benchmark.hz == last.hz) {
+          if (bench.hz == last.hz) {
             addClass(elResult, 'slowest');
           }
         }
@@ -323,14 +317,14 @@
    * @private
    */
   function onRun(e) {
-    var benchmarks = ui.benchmarks,
+    var benches = ui.benchmarks,
         run = $('run').innerHTML != RUN_TEXT.RUNNING;
 
     ui.abort();
     if (run) {
       logError(false);
       invoke(Benchmark.CALIBRATIONS, 'reset');
-      ui.run((e || window.event).shiftKey ? benchmarks.slice(0).reverse() : benchmarks);
+      ui.run((e || window.event).shiftKey ? benches.slice(0).reverse() : benches);
     }
   }
 
@@ -343,11 +337,11 @@
    */
   function abort() {
     var me = this,
-        benchmarks = me.benchmarks;
+        benches = me.benchmarks;
 
     me.queue.length = 0;
-    me.render(benchmarks);
-    invoke(benchmarks.concat(Benchmark.CALIBRATIONS), 'abort');
+    me.render(benches);
+    invoke(benches.concat(Benchmark.CALIBRATIONS), 'abort');
     setHTML('run', RUN_TEXT.READY);
   }
 
@@ -362,7 +356,7 @@
   function addTest(name, id, fn) {
     var me = this,
         elTitle = $('title-' + id),
-        benchmark = new Benchmark(fn, {
+        bench = new Benchmark(fn, {
           'id': id,
           'name': name,
           'onStart': onCycle,
@@ -376,9 +370,9 @@
     addListener(elTitle, 'click', onClick);
     addListener(elTitle, 'keyup', onKeyUp);
 
-    me.benchmarks.push(benchmark);
+    me.benchmarks.push(bench);
     me.elResults.push($(RESULTS_PREFIX + id));
-    me.render(benchmark);
+    me.render(bench);
   }
 
   /**
@@ -400,17 +394,17 @@
    * Renders the results table cell of the corresponding benchmark(s).
    * @static
    * @member ui
-   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    */
-  function render(benchmarks) {
+  function render(benches) {
     var me = this;
-    if (!isArray(benchmarks)) {
-      benchmarks = benchmarks ? [benchmarks] : me.benchmarks;
+    if (!isArray(benches)) {
+      benches = benches ? [benches] : me.benchmarks;
     }
-    each(benchmarks, function(benchmark) {
-      var cell = $(RESULTS_PREFIX + benchmark.id),
-          error = benchmark.error,
-          hz = benchmark.hz;
+    each(benches, function(bench) {
+      var cell = $(RESULTS_PREFIX + bench.id),
+          error = bench.error,
+          hz = bench.hz;
 
       cell.title = '';
 
@@ -425,19 +419,19 @@
       }
       else {
         // status: running
-        if (benchmark.running) {
+        if (bench.running) {
           setHTML(cell, 'running&hellip;');
         }
         // status: finished
-        else if (benchmark.cycles) {
-          setHTML(cell, formatNumber(hz));
-          cell.title = 'Ran ' + formatNumber(benchmark.count) + ' times in ' +
-                       benchmark.times.cycle.toFixed(2) + ' seconds.' +
-                       (hz == Infinity ? '' : ' (' +
-                       benchmark.RME.toFixed(2) + '% margin of error)');
+        else if (bench.cycles) {
+          cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
+            bench.times.cycle.toFixed(2) + ' seconds.';
+
+          setHTML(cell, hz == Infinity ? hz :
+            formatNumber(hz) + ' <small>&plusmn;' + bench.RME.toFixed(2) + '%<\/small>');
         }
         // status: pending
-        else if (indexOf(me.queue, benchmark) > -1) {
+        else if (indexOf(me.queue, bench) > -1) {
           setHTML(cell, 'pending&hellip;');
         }
         // status: ready
@@ -452,23 +446,23 @@
    * Adds given benchmark(s) to the queue and runs.
    * @static
    * @member ui
-   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    */
-  function run(benchmarks) {
+  function run(benches) {
     var added,
         me = this,
         queue = me.queue;
 
-    if (!isArray(benchmarks)) {
-      benchmarks = benchmarks ? [benchmarks] : me.benchmarks;
+    if (!isArray(benches)) {
+      benches = benches ? [benches] : me.benchmarks;
     }
-    each(benchmarks, function(benchmark) {
-      if (!benchmark.error && indexOf(queue, benchmark) < 0) {
+    each(benches, function(bench) {
+      if (!bench.error && indexOf(queue, bench) < 0) {
         // reset before (re)running so the previous run's results are
         // not re-recorded if the operation is aborted mid queue
-        benchmark.reset();
-        queue.push(benchmark);
-        me.render(benchmark);
+        bench.reset();
+        queue.push(bench);
+        me.render(bench);
         added = true;
 
         if (!me.running) {

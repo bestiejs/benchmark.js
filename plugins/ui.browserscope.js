@@ -38,19 +38,19 @@
   /**
    * Creates a Browserscope results object (skipping unrun and errored benchmarks).
    * @private
-   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    * @returns {Object|Null} Browserscope results object or null.
    */
-  function createSnapshot(benchmarks) {
-    if (!Benchmark.isArray(benchmarks)) {
-      benchmarks = benchmarks ? [benchmarks] : ui.benchmarks;
+  function createSnapshot(benches) {
+    if (!Benchmark.isArray(benches)) {
+      benches = benches ? [benches] : ui.benchmarks;
     }
-    return Benchmark.reduce(benchmarks, function(result, benchmark, key) {
-      if (benchmark.cycles) {
+    return Benchmark.reduce(benches, function(result, bench, key) {
+      if (bench.cycles) {
         // duplicate and non alphanumeric benchmark names have their ids appended
-        key = (benchmark.name.match(/[a-z0-9]+/ig) || []).join(' ');
+        key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
         result || (result = { });
-        result[key && !result[key] ? key : key + benchmark.id ] = benchmark.hz;
+        result[key && !result[key] ? key : key + bench.id ] = bench.hz;
       }
       return result;
     }, null);
@@ -247,16 +247,16 @@
    * Creates a Browserscope beacon and posts the benchmark results.
    * @static
    * @member ui.browserscope
-   * @param {Array|Object} [benchmarks=ui.benchmarks] One or an array of benchmarks.
+   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    */
-  function post(benchmarks) {
+  function post(benches) {
     var idoc,
         iframe,
         body = document.body,
         me = ui.browserscope,
         key = me.KEY,
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
-        snapshot = createSnapshot(benchmarks);
+        snapshot = createSnapshot(benches);
 
     if (key && snapshot) {
       // create new beacon
