@@ -319,13 +319,15 @@
 
           // set host results
           me.count = clone.count;
-          me.hz = mean;
           me.running = false;
-
-          times.period = 1 / mean;
-          times.cycle = times.period * me.count;
           times.stop = now;
           times.elapsed = elapsed;
+
+          if (clone.hz != Infinity) {
+            me.hz = mean;
+            times.period = 1 / mean;
+            times.cycle = times.period * me.count;
+          }
 
           clearCompiled(me);
           me.onComplete(me);
@@ -401,6 +403,7 @@
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
         // cleanup test body
         body = body.replace(/^\s+/, '').replace(/\s+$/, '').replace(/([^\n;])$/, '$1\n');
+
         // create unrolled test cycle
         if (body && count > 1) {
           if (lastCount) {
