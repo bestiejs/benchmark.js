@@ -7,7 +7,8 @@ test("user agent detection", function() {
         xhr,
         isHostType = Benchmark.isHostType,
         reduce = Benchmark.reduce,
-        toString = {}.toString;
+        toString = {}.toString,
+        trim = function(string) { return string.replace(/^\s+/, '').replace(/\s+$/, ''); }
 
     if (isHostType(window, 'ActiveXObject')) {
       xhr = new ActiveXObject('Microsoft.XMLHTTP');
@@ -20,7 +21,7 @@ test("user agent detection", function() {
       if (/benchmark\.js/.test(src)) {
         xhr.open('get', src, false);
         xhr.send();
-        compiled = Function('reduce,toString,ua,options',
+        compiled = Function('reduce,toString,trim,ua,options',
           'return ' +
           (/(\s*)Benchmark.platform\s*=((?:.|\n)*?)\1}/.exec(xhr.responseText)[2] + '}())')
             .replace(/ua\s*=[^,]+,/, '')
@@ -36,7 +37,7 @@ test("user agent detection", function() {
       if (options.opera < 7.6) {
         delete options.opera;
       }
-      return compiled(reduce, toString, options.ua, options);
+      return compiled(reduce, toString, trim, options.ua, options);
     };
   }());
 
@@ -65,6 +66,11 @@ test("user agent detection", function() {
 
     'Android Browser 4.0 (WebKit) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
+    },
+
+    'Android Browser 4.1\u03b1 (platform preview rendered by WebKit) on Android 2.2.1': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.1a Mobile Safari/533.1',
+      'external': null
     },
 
     'BlackBerry Browser 4.0.0 on BlackBerry 7250': {
@@ -304,7 +310,8 @@ test("user agent detection", function() {
     },
 
     'IE 9.0 on Windows 7': {
-      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)'
+      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
+      'mode': 9
     },
 
     'Iron 0.2.152.0 on Windows Vista': {
@@ -340,6 +347,13 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.13) Gecko/20100917 Firefox/3.5.13 Lunascape/6.2.1.22445'
     },
 
+    'Lunascape 6.3.1.22729\u03b2 (platform preview rendered by Trident) on Windows Vista': {
+      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; Lunascape/6.3.1.22729',
+      'appMinorVersion': 'beta',
+      'external': null,
+      'mode': 9
+    },
+
     'Lunascape 6.3.2.22803 (WebKit) on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Lunascape/6.3.2.22803 Safari/533.3'
     },
@@ -360,8 +374,15 @@ test("user agent detection", function() {
 
     'Maxthon 3.x (running in IE 7 mode) on Windows XP': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; Trident/4.0; Maxthon/3.0)',
-      'mode': 7,
-      'external': null
+      'external': null,
+      'mode': 7
+    },
+
+    'Maxthon 3.x\u03b1 (platform preview rendered by Trident) on Windows XP': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; Maxthon/3.0)',
+      'appMinorVersion': 'alpha',
+      'external': null,
+      'mode': 8
     },
 
     'Opera Mobile 10.00 on Linux i686': {
@@ -709,6 +730,13 @@ test("user agent detection", function() {
       'ua': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; Sleipnir 2.8.4)'
     },
 
+    'Sleipnir 2.9.2\u03b2 (platform preview rendered by Trident) on Windows XP': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; Sleipnir/2.9.2)',
+      'appMinorVersion': 'beta',
+      'external': null,
+      'mode': 8
+    },
+
     'Sleipnir 2.9.4 (running in IE 7 mode) on Windows Vista': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; Trident/4.0; Sleipnir/2.9.4)',
       'mode': 7
@@ -736,6 +764,14 @@ test("user agent detection", function() {
     'Sunrise 4.0.1 on Linux x86_64': {
       'ua': 'Mozilla/6.0 (X11; U; Linux x86_64; en-US; rv:2.9.0.3) Gecko/2009022510 FreeBSD/ Sunrise/4.0.1/like Safari'
     },
+
+    'Swiftfox 2.0.0.6 on Linux i686': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux i686 (x86_64); en-US; rv:1.8.1.6) Gecko/20070803 Firefox/2.0.0.6 (Swiftfox)'
+    },
+
+    'Swiftfox 3.0.10\u03b1 on Linux i686': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.10pre) Gecko/2009041814 Firefox/3.0.10pre (Swiftfox)',
+     },
 
     'Mozilla/5.0 (PLAYSTATION 3; 2.00)': {
       'ua': 'Mozilla/5.0 (PLAYSTATION 3; 2.00)'

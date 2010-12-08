@@ -351,6 +351,16 @@
   }
 
   /**
+   * A generic bare-bones String#trim solution.
+   * @private
+   * @param {String} string The string to trim.
+   * @returns {String} The trimmed string.
+   */
+  function trim(string) {
+    return string.replace(/^\s+/, '').replace(/\s+$/, '');
+  }
+
+  /**
    * Clocks the time taken to execute a test per cycle (seconds).
    * @private
    * @param {Object} me The benchmark instance.
@@ -383,7 +393,7 @@
         // extract test body
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
         // cleanup test body
-        body = body.replace(/^\s+/, '').replace(/\s+$/, '').replace(/([^\n;])$/, '$1\n');
+        body = trim(body).replace(/([^\n;])$/, '$1\n');
 
         // create unrolled test cycle
         if (body && count > 1) {
@@ -957,7 +967,7 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Opera,Chrome,Firefox,IE,Safari',
+        name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
         os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
         layout = /Gecko|Trident|WebKit/.exec(ua),
@@ -969,11 +979,11 @@
     });
 
     product = reduce(product.split(','), function(product, guess) {
-      return product || (product = RegExp(guess + '[^);/]*').exec(ua));
+      return product || (product = RegExp(guess + '[^();/-]*').exec(ua));
     });
 
     os = reduce(os.split(','), function(os, guess) {
-      if (!os && (os = RegExp(guess + '[^);/-]*').exec(ua))) {
+      if (!os && (os = RegExp(guess + '[^();/-]*').exec(ua))) {
         // platform tokens defined at
         // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
         if (/Windows/.test(os) && (data = data[0/*opera fix*/,/[456]\.\d/.exec(os)])) {
@@ -996,18 +1006,18 @@
         if (/Mac/.test(os)) {
           os = String(os).replace(/ Mach$/, '').replace('Macintosh', 'Mac OS');
         }
-        os = String(os).replace(/\/(\d)/, ' $1').split(' on ')[0];
+        os = trim(String(os).replace(/\/(\d)/, ' $1').split(' on ')[0]);
       }
       return os;
     });
 
     // detect non Opera versions
-    version = reduce(/webOS/.test(os) ? [name] : ['version', name, product], function(version, guess, i) {
+    version = reduce(/webOS/.test(os) ? [name] : ['version', /fox/.test(name) ? 'Firefox' : name, product], function(version, guess, i) {
       return version || (version = (RegExp(guess + (i == 1 ? '[ /-]' : '/') + '([^ ();/-]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
     // cleanup product
-    product = product && String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0];
+    product = product && trim(String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
 
     // detect non Safari WebKit based browsers
     if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
@@ -1030,7 +1040,7 @@
     }
     // detect Maxthon's unreliable version info
     if (name == 'Maxthon') {
-      version = version && version.replace(/\..*/, '.x');
+      version = version && version.replace(/\.[.\d]*/, '.x');
     }
     // detect Firefox nightly
     else if (name == 'Minefield') {
