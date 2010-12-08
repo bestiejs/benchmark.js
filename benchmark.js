@@ -929,10 +929,6 @@
         me.error = e;
         me.onError(me);
       }
-      // used for calibration later
-      looped = me.looped || 0;
-      delete me.looped;
-
       // should we exit early?
       if (me.onCycle(me) === false) {
         me.abort();
