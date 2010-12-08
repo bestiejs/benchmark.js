@@ -354,7 +354,7 @@
    * Clocks the time taken to execute a test per cycle (seconds).
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Number} The cycle time of the instance.
+   * @returns {Object} An object containing the clocked time and loops taken.
    */
   var clock = (function() {
     var fallback,
@@ -362,7 +362,7 @@
         uid = +new Date,
         args = 'm' + uid + ',c' + uid,
         chunk = 'while(i$--){',
-        code = ['var r$,i$=m$.looped=m$.count,f$=m$.fn,t$=#{0};\n', '#{1};m$.times.cycle=r$;return"$"'],
+        code = ['var r$,i$=m$.count,l$=i$,f$=m$.fn,t$=#{0};\n', '#{1};return{looped:i$<0?l$:0,time:r$,uid:"$"}'],
         co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
 
     function embed(me) {
@@ -395,8 +395,8 @@
             // how much is left to unroll
             remainder -= lastCount * into;
 
-            // for large strings switch to hybrid compiling (unroll + while loop)
-            if (body.length * count > 4e6) {
+            // for large strings (~250mb+) switch to hybrid compiling (unroll + while loop)
+            if (body.length * count > 2.56e5) {
               fn.compilable = 0;
               // reduce remainder as much as possible and shift unrolled to the while loop
               if (shift = remainder ? Math.floor(remainder / into) : 0) {
@@ -405,7 +405,7 @@
                 remainder -= shift;
               }
               // compile while loop
-              head = head.replace(/(looped=)([^,]+)/, '$1' + into);
+              head = head.replace(/(i\d+=)[^,]+/, '$1' + into);
               prefix = chunk + lastBody + '}';
             }
             else {
@@ -428,18 +428,19 @@
       var count = me.count,
           fn = me.fn,
           compilable = !supported ? -1 : fn.compilable,
-          times = me.times;
+          times = me.times,
+          result = { 'looped': 0, 'time': 0 };
 
       if (!fn.unclockable) {
         if (compilable == null || compilable > -1) {
           try {
             if (compilable == null) {
               me.count = 1;
-              compilable = fn.compilable = embed(me)(me, co) == uid ? 1 : -1;
+              compilable = fn.compilable = embed(me)(me, co).uid == uid ? 1 : -1;
               me.count = count;
             }
             if (compilable > -1) {
-              embed(me)(me, co);
+              result = embed(me)(me, co);
             }
           } catch(e) {
             me.count = count;
@@ -447,13 +448,11 @@
           }
         }
         if (compilable < 0) {
-          fallback(me, co);
+          result = fallback(me, co);
         }
-      } else {
-        // unclockable benchmarks (e.g. empty tests)
-        times.cycle = 0;
       }
-      return times.cycle;
+      delete result.uid;
+      return result;
     }
 
     // enable benchmarking via the --enable-benchmarking flag
@@ -853,8 +852,8 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function _run(me, async) {
-    var compilable,
-        cycles = me.cycles;
+    var clocked,
+        compilable;
 
     function onCalibrate(cal) {
       if (cal.aborted) {
@@ -866,8 +865,7 @@
     }
 
     function finish() {
-      var clocked,
-          divisor,
+      var divisor,
           period,
           fn = me.fn,
           index = me.CALIBRATION_INDEX,
@@ -880,7 +878,7 @@
       if (me.running) {
         // calibrate by subtracting iteration overhead
         clocked = times.cycle = Math.max(0,
-          times.cycle - (cal && cal.times.period || 0) * me.looped);
+          clocked.time - (cal && cal.times.period || 0) * clocked.looped);
 
         // seconds per operation
         period = times.period = clocked / count;
@@ -897,7 +895,7 @@
         if (me.running) {
           // tests may clock at 0 when INIT_RUN_COUNT is a small number,
           // to avoid that we set its count to something a bit higher
-          if (!clocked && (divisor = CYCLE_DIVISORS[cycles]) != null) {
+          if (!clocked && (divisor = CYCLE_DIVISORS[me.cycles]) != null) {
             count = Math.floor(4e6 / divisor);
           }
           // calculate how many more iterations it will take to achive the MIN_TIME
@@ -922,35 +920,33 @@
 
     // continue, if not aborted between cycles
     if (me.running) {
-      if (cycles) {
-        cycles = ++me.cycles;
-      } else {
-        cycles = me.cycles = 1;
-      }
-      // clock executions of me.fn
+      me.cycles++;
       try {
-        clock(me);
+        clocked = clock(me);
       }
       catch(e) {
         me.abort();
         me.error = e;
         me.onError(me);
       }
+      // used for calibration later
+      looped = me.looped || 0;
+      delete me.looped;
+
       // should we exit early?
       if (me.onCycle(me) === false) {
         me.abort();
       }
     }
-
-    if (me.aborted) {
-      finish();
-    } else {
-      // check if calibration is needed
+    // check if calibration is needed
+    if (me.running) {
       compilable = me.fn.compilable;
       if (compilable == null || compilable > 0 || me.constructor == Calibration ||
           (compilable < 1 && calibrate(me, onCalibrate, async))) {
         finish();
       }
+    } else {
+      finish();
     }
   }
 
@@ -1198,7 +1194,7 @@
      * The number of cycles performed while benchmarking.
      * @member Benchmark
      */
-    'cycles': null,
+    'cycles': 0,
 
     /**
      * The error object if the test failed.
