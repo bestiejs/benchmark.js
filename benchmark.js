@@ -79,38 +79,11 @@
     Benchmark.call(this, fn, options);
   }
 
+  // Calibration inherits from Benchmark
   (function() {
-
-    /**
-     * Runs calibration benchmarks without calibrating itself.
-     * @member Calibration
-     * @param {Boolean} [async=false] Flag to run asynchronously.
-     */
-    function run(async) {
-      var me = this;
-      me.reset();
-      me.count = me.INIT_RUN_COUNT;
-      me.running = true;
-      me.times.start = +new Date;
-      me.onStart(me);
-
-      async = async == null ? me.DEFAULT_ASYNC : async;
-      if (me.computing) {
-        _run(me, async);
-      } else {
-        compute(me, async);
-      }
-    }
-
-    // Calibration inherits from Benchmark
     function Klass() { }
     Klass.prototype = Benchmark.prototype;
-    var proto = Calibration.prototype = new Klass;
-
-    // point to the correct constructor
-    proto.constructor = Calibration;
-    // custom run method to avoid calibrating itself
-    proto.run = run;
+    (Calibration.prototype = new Klass).constructor = Calibration;
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -264,12 +237,9 @@
           sd,
           sem,
           compilable = fn.compilable,
-          index = me.CALIBRATION_INDEX,
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
-          cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[(index > 0 || compilable < 1) && index],
           elapsed = (now - times.start) / 1e3,
           sampleSize = sample.length,
           sumOf = function(sum, clone) { return sum + clone.hz; },
@@ -318,9 +288,6 @@
           me.RME = rme;
           me.SD  = sd;
           me.SEM = sem;
-
-          // calibrate by subtracting iteration overhead
-          mean = Math.max(0, mean - (cal && cal.times.period || 0));
 
           // set host results
           me.count = clone.count;
@@ -395,7 +362,7 @@
         uid = +new Date,
         args = 'm' + uid + ',c' + uid,
         chunk = 'while(i$--){',
-        code = ['var r$,i$=m$.count,f$=m$.fn,t$=#{0};\n', '#{1};m$.times.cycle=r$;return"$"'],
+        code = ['var r$,i$=m$.looped=m$.count,f$=m$.fn,t$=#{0};\n', '#{1};m$.times.cycle=r$;return"$"'],
         co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
 
     function embed(me) {
@@ -429,7 +396,7 @@
             remainder -= lastCount * into;
 
             // for large strings switch to hybrid compiling (unroll + while loop)
-            if (body.length * count > 1e6) {
+            if (body.length * count > 4e6) {
               fn.compilable = 0;
               // reduce remainder as much as possible and shift unrolled to the while loop
               if (shift = remainder ? Math.floor(remainder / into) : 0) {
@@ -438,7 +405,7 @@
                 remainder -= shift;
               }
               // compile while loop
-              head = head.replace(/(i\d+=)([^,]+)/, '$1' + into);
+              head = head.replace(/(looped=)([^,]+)/, '$1' + into);
               prefix = chunk + lastBody + '}';
             }
             else {
@@ -460,8 +427,8 @@
     function clock(me) {
       var count = me.count,
           fn = me.fn,
-          times = me.times,
-          compilable = !supported ? -1 : fn.compilable;
+          compilable = !supported ? -1 : fn.compilable,
+          times = me.times;
 
       if (!fn.unclockable) {
         if (compilable == null || compilable > -1) {
@@ -861,40 +828,21 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function run(async) {
-    var me = this,
-        compilable = me.fn.compilable;
-
-    function onCalibrate(cal) {
-      if (cal.aborted) {
-        me.abort();
-        me.onComplete(me);
-      } else if (me.running) {
-        call(me, rerun, async);
-      }
-    }
-
-    function rerun() {
-      me.run(async);
-    }
-
+    var me = this;
     async = async == null ? me.DEFAULT_ASYNC : async;
+
+    // set running to false so reset() won't call abort()
+    me.running = false;
+    me.reset();
     me.running = true;
+    me.count = me.INIT_RUN_COUNT;
+    me.times.start = +new Date;
+    me.onStart(me);
 
-    if (compilable == null || compilable > 0 ||
-        (compilable < 1 && calibrate(me, onCalibrate, async))) {
-      // set running to false so reset() won't call abort()
-      me.running = false;
-      me.reset();
-      me.running = true;
-      me.count = me.INIT_RUN_COUNT;
-      me.times.start = +new Date;
-      me.onStart(me);
-
-      if (me.computing) {
-        _run(me, async);
-      } else {
-        compute(me, async);
-      }
+    if (me.computing) {
+      _run(me, async);
+    } else {
+      compute(me, async);
     }
   }
 
@@ -905,29 +853,37 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function _run(me, async) {
-    var clocked,
-        divisor,
-        period,
-        count = me.count,
-        cycles = me.cycles,
-        delay = me.CYCLE_DELAY,
-        fn = me.fn,
-        minTime = me.MIN_TIME;
+    var compilable,
+        cycles = me.cycles;
 
-    // continue, if not aborted between cycles
-    if (me.running) {
-
-      if (cycles) {
-        cycles = ++me.cycles;
-      } else {
-        cycles = me.cycles = 1;
+    function onCalibrate(cal) {
+      if (cal.aborted) {
+        me.abort();
+        me.onComplete(me);
+      } else if (me.running) {
+        call(me, finish, async);
       }
-      try {
-        // clock executions of me.fn
-        clocked = clock(me);
+    }
+
+    function finish() {
+      var divisor,
+          period,
+          fn = me.fn,
+          index = me.CALIBRATION_INDEX,
+          times = me.times,
+          cals = me.constructor.CALIBRATIONS || [],
+          cal = cals[(index > 0 || fn.compilable < 1) && index],
+          clocked = times.cycle,
+          count = me.count,
+          minTime = me.MIN_TIME;
+
+      if (me.running) {
+        // calibrate by subtracting iteration overhead
+        clocked = times.cycle = Math.max(0,
+          clocked - (cal && cal.times.period || 0) * me.looped);
 
         // seconds per operation
-        period = me.times.period = clocked / count;
+        period = times.period = clocked / count;
 
         // ops per second
         me.hz = 1 / period;
@@ -954,10 +910,26 @@
             clearCompiled(me);
           }
         }
-        // update count for next cycle
-        if (me.running) {
-          me.count = count;
-        }
+      }
+      // figure out what to do next
+      if (me.running) {
+        me.count = count;
+        call(me, _run, async);
+      } else {
+        me.onComplete(me);
+      }
+    }
+
+    // continue, if not aborted between cycles
+    if (me.running) {
+      if (cycles) {
+        cycles = ++me.cycles;
+      } else {
+        cycles = me.cycles = 1;
+      }
+      // clock executions of me.fn
+      try {
+        clock(me);
       }
       catch(e) {
         me.abort();
@@ -970,11 +942,15 @@
       }
     }
 
-    // figure out what to do next
-    if (me.running) {
-      call(me, _run, async);
+    if (me.aborted) {
+      finish();
     } else {
-      me.onComplete(me);
+      // check if calibration is needed
+      compilable = me.fn.compilable;
+      if (compilable == null || compilable > 0 || me.constructor == Calibration ||
+          (compilable < 1 && calibrate(me, onCalibrate, async))) {
+        finish();
+      }
     }
   }
 
