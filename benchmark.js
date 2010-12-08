@@ -395,8 +395,8 @@
             // how much is left to unroll
             remainder -= lastCount * into;
 
-            // for large strings (~250mb+) switch to hybrid compiling (unroll + while loop)
-            if (body.length * count > 2.56e5) {
+            // for large strings (~50mb+) switch to hybrid compiling (unroll + while loop)
+            if (body.length * count > 51e3) {
               fn.compilable = 0;
               // reduce remainder as much as possible and shift unrolled to the while loop
               if (shift = remainder ? Math.floor(remainder / into) : 0) {
