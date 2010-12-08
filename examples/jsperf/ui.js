@@ -323,7 +323,6 @@
     ui.abort();
     if (run) {
       logError(false);
-      invoke(Benchmark.CALIBRATIONS, 'reset');
       ui.run((e || window.event).shiftKey ? benches.slice(0).reverse() : benches);
     }
   }

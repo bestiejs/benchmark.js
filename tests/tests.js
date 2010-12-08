@@ -709,7 +709,7 @@ test("user agent detection", function() {
       'mode': 5
     },
 
-    'unknown platform': {
+    'Mozilla/5.0 (PLAYSTATION 3; 2.00)': {
       'ua': 'Mozilla/5.0 (PLAYSTATION 3; 2.00)'
     }
   };

@@ -8,7 +8,7 @@
 
 (function(window) {
 
-  /** MAX_RUN_COUNT divisors used to avoid hz of Infinity */
+  /** Divisors used to avoid hz of Infinity */
   var CYCLE_DIVISORS = {
     '1': 4096,
     '2': 512,
@@ -59,11 +59,12 @@
    * @param {Object} [options={}] Options object.
    */
   function Benchmark(fn, options) {
+    var me = this;
     options = extend({ }, options);
-    extend(this, options);
-    this.fn = fn;
-    this.options = options;
-    this.times = extend({ }, this.times);
+    extend(me, options);
+    me.fn = fn;
+    me.options = options;
+    me.times = extend({ }, me.times);
   }
 
   /**
@@ -83,13 +84,12 @@
     /**
      * Runs calibration benchmarks without calibrating itself.
      * @member Calibration
-     * @param {Number} [count=Benchmark#INIT_RUN_COUNT] Iterations to clock on first cycle.
      * @param {Boolean} [async=false] Flag to run asynchronously.
      */
-    function run(count, async) {
+    function run(async) {
       var me = this;
       me.reset();
-      me.count = count || me.INIT_RUN_COUNT;
+      me.count = me.INIT_RUN_COUNT;
       me.running = true;
       me.times.start = +new Date;
       me.onStart(me);
@@ -169,6 +169,7 @@
 
     if (compiled[uid]) {
       delete compiled[uid];
+      // run garbage collection in IE
       if (isHostType(window, 'CollectGarbage')) {
         CollectGarbage();
       }
@@ -184,13 +185,15 @@
   function compute(me, async) {
     var calibrating = me.constructor == Calibration,
         fn = me.fn,
+        initRunCount = me.INIT_RUN_COUNT,
         initSampleSize = 5,
         queue = [],
         sample = [],
-        state = { 'calibrated': isCalibrated(), 'uncompilable': fn.uncompilable };
+        state = { 'calibrated': isCalibrated(), 'compilable': fn.compilable };
 
     function initialize() {
       me.cycles = 0;
+      me.INIT_RUN_COUNT = initRunCount;
       clearQueue();
       clearCompiled(me);
       enqueue(initSampleSize);
@@ -214,10 +217,10 @@
     }
 
     function onComplete(clone) {
-      // update run count and init uncompilable state
+      // update host run count and init compilable state
       me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
-      if (state.uncompilable == null) {
-        state.uncompilable = fn.uncompilable;
+      if (state.compilable == null) {
+        state.compilable = fn.compilable;
       }
     }
 
@@ -254,17 +257,19 @@
     }
 
     function onInvokeCycle(clone) {
-      var mean,
+      var complete,
+          mean,
           moe,
           rme,
           sd,
           sem,
+          compilable = fn.compilable,
+          index = me.CALIBRATION_INDEX,
           now = +new Date,
           times = me.times,
-          uncompilable = fn.uncompilable,
           aborted = me.aborted,
           cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[uncompilable && me.CALIBRATION_INDEX],
+          cal = cals[(index > 0 || compilable < 1) && index],
           elapsed = (now - times.start) / 1e3,
           sampleSize = sample.length,
           sumOf = function(sum, clone) { return sum + clone.hz; },
@@ -276,17 +281,15 @@
       }
       // exit early if aborted
       if (aborted) {
-        clearQueue();
-        clearCompiled(me);
-        me.onComplete(me);
+        complete = true;
       }
       // start over if switching compilable state
-      else if (state.uncompilable != uncompilable) {
-        state.uncompilable = uncompilable;
+      else if (state.compilable != compilable) {
+        state.compilable = compilable;
         times.start = +new Date;
         initialize();
       }
-      // simulate onComplete and enqueue runs if needed
+      // simulate onComplete and enqueue additional runs if needed
       else if (!queue.length || sampleSize > initSampleSize) {
         // compute values
         mean = reduce(sample, sumOf, 0) / sampleSize || 0;
@@ -308,7 +311,9 @@
         }
         // finish up
         else {
-          // set host statistical data
+          complete = true;
+
+          // set statistical data
           me.MoE = moe;
           me.RME = rme;
           me.SD  = sd;
@@ -328,10 +333,16 @@
             times.period = 1 / mean;
             times.cycle = times.period * me.count;
           }
-
-          clearCompiled(me);
-          me.onComplete(me);
         }
+      }
+      // cleanup
+      if (complete) {
+        clearQueue();
+        clearCompiled(me);
+        delete fn.unclockable;
+        delete fn.compilable;
+        me.INIT_RUN_COUNT = initRunCount;
+        me.onComplete(me);
       }
       return !aborted;
     }
@@ -383,19 +394,22 @@
         supported,
         uid = +new Date,
         args = 'm' + uid + ',c' + uid,
-        chunk = 'while(i$--){f$()}',
+        chunk = 'while(i$--){',
         code = ['var r$,i$=m$.count,f$=m$.fn,t$=#{0};\n', '#{1};m$.times.cycle=r$;return"$"'],
         co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
 
     function embed(me) {
       var into,
-          pre = '',
-          fn = me.fn,
+          shift,
           count = me.count,
+          head = code[0],
+          fn = me.fn,
+          prefix = '',
           uid = fn.uid || (fn.uid = ++cache.counter),
           lastCycle = cache.compiled[uid] || { },
           lastCount = lastCycle.count,
-          body = lastCycle.body || '',
+          lastBody = lastCycle.body,
+          body = lastBody || '',
           remainder = count;
 
       if (lastCount != count) {
@@ -406,41 +420,66 @@
 
         // create unrolled test cycle
         if (body && count > 1) {
+
+          // compile faster by using the last cycles body as much as possible
           if (lastCount) {
+            // number of times to repeat the last cycles unrolled body
             into = Math.floor(remainder / lastCount);
+            // how much is left to unroll
             remainder -= lastCount * into;
-            pre = repeat(lastCycle.body, into);
+
+            // for large strings switch to hybrid compiling (unroll + while loop)
+            if (body.length * count > 1e6) {
+              fn.compilable = 0;
+              // reduce remainder as much as possible and shift unrolled to the while loop
+              if (shift = remainder ? Math.floor(remainder / into) : 0) {
+                lastBody = lastCycle.body += repeat(body, shift);
+                lastCycle.count += shift;
+                remainder -= shift;
+              }
+              // compile while loop
+              head = head.replace(/(i\d+=)([^,]+)/, '$1' + into);
+              prefix = chunk + lastBody + '}';
+            }
+            else {
+              prefix = repeat(lastBody, into);
+            }
           }
-          body = pre + (remainder ? repeat(body, remainder) : '');
-          cache.compiled[uid] = { 'count': count, 'body': body };
+          // compile unrolled body
+          body = prefix + (remainder ? repeat(body, remainder) : '');
+
+          // cache if not hybrid compiling
+          if (head == code[0]) {
+            cache.compiled[uid] = { 'count': count, 'body': body };
+          }
         }
       }
-      return Function(args, code[0] + body + code[1]);
+      return Function(args, head + body + code[1]);
     }
 
     function clock(me) {
       var count = me.count,
           fn = me.fn,
           times = me.times,
-          uncompilable = !supported || fn.uncompilable;
+          compilable = !supported ? -1 : fn.compilable;
 
       if (!fn.unclockable) {
-        if (!uncompilable) {
+        if (compilable == null || compilable > -1) {
           try {
-            if (uncompilable == null) {
+            if (compilable == null) {
               me.count = 1;
-              uncompilable = fn.uncompilable = embed(me)(me, co) != uid;
+              compilable = fn.compilable = embed(me)(me, co) == uid ? 1 : -1;
               me.count = count;
             }
-            if (!uncompilable) {
+            if (compilable > -1) {
               embed(me)(me, co);
             }
           } catch(e) {
             me.count = count;
-            uncompilable = fn.uncompilable = true;
+            compilable = fn.compilable = -1;
           }
         }
-        if (uncompilable) {
+        if (compilable < 0) {
           fallback(me, co);
         }
       } else {
@@ -467,15 +506,15 @@
     }
 
     // inject uid into variable names to avoid collisions with embedded tests
-    chunk = chunk.replace(/\$/g, uid);
     code = code.replace(/\$/g, uid).split('|');
+    chunk = chunk.replace(/\$/g, uid);
 
     // non embedding fallback
-    fallback = Function(args, code[0] + chunk + code[1]);
+    fallback = Function(args, code[0] + chunk + 'f' + uid + '()}' + code[1]);
 
     // is embedding supported?
     (function() {
-      var x = new Benchmark(function() { return true; }, { 'count': 1 });
+      var x = new Benchmark(function() { return 1; }, { 'count': 1 });
       try { supported = embed(x)(x, co); } catch(e) { }
     }());
 
@@ -823,7 +862,7 @@
    */
   function run(async) {
     var me = this,
-        uncompilable = me.fn.uncompilable;
+        compilable = me.fn.compilable;
 
     function onCalibrate(cal) {
       if (cal.aborted) {
@@ -841,7 +880,8 @@
     async = async == null ? me.DEFAULT_ASYNC : async;
     me.running = true;
 
-    if (!uncompilable || (uncompilable && calibrate(me, onCalibrate, async))) {
+    if (compilable == null || compilable > 0 ||
+        (compilable < 1 && calibrate(me, onCalibrate, async))) {
       // set running to false so reset() won't call abort()
       me.running = false;
       me.reset();
@@ -872,7 +912,6 @@
         cycles = me.cycles,
         delay = me.CYCLE_DELAY,
         fn = me.fn,
-        maxCount = me.MAX_RUN_COUNT,
         minTime = me.MIN_TIME;
 
     // continue, if not aborted between cycles
@@ -903,22 +942,16 @@
           // tests may clock at 0 when INIT_RUN_COUNT is a small number,
           // to avoid that we set its count to something a bit higher
           if (!clocked && (divisor = CYCLE_DIVISORS[cycles]) != null) {
-            count = Math.floor(maxCount / divisor);
-            // give up and declare the test unclockable
-            if (!(me.running = count <= maxCount)) {
-              fn.unclockable = true;
-              clearCompiled(me);
-            }
+            count = Math.floor(4e6 / divisor);
           }
           // calculate how many more iterations it will take to achive the MIN_TIME
           if (count <= me.count) {
             count += Math.ceil((minTime - clocked) / period);
-            // to avoid freezing the browser avoid compiling if the
-            // next cycle would exceed the max count allowed
-            if (count > maxCount) {
-              fn.uncompilable = true;
-              me.running = false;
-            }
+          }
+          // give up and declare the test unclockable
+          if (!(me.running = count != Infinity)) {
+            fn.unclockable = true;
+            clearCompiled(me);
           }
         }
         // update count for next cycle
@@ -1057,7 +1090,7 @@
       'name': name && description.unshift(name) && name,
       'product': product && description.push('on ' + product) && product,
       'os': os && description.push((product ? '' : 'on ') + os) && os,
-      'description': description.length ? description.join(' ') : 'unknown platform',
+      'description': description.length ? description.join(' ') : ua,
       'toString': function() { return this.description; }
     };
   }());
@@ -1072,8 +1105,8 @@
      * @member Benchmark
      */
     'CALIBRATIONS': (function() {
-      var cal = new Calibration(function() { });
-      cal.fn.uncompilable = true;
+      var cal = new Calibration(noop);
+      cal.fn.compilable = -1;
       return [cal];
     }()),
 
@@ -1138,12 +1171,6 @@
      * @member Benchmark
      */
     'INIT_RUN_COUNT': 5,
-
-    /**
-     * The maximum test executions allowed per cycle (used to avoid freezing the browser).
-     * @member Benchmark
-     */
-    'MAX_RUN_COUNT': 4e6, // 4 million
 
     /**
      * The maximum time a benchmark is allowed to run before finishing (secs).
