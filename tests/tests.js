@@ -119,6 +119,18 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/540.0 (KHTML, like Gecko) Ubuntu/10.10 Chrome/8.1.0.0 Safari/540.0'
     },
 
+    'Epiphany 0.9.2 on Linux i686': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.4) Gecko/20030908 Epiphany/0.9.2'
+    },
+
+    'Epiphany 2.22 on Linux x86_64': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; en; rv:1.9.0.8) Gecko/20080528 Fedora/2.24.3-4.fc10 Epiphany/2.22 Firefox/3.0'
+    },
+
+    'Epiphany 2.30.6 on Linux x86_64': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Epiphany/2.30.6 Safari/534.7'
+    },
+
     'Firefox 3.0\u03b11 on Mac OS X': {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X Mach-O; en-US; rv:1.9a1) Gecko/20061204 Firefox/3.0a1'
     },
@@ -157,6 +169,14 @@ test("user agent detection", function() {
 
     'Flock 2.6.0 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.19) Gecko/2010061201 Firefox/3.0.19 Flock/2.6.0'
+    },
+
+    'Galeon 1.2.5 on Linux i686': {
+      'ua': 'Mozilla/5.0 Galeon/1.2.5 (X11; Linux i686; U;) Gecko/20020809'
+    },
+
+    'Galeon 2.0.7 on Linux i686': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.8) Gecko/20090327 Galeon/2.0.7'
     },
 
     'GreenBrowser (running in IE 7 mode) on Windows XP': {
@@ -707,6 +727,14 @@ test("user agent detection", function() {
     'SlimBrowser (running in IE 5 mode) on Windows 7': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/4.0; SlimBrowser)',
       'mode': 5
+    },
+
+    'Sunrise 1.7.5 on Mac OS X 10.5.5': {
+      'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_5; ja-jp) AppleWebKit/525.18 (KHTML, like Gecko) Sunrise/1.7.5 like Safari/5525.20.1'
+    },
+
+    'Sunrise 4.0.1 on Linux x86_64': {
+      'ua': 'Mozilla/6.0 (X11; U; Linux x86_64; en-US; rv:2.9.0.3) Gecko/2009022510 FreeBSD/ Sunrise/4.0.1/like Safari'
     },
 
     'Mozilla/5.0 (PLAYSTATION 3; 2.00)': {

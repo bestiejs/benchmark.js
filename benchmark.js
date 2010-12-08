@@ -961,7 +961,7 @@
     var description = [],
         doc = typeof window.document != 'undefined' && document || {},
         ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
-        name = 'Avant Browser,Camino,Fennec,Flock,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Opera,Chrome,Firefox,IE,Safari',
+        name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Opera,Chrome,Firefox,IE,Safari',
         os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
         layout = /Gecko|Trident|WebKit/.exec(ua),
@@ -1007,7 +1007,7 @@
 
     // detect non Opera versions
     version = reduce(/webOS/.test(os) ? [name] : ['version', name, product], function(version, guess, i) {
-      return version || (version = (RegExp(guess + (i == 1 ? '[ /-]' : '/') + '([^ ();-]*)', 'i').exec(ua) || 0)[1]);
+      return version || (version = (RegExp(guess + (i == 1 ? '[ /-]' : '/') + '([^ ();/-]*)', 'i').exec(ua) || 0)[1]);
     }, version);
 
     // cleanup product
