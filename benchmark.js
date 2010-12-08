@@ -273,7 +273,7 @@
         rme = (moe / mean) * 100 || 0;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || calibrating || queue.length)) {
+        if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || rme > 50 || calibrating || queue.length)) {
           if (!queue.length) {
             // quadruple sample size to cut the margin of error in half
             enqueue(rme > 50 ? sampleSize * 3 : 1);
@@ -866,21 +866,21 @@
     }
 
     function finish() {
-      var divisor,
+      var clocked,
+          divisor,
           period,
           fn = me.fn,
           index = me.CALIBRATION_INDEX,
           times = me.times,
           cals = me.constructor.CALIBRATIONS || [],
           cal = cals[(index > 0 || fn.compilable < 1) && index],
-          clocked = times.cycle,
           count = me.count,
           minTime = me.MIN_TIME;
 
       if (me.running) {
         // calibrate by subtracting iteration overhead
         clocked = times.cycle = Math.max(0,
-          clocked - (cal && cal.times.period || 0) * me.looped);
+          times.cycle - (cal && cal.times.period || 0) * me.looped);
 
         // seconds per operation
         period = times.period = clocked / count;
