@@ -131,10 +131,9 @@
    */
   function template(string, object) {
     string = string == null ? '' : string;
-    object || (object = { });
-    for (var key in object) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), object[key]);
-    }
+    Benchmark.forIn(object || { }, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+    });
     return string;
   }
 

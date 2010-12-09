@@ -47,7 +47,10 @@
     'counter': 0
   },
 
-  /** Helps to resolve an object's internal [[Class]] property */
+  /** Used in Benchmark.hasKey() */
+  hasOwnProperty = cache.hasOwnProperty,
+
+  /** Used to resolve an object's internal [[Class]] property */
   toString = cache.toString;
 
   /*--------------------------------------------------------------------------*/
@@ -94,7 +97,7 @@
    * @param {Object} me The benchmark instance waiting for calibrations to complete.
    * @param {Function} callback Function executed after calibration.
    * @param {Boolean} [async=false] Flag to run asynchronously.
-   * @returns {Boolean} Returns true if calibrated, false if not.
+   * @returns {Boolean} Returns true if calibrated, else false.
    */
   function calibrate(me, callback, async) {
     var result = isCalibrated(),
@@ -336,31 +339,6 @@
   }
 
   /**
-   * Repeat a string a given number of times using the `Exponentiation by squaring` algorithm.
-   * http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
-   * @private
-   * @param {String} string The string to repeat.
-   * @param {Number} count The number of times to repeat the string.
-   * @returns {String} The repeated string.
-   */
-  function repeat(string, count) {
-    if (count < 1) return '';
-    if (count % 2) return repeat(string, count - 1) + string;
-    var half = repeat(string, count / 2);
-    return half + half;
-  }
-
-  /**
-   * A generic bare-bones String#trim solution.
-   * @private
-   * @param {String} string The string to trim.
-   * @returns {String} The trimmed string.
-   */
-  function trim(string) {
-    return string.replace(/^\s+/, '').replace(/\s+$/, '');
-  }
-
-  /**
    * Clocks the time taken to execute a test per cycle (seconds).
    * @private
    * @param {Object} me The benchmark instance.
@@ -527,10 +505,9 @@
    * @returns {Object} The destination object.
    */
   function extend(destination, source) {
-    source || (source = { });
-    for (var key in source) {
-      destination[key] = source[key];
-    }
+    forIn(source || { }, function(value, key) {
+      destination[key] = value;
+    });
     return destination;
   }
 
@@ -549,6 +526,21 @@
   }
 
   /**
+   * A generic bare-bones for-in solution for an object's own properties.
+   * @static
+   * @member Benchmark
+   * @param {Object} object The object to iterate over.
+   * @param {Function} callback The function called per iteration.
+   */
+  function forIn(object, callback) {
+    for (var key in object) {
+      if (hasKey(object, key) && callback(object[key], key, object) === false) {
+        break;
+      }
+    }
+  }
+
+  /**
    * Converts a number to a more readable comma separated string representation.
    * @static
    * @member Benchmark
@@ -563,6 +555,37 @@
 
     return (end ? string.slice(0, end) + comma : '') +
       string.slice(end).replace(/(\d{3})(?=\d)/g, '$1' + comma);
+  }
+
+  /**
+   * Checks if an object has the specified key as a direct property.
+   * @static
+   * @member Benchmark
+   * @param {Object} object The object to check.
+   * @param {String} key The key to check for.
+   * @returns {Boolean} Returns true if key is a direct property, else false.
+   */
+  function hasKey(object, key) {
+    var result,
+        ctor = object.constructor,
+        proto = Object.prototype;
+
+    // for modern browsers
+    object = Object(object);
+    if (typeof hasOwnProperty == 'function') {
+      result = hasOwnProperty.call(object, key);
+    }
+    // for Safari 2
+    else if (cache.__proto__ == proto) {
+      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
+    }
+    // for others (not as accurate)
+    else {
+      result = key in object && (ctor && ctor.prototype
+        ? object[key] !== ctor.prototype[key]
+        : object[key] !== proto[key]);
+    }
+    return result;
   }
 
   /**
@@ -693,16 +716,15 @@
    * @returns {String} The joined result.
    */
   function join(object, separator1, separator2) {
-    var key,
-        pairs = [];
-
-    if (!isArray(object)) {
-      separator2 || (separator2 = ': ');
-      for (key in object) {
-        pairs.push(key + separator2 + object[key]);
-      }
-    } else {
+    var pairs = [];
+    if (isArray(object)) {
       pairs = object;
+    }
+    else {
+      separator2 || (separator2 = ': ');
+      forIn(object, function(value, key) {
+        pairs.push(key + separator2 + value);
+      });
     }
     return pairs.join(separator1 || ',');
   }
@@ -730,6 +752,33 @@
       accumulator = callback(accumulator, value, index, array);
     });
     return accumulator;
+  }
+
+  /**
+   * Repeat a string a given number of times using the `Exponentiation by squaring` algorithm.
+   * http://www.merlyn.demon.co.uk/js-misc0.htm#MLS
+   * @static
+   * @member Benchmark
+   * @param {String} string The string to repeat.
+   * @param {Number} count The number of times to repeat the string.
+   * @returns {String} The repeated string.
+   */
+  function repeat(string, count) {
+    if (count < 1) return '';
+    if (count % 2) return repeat(string, count - 1) + string;
+    var half = repeat(string, count / 2);
+    return half + half;
+  }
+
+  /**
+   * A generic bare-bones String#trim solution.
+   * @static
+   * @member Benchmark
+   * @param {String} string The string to trim.
+   * @returns {String} The trimmed string.
+   */
+  function trim(string) {
+    return string.replace(/^\s+/, '').replace(/\s+$/, '');
   }
 
   /*--------------------------------------------------------------------------*/
@@ -764,16 +813,15 @@
    * @returns {Object} Cloned instance.
    */
   function clone(options) {
-    var key,
-        me = this,
+    var me = this,
         result = new me.constructor(me.fn, extend(extend({ }, me.options), options));
 
     // copy manually added properties
-    for (key in me) {
-      if (!result[key]) {
-        result[key] = me[key];
+    forIn(me, function(value, key) {
+      if (!hasKey(result, key)) {
+        result[key] = value;
       }
-    }
+    });
     result.reset();
     return result;
   }
@@ -1097,8 +1145,14 @@
     // generic Array#filter
     'filter': filter,
 
+    // iterate over an object's direct properties
+    'forIn': forIn,
+
     // converts a number to a comma separated string
     'formatNumber': formatNumber,
+
+    // xbrowser Object#hasOwnProperty
+    'hasKey': hasKey,
 
     // generic Array#indexOf
     'indexOf': indexOf,
@@ -1119,7 +1173,13 @@
     'noop': noop,
 
     // generic Array#reduce
-    'reduce': reduce
+    'reduce': reduce,
+
+    // repeats a string a number of times
+    'repeat': repeat,
+
+    // generic String#trim
+    'trim': trim
   });
 
   /*--------------------------------------------------------------------------*/
