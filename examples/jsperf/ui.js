@@ -292,7 +292,7 @@
           text = percent + '% slower';
 
           // mark slowest
-          if (bench.hz == last.hz) {
+          if (!bench.compare(last)) {
             addClass(elResult, 'slowest');
           }
         }
