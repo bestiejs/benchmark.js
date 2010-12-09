@@ -1221,7 +1221,7 @@
     'MAX_TIME_ELAPSED': 8,
 
     /**
-     * The minimum time needed to reduce the percent uncetainty of measurement to 1% (secs).
+     * The minimum time needed to reduce the percent uncertainty of measurement to 1% (secs).
      * @member Benchmark
      */
     'MIN_TIME': (function() {
