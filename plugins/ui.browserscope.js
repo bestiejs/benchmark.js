@@ -6,7 +6,9 @@
     'counter': 0,
     'lastAction': 'load',
     'trash': createElement('div')
-  };
+  },
+
+  interpolate = Benchmark.interpolate;
 
   /*--------------------------------------------------------------------------*/
 
@@ -105,7 +107,7 @@
    * @param {Object} object The template object used to modify the html.
    */
   function setHTML(element, html, object) {
-    element.innerHTML = template(html, object);
+    element.innerHTML = interpolate(html, object);
   }
 
   /**
@@ -120,21 +122,6 @@
       cont.className = 'bs-rt-message';
       cont.innerHTML = text;
     }
-  }
-
-  /**
-   * Modify a string by replacing named tokens with matching object property values.
-   * @private
-   * @param {String} string The string to modify.
-   * @param {Object} object The template object.
-   * @returns {String} The modified string.
-   */
-  function template(string, object) {
-    string = string == null ? '' : string;
-    Benchmark.forIn(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
-    });
-    return string;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -276,7 +263,7 @@
       cache.lastAction = 'post';
 
       // perform inception :3
-      idoc.write(template(
+      idoc.write(interpolate(
         '<html><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +

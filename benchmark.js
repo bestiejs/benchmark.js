@@ -348,13 +348,13 @@
    * @returns {Object} An object containing the clocked time and loops taken.
    */
   var clock = (function() {
-    var fallback,
+    var args,
+        fallback,
         supported,
-        uid = +new Date,
-        args = 'm' + uid + ',c' + uid,
-        chunk = 'while(i$--){',
-        code = ['var r$,i$=m$.count,l$=i$,f$=m$.fn,t$=#{0};\n', '#{1};return{looped:i$<0?l$:0,time:r$,uid:"$"}'],
-        co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { };
+        whileLoop,
+        code = ['m$,c$', 'while(i$--){', 'var r$,i$=m$.count,l$=i$,f$=m$.fn,t$=#{start};\n', '#{end};return{looped:i$<0?l$:0,time:r$,uid:"$"}'],
+        co = typeof window.chrome != 'undefined' ? chrome : typeof window.chromium != 'undefined' ? chromium : { },
+        uid = +new Date;
 
     function embed(me) {
       var into,
@@ -397,7 +397,7 @@
               }
               // compile while loop
               head = head.replace(/(i\d+=)[^,]+/, '$1' + into);
-              prefix = chunk + lastBody + '}';
+              prefix = whileLoop + lastBody + '}';
             }
             else {
               prefix = repeat(lastBody, into);
@@ -422,10 +422,16 @@
           times = me.times,
           result = { 'looped': 0, 'time': 0 };
 
+      // fn compilable modes:
+      //  1 is unrolled
+      //  0 is hybrid (unroll + while loop)
+      // -1 is just while loop
       if (!fn.unclockable) {
         if (compilable == null || compilable > -1) {
           try {
             if (compilable == null) {
+              // determine if unrolled code is exited early, caused by rogue
+              // return statement, by checking for a return object with the uid
               me.count = 1;
               compilable = fn.compilable = embed(me)(me, co).uid == uid ? 1 : -1;
               me.count = count;
@@ -450,24 +456,31 @@
     // in at least Chrome 7 to use chrome.Interval
     code = code.join('|');
     if (typeof co.Interval == 'function') {
-      code = code.replace('#{0}', 'new c$.Interval;t$.start()')
-        .replace('#{1}', 't$.stop();r$=t$.microseconds()/1e6');
+      code = interpolate(code, {
+        'start': 'new c$.Interval;t$.start()',
+        'end': 't$.stop();r$=t$.microseconds()/1e6'
+      });
     }
     else if (typeof Date.now == 'function') {
-      code = code.replace('#{0}', 'Date.now()')
-        .replace('#{1}', 'r$=(Date.now()-t$)/1e3');
+      code = interpolate(code, {
+        'start': 'Date.now()',
+        'end': 'r$=(Date.now()-t$)/1e3'
+      });
     }
     else {
-      code = code.replace('#{0}', '(new Date).getTime()')
-        .replace('#{1}', 'r$=((new Date).getTime()-t$)/1e3');
+      code = interpolate(code, {
+        'start': '(new Date).getTime()',
+        'end': 'r$=((new Date).getTime()-t$)/1e3'
+      });
     }
 
     // inject uid into variable names to avoid collisions with embedded tests
     code = code.replace(/\$/g, uid).split('|');
-    chunk = chunk.replace(/\$/g, uid);
+    args = code.shift();
+    whileLoop = code.shift();
 
     // non embedding fallback
-    fallback = Function(args, code[0] + chunk + 'f' + uid + '()}' + code[1]);
+    fallback = Function(args, code[0] + whileLoop + 'f' + uid + '()}' + code[1]);
 
     // is embedding supported?
     (function() {
@@ -680,8 +693,26 @@
           }
         }
       }
+
+      // start iterating over the array
       onInvoke(queued ? benches.shift() : first);
     }
+  }
+
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   * @static
+   * @member Benchmark
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   */
+  function interpolate(string, object) {
+    string = string == null ? '' : string;
+    forIn(object || { }, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+    });
+    return string;
   }
 
   /**
@@ -1163,6 +1194,9 @@
 
     // invokes a method of each benchmark in a collection
     'invoke': invoke,
+
+    // modifies a string using a template object
+    'interpolate': interpolate,
 
     // xbrowser Array.isArray
     'isArray': isArray,
