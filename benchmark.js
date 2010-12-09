@@ -161,11 +161,13 @@
   function compute(me, async) {
     var calibrating = me.constructor == Calibration,
         fn = me.fn,
+        initCompilable = fn.compilable,
         initRunCount = me.INIT_RUN_COUNT,
         initSampleSize = 5,
+        initUnclockable = fn.unclockable,
         queue = [],
         sample = [],
-        state = { 'calibrated': isCalibrated(), 'compilable': fn.compilable };
+        state = { 'calibrated': isCalibrated(), 'compilable': initCompilable };
 
     function initialize() {
       me.cycles = 0;
@@ -309,8 +311,8 @@
       if (complete) {
         clearQueue();
         clearCompiled(me);
-        delete fn.unclockable;
-        delete fn.compilable;
+        fn.compilable = initCompilable;
+        fn.unclockable = initUnclockable;
         me.INIT_RUN_COUNT = initRunCount;
         me.onComplete(me);
       }
@@ -335,7 +337,8 @@
    * @returns {Boolean} Returns true if calibrated, false if not.
    */
   function isCalibrated() {
-    return !filter(Benchmark.CALIBRATIONS, function(cal) { return !cal.cycles; }).length;
+    return !filter(Benchmark.CALIBRATIONS,
+      function(cal) { return !cal.cycles; }).length;
   }
 
   /**
@@ -703,7 +706,8 @@
    * @returns {Boolean} If the property value is a non-primitive return true, else false.
    */
   function isHostType(object, property) {
-    return !/^(boolean|number|string|undefined)$/.test(typeof object[property]) && !!object[property];
+    return !/^(?:boolean|number|string|undefined)$/
+      .test(typeof object[property]) && !!object[property];
   }
 
   /**
@@ -872,7 +876,6 @@
           me[key] = proto.times[key];
         }
       });
-
       if (changed) {
         me.onReset(me);
       }
@@ -980,6 +983,7 @@
     if (me.running) {
       me.cycles++;
       try {
+        // used by finish()
         clocked = clock(me);
       }
       catch(e) {

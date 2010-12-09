@@ -405,37 +405,39 @@
           error = bench.error,
           hz = bench.hz;
 
-      cell.title = '';
+      if (cell) {
+        cell.title = '';
 
-      // status: error
-      if (error) {
-        setHTML(cell, 'Error');
-        if (!hasClass(cell, ERROR_CLASS)) {
-          addClass(cell, ERROR_CLASS);
+        // status: error
+        if (error) {
+          setHTML(cell, 'Error');
+          if (!hasClass(cell, ERROR_CLASS)) {
+            addClass(cell, ERROR_CLASS);
+          }
+          logError('<p>' + error + '.<\/p><ul><li>' +
+            Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
         }
-        logError('<p>' + error + '.<\/p><ul><li>' +
-          Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
-      }
-      else {
-        // status: running
-        if (bench.running) {
-          setHTML(cell, 'running&hellip;');
-        }
-        // status: finished
-        else if (bench.cycles) {
-          cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
-            bench.times.cycle.toFixed(2) + ' seconds.';
-
-          setHTML(cell, hz == Infinity ? hz :
-            formatNumber(hz) + ' <small>&plusmn;' + bench.RME.toFixed(2) + '%<\/small>');
-        }
-        // status: pending
-        else if (indexOf(me.queue, bench) > -1) {
-          setHTML(cell, 'pending&hellip;');
-        }
-        // status: ready
         else {
-          setHTML(cell, 'ready');
+          // status: running
+          if (bench.running) {
+            setHTML(cell, 'running&hellip;');
+          }
+          // status: finished
+          else if (bench.cycles) {
+            cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
+              bench.times.cycle.toFixed(2) + ' seconds.';
+
+            setHTML(cell, hz == Infinity ? hz :
+              formatNumber(hz) + ' <small>&plusmn;' + bench.RME.toFixed(2) + '%<\/small>');
+          }
+          // status: pending
+          else if (indexOf(me.queue, bench) > -1) {
+            setHTML(cell, 'pending&hellip;');
+          }
+          // status: ready
+          else {
+            setHTML(cell, 'ready');
+          }
         }
       }
     });
@@ -561,6 +563,7 @@
   // customize calibration benchmarks
   each(Benchmark.CALIBRATIONS, function(cal) {
     cal.name = 'Calibrating';
+    cal.onComplete = onComplete;
     cal.onCycle = cal.onStart = onCycle;
   });
 
