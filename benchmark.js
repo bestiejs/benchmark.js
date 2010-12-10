@@ -50,6 +50,9 @@
   /** Used in Benchmark.hasKey() */
   hasOwnProperty = cache.hasOwnProperty,
 
+  /** Used to convert array-like objects to arrays */
+  slice = [].slice,
+
   /** Used to resolve an object's internal [[Class]] property */
   toString = cache.toString;
 
@@ -64,7 +67,15 @@
   function Benchmark(fn, options) {
     var me = this;
     options = extend({ }, options);
-    extend(me, options);
+    forIn(options, function(value, key) {
+      // add event listeners
+      if (/^on[A-Z]/.test(key)) {
+        me.on(key.slice(2).toLowerCase(), value);
+      } else {
+        me[key] = value;
+      }
+    });
+
     me.fn = fn;
     me.options = options;
     me.times = extend({ }, me.times);
@@ -210,12 +221,12 @@
           me.cycles += clone.cycles;
           me.hz = clone.hz;
           me.times.period = clone.times.period;
-          me.onCycle(me);
+          me.emit('cycle');
         }
         else if (clone.error) {
           me.abort();
           me.error = clone.error;
-          me.onError(me);
+          me.emit('error');
         }
       }
       else if (me.aborted) {
@@ -314,7 +325,7 @@
         fn.compilable = initCompilable;
         fn.unclockable = initUnclockable;
         me.INIT_RUN_COUNT = initRunCount;
-        me.onComplete(me);
+        me.emit('complete');
       }
       return !aborted;
     }
@@ -633,7 +644,6 @@
    */
   function invoke(benches, methodName, args) {
     var async,
-        backup,
         queued,
         i = 0,
         first = benches[0],
@@ -641,9 +651,12 @@
         options = { 'onComplete': noop, 'onCycle': noop };
 
     function onInvoke(me) {
+      var listeners;
       if (async) {
-        backup = me.onComplete;
-        me.onComplete = onComplete;
+        // insert invoke's "complete" listener before others
+        me.on('complete', onComplete);
+        listeners = me.events['complete'];
+        listeners.splice(0, 0, listeners.pop());
       }
       // execute method
       me[methodName].apply(me, args || []);
@@ -655,8 +668,9 @@
     function onComplete(me) {
       var next;
       if (async) {
-        me.onComplete = backup;
-        me.onComplete(me);
+        // remove invoke's "complete" listener and call the rest
+        me.events['complete'].shift();
+        me.emit('complete');
       }
       // choose next benchmark if not exiting early
       if (options.onCycle(me) !== false) {
@@ -671,6 +685,9 @@
       } else {
         options.onComplete(me);
       }
+      // cancel the rest of the "complete" listeners
+      // because they were called above
+      return false;
     }
 
     if (length) {
@@ -819,6 +836,80 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Registers a single listener of a specified event type.
+   * @member Benchmark
+   * @param {String} type The event type.
+   * @param {Function} listener The function called when the event occurs.
+   * @returns {Object} The benchmark instance.
+   */
+  function addListener(type, listener) {
+    var me = this,
+        events = me.events || (me.events = { }),
+        listeners = events[type] || (events[type] = []);
+
+    listeners.push(listener);
+    return me;
+  }
+
+  /**
+   * Executes all registered listeners of a specified event type.
+   * @member Benchmark
+   * @param {String} type The event type.
+   */
+  function emit(type) {
+    var me = this,
+        args = [me].concat(slice.call(arguments, 1)),
+        events = me.events,
+        listeners = events && events[type] || [],
+        successful = true;
+
+    each(listeners, function(listener) {
+      if (listener.apply(me, args) === false) {
+        successful = false;
+        return successful;
+      }
+    });
+    return successful;
+  }
+
+  /**
+   * Unregisters a single listener of a specified event type.
+   * @member Benchmark
+   * @param {String} type The event type.
+   * @param {Function} listener The function to unregister.
+   * @returns {Object} The benchmark instance.
+   */
+  function removeListener(type, listener) {
+    var me = this,
+        events = me.events,
+        listeners = events && events[type] || [],
+        index = indexOf(listeners, listener);
+
+    if (index > -1) {
+      listeners.splice(index, 1);
+    }
+    return me;
+  }
+
+  /**
+   * Unregisters all listeners of a specified event type.
+   * @member Benchmark
+   * @param {String} type The event type.
+   * @returns {Object} The benchmark instance.
+   */
+  function removeAllListener(type) {
+    var me = this,
+        events = me.events;
+
+    if (events) {
+      delete events[type];
+    }
+    return me;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
    * Aborts the benchmark as well as in progress calibrations without recording times.
    * @member Benchmark
    */
@@ -837,7 +928,7 @@
       me.running = NaN;
       me.reset();
       me.aborted = true;
-      me.onAbort(me);
+      me.emit('abort');
     }
   }
 
@@ -890,7 +981,6 @@
     if (me.running) {
       // no worries, reset() is called within abort()
       me.abort();
-      me.error = proto.error;
       me.aborted = proto.aborted;
     }
     else {
@@ -908,7 +998,7 @@
         }
       });
       if (changed) {
-        me.onReset(me);
+        me.emit('reset');
       }
     }
   }
@@ -928,7 +1018,7 @@
     me.running = true;
     me.count = me.INIT_RUN_COUNT;
     me.times.start = +new Date;
-    me.onStart(me);
+    me.emit('start');
 
     if (me.computing) {
       _run(me, async);
@@ -950,7 +1040,7 @@
     function onCalibrate(cal) {
       if (cal.aborted) {
         me.abort();
-        me.onComplete(me);
+        me.emit('complete');
       } else if (me.running) {
         call(me, finish, async);
       }
@@ -1006,7 +1096,7 @@
         me.count = count;
         call(me, _run, async);
       } else {
-        me.onComplete(me);
+        me.emit('complete');
       }
     }
 
@@ -1020,10 +1110,10 @@
       catch(e) {
         me.abort();
         me.error = e;
-        me.onError(me);
+        me.emit('error');
       }
       // should we exit early?
-      if (me.onCycle(me) === false) {
+      if (me.emit('cycle') === false) {
         me.abort();
       }
     }
@@ -1345,32 +1435,29 @@
       'stop': 0
     },
 
-    // callback fired when a benchmark is aborted
-    'onAbort': noop,
-
-    // callback fired when the benchmark is complete
-    'onComplete': noop,
-
-    // callback fired when a test cycle ends
-    'onCycle': noop,
-
-    // callback fired when a benchmark errors
-    'onError': noop,
-
-    // callback fired when a benchmark is reset
-    'onReset': noop,
-
-    // callback fired when a benchmark is started
-    'onStart': noop,
-
     // aborts benchmark (does not record times)
     'abort': abort,
+
+    // registers a single listener
+    'addListener': addListener,
 
     // create new benchmark with the same test function and options
     'clone': clone,
 
     // compares benchmark's hertz with another
     'compare': compare,
+
+    // executes listeners of a specified type
+    'emit': emit,
+
+    // alias for addListener
+    'on': addListener,
+
+    // removes all listeners of a specified type
+    'removeAllListener': removeAllListener,
+
+    // removes a single listener
+    'removeListener': removeListener,
 
     // reset benchmark properties
     'reset': reset,

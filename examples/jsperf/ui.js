@@ -85,6 +85,7 @@
    * @param {Function} handler The event handler.
    */
   function addListener(element, eventName, handler) {
+    element = $(element);
     if (typeof element.addEventListener != 'undefined') {
       element.addEventListener(eventName, handler, false);
     } else if (element.attachEvent != 'undefined') {
@@ -206,9 +207,8 @@
   function onCycle(bench) {
     var cycles = bench.cycles;
     if (!bench.aborted) {
-      setStatus(bench.name + ' &times; ' +
-                formatNumber(bench.count) + ' (' +
-                cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
+      setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
+        cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
     }
   }
 
@@ -238,13 +238,14 @@
    * @private
    */
   function onLoad() {
-    $('run').onclick = onRun;
-    $('question').value = 'no';
-
     addClass('run', 'show');
+    addListener('run', 'click', onRun);
     setHTML('run', RUN_TEXT.READY);
     setHTML('user-agent', Benchmark.platform);
     setStatus(STATUS_TEXT.READY);
+
+    // answer spammer question
+    $('question').value = 'no';
 
     // show warning when Firebug is enabled
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
@@ -296,6 +297,7 @@
             addClass(elResult, 'slowest');
           }
         }
+        // write ranking
         if (elSpan) {
           setHTML(elSpan, text);
         } else {
@@ -339,8 +341,8 @@
         benches = me.benchmarks;
 
     me.queue.length = 0;
-    me.render(benches);
     invoke(benches.concat(Benchmark.CALIBRATIONS), 'abort');
+    me.render(benches);
     setHTML('run', RUN_TEXT.READY);
   }
 
@@ -563,8 +565,9 @@
   // customize calibration benchmarks
   each(Benchmark.CALIBRATIONS, function(cal) {
     cal.name = 'Calibrating';
-    cal.onComplete = onComplete;
-    cal.onCycle = cal.onStart = onCycle;
+    cal.on('complete', onComplete)
+       .on('cycle', onCycle)
+       .on('start', onCycle);
   });
 
   // optimized asynchronous Google Analytics snippet based on
