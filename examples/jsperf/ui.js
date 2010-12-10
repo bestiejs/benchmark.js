@@ -272,8 +272,8 @@
         result = Benchmark.filter(ui.benchmarks, function(bench) { return bench.cycles; });
 
     if (result.length > 1) {
-      // sort descending by hz (highest hz / fastest first)
-      result.sort(function(a, b) { return b.hz - a.hz; });
+      // sort descending fastest to slowest
+      result.sort(function(a, b) { return b.compare(a); });
       first = result[0];
       last  = result[result.length - 1];
 

@@ -669,7 +669,7 @@
       var next;
       if (async) {
         // remove invoke's "complete" listener and call the rest
-        me.events['complete'].shift();
+        me.removeListener('complete', onComplete);
         me.emit('complete');
       }
       // choose next benchmark if not exiting early
@@ -899,11 +899,10 @@
    */
   function removeAllListener(type) {
     var me = this,
-        events = me.events;
+        events = me.events,
+        listeners = events && events[type] || [];
 
-    if (events) {
-      delete events[type];
-    }
+    listeners.length = 0;
     return me;
   }
 
@@ -1137,15 +1136,17 @@
    * @member Benchmark
    */
   Benchmark.platform = (function() {
-    var description = [],
-        doc = typeof window.document != 'undefined' && document || {},
-        ua = typeof window.navigator != 'undefined' && (navigator || {}).userAgent,
+    var me = this,
+        description = [],
+        doc = window.document && document || {},
+        navigator = window.navigator && navigator || {},
+        ua = navigator.userAgent,
+        layout = /Gecko|Trident|WebKit/.exec(ua),
+        data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
         name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
         os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
-        layout = /Gecko|Trident|WebKit/.exec(ua),
-        version = toString.call(window.opera) == '[object Opera]' && opera.version(),
-        data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' };
+        version = toString.call(window.opera) == '[object Opera]' && opera.version();
 
     name = reduce(name.split(','), function(name, guess) {
       return name || (name = RegExp(guess + '\\b', 'i').exec(ua) && guess);
@@ -1192,8 +1193,14 @@
     // cleanup product
     product = product && trim(String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
 
+    // detect node.js
+    if (me && me === me.global && (data = me.process) && typeof data == 'object') {
+      name = 'node';
+      version = data.version;
+      os = data.platform;
+    }
     // detect non Safari WebKit based browsers
-    if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
+    else if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
       name = /[a-z]+/i.exec(product) + ' Browser';
     }
     // detect unspecified Safari versions
@@ -1467,6 +1474,10 @@
   });
 
   // expose
-  window.Benchmark = Benchmark;
-
+  if (Benchmark.platform.name == 'node') {
+    window = global;
+    exports.Benchmark = Benchmark;
+  } else {
+    window.Benchmark = Benchmark;
+  }
 }(this));
