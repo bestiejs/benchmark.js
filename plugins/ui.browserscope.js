@@ -38,7 +38,7 @@
   }
 
   /**
-   * Creates a Browserscope results object (skipping unrun and errored benchmarks).
+   * Creates a Browserscope results object.
    * @private
    * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    * @returns {Object|Null} Browserscope results object or null.
@@ -47,13 +47,23 @@
     if (!Benchmark.isArray(benches)) {
       benches = benches ? [benches] : ui.benchmarks;
     }
+    // remove unrun, errored, or Infinity hz
+    benches = Benchmark.filter(benches, function(bench) {
+      return bench.cycles && isFinite(bench.hz);
+    });
+
+    // clone benchmarks using lower limit of the confidence interval
+    benches = Benchmark.map(benches, function(bench) {
+      var clone = bench.clone();
+      clone.hz = Math.round(bench.hz - bench.MoE);
+      return clone;
+    });
+
     return Benchmark.reduce(benches, function(result, bench, key) {
-      if (bench.cycles) {
-        // duplicate and non alphanumeric benchmark names have their ids appended
-        key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
-        result || (result = { });
-        result[key && !result[key] ? key : key + bench.id ] = bench.hz;
-      }
+      // duplicate and non alphanumeric benchmark names have their ids appended
+      key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
+      result || (result = { });
+      result[key && !result[key] ? key : key + bench.id ] = bench.hz;
       return result;
     }, null);
   }
@@ -317,10 +327,10 @@
   ui.browserscope = {
 
     /** Your Browserscope API key */
-    'KEY': '',
+    'KEY': 'agt1YS1wcm9maWxlcnINCxIEVGVzdBis2dcCDA',
 
     /** Selector of the element used for displaying the cumulative results table */
-    'PLACEHOLDER_SELECTOR': '',
+    'PLACEHOLDER_SELECTOR': '#bs-results',
 
     /** The delay between removing abandoned script and iframe elements (secs) */
     'CLEANUP_INTERVAL': 10,
