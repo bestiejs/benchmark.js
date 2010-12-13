@@ -5,6 +5,7 @@ test("user agent detection", function() {
   var getPlatform = (function() {
     var compiled,
         xhr,
+        isClassOf = Benchmark.isClassOf,
         isHostType = Benchmark.isHostType,
         reduce = Benchmark.reduce,
         toString = {}.toString,
@@ -21,14 +22,20 @@ test("user agent detection", function() {
       if (/benchmark\.js/.test(src)) {
         xhr.open('get', src, false);
         xhr.send();
-        compiled = Function('reduce,toString,trim,ua,options',
+        compiled = Function('isClassOf,isHostType,reduce,toString,trim,options',
           'return ' +
           (/(\s*)Benchmark.platform\s*=((?:.|\n)*?)\1}/.exec(xhr.responseText)[2] + '}())')
-            .replace(/ua\s*=[^,]+,/, '')
-            .replace(/navigator\.appMinorVersion/g, 'options.appMinorVersion')
-            .replace(/version\s*=[^,]+,/, 'version=options.opera,')
-            .replace(/(?:window\.)?external/g, 'options.external')
-            .replace(/doc\.documentMode/g, 'options.mode'));
+            .replace(/\bme\s*=[^,;]+([,;])/, 'me=options$1')
+            .replace(/\bua\s*=[^,;]+([,;])/, 'ua=me.ua$1')
+            .replace(/\bopera\.version\(\)/, 'opera')
+            .replace(/\bwindow\b/g, 'me')
+            .replace(/\bexports\b/g, 'me.exports')
+            .replace(/([^.\x22\x27])global\b/g, '$1me.global')
+            .replace(/\bsystem\b/g, 'me.system')
+            .replace(/\bEnvironment\b/g, 'Object')
+            .replace(/\bnav\.appMinorVersion/g, 'me.appMinorVersion')
+            .replace(/\b(?:me\.)?external/g, 'me.external')
+            .replace(/\bdoc\.documentMode/g, 'me.mode'));
       }
     });
 
@@ -37,7 +44,8 @@ test("user agent detection", function() {
       if (options.opera < 7.6) {
         delete options.opera;
       }
-      return compiled(reduce, toString, trim, options.ua, options);
+      options.window || (options.window = window);
+      return compiled(isClassOf, isHostType, reduce, toString, trim, options);
     };
   }());
 
@@ -385,6 +393,21 @@ test("user agent detection", function() {
       'mode': 8
     },
 
+    'Narwhal on Cygwin': (function() {
+      var object = {
+        'exports': { },
+        'system':  { 'os': 'cygwin' }
+      };
+      object.global = object.system.global = object;
+      return object;
+    }()),
+
+    'Node.js 0.3.1 on Cygwin': {
+      'exports': { },
+      'global': { },
+      'process': { 'version': 'v0.3.1', 'platform': 'cygwin' },
+    },
+
     'Opera Mobile 10.00 on Linux i686': {
       'ua': 'Opera/9.80 (Linux i686; Opera Mobi/1038; U; en) Presto/2.5.24 Version/10.00'
     },
@@ -393,6 +416,20 @@ test("user agent detection", function() {
       'ua': 'Opera/9.80 (Windows NT 5.1; U; en) Presto/2.6.37 Version/11.00',
       'opera': '11.00'
     },
+
+    'Rhino': {
+      'global': { },
+      'environment': { }
+    },
+
+    'RingoJS': (function() {
+      var object = {
+        'exports': { },
+        'system':  { }
+      };
+      object.global = object;
+      return object;
+    }()),
 
     'RockMelt 0.8.34.820 on Mac OS X 10.5.8': {
       'ua': 'Mozilla/5.0(Macintosh; U; Intel Mac OS X 10_5_8; en-US)AppleWebKit/534.3(KHTML,like Gecko)RockMelt/0.8.34.820 Chrome/6.0.472.63 Safari/534.3'

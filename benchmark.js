@@ -41,6 +41,10 @@
     '97': 1.985, '98': 1.984, '99': 1.984, '100': 1.984,'Infinity': 1.960
   },
 
+  /** Feature detect DOM0 timeout API */
+  HAS_TIMEOUT_API = isHostType(window, 'setTimeout') &&
+    isHostType(window, 'clearTimeout'),
+
   /** Internal cached used by various methods */
   cache = {
     'compiled': { },
@@ -51,22 +55,21 @@
   hasOwnProperty = cache.hasOwnProperty,
 
   /** Used to convert array-like objects to arrays */
-  slice = [].slice,
-
-  /** Used to resolve an object's internal [[Class]] property */
-  toString = cache.toString;
+  slice = [].slice;
 
   /*--------------------------------------------------------------------------*/
 
   /**
    * Benchmark constructor.
    * @constructor
-   * @param {Function} fn Test to benchmark.
+   * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    */
   function Benchmark(fn, options) {
     var me = this;
+    fn.uid || (fn.uid = ++cache.counter);
     options = extend({ }, options);
+
     forIn(options, function(value, key) {
       // add event listeners
       if (/^on[A-Z]/.test(key)) {
@@ -86,7 +89,7 @@
    * @private
    * @constructor
    * @base Benchmark
-   * @param {Function} fn Test to benchmark.
+   * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    */
   function Calibration(fn, options) {
@@ -122,6 +125,10 @@
         'onCycle': onCycle,
         'onComplete': callback
       });
+      // synchronous calibrations have now completed
+      if (!async) {
+        result = true;
+      }
     }
     return result;
   }
@@ -134,7 +141,7 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function call(me, fn, async) {
-    if (async && isHostType(window, 'setTimeout')) {
+    if (async && HAS_TIMEOUT_API) {
       me.timerId = setTimeout(function() {
         delete me.timerId;
         fn(me, async);
@@ -374,8 +381,7 @@
           head = code[0],
           fn = me.fn,
           prefix = '',
-          uid = fn.uid || (fn.uid = ++cache.counter),
-          lastCycle = cache.compiled[uid] || { },
+          lastCycle = cache.compiled[fn.uid] || { },
           lastCount = lastCycle.count,
           lastBody = lastCycle.body,
           body = lastBody || '',
@@ -419,7 +425,7 @@
 
           // cache if not hybrid compiling
           if (head == code[0]) {
-            cache.compiled[uid] = { 'count': count, 'body': body };
+            cache.compiled[fn.uid] = { 'count': count, 'body': body };
           }
         }
       }
@@ -497,6 +503,7 @@
     (function() {
       var x = new Benchmark(function() { return 1; }, { 'count': 1 });
       try { supported = embed(x)(x, co); } catch(e) { }
+      cache.counter = 0;
     }());
 
     return clock;
@@ -644,31 +651,32 @@
    */
   function invoke(benches, methodName, args) {
     var async,
+        bench,
         queued,
         i = 0,
-        first = benches[0],
         length = benches.length,
         options = { 'onComplete': noop, 'onCycle': noop };
 
     function onInvoke(me) {
       var listeners;
+
+      // insert invoke's "complete" listener before others so it's executed first
       if (async) {
-        // insert invoke's "complete" listener before others
         me.on('complete', onComplete);
         listeners = me.events['complete'];
         listeners.splice(0, 0, listeners.pop());
       }
       // execute method
       me[methodName].apply(me, args || []);
-      if (!async) {
-        onComplete(me);
-      }
+      // if synchronous return next benchmark after completing the current
+      return !async && onComplete(me);
     }
 
     function onComplete(me) {
       var next;
+
+      // remove invoke's "complete" listener and call the rest
       if (async) {
-        // remove invoke's "complete" listener and call the rest
         me.removeListener('complete', onComplete);
         me.emit('complete');
       }
@@ -681,38 +689,42 @@
         }
       }
       if (next) {
-        call(next, onInvoke, async);
+        if (async) {
+          call(next, onInvoke, async);
+        } else {
+          return next;
+        }
       } else {
         options.onComplete(me);
       }
-      // cancel the rest of the "complete" listeners
-      // because they were called above
+      // when async the `return false` will cancel the rest of the "complete"
+      // listeners because they were called above and when synchronous it will
+      // end the while loop
       return false;
     }
 
-    if (length) {
-      // juggle arguments
-      if (arguments.length == 2 && typeof methodName == 'object') {
-        options = extend(options, methodName);
-        methodName = options.methodName;
-        queued = options.queued;
+    // juggle arguments
+    if (arguments.length == 2 && typeof methodName == 'object') {
+      options = extend(options, methodName);
+      args = isArray(args = options.args || []) ? args : [args];
+      methodName = options.methodName;
+      queued = options.queued;
 
-        args = options.args || [];
-        if (!isArray(args)) {
-          args = [args];
-        }
-        // allow asyncronous invoking of the run() method
-        if ('MIN_TIME' in first && first instanceof Benchmark && methodName == 'run') {
-          if ('async' in options) {
-            async = options.async;
-          } else if (toString.call(args[0]) == '[object Boolean]') {
-            async = args[0];
-          }
-        }
+      // for use with Benchmark#run only
+      if ('async' in options) {
+        async = options.async;
+      } else if (isClassOf(args[0], 'Boolean')) {
+        async = args[0];
       }
-
-      // start iterating over the array
-      onInvoke(queued ? benches.shift() : first);
+      async = async && HAS_TIMEOUT_API;
+    }
+    // start iterating over the array
+    if (bench = queued ? benches.shift() : benches[0]) {
+      if (async) {
+        onInvoke(bench);
+      } else {
+        while (bench = onInvoke(bench));
+      }
     }
   }
 
@@ -737,10 +749,21 @@
    * @static
    * @member Benchmark
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} If the value is an array return true, else false.
+   * @returns {Boolean} Returns true if value is an array, else false.
    */
   function isArray(value) {
-    return toString.call(value) == '[object Array]';
+    return isClassOf(value, 'Array');
+  }
+
+  /**
+   * Checks if an object is of the specified class.
+   * @private
+   * @param {Object} object The object.
+   * @param {String} name The name of the class.
+   * @returns {Boolean} Returns true if of the class, else false.
+   */
+  function isClassOf(object, name) {
+    return {}.toString.call(object).slice(8, -1) == name;
   }
 
   /**
@@ -751,7 +774,7 @@
    * @member Benchmark
    * @param {Mixed} object The owner of the property.
    * @param {String} property The property name to check.
-   * @returns {Boolean} If the property value is a non-primitive return true, else false.
+   * @returns {Boolean} Returns true if the property value is a non-primitive, else false.
    */
   function isHostType(object, property) {
     return !/^(?:boolean|number|string|undefined)$/
@@ -779,6 +802,21 @@
       });
     }
     return pairs.join(separator1 || ',');
+  }
+
+  /**
+   * A generic bare-bones Array#map solution.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   * @returns {Array} A new array of values returned by the callback.
+   */
+  function map(array, callback) {
+    return reduce(array, function(result, value, index) {
+      result.push(callback(value, index, array));
+      return result;
+    }, []);
   }
 
   /**
@@ -918,7 +956,7 @@
       if (me.constructor != Calibration) {
         invoke(Benchmark.CALIBRATIONS, 'abort');
       }
-      if (me.timerId && isHostType(window, 'clearTimeout')) {
+      if (me.timerId && HAS_TIMEOUT_API) {
         clearTimeout(me.timerId);
         delete me.timerId;
       }
@@ -1128,6 +1166,19 @@
     }
   }
 
+  /**
+   * Displays relevant benchmark information when coerced to a string.
+   * @member Benchmark
+   */
+  function toString() {
+    var me = this,
+        cycles = me.cycles,
+        name = me.name || me.id || ('<Test #' + me.fn.uid + '>');
+
+    return name + ' x ' + formatNumber(me.count) + ' (' +
+      cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -1139,14 +1190,14 @@
     var me = this,
         description = [],
         doc = window.document && document || {},
-        navigator = window.navigator && navigator || {},
-        ua = navigator.userAgent,
+        nav = window.navigator && navigator || {},
+        ua = nav.userAgent || 'unknown platform',
         layout = /Gecko|Trident|WebKit/.exec(ua),
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
         name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
         os = 'webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'Android,BlackBerry\\s?\\d+,iP[ao]d,iPhone',
-        version = toString.call(window.opera) == '[object Opera]' && opera.version();
+        version = isClassOf(window.opera, 'Opera') && opera.version();
 
     name = reduce(name.split(','), function(name, guess) {
       return name || (name = RegExp(guess + '\\b', 'i').exec(ua) && guess);
@@ -1193,11 +1244,23 @@
     // cleanup product
     product = product && trim(String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
 
-    // detect node.js
-    if (me && me === me.global && (data = me.process) && typeof data == 'object') {
-      name = 'node';
-      version = data.version;
-      os = data.platform;
+    // detect server-side js
+    if (me && isHostType(me, 'global')) {
+      if (typeof exports == 'object' && exports) {
+        if (me == window && typeof system == 'object' && system) {
+          name = system.global == global ? 'Narwhal' : 'RingoJS';
+          os = system.os;
+        }
+        else if ((data = me.process) && typeof data == 'object') {
+          name = 'Node.js';
+          version = /[\d.]+/.exec(data.version)[0];
+          os = data.platform;
+        }
+        os = os && (os.charAt(0).toUpperCase() + os.slice(1));
+      }
+      else if (isClassOf(me.environment, 'Environment')) {
+        name = 'Rhino';
+      }
     }
     // detect non Safari WebKit based browsers
     else if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
@@ -1215,7 +1278,7 @@
       version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
     }
     // detect release phases
-    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /(?:alpha|beta) ?\d?/i.exec(ua + ';' + navigator.appMinorVersion))) {
+    if (version && (data = /(?:[ab]|dp|pre|[ab]\dpre)\d?\+?$/i.exec(version) || /(?:alpha|beta) ?\d?/i.exec(ua + ';' + nav.appMinorVersion))) {
       version = version.replace(RegExp(data + '\\+?$'), '') + (/^b/i.test(data) ? '\u03b2' : '\u03b1') + (/\d+\+?/.exec(data) || '');
     }
     // detect Maxthon's unreliable version info
@@ -1263,9 +1326,8 @@
      * @member Benchmark
      */
     'CALIBRATIONS': (function() {
-      var cal = new Calibration(noop);
-      cal.fn.compilable = -1;
-      return [cal];
+      noop.compilable = noop.uid = -1;
+      return [new Calibration(noop)];
     }()),
 
     // generic Array#forEach
@@ -1298,11 +1360,17 @@
     // xbrowser Array.isArray
     'isArray': isArray,
 
+    // checks internal [[Class]] of an object
+    'isClassOf': isClassOf,
+
     // checks if an object's property is a non-primitive value
     'isHostType': isHostType,
 
     // generic Array#join for arrays and objects
     'join': join,
+
+    // generic Array#map
+    'map': map,
 
     // no operation
     'noop': noop,
@@ -1318,6 +1386,9 @@
   });
 
   /*--------------------------------------------------------------------------*/
+
+  // IE may ignore `toString` in a for-in loop
+  Benchmark.prototype.toString = toString;
 
   extend(Benchmark.prototype, {
 
@@ -1358,7 +1429,7 @@
     'MIN_TIME': (function() {
       var unit, start = +new Date;
       while(!(unit = +new Date - start));
-      return unit / 20; // (unit / 2) / 0.01 / 1e3
+      return (unit / 20).toFixed(2); // (unit / 2) / 0.01 / 1e3
     }()),
 
     /**
@@ -1474,9 +1545,13 @@
   });
 
   // expose
-  if (Benchmark.platform.name == 'node') {
+  if (/Narwhal|Node|RingoJS/.test(Benchmark.platform.name)) {
     window = global;
-    exports.Benchmark = Benchmark;
+    if (typeof module == 'object' && module.exports == exports) {
+      module.exports = Benchmark;
+    } else {
+      exports.Benchmark = Benchmark;
+    }
   } else {
     window.Benchmark = Benchmark;
   }
