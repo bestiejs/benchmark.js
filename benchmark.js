@@ -65,7 +65,7 @@
   /** Root namespace for timer API (defined later) */
   timerNS = null,
 
-  /** Resolution of the timer (ms, µs, or ns) */
+  /** Resolution of the timer (ms, Âµs, or ns) */
   timerRes = 'ms';
 
   /*--------------------------------------------------------------------------*/
@@ -323,7 +323,7 @@
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     else if (typeof timerNS.Interval == 'function') {
-      timerRes = 'µs';
+      timerRes = 'Âµs';
       code = interpolate(code, {
         'start': 's$=new n$.Interval;s$.start()',
         'end': 's$.stop();r$=s$.microseconds()/1e6'
