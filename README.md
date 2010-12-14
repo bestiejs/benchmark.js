@@ -8,4 +8,8 @@ In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collabor
 
 Feel free to fork if you see possible improvements!
 
+To clone this repository including all submodules:
+
+    git clone --recursive git@github.com:mathiasbynens/benchmark.js.git
+
 _— [Mathias](http://mathiasbynens.be/)_
