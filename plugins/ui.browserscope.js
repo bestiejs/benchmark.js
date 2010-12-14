@@ -327,10 +327,10 @@
   ui.browserscope = {
 
     /** Your Browserscope API key */
-    'KEY': 'agt1YS1wcm9maWxlcnINCxIEVGVzdBis2dcCDA',
+    'KEY': '',
 
     /** Selector of the element used for displaying the cumulative results table */
-    'PLACEHOLDER_SELECTOR': '#bs-results',
+    'PLACEHOLDER_SELECTOR': '',
 
     /** The delay between removing abandoned script and iframe elements (secs) */
     'CLEANUP_INTERVAL': 10,
