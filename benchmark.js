@@ -305,10 +305,16 @@
 
     // define root namespace of timer API
     try {
-      timerNS = java.lang.System;
-    } catch(e) {
+      (timerNS = java.lang.System).nanoTime();
+    }
+    catch(e) {
+      timerNS = 0;
       each(window.document && document.applets || [], function(applet) {
-        timerNS || (timerNS = 'nanoTime' in applet && applet);
+        try {
+          timerNS || (timerNS = applet).nanoTime();
+        } catch(e) {
+          timerNS = 0;
+        }
       });
       timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
       timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
