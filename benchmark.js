@@ -65,7 +65,7 @@
   /** Root namespace for timer API (defined later) */
   timerNS = null,
 
-  /** Resolution of the timer (ms, µs, or ns) */
+  /** Resolution of the timer (ms, us, or ns) */
   timerRes = 'ms';
 
   /*--------------------------------------------------------------------------*/
@@ -217,6 +217,7 @@
           compilable = fn.compilable = -1;
         }
       }
+      // fallback to simple while loop when compilable is -1
       if (compilable < 0) {
         result = embed(me)(me, timerNS);
       }
@@ -229,9 +230,9 @@
    * Creates a function composed of the test body and timers.
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Function} Compiled function.
+   * @returns {Function} The compiled function.
    */
-  var embed = (function() {
+  function embed() {
     var args,
         fallback,
         whileLoop,
@@ -243,7 +244,8 @@
           'm$,n$'
         ];
 
-    function embed(me) {
+    // lazily defined to give Java applets time to initialize
+    embed = function(me) {
       var into,
           shift,
           count = me.count,
@@ -299,12 +301,15 @@
         }
       }
       return Function(args, head + body + code[1]);
-    }
+    };
 
     // define root namespace of timer API
     try {
       timerNS = java.lang.System;
     } catch(e) {
+      each(window.document && document.applets || [], function(applet) {
+        timerNS || (timerNS = 'nanoTime' in applet && applet);
+      });
       timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
       timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
       timerNS || (timerNS = window);
@@ -313,7 +318,7 @@
     // Java System.nanoTime()
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
     code = code.join('|');
-    if (typeof timerNS.nanoTime == 'function') {
+    if ('nanoTime' in timerNS) {
       timerRes = 'ns';
       code = interpolate(code, {
         'start': 's$=n$.nanoTime()',
@@ -323,7 +328,7 @@
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     else if (typeof timerNS.Interval == 'function') {
-      timerRes = 'µs';
+      timerRes = 'us';
       code = interpolate(code, {
         'start': 's$=new n$.Interval;s$.start()',
         'end': 's$.stop();r$=s$.microseconds()/1e6'
@@ -349,7 +354,7 @@
     args = code.pop();
     whileLoop = code.pop();
 
-    // non embedding fallback
+    // create non-embedding fallback
     fallback = Function(args, code[0] + whileLoop + code.pop() + code[1]);
 
     // is function decompilation supported?
@@ -359,8 +364,39 @@
       cache.counter = 0;
     }());
 
-    return embed;
-  }());
+    // define Benchmark#MIN_TIME
+    (function() {
+      var time,
+          divisor = 1e3,
+          proto = Benchmark.prototype,
+          start = +new Date,
+          unit = 1;
+
+      if (!proto.MIN_TIME) {
+        if (timerRes == 'us') {
+          divisor = 1e6;
+          time = new timerNS.Interval;
+          time.start();
+          while(!(unit = time.microseconds()));
+        }
+        else if (timerRes == 'ns') {
+          divisor = 1e9;
+          start = timerNS.nanoTime();
+          while(!(unit = timerNS.nanoTime() - start));
+        }
+        else {
+          while(!(unit = +new Date - start));
+        }
+        // percent uncertainty of 1%
+        time = unit / 2 / 0.1 / divisor;
+        // round up for IE
+        proto.MIN_TIME = time > 0.07 ? +(time + 1e-4).toFixed(2) : time;
+      }
+    }());
+
+    // execute lazy defined embed
+    return embed.apply(null, arguments);
+  };
 
   /*--------------------------------------------------------------------------*/
 
@@ -913,7 +949,7 @@
     var me = this,
         cycles = me.cycles,
         name = me.name || me.id || ('<Test #' + me.fn.uid + '>'),
-        jre = /Narwhal|Rhino|RingoJS/.test(Benchmark.platform.name),
+        jre = isHostType(window, 'java') && !isHostType(window, 'netscape'),
         pm = jre ? '\xf1' : '\xb1',
         x = jre ? 'x' : '\xd7';
 
@@ -1297,8 +1333,6 @@
 
     // detect server-side js
     if (me && isHostType(me, 'global')) {
-      alpha = '\xe0';
-      beta  = '\xe1';
       if (typeof exports == 'object' && exports) {
         if (me == window && typeof system == 'object' && system) {
           name = system.global == global ? 'Narwhal' : 'RingoJS';
@@ -1313,6 +1347,10 @@
       }
       else if (isClassOf(me.environment, 'Environment')) {
         name = 'Rhino';
+      }
+      if (isHostType(me, 'java')) {
+         alpha = '\xe0';
+         beta  = '\xe1';
       }
     }
     // detect non Safari WebKit based browsers
@@ -1479,16 +1517,10 @@
     'MAX_TIME_ELAPSED': 8,
 
     /**
-     * The minimum time needed to reduce the percent uncertainty of measurement to 1% (secs).
+     * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
      * @member Benchmark
      */
-    'MIN_TIME': (function() {
-      var unit = 1, start = +new Date;
-      if (timerRes == 'ms') {
-        while(!(unit = +new Date - start));
-      }
-      return +((unit / 20) + 1e-4).toFixed(2); // (unit / 2) / 0.01 / 1e3
-    }()),
+    'MIN_TIME': 0,
 
     /**
      * The margin of error.

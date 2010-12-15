@@ -42,6 +42,11 @@ a:hover, a:focus {
   text-decoration: none;
 }
 
+applet {
+  width:0;
+  height:0;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
