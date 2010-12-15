@@ -301,7 +301,7 @@
                 remainder -= shift;
               }
               // reduce remainder by shifting more unrolled to the while loop
-              if (shift = remainder && Math.floor(remainder / into)) {
+              if (shift = remainder && lastBody.length < limit && Math.floor(remainder / into)) {
                 lastBody = lastCycle.body += repeat(body, shift);
                 lastCycle.count += shift;
                 remainder -= shift;
