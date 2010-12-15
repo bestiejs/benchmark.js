@@ -305,21 +305,23 @@
 
     // define root namespace of timer API
     try {
-      (timerNS = java.lang.System).nanoTime();
-    }
-    catch(e) {
+      timerNS = typeof (timerNS = java.lang.System).nanoTime() == 'number' && timerNS;
+    } catch(e) {
       timerNS = 0;
-      each(window.document && document.applets || [], function(applet) {
-        try {
-          timerNS || (timerNS = applet).nanoTime();
-        } catch(e) {
-          timerNS = 0;
-        }
-      });
-      timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
-      timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
-      timerNS || (timerNS = window);
     }
+    // check Java applets
+    timerNS || each(window.document && document.applets || [], function(applet) {
+      try {
+        // check type in case Safari returns an object instead of a number
+        timerNS || (timerNS = typeof (timerNS = applet).nanoTime() == 'number' && timerNS);
+      } catch(e) {
+        timerNS = 0;
+      }
+    });
+    // check Chrome's microsecond timer
+    timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
+    timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
+    timerNS || (timerNS = window);
 
     // Java System.nanoTime()
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
