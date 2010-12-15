@@ -12,10 +12,6 @@
   print('Benchmark.platform: expected at least "RingoJS"; got "' +
     Benchmark.platform + '";');
 
-  // check Benchmark#MIN_TIME
-  print('Benchmark#MIN_TIME: expected 0.05; got ' +
-    Benchmark.prototype.MIN_TIME + ';');
-
   (function() {
     global.arr = new Array(100);
     var bench = new Benchmark(function() { arr.join(' '); }),
@@ -32,6 +28,10 @@
       bench.on('complete', function() {
         print('Test async: expected async; got ' +
           (counter ? 'a' : '') + 'sync ' + bench);
+
+        // check Benchmark#MIN_TIME
+        print('Benchmark#MIN_TIME: expected at most 0.05; got ' +
+          Benchmark.prototype.MIN_TIME + ';');
       });
 
       counter = 0;

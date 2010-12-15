@@ -12,10 +12,6 @@
   console.log('Benchmark.platform: expected at least "Node.js"; got "' +
     Benchmark.platform + '";');
 
-  // check Benchmark#MIN_TIME
-  console.log('Benchmark#MIN_TIME: expected 0.05; got ' +
-    Benchmark.prototype.MIN_TIME + ';');
-
   (function() {
     global.arr = new Array(100);
     var bench = new Benchmark(function() { arr.join(' '); }),
@@ -32,6 +28,10 @@
       bench.on('complete', function() {
         console.log('Test async: expected async; got ' +
           (counter ? 'a' : '') + 'sync ' + bench);
+
+        // check Benchmark#MIN_TIME
+        console.log('Benchmark#MIN_TIME: expected at most 0.05; got ' +
+          Benchmark.prototype.MIN_TIME + ';');
       });
 
       counter = 0;

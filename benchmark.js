@@ -367,10 +367,10 @@
     // define Benchmark#MIN_TIME
     (function() {
       var time,
+          unit,
           divisor = 1e3,
           proto = Benchmark.prototype,
-          start = +new Date,
-          unit = 1;
+          start = +new Date;
 
       if (!proto.MIN_TIME) {
         if (timerRes == 'us') {
@@ -388,7 +388,7 @@
           while(!(unit = +new Date - start));
         }
         // percent uncertainty of 1%
-        time = unit / 2 / 0.1 / divisor;
+        time = unit / 2 / 0.01 / divisor;
         // round up for IE
         proto.MIN_TIME = time > 0.07 ? +(time + 1e-4).toFixed(2) : time;
       }
@@ -953,7 +953,7 @@
         pm = jre ? '\xf1' : '\xb1',
         x = jre ? 'x' : '\xd7';
 
-    return name + ' ' + x + ' ' + formatNumber(me.count) + ' ' + pm +
+    return name + ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
       me.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
   }
 
