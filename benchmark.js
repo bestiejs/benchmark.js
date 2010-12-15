@@ -404,7 +404,7 @@
         // percent uncertainty of 1%
         time = unit / 2 / 0.01 / divisor;
         // round up for IE
-        proto.MIN_TIME = time > 0.07 ? +(time + 1e-4).toFixed(2) : time;
+        proto.MIN_TIME = time > 0.7 ? + (time + 1e-3).toFixed(1) : time;
       }
     }());
 
