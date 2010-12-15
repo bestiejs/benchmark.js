@@ -251,6 +251,7 @@
           count = me.count,
           head = code[0],
           fn = me.fn,
+          limit = 51e3,
           prefix = '',
           lastCycle = cache.compiled[fn.uid] || { },
           lastCount = lastCycle.count,
@@ -275,10 +276,17 @@
             // how much is left to unroll
             remainder -= lastCount * into;
             // for large strings (~50mb+) switch to hybrid compiling (unroll + while loop)
-            if (body.length * count > 51e3) {
+            if (body.length * count > limit) {
               fn.compilable = 0;
-              // reduce remainder as much as possible and shift unrolled to the while loop
-              if (shift = remainder ? Math.floor(remainder / into) : 0) {
+              // push cached unrolled tests to the large string limit
+              if (shift = Math.floor(limit / lastBody.length) - 1) {
+                lastBody = lastCycle.body += repeat(lastBody, shift);
+                lastCount = lastCycle.count *= shift + 1;
+                into = Math.floor(count / lastCount);
+                remainder = count - (lastCount * into);
+              }
+              // pack as many new unrolled tests into the while loop as possible
+              if (shift = Math.floor((limit - lastBody.length) / body.length)) {
                 lastBody = lastCycle.body += repeat(body, shift);
                 lastCycle.count += shift;
                 remainder -= shift;
@@ -305,23 +313,21 @@
 
     // define root namespace of timer API
     try {
-      timerNS = typeof (timerNS = java.lang.System).nanoTime() == 'number' && timerNS;
+      // true for Java environments and possibly Firefox
+      timerNS = java.lang.System;
     } catch(e) {
-      timerNS = 0;
-    }
-    // check Java applets
-    timerNS || each(window.document && document.applets || [], function(applet) {
-      try {
+      // check Java applets
+      each(window.document && document.applets || [], function(applet) {
         // check type in case Safari returns an object instead of a number
-        timerNS || (timerNS = typeof (timerNS = applet).nanoTime() == 'number' && timerNS);
-      } catch(e) {
-        timerNS = 0;
-      }
-    });
-    // check Chrome's microsecond timer
-    timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
-    timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
-    timerNS || (timerNS = window);
+        try {
+          timerNS || (timerNS = typeof applet.nanoTime() == 'number' && applet);
+        } catch(e) { }
+      });
+      // check Chrome's microsecond timer
+      timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
+      timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
+      timerNS || (timerNS = window);
+    }
 
     // Java System.nanoTime()
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
