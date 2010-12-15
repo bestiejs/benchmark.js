@@ -8,8 +8,13 @@ In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collabor
 
 Feel free to fork if you see possible improvements!
 
-To clone this repository including all submodules:
+To clone this repository including all submodules, using git 1.6.5 or later:
 
     git clone --recursive git@github.com:mathiasbynens/benchmark.js.git
+
+For older git versions, just use:
+
+    git clone git@github.com:mathiasbynens/benchmark.js.git
+    git submodule update --init
 
 _— [Mathias](http://mathiasbynens.be/)_

@@ -42,9 +42,9 @@ a:hover, a:focus {
   text-decoration: none;
 }
 
-applet {
-  width:0;
-  height:0;
+applet { /* display: none deactivates the applet in some browsers, so we use this instead: */
+  width: 0;
+  height: 0;
 }
 
 table {
