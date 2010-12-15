@@ -62,6 +62,9 @@
   /** Used to convert array-like objects to arrays */
   slice = [].slice,
 
+  /** Smallest measurable time (secs) */
+  timerMin = null,
+
   /** Root namespace for timer API (defined later) */
   timerNS = null,
 
@@ -251,7 +254,8 @@
           count = me.count,
           head = code[0],
           fn = me.fn,
-          limit = 25e3, // (can expect up to double the limit ~50mb)
+          limit = 51e3,
+          most  = Math.floor(limit * 0.75),
           prefix = '',
           lastCycle = cache.compiled[fn.uid] || { },
           lastCount = lastCycle.count,
@@ -267,26 +271,31 @@
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
         // cleanup test body
         body = trim(body).replace(/([^\n;])$/, '$1\n');
+
         // create unrolled test cycle
         if (body && count > 1) {
-          // compile faster by using the last cycles body as much as possible
+
+          // compile faster by using the last cycles unrolled cached as much as possible
           if (lastCount) {
             // number of times to repeat the last cycles unrolled body
             into = Math.floor(remainder / lastCount);
             // how much is left to unroll
             remainder -= lastCount * into;
-            // for large strings (~25mb+) switch to hybrid compiling (unroll + while loop)
+
+            // switch to hybrid compiling for larger strings (50mb+)
             if (body.length * count > limit) {
               fn.compilable = 0;
-              // push cached unrolled tests to the large string limit
-              if (shift = Math.max(0, Math.floor(limit / lastBody.length) - 1)) {
+
+              // push unrolled cache to about 75% of the string limit,
+              // leaving a little wiggle room for further reducing the remainder
+              if (shift = Math.max(0, Math.floor(most / lastBody.length) - 1)) {
                 lastBody = lastCycle.body += repeat(lastBody, shift);
                 lastCount = lastCycle.count *= shift + 1;
                 into = Math.floor(count / lastCount);
                 remainder = count - (lastCount * into);
               }
               // pack as many new unrolled tests into the while loop as possible
-              if (shift = Math.floor(Math.max(0, limit - lastBody.length) / body.length)) {
+              if (shift = Math.floor(Math.max(0, most - lastBody.length) / body.length)) {
                 lastBody = lastCycle.body += repeat(body, shift);
                 lastCycle.count += shift;
                 remainder -= shift;
@@ -387,7 +396,6 @@
     // define Benchmark#MIN_TIME
     (function() {
       var time,
-          unit,
           divisor = 1e3,
           proto = Benchmark.prototype,
           start = +new Date;
@@ -397,18 +405,20 @@
           divisor = 1e6;
           time = new timerNS.Interval;
           time.start();
-          while(!(unit = time.microseconds()));
+          while(!(timerMin = time.microseconds()));
         }
         else if (timerRes == 'ns') {
           divisor = 1e9;
           start = timerNS.nanoTime();
-          while(!(unit = timerNS.nanoTime() - start));
+          while(!(timerMin = timerNS.nanoTime() - start));
         }
         else {
-          while(!(unit = +new Date - start));
+          while(!(timerMin = +new Date - start));
         }
         // percent uncertainty of 1%
-        time = unit / 2 / 0.01 / divisor;
+        time = timerMin / 2 / 0.01 / divisor;
+        // convert smallest measurable time to seconds
+        timerMin /= divisor;
         // round up for IE
         proto.MIN_TIME = time > 0.7 ? + (time + 1e-3).toFixed(1) : time;
       }
@@ -952,7 +962,7 @@
       each(timeKeys, function(key) {
         if (times[key] != proto.times[key]) {
           changed = true;
-          me[key] = proto.times[key];
+          times[key] = proto.times[key];
         }
       });
       if (changed) {
@@ -1193,6 +1203,9 @@
         clocked = times.cycle = Math.max(0,
           clocked.time - (cal && cal.times.period || 0) * clocked.looped);
 
+        // smells like Infinity ?
+        clocked = Math.min(timerMin, clocked) / Math.max(timerMin, clocked) > 0.9 ? 0 : clocked;
+
         // seconds per operation
         period = times.period = clocked / count;
 
@@ -1221,6 +1234,10 @@
             clearCompiled(me);
           }
         }
+        // should we exit early?
+        if (me.emit('cycle') === false) {
+          me.abort();
+        }
       }
       // figure out what to do next
       if (me.running) {
@@ -1242,10 +1259,6 @@
         me.abort();
         me.error = e;
         me.emit('error');
-      }
-      // should we exit early?
-      if (me.emit('cycle') === false) {
-        me.abort();
       }
     }
     // check if calibration is needed
