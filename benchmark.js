@@ -251,7 +251,7 @@
           count = me.count,
           head = code[0],
           fn = me.fn,
-          limit = 51e3,
+          limit = 25e3, // (can expect up to double the limit ~50mb)
           prefix = '',
           lastCycle = cache.compiled[fn.uid] || { },
           lastCount = lastCycle.count,
@@ -275,18 +275,24 @@
             into = Math.floor(remainder / lastCount);
             // how much is left to unroll
             remainder -= lastCount * into;
-            // for large strings (~50mb+) switch to hybrid compiling (unroll + while loop)
+            // for large strings (~25mb+) switch to hybrid compiling (unroll + while loop)
             if (body.length * count > limit) {
               fn.compilable = 0;
               // push cached unrolled tests to the large string limit
-              if (shift = Math.floor(limit / lastBody.length) - 1) {
+              if (shift = Math.max(0, Math.floor(limit / lastBody.length) - 1)) {
                 lastBody = lastCycle.body += repeat(lastBody, shift);
                 lastCount = lastCycle.count *= shift + 1;
                 into = Math.floor(count / lastCount);
                 remainder = count - (lastCount * into);
               }
               // pack as many new unrolled tests into the while loop as possible
-              if (shift = Math.floor((limit - lastBody.length) / body.length)) {
+              if (shift = Math.floor(Math.max(0, limit - lastBody.length) / body.length)) {
+                lastBody = lastCycle.body += repeat(body, shift);
+                lastCycle.count += shift;
+                remainder -= shift;
+              }
+              // reduce remainder by shifting more unrolled to the while loop
+              if (shift = remainder && Math.floor(remainder / into)) {
                 lastBody = lastCycle.body += repeat(body, shift);
                 lastCycle.count += shift;
                 remainder -= shift;
