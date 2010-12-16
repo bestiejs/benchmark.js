@@ -8,11 +8,14 @@
 
 (function(window) {
 
-  /** Feature detect function decompilation via toString() (performed in embed) */
+  /** Detect function decompilation via toString() (performed in embed) */
   var HAS_FUNC_DECOMP,
 
-  /** Feature detect DOM0 timeout API (performed at the bottom) */
+  /** Detect DOM0 timeout API (performed at the bottom) */
   HAS_TIMEOUT_API,
+
+  /** Detect a Java environment */
+  IN_JAVA = isHostType(window, 'java') && !isHostType(window, 'netscape'),
 
   /** Integrity check for compiled tests */
   EMBEDDED_UID = +new Date,
@@ -52,7 +55,6 @@
 
   /** Internal cached used by various methods */
   cache = {
-    'compiled': { },
     'counter': 0
   },
 
@@ -168,65 +170,39 @@
   }
 
   /**
-   * Clears cached compiled code for a given test function.
-   * @private
-   * @param {Object} me The benchmark instance used to resolve the cache entry.
-   */
-  function clearCompiled(me) {
-    var uid = me.fn.uid,
-        compiled = cache.compiled;
-
-    if (compiled[uid]) {
-      delete compiled[uid];
-      // run garbage collection in IE
-      if (isHostType(window, 'CollectGarbage')) {
-        CollectGarbage();
-      }
-    }
-  }
-
-  /**
-   * Clocks the time taken to execute a test per cycle (seconds).
+   * Clocks the time taken to execute a test per cycle (secs).
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Object} An object containing the clocked time and loops taken.
+   * @returns {Number} The time taken.
    */
   function clock(me) {
-    var count = me.count,
+    var result,
+        count = me.count,
         fn = me.fn,
-        compilable = !HAS_FUNC_DECOMP ? -1 : fn.compilable,
-        times = me.times,
-        result = { 'looped': 0, 'time': 0 };
+        compilable = HAS_FUNC_DECOMP ? fn.compilable : false;
 
-    // fn compilable modes:
-    //  1 is unrolled
-    //  0 is hybrid (unroll + while loop)
-    // -1 is just while loop
-    if (!fn.unclockable) {
-      if (compilable == null || compilable > -1) {
-        try {
-          if (compilable == null) {
-            // determine if unrolled code is exited early, caused by rogue
-            // return statement, by checking for a return object with the uid
-            me.count = 1;
-            compilable = fn.compilable = embed(me)(me, timerNS).uid == EMBEDDED_UID ? 1 : -1;
-            me.count = count;
-          }
-          if (compilable > -1) {
-            result = embed(me)(me, timerNS);
-          }
-        } catch(e) {
+    if (compilable == null || compilable) {
+      try {
+        if (compilable == null) {
+          // determine if unrolled code is exited early, by a rogue return
+          // statement, by checking for a return object with the uid
+          me.count = 1;
+          compilable = fn.compilable = embed(me)(me, timerNS).uid == EMBEDDED_UID;
           me.count = count;
-          compilable = fn.compilable = -1;
         }
-      }
-      // fallback to simple while loop when compilable is -1
-      if (compilable < 0) {
-        result = embed(me)(me, timerNS);
+        if (compilable) {
+          result = embed(me)(me, timerNS);
+        }
+      } catch(e) {
+        me.count = count;
+        compilable = fn.compilable = false;
       }
     }
-    delete result.uid;
-    return result;
+    // fallback to simple while-loop when compilable is false
+    if (!compilable) {
+      result = embed(me)(me, timerNS);
+    }
+    return result.time;
   }
 
   /**
@@ -238,107 +214,48 @@
   function embed() {
     var args,
         fallback,
-        whileLoop,
         code = [
-          'var r$,i$=m$.count,l$=i$,f$=m$.fn,#{start};\n',
-          '#{end};return{looped:i$<0?l$:0,time:r$,uid:"$"}',
-          'f$()}',
-          'while(i$--){',
+          'var r$,i$=m$.count,l$=i$,f$=m$.fn,#{start};while(i$--){',
+          '}#{end};return{time:r$,uid:"$"}',
+          'f$()',
           'm$,n$'
         ];
 
     // lazily defined to give Java applets time to initialize
     embed = function(me) {
-      var into,
-          shift,
-          count = me.count,
-          head = code[0],
+      var body,
+          result,
           fn = me.fn,
-          limit = 51e3,
-          most  = Math.floor(limit * 0.75),
-          prefix = '',
-          lastCycle = cache.compiled[fn.uid] || { },
-          lastCount = lastCycle.count,
-          lastBody = lastCycle.body,
-          body = lastBody || '',
-          remainder = count;
+          compilable = fn.compilable;
 
-      if (fn.compilable < 0) {
-        return fallback;
-      }
-      if (lastCount != count) {
+      if (compilable == null || compilable) {
         // extract test body
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
         // cleanup test body
         body = trim(body).replace(/([^\n;])$/, '$1\n');
-
-        // create unrolled test cycle
-        if (body && count > 1) {
-
-          // compile faster by using the last cycles unrolled cached as much as possible
-          if (lastCount) {
-            // number of times to repeat the last cycles unrolled body
-            into = Math.floor(remainder / lastCount);
-            // how much is left to unroll
-            remainder -= lastCount * into;
-
-            // switch to hybrid compiling for larger strings (50mb+)
-            if (body.length * count > limit) {
-              fn.compilable = 0;
-
-              // push unrolled cache to about 75% of the string limit,
-              // leaving a little wiggle room for further reducing the remainder
-              if (shift = Math.max(0, Math.floor(most / lastBody.length) - 1)) {
-                lastBody = lastCycle.body += repeat(lastBody, shift);
-                lastCount = lastCycle.count *= shift + 1;
-                into = Math.floor(count / lastCount);
-                remainder = count - (lastCount * into);
-              }
-              // pack as many new unrolled tests into the while loop as possible
-              if (shift = Math.floor(Math.max(0, most - lastBody.length) / body.length)) {
-                lastBody = lastCycle.body += repeat(body, shift);
-                lastCycle.count += shift;
-                remainder -= shift;
-              }
-              // reduce remainder by shifting more unrolled to the while loop
-              if (shift = remainder && lastBody.length < limit && Math.floor(remainder / into)) {
-                lastBody = lastCycle.body += repeat(body, shift);
-                lastCycle.count += shift;
-                remainder -= shift;
-              }
-              // compile while loop
-              head = head.replace(/(i\d+=)[^,]+/, '$1' + into);
-              prefix = whileLoop + lastBody + '}';
-            }
-            else {
-              prefix = repeat(lastBody, into);
-            }
-          }
-          // compile unrolled body
-          body = prefix + (remainder ? repeat(body, remainder) : '');
-
-          // cache if not hybrid compiling
-          if (head == code[0]) {
-            cache.compiled[fn.uid] = { 'count': count, 'body': body };
-          }
-        }
+        // compile while-loop using extracted body
+        result = Function(args, code[0] + body + code[1]);
       }
-      return Function(args, head + body + code[1]);
+      else {
+        // while-loop calling test function
+        result = fallback;
+      }
+      return result;
     };
 
-    // define root namespace of timer API
+    // determine root namespace of timer API
     try {
       // true for Java environments and possibly Firefox
       timerNS = java.lang.System;
     } catch(e) {
-      // check Java applets
+      // check Java applets for an exposed nanoTime() method
       each(window.document && document.applets || [], function(applet) {
         // check type in case Safari returns an object instead of a number
         try {
-          timerNS || (timerNS = typeof applet.nanoTime() == 'number' && applet);
+          timerNS  || (timerNS = typeof applet.nanoTime() == 'number' && applet);
         } catch(e) { }
       });
-      // check Chrome's microsecond timer
+      // check for chrome object, which may have a microsecond timer
       timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
       timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
       timerNS || (timerNS = window);
@@ -378,22 +295,7 @@
       });
     }
 
-    // inject uid into variable names to avoid collisions with embedded tests
-    code = code.replace(/\$/g, EMBEDDED_UID).split('|');
-    args = code.pop();
-    whileLoop = code.pop();
-
-    // create non-embedding fallback
-    fallback = Function(args, code[0] + whileLoop + code.pop() + code[1]);
-
-    // is function decompilation supported?
-    (function() {
-      var x = new Benchmark(function() { return 1; }, { 'count': 1 });
-      try { HAS_FUNC_DECOMP = embed(x)(x, timerNS) == 1; } catch(e) { }
-      cache.counter = 0;
-    }());
-
-    // define Benchmark#MIN_TIME
+    // determine Benchmark#MIN_TIME
     (function() {
       var time,
           divisor = 1e3,
@@ -422,6 +324,19 @@
         // round up for IE
         proto.MIN_TIME = time > 0.7 ? + (time + 1e-3).toFixed(1) : time;
       }
+    }());
+
+    // inject uid into variable names to avoid collisions with
+    // embedded tests and create non-embedding fallback
+    code = code.replace(/\$/g, EMBEDDED_UID).split('|');
+    args = code.pop();
+    fallback = Function(args, code[0] + code.pop() + code[1]);
+
+    // is function decompilation supported?
+    HAS_FUNC_DECOMP = !!(function() {
+      var x = new Benchmark(function() { return 1; }, { 'count': 1 });
+      cache.counter = 0;
+      try { return embed(x)(x, timerNS) == 1; } catch(e) { }
     }());
 
     // execute lazy defined embed
@@ -618,7 +533,7 @@
       }
       // when async the `return false` will cancel the rest of the "complete"
       // listeners because they were called above and when synchronous it will
-      // end the while loop
+      // end the while-loop
       return false;
     }
 
@@ -979,9 +894,8 @@
     var me = this,
         cycles = me.cycles,
         name = me.name || me.id || ('<Test #' + me.fn.uid + '>'),
-        jre = isHostType(window, 'java') && !isHostType(window, 'netscape'),
-        pm = jre ? '\xf1' : '\xb1',
-        x = jre ? 'x' : '\xd7';
+        pm = IN_JAVA ? '\xf1' : '\xb1',
+        x = IN_JAVA ? 'x' : '\xd7';
 
     return name + ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
       me.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
@@ -998,19 +912,16 @@
   function compute(me, async) {
     var calibrating = me.constructor == Calibration,
         fn = me.fn,
-        initCompilable = fn.compilable,
         initRunCount = me.INIT_RUN_COUNT,
         initSampleSize = 5,
-        initUnclockable = fn.unclockable,
         queue = [],
         sample = [],
-        state = { 'calibrated': isCalibrated(), 'compilable': initCompilable };
+        state = { 'calibrated': isCalibrated(), 'compilable': fn.compilable };
 
     function initialize() {
       me.cycles = 0;
       me.INIT_RUN_COUNT = initRunCount;
       clearQueue();
-      clearCompiled(me);
       enqueue(initSampleSize);
     }
 
@@ -1087,8 +998,8 @@
           sumOf = function(sum, clone) { return sum + clone.hz; },
           varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
 
-      // avoid computing unclockable tests
-      if (fn.unclockable) {
+      // avoid unclockable tests
+      if (clone.hz == Infinity) {
         clearQueue();
       }
       // exit early if aborted
@@ -1147,9 +1058,6 @@
       // cleanup
       if (complete) {
         clearQueue();
-        clearCompiled(me);
-        fn.compilable = initCompilable;
-        fn.unclockable = initUnclockable;
         me.INIT_RUN_COUNT = initRunCount;
         me.emit('complete');
       }
@@ -1175,8 +1083,7 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function _run(me, async) {
-    var clocked,
-        compilable;
+    var clocked;
 
     function onCalibrate(cal) {
       if (cal.aborted) {
@@ -1194,16 +1101,16 @@
           index = me.CALIBRATION_INDEX,
           times = me.times,
           cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[(index > 0 || fn.compilable < 1) && index],
+          cal = cals[index > 1 ? index : fn.compilable ? 0 : 1],
           count = me.count,
           minTime = me.MIN_TIME;
 
       if (me.running) {
         // calibrate by subtracting iteration overhead
         clocked = times.cycle = Math.max(0,
-          clocked.time - (cal && cal.times.period || 0) * clocked.looped);
+          clocked - ((cal && cal.times.period || 0) * count));
 
-        // smells like Infinity ?
+        // smells like Infinity?
         clocked = Math.min(timerMin, clocked) / Math.max(timerMin, clocked) > 0.9 ? 0 : clocked;
 
         // seconds per operation
@@ -1213,7 +1120,7 @@
         me.hz = 1 / period;
 
         // do we need to do another cycle?
-        me.running = !fn.unclockable && clocked < minTime;
+        me.running = clocked < minTime;
 
         // avoid working our way up to this next time
         me.INIT_RUN_COUNT = count;
@@ -1228,16 +1135,12 @@
           if (count <= me.count) {
             count += Math.ceil((minTime - clocked) / period);
           }
-          // give up and declare the test unclockable
-          if (!(me.running = count != Infinity)) {
-            fn.unclockable = true;
-            clearCompiled(me);
-          }
+          me.running = count != Infinity;
         }
-        // should we exit early?
-        if (me.emit('cycle') === false) {
-          me.abort();
-        }
+      }
+      // should we exit early?
+      if (me.emit('cycle') === false) {
+        me.abort();
       }
       // figure out what to do next
       if (me.running) {
@@ -1263,9 +1166,7 @@
     }
     // check if calibration is needed
     if (me.running) {
-      compilable = me.fn.compilable;
-      if (compilable == null || compilable > 0 || me.constructor == Calibration ||
-          (compilable < 1 && calibrate(me, onCalibrate, async))) {
+      if (me.constructor == Calibration || calibrate(me, onCalibrate, async)) {
         finish();
       }
     } else {
@@ -1306,8 +1207,8 @@
    */
   Benchmark.platform = (function() {
     var me = this,
-        alpha = '\u03b1',
-        beta = '\u03b2',
+        alpha = IN_JAVA ? '\xe0' : '\u03b1',
+        beta = IN_JAVA ? '\xe1' : '\u03b2',
         description = [],
         doc = window.document && document || {},
         nav = window.navigator && navigator || {},
@@ -1381,10 +1282,6 @@
       else if (isClassOf(me.environment, 'Environment')) {
         name = 'Rhino';
       }
-      if (isHostType(me, 'java')) {
-         alpha = '\xe0';
-         beta  = '\xe1';
-      }
     }
     // detect non Safari WebKit based browsers
     else if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {
@@ -1450,8 +1347,11 @@
      * @member Benchmark
      */
     'CALIBRATIONS': (function() {
-      noop.compilable = noop.uid = -1;
-      return [new Calibration(noop)];
+      var a = function() { },
+          b = function() { };
+      a.uid = b.uid = -1;
+      b.compilable = false;
+      return [new Calibration(a), new Calibration(b)];
     }()),
 
     // generic Array#forEach
@@ -1529,7 +1429,7 @@
      * The delay between test cycles (secs).
      * @member Benchmark
      */
-    'CYCLE_DELAY': 0.2,
+    'CYCLE_DELAY': 0.01,
 
     /**
      * A flag to indicate methods will run asynchronously by default.

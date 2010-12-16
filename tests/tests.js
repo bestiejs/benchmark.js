@@ -28,6 +28,7 @@ test("user agent detection", function() {
             .replace(/\bme\s*=[^,;]+([,;])/, 'me=options$1')
             .replace(/\bua\s*=[^,;]+([,;])/, 'ua=me.ua$1')
             .replace(/\bopera\.version\(\)/, 'opera')
+            .replace(/\bIN_JAVA\b/g, 'false')
             .replace(/\bwindow\b/g, 'me')
             .replace(/\bexports\b/g, 'me.exports')
             .replace(/([^.\x22\x27])global\b/g, '$1me.global')

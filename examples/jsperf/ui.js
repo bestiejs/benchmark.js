@@ -565,7 +565,6 @@
   // customize calibration benchmarks
   each(Benchmark.CALIBRATIONS, function(cal) {
     cal.name = 'Calibrating';
-    cal.DEFAULT_ASYNC = false;
     cal.on('complete', onComplete)
        .on('cycle', onCycle)
        .on('start', onCycle);
