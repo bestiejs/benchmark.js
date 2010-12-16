@@ -42,9 +42,10 @@ a:hover, a:focus {
   text-decoration: none;
 }
 
-applet { /* display: none deactivates the applet in some browsers, so we use this instead: */
-  width: 0;
-  height: 0;
+/* display: none deactivates the applet in some browsers, so we use this instead */
+applet {
+  position: absolute;
+  left: -9999px;
 }
 
 table {
@@ -306,7 +307,7 @@ li.current a {
 
 #bs-logo span {
   position: absolute;
-  top: -9999px;
+  left: -9999px;
 }
 
 #bs-logo a {

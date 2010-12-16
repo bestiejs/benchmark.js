@@ -14,6 +14,9 @@
   /** Detect DOM0 timeout API (performed at the bottom) */
   HAS_TIMEOUT_API,
 
+  /** Detect HTML5 web storage */
+  HAS_STORAGE = isHostType(window, 'sessionStorage') && isHostType(sessionStorage, 'setItem'),
+
   /** Detect a Java environment */
   IN_JAVA = isHostType(window, 'java') && !isHostType(window, 'netscape'),
 
@@ -231,8 +234,6 @@
       if (compilable == null || compilable) {
         // extract test body
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
-        // cleanup test body
-        body = trim(body).replace(/([^\n;])$/, '$1\n');
         // compile while-loop using extracted body
         result = Function(args, code[0] + body + code[1]);
       }
@@ -342,6 +343,43 @@
     // execute lazy defined embed
     return embed.apply(null, arguments);
   };
+
+  /**
+   * Records benchmark results to session storage.
+   * @private
+   * @param {Object} me The benchmark instance.
+   */
+  function store(me) {
+    if (HAS_STORAGE) {
+      sessionStorage['bench:' + me.fn.uid] =
+        join(reduce([me, me.times], function(record, object) {
+          forIn(object, function(value, key) {
+            if (isClassOf(value, 'Number') && /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
+              record[key] = value;
+            }
+          });
+          return record;
+        }, { }));
+    }
+  }
+
+  /**
+   * Restores recorded benchmark results.
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @returns {Boolean} Returns true if results were restored, esle false
+   */
+  function restore(me) {
+    var data;
+    if (HAS_STORAGE) {
+      data = sessionStorage['bench:' + me.fn.uid];
+      each(data && data.split(',') || [], function(pair) {
+        pair = pair.split(': ');
+        (/^(?:cycle|elapsed|period|start|stop)$/.test(pair[0]) ? me.times : me)[pair[0]] = +pair[1];
+      });
+    }
+    return !!data;
+  }
 
   /*--------------------------------------------------------------------------*/
 
@@ -573,7 +611,7 @@
   function interpolate(string, object) {
     string = string == null ? '' : string;
     forIn(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
     });
     return string;
   }
@@ -1053,6 +1091,10 @@
             times.period = 1 / mean;
             times.cycle = times.period * me.count;
           }
+          // record results
+          if (me.persist) {
+            store(me);
+          }
         }
       }
       // cleanup
@@ -1191,7 +1233,17 @@
     me.times.start = +new Date;
     me.emit('start');
 
-    if (me.computing) {
+    if (me.persist && restore(me)) {
+      // use restored data
+      call(me, function() {
+        me.running = false;
+        if (me.emit('cycle') === false) {
+          me.abort();
+        }
+        me.emit('complete');
+      }, async);
+    }
+    else if (me.computing) {
       _run(me, async);
     } else {
       compute(me, async);
@@ -1349,7 +1401,8 @@
     'CALIBRATIONS': (function() {
       var a = function() { },
           b = function() { };
-      a.uid = b.uid = -1;
+      a.uid = -1;
+      b.uid = -2;
       b.compilable = false;
       return [new Calibration(a), new Calibration(b)];
     }()),
@@ -1413,6 +1466,9 @@
   });
 
   /*--------------------------------------------------------------------------*/
+
+  // persist Calibration results
+  Calibration.prototype.persist = true;
 
   // IE may ignore `toString` in a for-in loop
   Benchmark.prototype.toString = toString;
@@ -1504,16 +1560,22 @@
     'hz': 0,
 
     /**
-     * A flag to indicate if the benchmark is running.
-     * @member Benchmark
-     */
-    'running': false,
-
-    /**
      * A flag to indicate if the benchmark is aborted.
      * @member Benchmark
      */
     'aborted': false,
+
+    /**
+     * A flag to indicate if results persist for the browser session.
+     * @member Benchmark
+     */
+    'persist': false,
+
+    /**
+     * A flag to indicate if the benchmark is running.
+     * @member Benchmark
+     */
+    'running': false,
 
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
