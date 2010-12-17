@@ -8,7 +8,7 @@ table, p, ul, h1, h2, h3, #error-info, iframe, form div, #faq {
   margin-bottom: 1em;
 }
 
-button, input, textarea, a {
+button, input, textarea, a, #bs-results .bs-rt {
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -40,12 +40,6 @@ a {
 
 a:hover, a:focus {
   text-decoration: none;
-}
-
-/* display: none deactivates the applet in some browsers, so we use this instead */
-applet {
-  position: absolute;
-  left: -9999px;
 }
 
 table {
@@ -305,9 +299,9 @@ li.current a {
   margin: 0;
 }
 
-#bs-logo span {
+#bs-logo span, applet {
   position: absolute;
-  left: -9999px;
+  left: -9999em;
 }
 
 #bs-logo a {
@@ -320,22 +314,19 @@ li.current a {
 }
 
 #bs-ua {
-  padding: 0.5em 0.5em 0;
+  padding: .5em .5em 0;
   color: #555;
 }
 
 #bs-results .bs-rt {
   font-size: 10pt;
-  padding: 0.5em;
-  background:#ddd;
-  border-radius: 4px;
-  -moz-border-radius: 4px;
-  -webkit-border-radius: 4px;
+  padding: .5em;
+  background: #ddd;
 }
 
 #bs-results td {
   border: 1px solid #ddd;
-  padding: 0.4em;
+  padding: .4em;
   white-space: nowrap;
 }
 
