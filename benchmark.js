@@ -14,6 +14,9 @@
   /** Detect DOM0 timeout API (performed at the bottom) */
   HAS_TIMEOUT_API,
 
+  /** Detect IE garbage collection function */
+  HAS_COLLECT_GARBAGE = isHostType(window, 'CollectGarbage'),
+
   /** Detect HTML5 web storage */
   HAS_STORAGE = isHostType(window, 'sessionStorage') && isHostType(sessionStorage, 'setItem'),
 
@@ -58,7 +61,8 @@
 
   /** Internal cached used by various methods */
   cache = {
-    'counter': 0
+    'counter': 0,
+    'unrolled': { }
   },
 
   /** Used in Benchmark.hasKey() */
@@ -173,10 +177,28 @@
   }
 
   /**
+   * Clears unrolled test bodies cached for a given function.
+   * @private
+   * @param {Object} me The benchmark instance used to resolve the cache entry.
+   */
+  function clearUnrolled(me) {
+    var uid = me.fn.uid,
+        unrolled = cache.unrolled;
+
+    if (unrolled[uid]) {
+      delete unrolled[uid];
+      // run garbage collection in IE
+      if (HAS_COLLECT_GARBAGE) {
+        CollectGarbage();
+      }
+    }
+  }
+
+  /**
    * Clocks the time taken to execute a test per cycle (secs).
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Number} The time taken.
+   * @returns {Object} An object containing the clocked time and loops taken.
    */
   function clock(me) {
     var result,
@@ -205,7 +227,7 @@
     if (!compilable) {
       result = embed(me)(me, timerNS);
     }
-    return result.time;
+    return result;
   }
 
   /**
@@ -218,8 +240,9 @@
     var args,
         fallback,
         code = [
-          'var r$,i$=m$.count,l$=i$,f$=m$.fn,#{start};while(i$--){',
-          '}#{end};return{time:r$,uid:"$"}',
+          'var r$,i$=m$.count,j$=0,l$=i$+j$,f$=m$.fn,#{start};while(i$--){',
+          '}#{end};return{looped:l$,time:r$,uid:"$"}',
+          'while(j$--){',
           'f$()',
           'm$,n$'
         ];
@@ -227,15 +250,36 @@
     // lazily defined to give Java applets time to initialize
     embed = function(me) {
       var body,
+          into,
+          remainder,
           result,
           fn = me.fn,
-          compilable = fn.compilable;
+          compilable = fn.compilable,
+          count = me.count,
+          head = code[0],
+          limit = 5e4,
+          uid = fn.uid,
+          unrolled = cache.unrolled;
 
       if (compilable == null || compilable) {
         // extract test body
         body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
+        // cleanup test body
+        body = trim(body).replace(/([^\n;])$/, '$1;');
+        // unroll the loop to prevent locking the browser
+        if (count >= limit) {
+          // unroll about 50mb worth
+          into = Math.floor(limit / body.length);
+          remainder = count % into;
+          count = Math.floor(count / into);
+          unrolled[uid] || (unrolled[uid] = repeat(body, into));
+          head = head
+            .replace(/(i\d+=)[^,]+/, '$1' + count)
+            .replace(/(j\d+=)0/, '$1' + remainder) +
+            unrolled[uid] + '}' + code[2];
+        }
         // compile while-loop using extracted body
-        result = Function(args, code[0] + body + code[1]);
+        result = Function(args, head + body + code[1]);
       }
       else {
         // while-loop calling test function
@@ -1100,6 +1144,7 @@
       // cleanup
       if (complete) {
         clearQueue();
+        clearUnrolled(me);
         me.INIT_RUN_COUNT = initRunCount;
         me.emit('complete');
       }
@@ -1150,7 +1195,7 @@
       if (me.running) {
         // calibrate by subtracting iteration overhead
         clocked = times.cycle = Math.max(0,
-          clocked - ((cal && cal.times.period || 0) * count));
+          clocked.time - ((cal && cal.times.period || 0) * clocked.looped));
 
         // smells like Infinity?
         clocked = Math.min(timerMin, clocked) / Math.max(timerMin, clocked) > 0.9 ? 0 : clocked;
