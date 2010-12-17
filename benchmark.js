@@ -8,11 +8,8 @@
 
 (function(window) {
 
-  /** Detect function decompilation via toString() (performed in embed) */
-  var HAS_FUNC_DECOMP,
-
   /** Detect DOM0 timeout API (performed at the bottom) */
-  HAS_TIMEOUT_API,
+  var HAS_TIMEOUT_API,
 
   /** Detect HTML5 web storage */
   HAS_STORAGE = isHostType(window, 'sessionStorage') && isHostType(sessionStorage, 'setItem'),
@@ -65,16 +62,7 @@
   hasOwnProperty = cache.hasOwnProperty,
 
   /** Used to convert array-like objects to arrays */
-  slice = [].slice,
-
-  /** Smallest measurable time (secs) */
-  timerMin = null,
-
-  /** Root namespace for timer API (defined later) */
-  timerNS = null,
-
-  /** Resolution of the timer (ms, us, or ns) */
-  timerRes = 'ms';
+  slice = [].slice;
 
   /*--------------------------------------------------------------------------*/
 
@@ -178,171 +166,152 @@
    * @param {Object} me The benchmark instance.
    * @returns {Number} The time taken.
    */
-  function clock(me) {
-    var result,
-        count = me.count,
-        fn = me.fn,
-        compilable = HAS_FUNC_DECOMP ? fn.compilable : false;
-
-    if (compilable == null || compilable) {
-      try {
-        if (compilable == null) {
-          // determine if unrolled code is exited early, by a rogue return
-          // statement, by checking for a return object with the uid
-          me.count = 1;
-          compilable = fn.compilable = embed(me)(me, timerNS).uid == EMBEDDED_UID;
-          me.count = count;
-        }
-        if (compilable) {
-          result = embed(me)(me, timerNS);
-        }
-      } catch(e) {
-        me.count = count;
-        compilable = fn.compilable = false;
-      }
-    }
-    // fallback to simple while-loop when compilable is false
-    if (!compilable) {
-      result = embed(me)(me, timerNS);
-    }
-    return result.time;
-  }
-
-  /**
-   * Creates a function composed of the test body and timers.
-   * @private
-   * @param {Object} me The benchmark instance.
-   * @returns {Function} The compiled function.
-   */
-  function embed() {
-    var args,
-        fallback,
-        code = [
-          'var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){',
-          '}#{end};return{time:r$,uid:"$"}',
-          'f$()',
-          'm$,n$'
-        ];
-
-    // lazily defined to give Java applets time to initialize
-    embed = function(me) {
+  function clock() {
+    clock = function(me) {
       var body,
+          embedded,
           result,
           fn = me.fn,
-          compilable = fn.compilable;
+          compilable = fn.compilable,
+          count = me.count;
 
       if (compilable == null || compilable) {
-        // extract test body
-        body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
-        // compile while-loop using extracted body
-        result = Function(args, code[0] + body + code[1]);
+        try {
+          // extract test body
+          body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
+          // compile while-loop using extracted body
+          embedded = Function(args, code[0] + body + code[1]);
+
+          if (compilable == null) {
+            // determine if unrolled code is exited early, by a rogue return
+            // statement, by checking for a return object with the uid
+            me.count = 1;
+            compilable = fn.compilable = embedded(me, timerNS).uid == EMBEDDED_UID;
+            me.count = count;
+          }
+          if (compilable) {
+            result = embedded(me, timerNS);
+          }
+        } catch(e) {
+          me.count = count;
+          compilable = fn.compilable = false;
+        }
       }
-      else {
-        // while-loop calling test function
-        result = fallback;
+      // fallback to simple while-loop when compilable is false
+      if (!compilable) {
+        result = fallback(me, timerNS);
       }
-      return result;
+      result = result.time;
+      // smells like Infinity?
+      return Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
     };
 
-    // determine root namespace of timer API
-    try {
-      // true for Java environments and possibly Firefox
-      timerNS = java.lang.System;
-    } catch(e) {
-      // check Java applets for an exposed nanoTime() method
-      each(window.document && document.applets || [], function(applet) {
-        // check type in case Safari returns an object instead of a number
-        try {
-          timerNS  || (timerNS = typeof applet.nanoTime() == 'number' && applet);
-        } catch(e) { }
-      });
-      // check for chrome object, which may have a microsecond timer
-      timerNS || (timerNS = typeof window.chrome == 'object' && chrome);
-      timerNS || (timerNS = typeof window.chromium == 'object' && chromium);
-      timerNS || (timerNS = window);
+    function getRes() {
+      var measured,
+          start,
+          count = 50,
+          divisor = 1e3,
+          size = count,
+          sum = 0;
+
+      // get average smallest measurable time
+      while (count--) {
+        if (timerUnit == 'us') {
+          divisor = 1e6;
+          timerNS.start();
+          while(!(measured = timerNS.microseconds()));
+          sum += measured;
+        }
+        else if (timerUnit == 'ns') {
+          divisor = 1e9;
+          start = timerNS.nanoTime();
+          while(!(measured = timerNS.nanoTime() - start));
+          sum += measured;
+        }
+        else {
+          start = +new timerNS;
+          while(!(measured = +new timerNS - start));
+          sum += measured;
+        }
+      }
+      // convert average to seconds
+      return sum / size / divisor;
     }
 
+    var args,
+        fallback,
+        timerNS,
+        timerRes,
+        timerUnit,
+        min = 0.0015,
+        proto = Benchmark.prototype,
+        code = 'var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};return{time:r$,uid:"$"}|f$()|m$,n$';
+
+    // detect nanosecond support:
     // Java System.nanoTime()
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
-    code = code.join('|');
-    if ('nanoTime' in timerNS) {
-      timerRes = 'ns';
+    try {
+      timerNS = java.lang.System;
+    } catch(e) {
+      each(window.document && document.applets || [], function(applet) {
+        timerNS || (timerNS = 'nanoTime' in applet && applet);
+      });
+    }
+    try {
+      // check type in case Safari returns an object instead of a number
+      timerNS = typeof timerNS.nanoTime() == 'number' && timerNS;
+      timerUnit = 'ns';
+      timerRes = getRes();
+      timerNS = timerRes <= min && timerNS;
+    } catch(e) { }
+
+    // detect microseconds:
+    // enable benchmarking via the --enable-benchmarking flag
+    // in at least Chrome 7 to use chrome.Interval
+    if (!timerNS) {
+      try {
+        timerNS = new (window.chrome || window.chromium).Interval;
+        timerUnit = 'us';
+        timerRes = getRes();
+        timerNS = timerRes <= min && timerNS;
+      } catch(e) { }
+    }
+    // else milliseconds
+    if (!timerNS) {
+      timerNS = Date;
+      timerUnit = 'ms';
+      timerRes = getRes();
+    }
+
+    // use API of chosen timer
+    if (timerUnit == 'ns') {
       code = interpolate(code, {
         'start': 's$=n$.nanoTime()',
         'end': 'r$=(n$.nanoTime()-s$)/1e9'
       });
     }
-    // enable benchmarking via the --enable-benchmarking flag
-    // in at least Chrome 7 to use chrome.Interval
-    else if (typeof timerNS.Interval == 'function') {
-      timerRes = 'us';
+    else if (timerUnit == 'us') {
       code = interpolate(code, {
-        'start': 's$=new n$.Interval;s$.start()',
-        'end': 's$.stop();r$=s$.microseconds()/1e6'
-      });
-    }
-    else if (typeof Date.now == 'function') {
-      timerNS = window;
-      code = interpolate(code, {
-        'start': 's$=n$.Date.now()',
-        'end': 'r$=(n$.Date.now()-s$)/1e3'
+        'start': 's$=n$.start()',
+        'end': 'r$=n$.microseconds()/1e6'
       });
     }
     else {
-      timerNS = window;
       code = interpolate(code, {
-        'start': 's$=(new n$.Date).getTime()',
-        'end': 'r$=((new n$.Date).getTime()-s$)/1e3'
+        'start': 's$=(new n$).getTime()',
+        'end': 'r$=((new n$).getTime()-s$)/1e3'
       });
     }
-
-    // determine Benchmark#MIN_TIME
-    (function() {
-      var time,
-          divisor = 1e3,
-          proto = Benchmark.prototype,
-          start = +new Date;
-
-      if (!proto.MIN_TIME) {
-        if (timerRes == 'us') {
-          divisor = 1e6;
-          time = new timerNS.Interval;
-          time.start();
-          while(!(timerMin = time.microseconds()));
-        }
-        else if (timerRes == 'ns') {
-          divisor = 1e9;
-          start = timerNS.nanoTime();
-          while(!(timerMin = timerNS.nanoTime() - start));
-        }
-        else {
-          while(!(timerMin = +new Date - start));
-        }
-        // percent uncertainty of 1%
-        time = timerMin / 2 / 0.01 / divisor;
-        // convert smallest measurable time to seconds
-        timerMin /= divisor;
-        // round up for IE
-        proto.MIN_TIME = time > 0.7 ? + (time + 1e-3).toFixed(1) : time;
-      }
-    }());
-
     // inject uid into variable names to avoid collisions with
     // embedded tests and create non-embedding fallback
     code = code.replace(/\$/g, EMBEDDED_UID).split('|');
     args = code.pop();
     fallback = Function(args, code[0] + code.pop() + code[1]);
 
-    // is function decompilation supported?
-    HAS_FUNC_DECOMP = !!(function() {
-      var x = new Benchmark(function() { return 1; }, { 'count': 1 });
-      cache.counter = 0;
-      try { return embed(x)(x, timerNS) == 1; } catch(e) { }
-    }());
-
-    // execute lazy defined embed
-    return embed.apply(null, arguments);
-  };
+    // resolve time to achieve a percent uncertainty of 1%
+    proto.MIN_TIME || (proto.MIN_TIME = timerRes / 2 / 0.01);
+    return clock.apply(null, arguments);
+  }
 
   /**
    * Records benchmark results to session storage.
@@ -1136,9 +1105,6 @@
         clocked = times.cycle = Math.max(0,
           clocked - ((cal && cal.times.period || 0) * count));
 
-        // smells like Infinity?
-        clocked = Math.min(timerMin, clocked) / Math.max(timerMin, clocked) > 0.9 ? 0 : clocked;
-
         // seconds per operation
         period = times.period = clocked / count;
 
@@ -1614,7 +1580,6 @@
 
   // expose
   if (/Narwhal|Node|RingoJS/.test(Benchmark.platform.name)) {
-    timerNS = timerNS == window ? global : timerNS;
     window = global;
     if (typeof module == 'object' && module.exports == exports) {
       module.exports = Benchmark;
