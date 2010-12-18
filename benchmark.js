@@ -265,7 +265,7 @@
       timerNS = timerRes <= min && timerNS;
     } catch(e) { }
 
-    // detect microseconds:
+    // detect microsecond support:
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     if (!timerNS) {
@@ -1356,6 +1356,12 @@
       b.compilable = false;
       return [new Calibration(a), new Calibration(b)];
     }()),
+
+    /**
+     * The version number.
+     * @member Benchmark
+     */
+    'version': '0.1.337',
 
     // generic Array#forEach
     'each': each,
