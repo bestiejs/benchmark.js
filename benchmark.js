@@ -203,7 +203,8 @@
       }
       result = result.time;
       // smells like Infinity?
-      return Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
+      return me.DETECT_INFINITY &&
+        Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
     };
 
     function getRes() {
@@ -1420,9 +1421,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // persist Calibration results
-  Calibration.prototype.persist = true;
-
   // IE may ignore `toString` in a for-in loop
   Benchmark.prototype.toString = toString;
 
@@ -1445,6 +1443,12 @@
      * @member Benchmark
      */
     'DEFAULT_ASYNC': false,
+
+    /**
+     * A flag to indicate protection against large run counts if Infinity ops/sec is detected.
+     * @member Benchmark
+     */
+    'DETECT_INFINITY': true,
 
     /**
      * The default number of times to execute a test on a benchmark's first cycle.
@@ -1580,6 +1584,17 @@
 
     // run the benchmark
     'run': run
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  extend(Calibration.prototype, {
+
+    // to infinity, and beyond!
+    'DETECT_INFINITY': false,
+
+    // avoid repeat calibrations
+    'persist': true
   });
 
   /*--------------------------------------------------------------------------*/
