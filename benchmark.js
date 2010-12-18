@@ -320,7 +320,7 @@
    */
   function store(me) {
     if (HAS_STORAGE) {
-      sessionStorage['bench:' + me.fn.uid] =
+      sessionStorage['bm:' + Benchmark.platform + ':' + me.fn.uid] =
         join(reduce([me, me.times], function(record, object) {
           forIn(object, function(value, key) {
             if (isClassOf(value, 'Number') && /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
@@ -341,7 +341,7 @@
   function restore(me) {
     var data;
     if (HAS_STORAGE) {
-      data = sessionStorage['bench:' + me.fn.uid];
+      data = sessionStorage['bm:' + Benchmark.platform + ':' + me.fn.uid];
       each(data && data.split(',') || [], function(pair) {
         pair = pair.split(': ');
         (/^(?:cycle|elapsed|period|start|stop)$/.test(pair[0]) ? me.times : me)[pair[0]] = +pair[1];
