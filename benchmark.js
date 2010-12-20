@@ -190,7 +190,7 @@
             me.count = count;
           }
           if (compilable) {
-            result = embedded(me, timerNS);
+            result = embedded(me, timerNS).time;
           }
         } catch(e) {
           me.count = count;
@@ -199,9 +199,8 @@
       }
       // fallback to simple while-loop when compilable is false
       if (!compilable) {
-        result = fallback(me, timerNS);
+        result = fallback(me, timerNS).time;
       }
-      result = result.time;
       // smells like Infinity?
       return me.DETECT_INFINITY &&
         Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
@@ -221,17 +220,21 @@
           divisor = 1e6;
           timerNS.start();
           while(!(measured = timerNS.microseconds()));
-          sum += measured;
         }
         else if (timerUnit == 'ns') {
           divisor = 1e9;
           start = timerNS.nanoTime();
           while(!(measured = timerNS.nanoTime() - start));
-          sum += measured;
         }
         else {
           start = +new timerNS;
           while(!(measured = +new timerNS - start));
+        }
+        // check for broken timers
+        if (measured < 0) {
+          sum = Infinity;
+          break;
+        } else {
           sum += measured;
         }
       }
@@ -337,7 +340,7 @@
    * Restores recorded benchmark results.
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Boolean} Returns true if results were restored, esle false
+   * @returns {Boolean} Returns true if results were restored, else false
    */
   function restore(me) {
     var data;
@@ -1275,10 +1278,10 @@
           name = system.global == global ? 'Narwhal' : 'RingoJS';
           os = system.os;
         }
-        else if ((data = me.process) && typeof data == 'object') {
+        else if (typeof process == 'object' && process) {
           name = 'Node.js';
           version = /[\d.]+/.exec(data.version)[0];
-          os = data.platform;
+          os = process.platform;
         }
         os = os && (os.charAt(0).toUpperCase() + os.slice(1));
       }
@@ -1319,7 +1322,7 @@
       name += ' Mobile';
     }
     // detect platform preview
-    if (RegExp(alpha + '|' + beta).test(version) && typeof window.external == 'object' && !external) {
+    if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
       description.unshift('platform preview');
     }
     // detect layout engines
@@ -1348,6 +1351,7 @@
      * Benchmarks to establish iteration overhead.
      * @static
      * @member Benchmark
+     * @type Array
      */
     'CALIBRATIONS': (function() {
       var a = function() { },
@@ -1360,7 +1364,9 @@
 
     /**
      * The version number.
+     * @static
      * @member Benchmark
+     * @type String
      */
     'version': '0.1.337',
 
@@ -1429,129 +1435,169 @@
     /**
      * The index of the calibration benchmark to use when computing results.
      * @member Benchmark
+     * @type Number
      */
     'CALIBRATION_INDEX': 0,
 
     /**
      * The delay between test cycles (secs).
      * @member Benchmark
+     * @type Number
      */
     'CYCLE_DELAY': 0.01,
 
     /**
      * A flag to indicate methods will run asynchronously by default.
      * @member Benchmark
+     * @type Boolean
      */
     'DEFAULT_ASYNC': false,
 
     /**
      * A flag to indicate protection against large run counts if Infinity ops/sec is detected.
      * @member Benchmark
+     * @type Boolean
      */
     'DETECT_INFINITY': true,
 
     /**
      * The default number of times to execute a test on a benchmark's first cycle.
      * @member Benchmark
+     * @type Number
      */
     'INIT_RUN_COUNT': 5,
 
     /**
      * The maximum time a benchmark is allowed to run before finishing (secs).
      * @member Benchmark
+     * @type Number
      */
     'MAX_TIME_ELAPSED': 8,
 
     /**
      * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
      * @member Benchmark
+     * @type Number
      */
     'MIN_TIME': 0,
 
     /**
      * The margin of error.
      * @member Benchmark
+     * @type Number
      */
     'MoE': 0,
 
     /**
      * The relative margin of error (expressed as a percentage of the mean).
      * @member Benchmark
+     * @type Number
      */
     'RME': 0,
 
     /**
      * The sample standard deviation.
      * @member Benchmark
+     * @type Number
      */
     'SD': 0,
 
     /**
      * The standard error of the mean.
      * @member Benchmark
+     * @type Number
      */
     'SEM': 0,
 
     /**
      * The number of times a test was executed.
      * @member Benchmark
+     * @type Number
      */
     'count': 0,
 
     /**
      * The number of cycles performed while benchmarking.
      * @member Benchmark
+     * @type Number
      */
     'cycles': 0,
 
     /**
      * The error object if the test failed.
      * @member Benchmark
+     * @type Object|Null
      */
     'error': null,
 
     /**
      * The number of executions per second.
      * @member Benchmark
+     * @type Number
      */
     'hz': 0,
 
     /**
      * A flag to indicate if the benchmark is aborted.
      * @member Benchmark
+     * @type Boolean
      */
     'aborted': false,
 
     /**
      * A flag to indicate if results persist for the browser session.
      * @member Benchmark
+     * @type Boolean
      */
     'persist': false,
 
     /**
      * A flag to indicate if the benchmark is running.
      * @member Benchmark
+     * @type Boolean
      */
     'running': false,
 
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
      * @member Benchmark
+     * @type Object
      */
     'times': {
-      // time taken to complete the last cycle (secs).
+
+      /**
+       * The time taken to complete the last cycle (secs)
+       * @member Benchmark#times
+       * @type Number
+       */
       'cycle': 0,
 
-      // time taken to complete the benchmark (secs).
+      /**
+       * The time taken to complete the benchmark (secs).
+       * @member Benchmark#times
+       * @type Number
+       */
       'elapsed': 0,
 
-      // time taken to execute the test once (secs).
+      /**
+       * The time taken to execute the test once (secs).
+       * @member Benchmark#times
+       * @type Number
+       */
       'period': 0,
 
-      // timestamp of when the benchmark started (ms).
+      /**
+       * A timestamp of when the benchmark started (ms).
+       * @member Benchmark#times
+       * @type Number
+       */
       'start': 0,
 
-      // timestamp of when the benchmark finished (ms).
+      /**
+       * A timestamp of when the benchmark finished (ms).
+       * @member Benchmark#times
+       * @type Number
+       */
       'stop': 0
     },
 
