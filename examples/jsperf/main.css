@@ -4,11 +4,11 @@ html, body, h1, h2, h3, fieldset, #faq, #faq dt, #faq dd, iframe {
   border: 0;
 }
 
-table, p, ul, h1, h2, h3, #error-info, iframe, form div, #faq {
+table, p, ul, h1, h2, h3, #error-info, iframe, form div, #faq, .bs-rt {
   margin-bottom: 1em;
 }
 
-button, input, textarea, a, #bs-results .bs-rt {
+button, input, textarea, a, .bs-rt {
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -212,6 +212,10 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
 pre {
   width: 100%;
   overflow: auto;
+}
+
+#results {
+  margin-bottom: 0;
 }
 
 table pre {
