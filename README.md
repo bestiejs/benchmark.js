@@ -1,12 +1,18 @@
-# `benchmark.js`
+# Benchmark.js
 
-The benchmarking script used for [jsPerf](http://jsperf.com/).
+A robust benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
 
-`benchmark.js` started out as a heavily modified version of the excellent [JSLitmus](http://broofa.com/Tools/JSLitmus/) by Robert Kieffer ([GitHub](http://github.com/broofa/jslitmus)). It uses adaptive test cycles, meaning every test will roughly take the same amount of time, regardless of the operation. Thanks to this awesome feature, jsPerf tests can be run in any browser, on any device — including smartphones.
+## Project history
 
-In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collaborating on the project, providing some major contributions to `benchmark.js` and its UI for jsPerf (`ui.js`).
+Benchmark.js started out as a heavily modified version of the excellent [JSLitmus](http://broofa.com/Tools/JSLitmus/) by Robert Kieffer ([GitHub](http://github.com/broofa/jslitmus)). It uses adaptive test cycles, meaning every test will roughly take the same amount of time, regardless of the operation. Thanks to this awesome feature, jsPerf tests can be run in any browser, on any device — including smartphones.
 
-Feel free to fork if you see possible improvements!
+In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collaborating on the project, providing some major contributions to Benchmark.js and its UI for jsPerf ([`ui.js`](https://github.com/mathiasbynens/benchmark.js/blob/master/examples/jsperf/ui.js)).
+
+## Docs
+
+The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/docs>
+
+## Cloning this repo
 
 To clone this repository including all submodules, using git 1.6.5 or later:
 
@@ -16,5 +22,7 @@ For older git versions, just use:
 
     git clone git@github.com:mathiasbynens/benchmark.js.git
     git submodule update --init
+
+Feel free to fork if you see possible improvements!
 
 _— [Mathias](http://mathiasbynens.be/)_
