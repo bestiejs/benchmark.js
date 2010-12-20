@@ -832,7 +832,6 @@
 
   /**
    * Determines if the benchmark's hertz is higher than another.
-   * @static
    * @member Benchmark
    * @param {Object} other The benchmark to compare.
    * @returns {Number} Returns 1 if higher, -1 if lower, and 0 if indeterminate.
@@ -1210,6 +1209,7 @@
    * Platform object containing browser name, version, and operating system.
    * @static
    * @member Benchmark
+   * @type Boolean
    */
   Benchmark.platform = (function() {
     var me = this,
@@ -1444,7 +1444,7 @@
      * @member Benchmark
      * @type Number
      */
-    'CYCLE_DELAY': 0.01,
+    'CYCLE_DELAY': 0.005,
 
     /**
      * A flag to indicate methods will run asynchronously by default.

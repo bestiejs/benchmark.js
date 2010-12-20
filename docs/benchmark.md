@@ -1,7 +1,7 @@
 # Benchmark
 * [Benchmark.CALIBRATIONS](#static-CALIBRATIONS)
+* [Benchmark.platform](#static-platform)
 * [Benchmark.version](#static-version)
-* [Benchmark.compare](#static-compare)
 * [Benchmark.each](#static-each)
 * [Benchmark.extend](#static-extend)
 * [Benchmark.filter](#static-filter)
@@ -18,7 +18,6 @@
 * [Benchmark.join](#static-join)
 * [Benchmark.map](#static-map)
 * [Benchmark.noop](#static-noop)
-* [Benchmark.platform](#static-platform)
 * [Benchmark.reduce](#static-reduce)
 * [Benchmark.trim](#static-trim)
 
@@ -50,6 +49,7 @@
 * [Benchmark#abort](#abort)
 * [Benchmark#addListener](#addListener)
 * [Benchmark#clone](#clone)
+* [Benchmark#compare](#compare)
 * [Benchmark#emit](#emit)
 * [Benchmark#removeAllListeners](#removeAllListeners)
 * [Benchmark#removeListener](#removeListener)
@@ -61,17 +61,11 @@
 ## <a name="static-CALIBRATIONS" href="../benchmark.js#L1356">Benchmark.CALIBRATIONS</a>
 *(Array)*: Benchmarks to establish iteration overhead.
 
+## <a name="static-platform" href="../benchmark.js#L1214">Benchmark.platform</a>
+*(Boolean)*: Platform object containing browser name, version, and operating system.
+
 ## <a name="static-version" href="../benchmark.js#L1371">Benchmark.version</a>
 *(String)*: The version number.
-
-## <a name="static-compare" href="../benchmark.js#L840">Benchmark.compare(other)</a>
-Determines if the benchmark's hertz is higher than another.
-
-### Arguments
-1. `other` *(Object)*: The benchmark to compare.
-
-### Returns
-*(Number)*: Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
 
 ## <a name="static-each" href="../benchmark.js#L367">Benchmark.each(array, callback)</a>
 A generic bare-bones Array#forEach solution.
@@ -216,9 +210,6 @@ A generic bare-bones Array#map solution.
 ## <a name="static-noop" href="../benchmark.js#L684">Benchmark.noop()</a>
 A no operation function.
 
-## <a name="static-platform" href="../benchmark.js#L1214">Benchmark.platform</a>
-Platform object containing browser name, version, and operating system.
-
 ## <a name="static-reduce" href="../benchmark.js#L697">Benchmark.reduce(array, callback, accumulator)</a>
 A generic bare-bones Array#reduce solution.
 
@@ -230,8 +221,14 @@ A generic bare-bones Array#reduce solution.
 ### Returns
 *(Mixed)*: The accumulator.
 
-## <a name="#{hash}" href="../benchmark.js#L1601">Benchmark#timesstop</a>
-*(Number)*: A timestamp of when the benchmark finished *(ms)*.
+## <a name="static-trim" href="../benchmark.js#L711">Benchmark.trim(string)</a>
+A generic bare-bones String#trim solution.
+
+### Arguments
+1. `string` *(String)*: The string to trim.
+
+### Returns
+*(String)*: The trimmed string.
 
 
 # Benchmark.prototype
@@ -329,6 +326,15 @@ Creates a cloned benchmark with the same test function and options.
 ### Returns
 *(Object)*: Cloned instance.
 
+## <a name="compare" href="../benchmark.js#L839">Benchmark#compare(other)</a>
+Determines if the benchmark's hertz is higher than another.
+
+### Arguments
+1. `other` *(Object)*: The benchmark to compare.
+
+### Returns
+*(Number)*: Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
+
 ## <a name="emit" href="../benchmark.js#L738">Benchmark#emit(type)</a>
 Executes all registered listeners of a specified event type.
 
@@ -354,14 +360,14 @@ Unregisters a single listener of a specified event type.
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="reset" href="../benchmark.js#L851">Benchmark#reset()</a>
+## <a name="reset" href="../benchmark.js#L850">Benchmark#reset()</a>
 Reset properties and abort if running.
 
-## <a name="run" href="../benchmark.js#L1178">Benchmark#run(async)</a>
+## <a name="run" href="../benchmark.js#L1177">Benchmark#run(async)</a>
 Starts running the benchmark.
 
 ### Arguments
 1. `[async=false]` *(Boolean)*: Flag to run asynchronously.
 
-## <a name="toString" href="../benchmark.js#L888">Benchmark#toString()</a>
+## <a name="toString" href="../benchmark.js#L887">Benchmark#toString()</a>
 Displays relevant benchmark information when coerced to a string.
