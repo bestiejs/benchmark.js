@@ -58,13 +58,13 @@
 * [Benchmark#toString](#toString)
 
 # Benchmark
-## <a name="static-CALIBRATIONS" href="../benchmark.js#L1356">Benchmark.CALIBRATIONS</a>
+## <a name="static-CALIBRATIONS" href="../benchmark.js#L1354">Benchmark.CALIBRATIONS</a>
 *(Array)*: Benchmarks to establish iteration overhead. <sub>[&not;][1]</sub>
 
-## <a name="static-platform" href="../benchmark.js#L1214">Benchmark.platform</a>
+## <a name="static-platform" href="../benchmark.js#L1212">Benchmark.platform</a>
 *(Boolean)*: Platform object containing browser name, version, and operating system. <sub>[&not;][1]</sub>
 
-## <a name="static-version" href="../benchmark.js#L1371">Benchmark.version</a>
+## <a name="static-version" href="../benchmark.js#L1369">Benchmark.version</a>
 *(String)*: The version number. <sub>[&not;][1]</sub>
 
 ## <a name="static-each" href="../benchmark.js#L367">Benchmark.each(array, callback)</a>
@@ -121,7 +121,7 @@ Checks if an object has the specified key as a direct property. <sub>[&not;][1]<
 ### Returns
 *(Boolean)*: Returns true if key is a direct property, else false.
 
-## <a name="static-indexOf" href="../benchmark.js#L478">Benchmark.indexOf(array, value)</a>
+## <a name="static-indexOf" href="../benchmark.js#L476">Benchmark.indexOf(array, value)</a>
 A generic bare-bones Array#indexOf solution. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -129,9 +129,9 @@ A generic bare-bones Array#indexOf solution. <sub>[&not;][1]</sub>
 2. `value` *(Mixed)*: The value to search for.
 
 ### Returns
-*(Number)*: The index of the matched value or -1.
+*(Number)*: The index of the matched value or `-1`.
 
-## <a name="static-interpolate" href="../benchmark.js#L584">Benchmark.interpolate(string, object)</a>
+## <a name="static-interpolate" href="../benchmark.js#L582">Benchmark.interpolate(string, object)</a>
 Modify a string by replacing named tokens with matching object property values. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -141,7 +141,7 @@ Modify a string by replacing named tokens with matching object property values. 
 ### Returns
 *(String)*: The modified string.
 
-## <a name="static-invoke" href="../benchmark.js#L497">Benchmark.invoke(benches, methodName, args)</a>
+## <a name="static-invoke" href="../benchmark.js#L495">Benchmark.invoke(benches, methodName, args)</a>
 Invokes a given method, with arguments, on all benchmarks in an array. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -149,7 +149,7 @@ Invokes a given method, with arguments, on all benchmarks in an array. <sub>[&no
 2. `methodName` *(String|Object)*: Name of method to invoke or options object.
 3. `args` *(Array)*: Arguments to invoke the method with.
 
-## <a name="static-isArray" href="../benchmark.js#L599">Benchmark.isArray(value)</a>
+## <a name="static-isArray" href="../benchmark.js#L597">Benchmark.isArray(value)</a>
 Determines if the given value is an array. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -158,13 +158,13 @@ Determines if the given value is an array. <sub>[&not;][1]</sub>
 ### Returns
 *(Boolean)*: Returns true if value is an array, else false.
 
-## <a name="static-isCalibrated" href="../benchmark.js#L609">Benchmark.isCalibrated()</a>
+## <a name="static-isCalibrated" href="../benchmark.js#L607">Benchmark.isCalibrated()</a>
 Checks if calibration benchmarks have completed. <sub>[&not;][1]</sub>
 
 ### Returns
 *(Boolean)*: Returns true if calibrated, false if not.
 
-## <a name="static-isClassOf" href="../benchmark.js#L622">Benchmark.isClassOf(object, name)</a>
+## <a name="static-isClassOf" href="../benchmark.js#L620">Benchmark.isClassOf(object, name)</a>
 Checks if an object is of the specified class. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -174,7 +174,7 @@ Checks if an object is of the specified class. <sub>[&not;][1]</sub>
 ### Returns
 *(Boolean)*: Returns true if of the class, else false.
 
-## <a name="static-isHostType" href="../benchmark.js#L636">Benchmark.isHostType(object, property)</a>
+## <a name="static-isHostType" href="../benchmark.js#L634">Benchmark.isHostType(object, property)</a>
 Host objects can return type values that are different from their actual
 data type. The objects we are concerned with usually return non-primitive
 types of object, function, or unknown. <sub>[&not;][1]</sub>
@@ -186,7 +186,7 @@ types of object, function, or unknown. <sub>[&not;][1]</sub>
 ### Returns
 *(Boolean)*: Returns true if the property value is a non-primitive, else false.
 
-## <a name="static-join" href="../benchmark.js#L650">Benchmark.join(object, separator1, separator2)</a>
+## <a name="static-join" href="../benchmark.js#L648">Benchmark.join(object, separator1, separator2)</a>
 Creates a string of joined array values or object key-value pairs. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -197,7 +197,7 @@ Creates a string of joined array values or object key-value pairs. <sub>[&not;][
 ### Returns
 *(String)*: The joined result.
 
-## <a name="static-map" href="../benchmark.js#L672">Benchmark.map(array, callback)</a>
+## <a name="static-map" href="../benchmark.js#L670">Benchmark.map(array, callback)</a>
 A generic bare-bones Array#map solution. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -207,10 +207,10 @@ A generic bare-bones Array#map solution. <sub>[&not;][1]</sub>
 ### Returns
 *(Array)*: A new array of values returned by the callback.
 
-## <a name="static-noop" href="../benchmark.js#L684">Benchmark.noop()</a>
+## <a name="static-noop" href="../benchmark.js#L682">Benchmark.noop()</a>
 A no operation function. <sub>[&not;][1]</sub>
 
-## <a name="static-reduce" href="../benchmark.js#L697">Benchmark.reduce(array, callback, accumulator)</a>
+## <a name="static-reduce" href="../benchmark.js#L695">Benchmark.reduce(array, callback, accumulator)</a>
 A generic bare-bones Array#reduce solution. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -221,7 +221,7 @@ A generic bare-bones Array#reduce solution. <sub>[&not;][1]</sub>
 ### Returns
 *(Mixed)*: The accumulator.
 
-## <a name="static-trim" href="../benchmark.js#L711">Benchmark.trim(string)</a>
+## <a name="static-trim" href="../benchmark.js#L709">Benchmark.trim(string)</a>
 A generic bare-bones String#trim solution. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -232,82 +232,82 @@ A generic bare-bones String#trim solution. <sub>[&not;][1]</sub>
 
 
 # Benchmark.prototype
-## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1440">Benchmark#CALIBRATION_INDEX</a>
+## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1438">Benchmark#CALIBRATION_INDEX</a>
 *(Number)*: The index of the calibration benchmark to use when computing results. <sub>[&not;][1]</sub>
 
-## <a name="CYCLE_DELAY" href="../benchmark.js#L1447">Benchmark#CYCLE_DELAY</a>
+## <a name="CYCLE_DELAY" href="../benchmark.js#L1445">Benchmark#CYCLE_DELAY</a>
 *(Number)*: The delay between test cycles *(secs)*. <sub>[&not;][1]</sub>
 
-## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1454">Benchmark#DEFAULT_ASYNC</a>
+## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1452">Benchmark#DEFAULT_ASYNC</a>
 *(Boolean)*: A flag to indicate methods will run asynchronously by default. <sub>[&not;][1]</sub>
 
-## <a name="DETECT_INFINITY" href="../benchmark.js#L1461">Benchmark#DETECT_INFINITY</a>
+## <a name="DETECT_INFINITY" href="../benchmark.js#L1459">Benchmark#DETECT_INFINITY</a>
 *(Boolean)*: A flag to indicate protection against large run counts if Infinity ops/sec is detected. <sub>[&not;][1]</sub>
 
-## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1468">Benchmark#INIT_RUN_COUNT</a>
+## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1466">Benchmark#INIT_RUN_COUNT</a>
 *(Number)*: The default number of times to execute a test on a benchmark's first cycle. <sub>[&not;][1]</sub>
 
-## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1475">Benchmark#MAX_TIME_ELAPSED</a>
+## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1473">Benchmark#MAX_TIME_ELAPSED</a>
 *(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*. <sub>[&not;][1]</sub>
 
-## <a name="MIN_TIME" href="../benchmark.js#L1482">Benchmark#MIN_TIME</a>
+## <a name="MIN_TIME" href="../benchmark.js#L1480">Benchmark#MIN_TIME</a>
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*. <sub>[&not;][1]</sub>
 
-## <a name="MoE" href="../benchmark.js#L1489">Benchmark#MoE</a>
+## <a name="MoE" href="../benchmark.js#L1487">Benchmark#MoE</a>
 *(Number)*: The margin of error. <sub>[&not;][1]</sub>
 
-## <a name="RME" href="../benchmark.js#L1496">Benchmark#RME</a>
+## <a name="RME" href="../benchmark.js#L1494">Benchmark#RME</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*. <sub>[&not;][1]</sub>
 
-## <a name="SD" href="../benchmark.js#L1503">Benchmark#SD</a>
+## <a name="SD" href="../benchmark.js#L1501">Benchmark#SD</a>
 *(Number)*: The sample standard deviation. <sub>[&not;][1]</sub>
 
-## <a name="SEM" href="../benchmark.js#L1510">Benchmark#SEM</a>
+## <a name="SEM" href="../benchmark.js#L1508">Benchmark#SEM</a>
 *(Number)*: The standard error of the mean. <sub>[&not;][1]</sub>
 
-## <a name="aborted" href="../benchmark.js#L1545">Benchmark#aborted</a>
+## <a name="aborted" href="../benchmark.js#L1543">Benchmark#aborted</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted. <sub>[&not;][1]</sub>
 
-## <a name="count" href="../benchmark.js#L1517">Benchmark#count</a>
+## <a name="count" href="../benchmark.js#L1515">Benchmark#count</a>
 *(Number)*: The number of times a test was executed. <sub>[&not;][1]</sub>
 
-## <a name="cycles" href="../benchmark.js#L1524">Benchmark#cycles</a>
+## <a name="cycles" href="../benchmark.js#L1522">Benchmark#cycles</a>
 *(Number)*: The number of cycles performed while benchmarking. <sub>[&not;][1]</sub>
 
-## <a name="error" href="../benchmark.js#L1531">Benchmark#error</a>
+## <a name="error" href="../benchmark.js#L1529">Benchmark#error</a>
 *(Object|Null)*: The error object if the test failed. <sub>[&not;][1]</sub>
 
-## <a name="hz" href="../benchmark.js#L1538">Benchmark#hz</a>
+## <a name="hz" href="../benchmark.js#L1536">Benchmark#hz</a>
 *(Number)*: The number of executions per second. <sub>[&not;][1]</sub>
 
-## <a name="persist" href="../benchmark.js#L1552">Benchmark#persist</a>
+## <a name="persist" href="../benchmark.js#L1550">Benchmark#persist</a>
 *(Boolean)*: A flag to indicate if results persist for the browser session. <sub>[&not;][1]</sub>
 
-## <a name="running" href="../benchmark.js#L1559">Benchmark#running</a>
+## <a name="running" href="../benchmark.js#L1557">Benchmark#running</a>
 *(Boolean)*: A flag to indicate if the benchmark is running. <sub>[&not;][1]</sub>
 
-## <a name="times" href="../benchmark.js#L1566">Benchmark#times</a>
+## <a name="times" href="../benchmark.js#L1564">Benchmark#times</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop. <sub>[&not;][1]</sub>
 
-## <a name="cycle" href="../benchmark.js#L1573">Benchmark#times.cycle</a>
+## <a name="cycle" href="../benchmark.js#L1571">Benchmark#times.cycle</a>
 *(Number)*: The time taken to complete the last cycle *(secs)* <sub>[&not;][1]</sub>
 
-## <a name="elapsed" href="../benchmark.js#L1580">Benchmark#times.elapsed</a>
+## <a name="elapsed" href="../benchmark.js#L1578">Benchmark#times.elapsed</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*. <sub>[&not;][1]</sub>
 
-## <a name="period" href="../benchmark.js#L1587">Benchmark#times.period</a>
+## <a name="period" href="../benchmark.js#L1585">Benchmark#times.period</a>
 *(Number)*: The time taken to execute the test once *(secs)*. <sub>[&not;][1]</sub>
 
-## <a name="start" href="../benchmark.js#L1594">Benchmark#times.start</a>
+## <a name="start" href="../benchmark.js#L1592">Benchmark#times.start</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*. <sub>[&not;][1]</sub>
 
-## <a name="stop" href="../benchmark.js#L1601">Benchmark#times.stop</a>
+## <a name="stop" href="../benchmark.js#L1599">Benchmark#times.stop</a>
 *(Number)*: A timestamp of when the benchmark finished *(ms)*. <sub>[&not;][1]</sub>
 
-## <a name="abort" href="../benchmark.js#L794">Benchmark#abort()</a>
+## <a name="abort" href="../benchmark.js#L792">Benchmark#abort()</a>
 Aborts the benchmark as well as in progress calibrations without recording times. <sub>[&not;][1]</sub>
 
-## <a name="addListener" href="../benchmark.js#L724">Benchmark#addListener(type, listener)</a>
+## <a name="addListener" href="../benchmark.js#L722">Benchmark#addListener(type, listener)</a>
 Registers a single listener of a specified event type. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -317,7 +317,7 @@ Registers a single listener of a specified event type. <sub>[&not;][1]</sub>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="clone" href="../benchmark.js#L819">Benchmark#clone(options)</a>
+## <a name="clone" href="../benchmark.js#L817">Benchmark#clone(options)</a>
 Creates a cloned benchmark with the same test function and options. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -326,7 +326,7 @@ Creates a cloned benchmark with the same test function and options. <sub>[&not;]
 ### Returns
 *(Object)*: Cloned instance.
 
-## <a name="compare" href="../benchmark.js#L839">Benchmark#compare(other)</a>
+## <a name="compare" href="../benchmark.js#L837">Benchmark#compare(other)</a>
 Determines if the benchmark's hertz is higher than another. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -335,13 +335,13 @@ Determines if the benchmark's hertz is higher than another. <sub>[&not;][1]</sub
 ### Returns
 *(Number)*: Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
 
-## <a name="emit" href="../benchmark.js#L738">Benchmark#emit(type)</a>
+## <a name="emit" href="../benchmark.js#L736">Benchmark#emit(type)</a>
 Executes all registered listeners of a specified event type. <sub>[&not;][1]</sub>
 
 ### Arguments
 1. `type` *(String)*: The event type.
 
-## <a name="removeAllListeners" href="../benchmark.js#L779">Benchmark#removeAllListeners(type)</a>
+## <a name="removeAllListeners" href="../benchmark.js#L777">Benchmark#removeAllListeners(type)</a>
 Unregisters all listeners of a specified event type. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -350,7 +350,7 @@ Unregisters all listeners of a specified event type. <sub>[&not;][1]</sub>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="removeListener" href="../benchmark.js#L761">Benchmark#removeListener(type, listener)</a>
+## <a name="removeListener" href="../benchmark.js#L759">Benchmark#removeListener(type, listener)</a>
 Unregisters a single listener of a specified event type. <sub>[&not;][1]</sub>
 
 ### Arguments
@@ -360,16 +360,16 @@ Unregisters a single listener of a specified event type. <sub>[&not;][1]</sub>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="reset" href="../benchmark.js#L850">Benchmark#reset()</a>
+## <a name="reset" href="../benchmark.js#L848">Benchmark#reset()</a>
 Reset properties and abort if running. <sub>[&not;][1]</sub>
 
-## <a name="run" href="../benchmark.js#L1177">Benchmark#run(async)</a>
+## <a name="run" href="../benchmark.js#L1175">Benchmark#run(async)</a>
 Starts running the benchmark. <sub>[&not;][1]</sub>
 
 ### Arguments
 1. `[async=false]` *(Boolean)*: Flag to run asynchronously.
 
-## <a name="toString" href="../benchmark.js#L887">Benchmark#toString()</a>
+## <a name="toString" href="../benchmark.js#L885">Benchmark#toString()</a>
 Displays relevant benchmark information when coerced to a string. <sub>[&not;][1]</sub>
 
 

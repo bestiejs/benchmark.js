@@ -446,8 +446,7 @@
    */
   function hasKey(object, key) {
     var result,
-        ctor = object.constructor,
-        proto = Object.prototype;
+        parent = (object.constructor || Object).prototype;
 
     // for modern browsers
     object = Object(object);
@@ -455,14 +454,13 @@
       result = hasOwnProperty.call(object, key);
     }
     // for Safari 2
-    else if (cache.__proto__ == proto) {
+    else if (cache.__proto__ == Object.prototype) {
       object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
     }
     // for others (not as accurate)
     else {
-      result = key in object && (ctor && ctor.prototype
-        ? object[key] !== ctor.prototype[key]
-        : object[key] !== proto[key]);
+      result = key in object && !(key in parent &&
+        object[key] === parent[key]);
     }
     return result;
   }
