@@ -230,7 +230,8 @@
           start = +new timerNS;
           while(!(measured = +new timerNS - start));
         }
-        // check for broken timers
+        // check for broken timers (nanoTime may have issues)
+        // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
         if (measured < 0) {
           sum = Infinity;
           break;
@@ -285,6 +286,10 @@
       timerNS = Date;
       timerUnit = 'ms';
       timerRes = getRes();
+    }
+    // error if there are no working timers
+    if (timerRes == Infinity) {
+      throw new Error('Benchmark.js was unable to find a working timer.');
     }
 
     // use API of chosen timer
@@ -459,8 +464,8 @@
     }
     // for others (not as accurate)
     else {
-      result = key in object && !(key in parent &&
-        object[key] === parent[key]);
+      result = key in object &&
+        !(key in parent && object[key] === parent[key]);
     }
     return result;
   }
@@ -976,6 +981,7 @@
 
     function onInvokeCycle(clone) {
       var complete,
+          highRme,
           mean,
           moe,
           rme,
@@ -986,6 +992,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
+          maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
           sampleSize = sample.length,
           sumOf = function(sum, clone) { return sum + clone.hz; },
           varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
@@ -1016,12 +1023,19 @@
         moe = sem * (T_DISTRIBUTION[sampleSize - 1] || T_DISTRIBUTION.Infinity);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
+        // is rme really high
+        highRme = rme > 50;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (elapsed < me.MAX_TIME_ELAPSED || rme > 50 || calibrating || queue.length)) {
-          if (!queue.length) {
+        if (rme > 1 && (!maxedOut || calibrating || highRme || queue.length)) {
+          if (maxedOut && async) {
+            // switch to sync mode
+            clearQueue();
+            compute(me, false);
+          }
+          else if (!queue.length) {
             // quadruple sample size to cut the margin of error in half
-            enqueue(rme > 50 ? sampleSize * 3 : 1);
+            enqueue(highRme ? sampleSize * 3 : 1);
           }
         }
         // finish up
