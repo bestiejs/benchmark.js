@@ -1292,14 +1292,16 @@
         }
         else if (typeof process == 'object' && process) {
           name = 'Node.js';
-          version = /[\d.]+/.exec(data.version)[0];
+          version = /[\d.]+/.exec(process.version)[0];
           os = process.platform;
         }
-        os = os && (os.charAt(0).toUpperCase() + os.slice(1));
-      }
-      else if (isClassOf(me.environment, 'Environment')) {
+      } else if (isClassOf(me.environment, 'Environment')) {
         name = 'Rhino';
       }
+      if (IN_JAVA && !os) {
+        os = String(java.lang.System.getProperty('os.name'));
+      }
+      os = os && (os.charAt(0).toUpperCase() + os.slice(1));
     }
     // detect non Safari WebKit based browsers
     else if (product && (!name || name == 'Safari' && !/^iP/.test(product))) {

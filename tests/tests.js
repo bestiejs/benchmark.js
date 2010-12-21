@@ -32,10 +32,11 @@ test("user agent detection", function() {
             .replace(/\bwindow\b/g, 'me')
             .replace(/\bexports\b/g, 'me.exports')
             .replace(/([^.\x22\x27])global\b/g, '$1me.global')
+            .replace(/\bprocess\b/g, 'me.process')
             .replace(/\bsystem\b/g, 'me.system')
             .replace(/\bEnvironment\b/g, 'Object')
             .replace(/\bnav\.appMinorVersion/g, 'me.appMinorVersion')
-            .replace(/\b(?:me\.)?external/g, 'me.external')
+            .replace(/\bexternal/g, 'me.external')
             .replace(/\bdoc\.documentMode/g, 'me.mode'));
       }
     });
