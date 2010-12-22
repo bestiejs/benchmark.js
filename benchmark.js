@@ -259,7 +259,10 @@
       timerNS = java.lang.System;
     } catch(e) {
       each(window.document && document.applets || [], function(applet) {
-        timerNS || (timerNS = 'nanoTime' in applet && applet);
+        try {
+          // use non-dom object to avoid issues with libs that augment the dom
+          timerNS || (timerNS = 'nanoTime' in applet && new applet.Packages.nano);
+        } catch(e) { }
       });
     }
     try {
