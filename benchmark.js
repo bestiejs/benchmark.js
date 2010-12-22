@@ -890,12 +890,18 @@
   function toString() {
     var me = this,
         cycles = me.cycles,
-        name = me.name || me.id || ('<Test #' + me.fn.uid + '>'),
+        error = me.error,
         pm = IN_JAVA ? '\xf1' : '\xb1',
-        x = IN_JAVA ? 'x' : '\xd7';
+        x = IN_JAVA ? 'x' : '\xd7',
+        result = me.name || me.id || ('<Test #' + me.fn.uid + '>');
 
-    return name + ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
-      me.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
+    if (error) {
+      result += ': ' + join(error);
+    } else {
+      result += ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
+        me.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
+    }
+    return result;
   }
 
   /*--------------------------------------------------------------------------*/
