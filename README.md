@@ -12,6 +12,20 @@ In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collabor
 
 The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/docs>
 
+## Installation
+
+In the browser:
+
+    <script src="benchmark.js"></script>
+
+Via [npm](http://npmjs.org/):
+
+    npm install benchmark
+
+In [Node.js](http://nodejs.org/):
+
+    var bench = require('benchmark');
+
 ## Cloning this repo
 
 To clone this repository including all submodules, using git 1.6.5 or later:
