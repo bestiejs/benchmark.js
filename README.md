@@ -21,6 +21,7 @@ To clone this repository including all submodules, using git 1.6.5 or later:
 For older git versions, just use:
 
     git clone git@github.com:mathiasbynens/benchmark.js.git
+    cd benchmark.js
     git submodule update --init
 
 Feel free to fork if you see possible improvements!
