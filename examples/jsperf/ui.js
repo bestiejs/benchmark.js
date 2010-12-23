@@ -472,7 +472,6 @@
           me.running = true;
           setHTML('run', RUN_TEXT.RUNNING);
           invoke(queue, {
-            'async': true,
             'methodName': 'run',
             'queued': true,
             'onComplete': onQueueComplete
