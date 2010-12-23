@@ -5,6 +5,7 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
+    'timer': null,
     'trash': createElement('div')
   },
 
@@ -212,13 +213,16 @@
    */
   function load() {
     var me = ui.browserscope,
-        cont = me.container,
-        timer = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
+        cont = me.container;
 
     function onComplete(response) {
-      clearTimeout(timer);
+      clearTimeout(cache.timer);
       me.render(response);
     }
+
+    // start timer
+    clearTimeout(cache.timer);
+    cache.timer = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
 
     // request data
     if (cont) {
