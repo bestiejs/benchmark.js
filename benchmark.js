@@ -567,6 +567,7 @@
       } else if (isClassOf(args[0], 'Boolean')) {
         async = args[0];
       }
+      async = async == null ? Benchmark.prototype.DEFAULT_ASYNC : async;
       async = async && HAS_TIMEOUT_API;
     }
     // start iterating over the array
