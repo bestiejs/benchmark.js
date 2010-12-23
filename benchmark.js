@@ -183,8 +183,8 @@
           embedded = Function(args, code[0] + body + code[1]);
 
           if (compilable == null) {
-            // determine if unrolled code is exited early, by a rogue return
-            // statement, by checking for a return object with the uid
+            // determine if compiled code is exited early, usually by a rogue
+            // return statement, by checking for a return object with the uid
             me.count = 1;
             compilable = fn.compilable = embedded(me, timerNS).uid == EMBEDDED_UID;
             me.count = count;
@@ -260,7 +260,7 @@
     } catch(e) {
       each(window.document && document.applets || [], function(applet) {
         try {
-          // use non-dom object to avoid issues with libs that augment the dom
+          // use non-element to avoid issues with libs that augment them
           timerNS || (timerNS = 'nanoTime' in applet && new applet.Packages.nano);
         } catch(e) { }
       });
@@ -914,26 +914,15 @@
    * @private
    * @param {Object} me The benchmark instance.
    * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Array} [sample=[]] Benchmarks used for statistical analysis.
    */
-  function compute(me, async) {
-    var calibrating = me.constructor == Calibration,
+  function compute(me, async, sample) {
+    var calibrated = isCalibrated(),
+        calibrating = me.constructor == Calibration,
         fn = me.fn,
-        initRunCount = me.INIT_RUN_COUNT,
-        initSampleSize = 5,
+        initSize = 5,
         queue = [],
-        sample = [],
-        state = { 'calibrated': isCalibrated(), 'compilable': fn.compilable };
-
-    function initialize() {
-      me.cycles = 0;
-      me.INIT_RUN_COUNT = initRunCount;
-      clearQueue();
-      enqueue(initSampleSize);
-    }
-
-    function clearQueue() {
-      queue.length = sample.length = 0;
-    }
+        runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {
       while (count--) {
@@ -949,11 +938,8 @@
     }
 
     function onComplete(clone) {
-      // update host run count and init compilable state
+      // update host run count
       me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
-      if (state.compilable == null) {
-        state.compilable = fn.compilable;
-      }
     }
 
     function onCycle(clone) {
@@ -979,24 +965,23 @@
 
     function onStart(clone) {
       // reset timer if interrupted by calibrations
-      if (!calibrating && !state.calibrated && isCalibrated()) {
-        state.calibrated = true;
+      if (!calibrating && !calibrated && isCalibrated()) {
+        calibrated = true;
         me.times.start = +new Date;
       }
-      // update run count
-      clone.count = clone.INIT_RUN_COUNT = me.INIT_RUN_COUNT;
+      // sync clone's initial run count with host
+      clone.count = me.INIT_RUN_COUNT;
       onCycle(clone);
     }
 
     function onInvokeCycle(clone) {
       var complete,
-          highRme,
+          hiRme,
           mean,
           moe,
           rme,
           sd,
           sem,
-          compilable = fn.compilable,
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
@@ -1006,22 +991,16 @@
           sumOf = function(sum, clone) { return sum + clone.hz; },
           varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
 
-      // avoid unclockable tests
+      // exit early for unclockable tests
       if (clone.hz == Infinity) {
-        clearQueue();
+        queue.length = sample.length = 0;
       }
       // exit early if aborted
       if (aborted) {
         complete = true;
       }
-      // start over if switching compilable state
-      else if (state.compilable != compilable) {
-        state.compilable = compilable;
-        times.start = +new Date;
-        initialize();
-      }
       // simulate onComplete and enqueue additional runs if needed
-      else if (!queue.length || sampleSize > initSampleSize) {
+      else if (!queue.length || sampleSize > initSize) {
         // compute values
         mean = reduce(sample, sumOf, 0) / sampleSize || 0;
         // standard deviation
@@ -1033,18 +1012,18 @@
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
         // is rme really high
-        highRme = rme > 50;
+        hiRme = rme > 50;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (!maxedOut || calibrating || highRme || queue.length)) {
+        if (rme > 1 && (!maxedOut || calibrating || hiRme || queue.length)) {
           if (maxedOut && async) {
             // switch to sync mode
-            clearQueue();
-            compute(me, false);
+            queue.length = 0;
+            compute(me, false, sample);
           }
           else if (!queue.length) {
             // quadruple sample size to cut the margin of error in half
-            enqueue(highRme ? sampleSize * 3 : 1);
+            enqueue(hiRme ? sampleSize * 3 : 1);
           }
         }
         // finish up
@@ -1076,15 +1055,16 @@
       }
       // cleanup
       if (complete) {
-        clearQueue();
-        me.INIT_RUN_COUNT = initRunCount;
+        queue.length = 0;
+        me.INIT_RUN_COUNT = runCount;
         me.emit('complete');
       }
       return !aborted;
     }
 
-    // init queue and sample
-    initialize();
+    // init sample and queue
+    sample || (sample = []);
+    enqueue(sample.length ? 1 : initSize);
 
     // run them
     invoke(queue, {
