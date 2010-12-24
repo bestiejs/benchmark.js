@@ -196,10 +196,9 @@
       foreach($api as $entry) {
         // description
         if ($entry["name"]) {
-          // use &crarr; when IE supports it (alt &not;)
           $result[] = interpolate(
             "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">" .
-            "#{member}#{separator}#{call}</a>\n#{desc} <sup><code>[&#9650;][1]</code></sup>", $entry);
+            "#{member}#{separator}#{call}</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
         }
         // @param
         if (!empty($entry["args"])) {
