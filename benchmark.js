@@ -71,6 +71,37 @@
    * @constructor
    * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
+   * @example
+   * // simple usage
+   * var bench = new Benchmark(fn);
+   *
+   * // passing options
+   * var bench = new Benchmark(fn, {
+   *
+   *   // name used by Benchmark#toString to identify a test.
+   *   "name": "apples",
+   *
+   *   // id, displayed by Benchmark#toString if `name` is not available
+   *   "id": "a1",
+   *
+   *   // called when the benchmark starts
+   *   "onStart": onStart,
+   *
+   *   // called after each run cycle
+   *   "onCycle": onCycle,
+   *
+   *   // called when aborted
+   *   "onAbort": onAbort,
+   *
+   *   // called when a test errors
+   *   "onError": onError,
+   *
+   *   // called when reset
+   *   "onReset": onReset,
+   *
+   *   // called when benchmark is complete
+   *   "onComplete": onComplete
+   * });
    */
   function Benchmark(fn, options) {
     var me = this;
@@ -499,6 +530,31 @@
    * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} methodName Name of method to invoke or options object.
    * @param {Array} args Arguments to invoke the method with.
+   * @example
+   * // invoke `reset` on all benchmarks
+   * Benchmark.invoke(benches, "reset");
+   *
+   * // invoke `run` on all benchmarks passing `true` for the async argument
+   * Benchmark.invoke(benches, "run", true);
+   *
+   * // invoke `run`, treat benchmarks as a queue, and register invoke callbacks
+   * Benchmark.invoke(benches, {
+   *
+   *   // invoke the `run` method on each benchmark
+   *   "methodName": "run",
+   *
+   *   // pass async argument to `run`
+   *   "args": true,
+   *
+   *   // treat as queue, removing benchmarks from the front of `benches` until empty
+   *   "queued": true,
+   *
+   *   // called between invoking benchmarks
+   *   "onCycle": onCycle,
+   *
+   *   // called after all benchmarks have been invoked.
+   *   "onComplete": onComplete
+   * });
    */
   function invoke(benches, methodName, args) {
     var async,
@@ -567,8 +623,8 @@
       } else if (isClassOf(args[0], 'Boolean')) {
         async = args[0];
       }
-      async = async == null ? Benchmark.prototype.DEFAULT_ASYNC : async;
-      async = async && HAS_TIMEOUT_API;
+      async = (async == null ? Benchmark.prototype.DEFAULT_ASYNC :
+        async) && HAS_TIMEOUT_API;
     }
     // start iterating over the array
     if (bench = queued ? benches.shift() : benches[0]) {
@@ -587,6 +643,11 @@
    * @param {String} string The string to modify.
    * @param {Object} object The template object.
    * @returns {String} The modified string.
+   * @example
+   * Benchmark.interpolate("#{greet} #{who}!", {
+   *   "greet": "Hello",
+   *   "who": "world"
+   * }); // -> "Hello world!"
    */
   function interpolate(string, object) {
     string = string == null ? '' : string;
@@ -822,6 +883,10 @@
    * @member Benchmark
    * @param {Object} options Overwrite cloned options.
    * @returns {Object} Cloned instance.
+   * @example
+   * var clone = bench.clone({
+   *   "name": "doppelganger"
+   * });
    */
   function clone(options) {
     var me = this,
@@ -1069,7 +1134,7 @@
 
     // run them
     invoke(queue, {
-      'async': async == null ? me.DEFAULT_ASYNC : async,
+      'async': async,
       'methodName': 'run',
       'queued': true,
       'onCycle': onInvokeCycle
@@ -1178,7 +1243,7 @@
    */
   function run(async) {
     var me = this;
-    async = async == null ? me.DEFAULT_ASYNC : async;
+    async = (async == null ? me.DEFAULT_ASYNC : async) && HAS_TIMEOUT_API;
 
     // set running to false so reset() won't call abort()
     me.running = false;
@@ -1563,6 +1628,12 @@
     'running': false,
 
     /**
+     * Alias of <code>[addListener](#addListener)</code>
+     * @member Benchmark
+     */
+    'on': addListener,
+
+    /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
      * @member Benchmark
      * @type Object
@@ -1619,9 +1690,6 @@
 
     // executes listeners of a specified type
     'emit': emit,
-
-    // alias for addListener
-    'on': addListener,
 
     // removes all listeners of a specified type
     'removeAllListeners': removeAllListeners,

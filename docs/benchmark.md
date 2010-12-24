@@ -1,82 +1,83 @@
 # Benchmark
-* [Benchmark.CALIBRATIONS](#static-CALIBRATIONS)
-* [Benchmark.platform](#static-platform)
-* [Benchmark.version](#static-version)
-* [Benchmark.each](#static-each)
-* [Benchmark.extend](#static-extend)
-* [Benchmark.filter](#static-filter)
-* [Benchmark.forIn](#static-forIn)
-* [Benchmark.formatNumber](#static-formatNumber)
-* [Benchmark.hasKey](#static-hasKey)
-* [Benchmark.indexOf](#static-indexOf)
-* [Benchmark.interpolate](#static-interpolate)
-* [Benchmark.invoke](#static-invoke)
-* [Benchmark.isArray](#static-isArray)
-* [Benchmark.isCalibrated](#static-isCalibrated)
-* [Benchmark.isClassOf](#static-isClassOf)
-* [Benchmark.isHostType](#static-isHostType)
-* [Benchmark.join](#static-join)
-* [Benchmark.map](#static-map)
-* [Benchmark.noop](#static-noop)
-* [Benchmark.reduce](#static-reduce)
-* [Benchmark.trim](#static-trim)
+* <code>[Benchmark.CALIBRATIONS](#static-CALIBRATIONS)</code>
+* <code>[Benchmark.platform](#static-platform)</code>
+* <code>[Benchmark.version](#static-version)</code>
+* <code>[Benchmark.each](#static-each)</code>
+* <code>[Benchmark.extend](#static-extend)</code>
+* <code>[Benchmark.filter](#static-filter)</code>
+* <code>[Benchmark.forIn](#static-forIn)</code>
+* <code>[Benchmark.formatNumber](#static-formatNumber)</code>
+* <code>[Benchmark.hasKey](#static-hasKey)</code>
+* <code>[Benchmark.indexOf](#static-indexOf)</code>
+* <code>[Benchmark.interpolate](#static-interpolate)</code>
+* <code>[Benchmark.invoke](#static-invoke)</code>
+* <code>[Benchmark.isArray](#static-isArray)</code>
+* <code>[Benchmark.isCalibrated](#static-isCalibrated)</code>
+* <code>[Benchmark.isClassOf](#static-isClassOf)</code>
+* <code>[Benchmark.isHostType](#static-isHostType)</code>
+* <code>[Benchmark.join](#static-join)</code>
+* <code>[Benchmark.map](#static-map)</code>
+* <code>[Benchmark.noop](#static-noop)</code>
+* <code>[Benchmark.reduce](#static-reduce)</code>
+* <code>[Benchmark.trim](#static-trim)</code>
 
 # Benchmark.prototype
-* [Benchmark#CALIBRATION_INDEX](#CALIBRATION_INDEX)
-* [Benchmark#CYCLE_DELAY](#CYCLE_DELAY)
-* [Benchmark#DEFAULT_ASYNC](#DEFAULT_ASYNC)
-* [Benchmark#DETECT_INFINITY](#DETECT_INFINITY)
-* [Benchmark#INIT_RUN_COUNT](#INIT_RUN_COUNT)
-* [Benchmark#MAX_TIME_ELAPSED](#MAX_TIME_ELAPSED)
-* [Benchmark#MIN_TIME](#MIN_TIME)
-* [Benchmark#MoE](#MoE)
-* [Benchmark#RME](#RME)
-* [Benchmark#SD](#SD)
-* [Benchmark#SEM](#SEM)
-* [Benchmark#aborted](#aborted)
-* [Benchmark#count](#count)
-* [Benchmark#cycles](#cycles)
-* [Benchmark#error](#error)
-* [Benchmark#hz](#hz)
-* [Benchmark#persist](#persist)
-* [Benchmark#running](#running)
-* [Benchmark#times](#times)
-* [Benchmark#times.cycle](#cycle)
-* [Benchmark#times.elapsed](#elapsed)
-* [Benchmark#times.period](#period)
-* [Benchmark#times.start](#start)
-* [Benchmark#times.stop](#stop)
-* [Benchmark#abort](#abort)
-* [Benchmark#addListener](#addListener)
-* [Benchmark#clone](#clone)
-* [Benchmark#compare](#compare)
-* [Benchmark#emit](#emit)
-* [Benchmark#removeAllListeners](#removeAllListeners)
-* [Benchmark#removeListener](#removeListener)
-* [Benchmark#reset](#reset)
-* [Benchmark#run](#run)
-* [Benchmark#toString](#toString)
+* <code>[Benchmark#CALIBRATION_INDEX](#CALIBRATION_INDEX)</code>
+* <code>[Benchmark#CYCLE_DELAY](#CYCLE_DELAY)</code>
+* <code>[Benchmark#DEFAULT_ASYNC](#DEFAULT_ASYNC)</code>
+* <code>[Benchmark#DETECT_INFINITY](#DETECT_INFINITY)</code>
+* <code>[Benchmark#INIT_RUN_COUNT](#INIT_RUN_COUNT)</code>
+* <code>[Benchmark#MAX_TIME_ELAPSED](#MAX_TIME_ELAPSED)</code>
+* <code>[Benchmark#MIN_TIME](#MIN_TIME)</code>
+* <code>[Benchmark#MoE](#MoE)</code>
+* <code>[Benchmark#RME](#RME)</code>
+* <code>[Benchmark#SD](#SD)</code>
+* <code>[Benchmark#SEM](#SEM)</code>
+* <code>[Benchmark#aborted](#aborted)</code>
+* <code>[Benchmark#count](#count)</code>
+* <code>[Benchmark#cycles](#cycles)</code>
+* <code>[Benchmark#error](#error)</code>
+* <code>[Benchmark#hz](#hz)</code>
+* <code>[Benchmark#persist](#persist)</code>
+* <code>[Benchmark#running](#running)</code>
+* <code>[Benchmark#times](#times)</code>
+* <code>[Benchmark#times.cycle](#cycle)</code>
+* <code>[Benchmark#times.elapsed](#elapsed)</code>
+* <code>[Benchmark#times.period](#period)</code>
+* <code>[Benchmark#times.start](#start)</code>
+* <code>[Benchmark#times.stop](#stop)</code>
+* <code>[Benchmark#abort](#abort)</code>
+* <code>[Benchmark#addListener](#addListener)</code>
+* <code>[Benchmark#clone](#clone)</code>
+* <code>[Benchmark#compare](#compare)</code>
+* <code>[Benchmark#emit](#emit)</code>
+* <code>[Benchmark#on](#on)</code>
+* <code>[Benchmark#removeAllListeners](#removeAllListeners)</code>
+* <code>[Benchmark#removeListener](#removeListener)</code>
+* <code>[Benchmark#reset](#reset)</code>
+* <code>[Benchmark#run](#run)</code>
+* <code>[Benchmark#toString](#toString)</code>
 
 # Benchmark
-## <a name="static-CALIBRATIONS" href="../benchmark.js#L1360" title="View in source">Benchmark.CALIBRATIONS</a>
-*(Array)*: Benchmarks to establish iteration overhead. <sup>[&uarr;][1]</sup>
+## <a name="static-CALIBRATIONS" href="../benchmark.js#L1425" title="View in source">Benchmark.CALIBRATIONS</a>
+*(Array)*: Benchmarks to establish iteration overhead. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-platform" href="../benchmark.js#L1216" title="View in source">Benchmark.platform</a>
-*(Boolean)*: Platform object containing browser name, version, and operating system. <sup>[&uarr;][1]</sup>
+## <a name="static-platform" href="../benchmark.js#L1281" title="View in source">Benchmark.platform</a>
+*(Boolean)*: Platform object containing browser name, version, and operating system. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-version" href="../benchmark.js#L1375" title="View in source">Benchmark.version</a>
-*(String)*: The version number. <sup>[&uarr;][1]</sup>
+## <a name="static-version" href="../benchmark.js#L1440" title="View in source">Benchmark.version</a>
+*(String)*: The version number. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-each" href="../benchmark.js#L375" title="View in source">Benchmark.each(array, callback)</a>
+## <a name="static-each" href="../benchmark.js#L406" title="View in source">Benchmark.each(array, callback)</a>
 A generic bare-bones Array#forEach solution.
-Callbacks may terminate the loop by explicitly returning false. <sup>[&uarr;][1]</sup>
+Callbacks may terminate the loop by explicitly returning false. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `array` *(Array)*: The array to iterate over.
 2. `callback` *(Function)*: The function called per iteration.
 
-## <a name="static-extend" href="../benchmark.js#L394" title="View in source">Benchmark.extend(destination, source)</a>
-Copies source properties to the destination object. <sup>[&uarr;][1]</sup>
+## <a name="static-extend" href="../benchmark.js#L425" title="View in source">Benchmark.extend(destination, source)</a>
+Copies source properties to the destination object. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `destination` *(Object)*: The destination object.
@@ -85,8 +86,8 @@ Copies source properties to the destination object. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Object)*: The destination object.
 
-## <a name="static-filter" href="../benchmark.js#L409" title="View in source">Benchmark.filter(array, callback)</a>
-A generic bare-bones Array#filter solution. <sup>[&uarr;][1]</sup>
+## <a name="static-filter" href="../benchmark.js#L440" title="View in source">Benchmark.filter(array, callback)</a>
+A generic bare-bones Array#filter solution. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -95,15 +96,15 @@ A generic bare-bones Array#filter solution. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Array)*: A new array of values that passed callback filter.
 
-## <a name="static-forIn" href="../benchmark.js#L422" title="View in source">Benchmark.forIn(object, callback)</a>
-A generic bare-bones for-in solution for an object's own properties. <sup>[&uarr;][1]</sup>
+## <a name="static-forIn" href="../benchmark.js#L453" title="View in source">Benchmark.forIn(object, callback)</a>
+A generic bare-bones for-in solution for an object's own properties. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `object` *(Object)*: The object to iterate over.
 2. `callback` *(Function)*: The function called per iteration.
 
-## <a name="static-formatNumber" href="../benchmark.js#L437" title="View in source">Benchmark.formatNumber(number)</a>
-Converts a number to a more readable comma separated string representation. <sup>[&uarr;][1]</sup>
+## <a name="static-formatNumber" href="../benchmark.js#L468" title="View in source">Benchmark.formatNumber(number)</a>
+Converts a number to a more readable comma separated string representation. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `number` *(Number)*: The number to convert.
@@ -111,8 +112,8 @@ Converts a number to a more readable comma separated string representation. <sup
 ### Returns
 *(String)*: The more readable string representation.
 
-## <a name="static-hasKey" href="../benchmark.js#L455" title="View in source">Benchmark.hasKey(object, key)</a>
-Checks if an object has the specified key as a direct property. <sup>[&uarr;][1]</sup>
+## <a name="static-hasKey" href="../benchmark.js#L486" title="View in source">Benchmark.hasKey(object, key)</a>
+Checks if an object has the specified key as a direct property. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `object` *(Object)*: The object to check.
@@ -121,8 +122,8 @@ Checks if an object has the specified key as a direct property. <sup>[&uarr;][1]
 ### Returns
 *(Boolean)*: Returns true if key is a direct property, else false.
 
-## <a name="static-indexOf" href="../benchmark.js#L484" title="View in source">Benchmark.indexOf(array, value)</a>
-A generic bare-bones Array#indexOf solution. <sup>[&uarr;][1]</sup>
+## <a name="static-indexOf" href="../benchmark.js#L515" title="View in source">Benchmark.indexOf(array, value)</a>
+A generic bare-bones Array#indexOf solution. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -131,8 +132,8 @@ A generic bare-bones Array#indexOf solution. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Number)*: The index of the matched value or `-1`.
 
-## <a name="static-interpolate" href="../benchmark.js#L591" title="View in source">Benchmark.interpolate(string, object)</a>
-Modify a string by replacing named tokens with matching object property values. <sup>[&uarr;][1]</sup>
+## <a name="static-interpolate" href="../benchmark.js#L652" title="View in source">Benchmark.interpolate(string, object)</a>
+Modify a string by replacing named tokens with matching object property values. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `string` *(String)*: The string to modify.
@@ -141,16 +142,48 @@ Modify a string by replacing named tokens with matching object property values. 
 ### Returns
 *(String)*: The modified string.
 
-## <a name="static-invoke" href="../benchmark.js#L503" title="View in source">Benchmark.invoke(benches, methodName, args)</a>
-Invokes a given method, with arguments, on all benchmarks in an array. <sup>[&uarr;][1]</sup>
+### Example
+    Benchmark.interpolate("#{greet} #{who}!", {
+      "greet": "Hello",
+      "who": "world"
+    }); // -> "Hello world!"
+
+## <a name="static-invoke" href="../benchmark.js#L559" title="View in source">Benchmark.invoke(benches, methodName, args)</a>
+Invokes a given method, with arguments, on all benchmarks in an array. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `benches` *(Array)*: Array of benchmarks to iterate over.
 2. `methodName` *(String|Object)*: Name of method to invoke or options object.
 3. `args` *(Array)*: Arguments to invoke the method with.
 
-## <a name="static-isArray" href="../benchmark.js#L606" title="View in source">Benchmark.isArray(value)</a>
-Determines if the given value is an array. <sup>[&uarr;][1]</sup>
+### Example
+    // invoke `reset` on all benchmarks
+    Benchmark.invoke(benches, "reset");
+
+    // invoke `run` on all benchmarks passing `true` for the async argument
+    Benchmark.invoke(benches, "run", true);
+
+    // invoke `run`, treat benchmarks as a queue, and register invoke callbacks
+    Benchmark.invoke(benches, {
+
+      // invoke the `run` method on each benchmark
+      "methodName": "run",
+
+      // pass async argument to `run`
+      "args": true,
+
+      // treat as queue, removing benchmarks from the front of `benches` until empty
+      "queued": true,
+
+      // called between invoking benchmarks
+      "onCycle": onCycle,
+
+      // called after all benchmarks have been invoked.
+      "onComplete": onComplete
+    });
+
+## <a name="static-isArray" href="../benchmark.js#L667" title="View in source">Benchmark.isArray(value)</a>
+Determines if the given value is an array. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `value` *(Mixed)*: The value to check.
@@ -158,14 +191,14 @@ Determines if the given value is an array. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Boolean)*: Returns true if value is an array, else false.
 
-## <a name="static-isCalibrated" href="../benchmark.js#L616" title="View in source">Benchmark.isCalibrated()</a>
-Checks if calibration benchmarks have completed. <sup>[&uarr;][1]</sup>
+## <a name="static-isCalibrated" href="../benchmark.js#L677" title="View in source">Benchmark.isCalibrated()</a>
+Checks if calibration benchmarks have completed. <sup><code>[&#9650;][1]</code></sup>
 
 ### Returns
 *(Boolean)*: Returns true if calibrated, false if not.
 
-## <a name="static-isClassOf" href="../benchmark.js#L629" title="View in source">Benchmark.isClassOf(object, name)</a>
-Checks if an object is of the specified class. <sup>[&uarr;][1]</sup>
+## <a name="static-isClassOf" href="../benchmark.js#L690" title="View in source">Benchmark.isClassOf(object, name)</a>
+Checks if an object is of the specified class. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `object` *(Object)*: The object.
@@ -174,10 +207,10 @@ Checks if an object is of the specified class. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Boolean)*: Returns true if of the class, else false.
 
-## <a name="static-isHostType" href="../benchmark.js#L643" title="View in source">Benchmark.isHostType(object, property)</a>
+## <a name="static-isHostType" href="../benchmark.js#L704" title="View in source">Benchmark.isHostType(object, property)</a>
 Host objects can return type values that are different from their actual
 data type. The objects we are concerned with usually return non-primitive
-types of object, function, or unknown. <sup>[&uarr;][1]</sup>
+types of object, function, or unknown. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `object` *(Mixed)*: The owner of the property.
@@ -186,8 +219,8 @@ types of object, function, or unknown. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Boolean)*: Returns true if the property value is a non-primitive, else false.
 
-## <a name="static-join" href="../benchmark.js#L657" title="View in source">Benchmark.join(object, separator1, separator2)</a>
-Creates a string of joined array values or object key-value pairs. <sup>[&uarr;][1]</sup>
+## <a name="static-join" href="../benchmark.js#L718" title="View in source">Benchmark.join(object, separator1, separator2)</a>
+Creates a string of joined array values or object key-value pairs. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `object` *(Array|Object)*: The object to operate on.
@@ -197,8 +230,8 @@ Creates a string of joined array values or object key-value pairs. <sup>[&uarr;]
 ### Returns
 *(String)*: The joined result.
 
-## <a name="static-map" href="../benchmark.js#L679" title="View in source">Benchmark.map(array, callback)</a>
-A generic bare-bones Array#map solution. <sup>[&uarr;][1]</sup>
+## <a name="static-map" href="../benchmark.js#L740" title="View in source">Benchmark.map(array, callback)</a>
+A generic bare-bones Array#map solution. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -207,11 +240,11 @@ A generic bare-bones Array#map solution. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Array)*: A new array of values returned by the callback.
 
-## <a name="static-noop" href="../benchmark.js#L691" title="View in source">Benchmark.noop()</a>
-A no operation function. <sup>[&uarr;][1]</sup>
+## <a name="static-noop" href="../benchmark.js#L752" title="View in source">Benchmark.noop()</a>
+A no operation function. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-reduce" href="../benchmark.js#L704" title="View in source">Benchmark.reduce(array, callback, accumulator)</a>
-A generic bare-bones Array#reduce solution. <sup>[&uarr;][1]</sup>
+## <a name="static-reduce" href="../benchmark.js#L765" title="View in source">Benchmark.reduce(array, callback, accumulator)</a>
+A generic bare-bones Array#reduce solution. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -221,8 +254,8 @@ A generic bare-bones Array#reduce solution. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Mixed)*: The accumulator.
 
-## <a name="static-trim" href="../benchmark.js#L718" title="View in source">Benchmark.trim(string)</a>
-A generic bare-bones String#trim solution. <sup>[&uarr;][1]</sup>
+## <a name="static-trim" href="../benchmark.js#L779" title="View in source">Benchmark.trim(string)</a>
+A generic bare-bones String#trim solution. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `string` *(String)*: The string to trim.
@@ -232,83 +265,83 @@ A generic bare-bones String#trim solution. <sup>[&uarr;][1]</sup>
 
 
 # Benchmark.prototype
-## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1444" title="View in source">Benchmark#CALIBRATION_INDEX</a>
-*(Number)*: The index of the calibration benchmark to use when computing results. <sup>[&uarr;][1]</sup>
+## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1509" title="View in source">Benchmark#CALIBRATION_INDEX</a>
+*(Number)*: The index of the calibration benchmark to use when computing results. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="CYCLE_DELAY" href="../benchmark.js#L1451" title="View in source">Benchmark#CYCLE_DELAY</a>
-*(Number)*: The delay between test cycles *(secs)*. <sup>[&uarr;][1]</sup>
+## <a name="CYCLE_DELAY" href="../benchmark.js#L1516" title="View in source">Benchmark#CYCLE_DELAY</a>
+*(Number)*: The delay between test cycles *(secs)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1458" title="View in source">Benchmark#DEFAULT_ASYNC</a>
-*(Boolean)*: A flag to indicate methods will run asynchronously by default. <sup>[&uarr;][1]</sup>
+## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1523" title="View in source">Benchmark#DEFAULT_ASYNC</a>
+*(Boolean)*: A flag to indicate methods will run asynchronously by default. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="DETECT_INFINITY" href="../benchmark.js#L1465" title="View in source">Benchmark#DETECT_INFINITY</a>
-*(Boolean)*: A flag to indicate protection against large run counts if Infinity ops/sec is detected. <sup>[&uarr;][1]</sup>
+## <a name="DETECT_INFINITY" href="../benchmark.js#L1530" title="View in source">Benchmark#DETECT_INFINITY</a>
+*(Boolean)*: A flag to indicate protection against large run counts if Infinity ops/sec is detected. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1472" title="View in source">Benchmark#INIT_RUN_COUNT</a>
-*(Number)*: The default number of times to execute a test on a benchmark's first cycle. <sup>[&uarr;][1]</sup>
+## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1537" title="View in source">Benchmark#INIT_RUN_COUNT</a>
+*(Number)*: The default number of times to execute a test on a benchmark's first cycle. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1479" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
-*(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*. <sup>[&uarr;][1]</sup>
+## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1544" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
+*(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MIN_TIME" href="../benchmark.js#L1486" title="View in source">Benchmark#MIN_TIME</a>
-*(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*. <sup>[&uarr;][1]</sup>
+## <a name="MIN_TIME" href="../benchmark.js#L1551" title="View in source">Benchmark#MIN_TIME</a>
+*(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MoE" href="../benchmark.js#L1493" title="View in source">Benchmark#MoE</a>
-*(Number)*: The margin of error. <sup>[&uarr;][1]</sup>
+## <a name="MoE" href="../benchmark.js#L1558" title="View in source">Benchmark#MoE</a>
+*(Number)*: The margin of error. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="RME" href="../benchmark.js#L1500" title="View in source">Benchmark#RME</a>
-*(Number)*: The relative margin of error *(expressed as a percentage of the mean)*. <sup>[&uarr;][1]</sup>
+## <a name="RME" href="../benchmark.js#L1565" title="View in source">Benchmark#RME</a>
+*(Number)*: The relative margin of error *(expressed as a percentage of the mean)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="SD" href="../benchmark.js#L1507" title="View in source">Benchmark#SD</a>
-*(Number)*: The sample standard deviation. <sup>[&uarr;][1]</sup>
+## <a name="SD" href="../benchmark.js#L1572" title="View in source">Benchmark#SD</a>
+*(Number)*: The sample standard deviation. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="SEM" href="../benchmark.js#L1514" title="View in source">Benchmark#SEM</a>
-*(Number)*: The standard error of the mean. <sup>[&uarr;][1]</sup>
+## <a name="SEM" href="../benchmark.js#L1579" title="View in source">Benchmark#SEM</a>
+*(Number)*: The standard error of the mean. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="aborted" href="../benchmark.js#L1549" title="View in source">Benchmark#aborted</a>
-*(Boolean)*: A flag to indicate if the benchmark is aborted. <sup>[&uarr;][1]</sup>
+## <a name="aborted" href="../benchmark.js#L1614" title="View in source">Benchmark#aborted</a>
+*(Boolean)*: A flag to indicate if the benchmark is aborted. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="count" href="../benchmark.js#L1521" title="View in source">Benchmark#count</a>
-*(Number)*: The number of times a test was executed. <sup>[&uarr;][1]</sup>
+## <a name="count" href="../benchmark.js#L1586" title="View in source">Benchmark#count</a>
+*(Number)*: The number of times a test was executed. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycles" href="../benchmark.js#L1528" title="View in source">Benchmark#cycles</a>
-*(Number)*: The number of cycles performed while benchmarking. <sup>[&uarr;][1]</sup>
+## <a name="cycles" href="../benchmark.js#L1593" title="View in source">Benchmark#cycles</a>
+*(Number)*: The number of cycles performed while benchmarking. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="error" href="../benchmark.js#L1535" title="View in source">Benchmark#error</a>
-*(Object|Null)*: The error object if the test failed. <sup>[&uarr;][1]</sup>
+## <a name="error" href="../benchmark.js#L1600" title="View in source">Benchmark#error</a>
+*(Object|Null)*: The error object if the test failed. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="hz" href="../benchmark.js#L1542" title="View in source">Benchmark#hz</a>
-*(Number)*: The number of executions per second. <sup>[&uarr;][1]</sup>
+## <a name="hz" href="../benchmark.js#L1607" title="View in source">Benchmark#hz</a>
+*(Number)*: The number of executions per second. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="persist" href="../benchmark.js#L1556" title="View in source">Benchmark#persist</a>
-*(Boolean)*: A flag to indicate if results persist for the browser session. <sup>[&uarr;][1]</sup>
+## <a name="persist" href="../benchmark.js#L1621" title="View in source">Benchmark#persist</a>
+*(Boolean)*: A flag to indicate if results persist for the browser session. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="running" href="../benchmark.js#L1563" title="View in source">Benchmark#running</a>
-*(Boolean)*: A flag to indicate if the benchmark is running. <sup>[&uarr;][1]</sup>
+## <a name="running" href="../benchmark.js#L1628" title="View in source">Benchmark#running</a>
+*(Boolean)*: A flag to indicate if the benchmark is running. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="times" href="../benchmark.js#L1570" title="View in source">Benchmark#times</a>
-*(Object)*: An object of timing data including cycle, elapsed, period, start, and stop. <sup>[&uarr;][1]</sup>
+## <a name="times" href="../benchmark.js#L1641" title="View in source">Benchmark#times</a>
+*(Object)*: An object of timing data including cycle, elapsed, period, start, and stop. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycle" href="../benchmark.js#L1577" title="View in source">Benchmark#times.cycle</a>
-*(Number)*: The time taken to complete the last cycle *(secs)* <sup>[&uarr;][1]</sup>
+## <a name="cycle" href="../benchmark.js#L1648" title="View in source">Benchmark#times.cycle</a>
+*(Number)*: The time taken to complete the last cycle *(secs)* <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="elapsed" href="../benchmark.js#L1584" title="View in source">Benchmark#times.elapsed</a>
-*(Number)*: The time taken to complete the benchmark *(secs)*. <sup>[&uarr;][1]</sup>
+## <a name="elapsed" href="../benchmark.js#L1655" title="View in source">Benchmark#times.elapsed</a>
+*(Number)*: The time taken to complete the benchmark *(secs)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="period" href="../benchmark.js#L1591" title="View in source">Benchmark#times.period</a>
-*(Number)*: The time taken to execute the test once *(secs)*. <sup>[&uarr;][1]</sup>
+## <a name="period" href="../benchmark.js#L1662" title="View in source">Benchmark#times.period</a>
+*(Number)*: The time taken to execute the test once *(secs)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="start" href="../benchmark.js#L1598" title="View in source">Benchmark#times.start</a>
-*(Number)*: A timestamp of when the benchmark started *(ms)*. <sup>[&uarr;][1]</sup>
+## <a name="start" href="../benchmark.js#L1669" title="View in source">Benchmark#times.start</a>
+*(Number)*: A timestamp of when the benchmark started *(ms)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="stop" href="../benchmark.js#L1605" title="View in source">Benchmark#times.stop</a>
-*(Number)*: A timestamp of when the benchmark finished *(ms)*. <sup>[&uarr;][1]</sup>
+## <a name="stop" href="../benchmark.js#L1676" title="View in source">Benchmark#times.stop</a>
+*(Number)*: A timestamp of when the benchmark finished *(ms)*. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="abort" href="../benchmark.js#L801" title="View in source">Benchmark#abort()</a>
-Aborts the benchmark as well as in progress calibrations without recording times. <sup>[&uarr;][1]</sup>
+## <a name="abort" href="../benchmark.js#L862" title="View in source">Benchmark#abort()</a>
+Aborts the benchmark as well as in progress calibrations without recording times. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="addListener" href="../benchmark.js#L731" title="View in source">Benchmark#addListener(type, listener)</a>
-Registers a single listener of a specified event type. <sup>[&uarr;][1]</sup>
+## <a name="addListener" href="../benchmark.js#L792" title="View in source">Benchmark#addListener(type, listener)</a>
+Registers a single listener of a specified event type. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `type` *(String)*: The event type.
@@ -317,8 +350,8 @@ Registers a single listener of a specified event type. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="clone" href="../benchmark.js#L826" title="View in source">Benchmark#clone(options)</a>
-Creates a cloned benchmark with the same test function and options. <sup>[&uarr;][1]</sup>
+## <a name="clone" href="../benchmark.js#L891" title="View in source">Benchmark#clone(options)</a>
+Creates a cloned benchmark with the same test function and options. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `options` *(Object)*: Overwrite cloned options.
@@ -326,8 +359,13 @@ Creates a cloned benchmark with the same test function and options. <sup>[&uarr;
 ### Returns
 *(Object)*: Cloned instance.
 
-## <a name="compare" href="../benchmark.js#L846" title="View in source">Benchmark#compare(other)</a>
-Determines if the benchmark's hertz is higher than another. <sup>[&uarr;][1]</sup>
+### Example
+    var clone = bench.clone({
+      "name": "doppelganger"
+    });
+
+## <a name="compare" href="../benchmark.js#L911" title="View in source">Benchmark#compare(other)</a>
+Determines if the benchmark's hertz is higher than another. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `other` *(Object)*: The benchmark to compare.
@@ -335,14 +373,17 @@ Determines if the benchmark's hertz is higher than another. <sup>[&uarr;][1]</su
 ### Returns
 *(Number)*: Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
 
-## <a name="emit" href="../benchmark.js#L745" title="View in source">Benchmark#emit(type)</a>
-Executes all registered listeners of a specified event type. <sup>[&uarr;][1]</sup>
+## <a name="emit" href="../benchmark.js#L806" title="View in source">Benchmark#emit(type)</a>
+Executes all registered listeners of a specified event type. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `type` *(String)*: The event type.
 
-## <a name="removeAllListeners" href="../benchmark.js#L786" title="View in source">Benchmark#removeAllListeners(type)</a>
-Unregisters all listeners of a specified event type. <sup>[&uarr;][1]</sup>
+## <a name="on" href="../benchmark.js#L1634" title="View in source">Benchmark#on</a>
+Alias of <code>[addListener](#addListener)</code> <sup><code>[&#9650;][1]</code></sup>
+
+## <a name="removeAllListeners" href="../benchmark.js#L847" title="View in source">Benchmark#removeAllListeners(type)</a>
+Unregisters all listeners of a specified event type. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `type` *(String)*: The event type.
@@ -350,8 +391,8 @@ Unregisters all listeners of a specified event type. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="removeListener" href="../benchmark.js#L768" title="View in source">Benchmark#removeListener(type, listener)</a>
-Unregisters a single listener of a specified event type. <sup>[&uarr;][1]</sup>
+## <a name="removeListener" href="../benchmark.js#L829" title="View in source">Benchmark#removeListener(type, listener)</a>
+Unregisters a single listener of a specified event type. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `type` *(String)*: The event type.
@@ -360,17 +401,17 @@ Unregisters a single listener of a specified event type. <sup>[&uarr;][1]</sup>
 ### Returns
 *(Object)*: The benchmark instance.
 
-## <a name="reset" href="../benchmark.js#L857" title="View in source">Benchmark#reset()</a>
-Reset properties and abort if running. <sup>[&uarr;][1]</sup>
+## <a name="reset" href="../benchmark.js#L922" title="View in source">Benchmark#reset()</a>
+Reset properties and abort if running. <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="run" href="../benchmark.js#L1179" title="View in source">Benchmark#run(async)</a>
-Starts running the benchmark. <sup>[&uarr;][1]</sup>
+## <a name="run" href="../benchmark.js#L1244" title="View in source">Benchmark#run(async)</a>
+Starts running the benchmark. <sup><code>[&#9650;][1]</code></sup>
 
 ### Arguments
 1. `[async=false]` *(Boolean)*: Flag to run asynchronously.
 
-## <a name="toString" href="../benchmark.js#L894" title="View in source">Benchmark#toString()</a>
-Displays relevant benchmark information when coerced to a string. <sup>[&uarr;][1]</sup>
+## <a name="toString" href="../benchmark.js#L959" title="View in source">Benchmark#toString()</a>
+Displays relevant benchmark information when coerced to a string. <sup><code>[&#9650;][1]</code></sup>
 
 
   [1]: #readme "Jump back to the TOC."
