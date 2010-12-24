@@ -1636,7 +1636,7 @@
     'running': false,
 
     /**
-     * Alias of [`Benchmark#addListener`](#addListener)
+     * Alias of [`Benchmark#addListener`](#addListener).
      * @member Benchmark
      */
     'on': addListener,

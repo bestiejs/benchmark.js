@@ -380,7 +380,7 @@ Executes all registered listeners of a specified event type. <sup><code>[&#9650;
 1. `type` *(String)*: The event type.
 
 ## <a name="on" href="../benchmark.js#L1642" title="View in source">Benchmark#on</a>
-Alias of [`Benchmark#addListener`](#addListener) <sup><code>[&#9650;][1]</code></sup>
+Alias of [`Benchmark#addListener`](#addListener). <sup><code>[&#9650;][1]</code></sup>
 
 ## <a name="removeAllListeners" href="../benchmark.js#L854" title="View in source">Benchmark#removeAllListeners(type)</a>
 Unregisters all listeners of a specified event type. <sup><code>[&#9650;][1]</code></sup>

@@ -14,7 +14,7 @@ The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/d
 
 ## Installation
 
-In the browser:
+In a browser:
 
     <script src="benchmark.js"></script>
 
@@ -24,7 +24,15 @@ Via [npm](http://npmjs.org/):
 
 In [Node.js](http://nodejs.org/):
 
-    var bench = require('benchmark');
+    var Benchmark = require("benchmark");
+
+In [Narwhal](http://narwhaljs.org/) and [RingoJS](http://ringojs.org/):
+
+    var Benchmark = require("benchmark").Benchmark;
+
+In [Rhino](http://www.mozilla.org/rhino/):
+
+    load("benchmark.js");
 
 ## Cloning this repo
 
@@ -40,4 +48,4 @@ For older git versions, just use:
 
 Feel free to fork if you see possible improvements!
 
-_— [Mathias](http://mathiasbynens.be/)_
+_&mdash; [Mathias](http://mathiasbynens.be/)_
