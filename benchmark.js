@@ -72,13 +72,14 @@
    * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    * @example
-   * // simple usage
+   *
+   * // basic usage
    * var bench = new Benchmark(fn);
    *
-   * // passing options
+   * // with options
    * var bench = new Benchmark(fn, {
    *
-   *   // name used by Benchmark#toString to identify a test.
+   *   // name used by Benchmark#toString to identify a benchmark.
    *   "name": "apples",
    *
    *   // id, displayed by Benchmark#toString if `name` is not available
@@ -529,24 +530,25 @@
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} methodName Name of method to invoke or options object.
-   * @param {Array} args Arguments to invoke the method with.
+   * @param {Mixed} args Arguments to invoke the method with.
    * @example
+   *
    * // invoke `reset` on all benchmarks
    * Benchmark.invoke(benches, "reset");
    *
-   * // invoke `run` on all benchmarks passing `true` for the async argument
-   * Benchmark.invoke(benches, "run", true);
+   * // invoke `emit` with arguments
+   * Benchmark.invoke(benches, "emit", ["complete", b, c]);
    *
-   * // invoke `run`, treat benchmarks as a queue, and register invoke callbacks
+   * // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
    * Benchmark.invoke(benches, {
    *
-   *   // invoke the `run` method on each benchmark
+   *   // invoke the `run` method
    *   "methodName": "run",
    *
-   *   // pass async argument to `run`
+   *   // pass a single argument
    *   "args": true,
    *
-   *   // treat as queue, removing benchmarks from the front of `benches` until empty
+   *   // treat as queue, removing benchmarks from front of `benches` until empty
    *   "queued": true,
    *
    *   // called between invoking benchmarks
@@ -610,11 +612,14 @@
       return false;
     }
 
-    // juggle arguments
-    if (arguments.length == 2 && typeof methodName == 'object') {
+    if (typeof methodName == 'string') {
+      args = isArray(args || (args = [])) ? args : [args];
+    }
+    else {
+      // juggle arguments
       options = extend(options, methodName);
-      args = isArray(args = options.args || []) ? args : [args];
       methodName = options.methodName;
+      args = isArray(args = options.args || []) ? args : [args];
       queued = options.queued;
 
       // for use with Benchmark#run only
@@ -626,6 +631,7 @@
       async = (async == null ? Benchmark.prototype.DEFAULT_ASYNC :
         async) && HAS_TIMEOUT_API;
     }
+
     // start iterating over the array
     if (bench = queued ? benches.shift() : benches[0]) {
       if (async) {
@@ -644,6 +650,7 @@
    * @param {Object} object The template object.
    * @returns {String} The modified string.
    * @example
+   *
    * Benchmark.interpolate("#{greet} #{who}!", {
    *   "greet": "Hello",
    *   "who": "world"
@@ -884,7 +891,8 @@
    * @param {Object} options Overwrite cloned options.
    * @returns {Object} Cloned instance.
    * @example
-   * var clone = bench.clone({
+   *
+   * var bizarro = bench.clone({
    *   "name": "doppelganger"
    * });
    */
@@ -1628,7 +1636,7 @@
     'running': false,
 
     /**
-     * Alias of <code>[addListener](#addListener)</code>
+     * Alias of [`Benchmark#addListener`](#addListener)
      * @member Benchmark
      */
     'on': addListener,
