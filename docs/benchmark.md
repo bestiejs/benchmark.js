@@ -59,15 +59,15 @@
 * [`Benchmark#toString`](#toString)
 
 # Benchmark
-## <a name="static-CALIBRATIONS" href="../benchmark.js#L1444" title="View in source">Benchmark.CALIBRATIONS</a>
+## <a name="static-CALIBRATIONS" href="../benchmark.js#L1441" title="View in source">Benchmark.CALIBRATIONS</a>
 *(Array)*: Benchmarks to establish iteration overhead.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-platform" href="../benchmark.js#L1289" title="View in source">Benchmark.platform</a>
+## <a name="static-platform" href="../benchmark.js#L1286" title="View in source">Benchmark.platform</a>
 *(Boolean)*: Platform object containing browser name, version, and operating system.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-version" href="../benchmark.js#L1459" title="View in source">Benchmark.version</a>
+## <a name="static-version" href="../benchmark.js#L1456" title="View in source">Benchmark.version</a>
 *(String)*: The version number.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -286,99 +286,99 @@ A generic bare-bones String#trim solution.
 
 
 # Benchmark.prototype
-## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1528" title="View in source">Benchmark#CALIBRATION_INDEX</a>
+## <a name="CALIBRATION_INDEX" href="../benchmark.js#L1525" title="View in source">Benchmark#CALIBRATION_INDEX</a>
 *(Number)*: The index of the calibration benchmark to use when computing results.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="CYCLE_DELAY" href="../benchmark.js#L1535" title="View in source">Benchmark#CYCLE_DELAY</a>
+## <a name="CYCLE_DELAY" href="../benchmark.js#L1532" title="View in source">Benchmark#CYCLE_DELAY</a>
 *(Number)*: The delay between test cycles *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1542" title="View in source">Benchmark#DEFAULT_ASYNC</a>
+## <a name="DEFAULT_ASYNC" href="../benchmark.js#L1539" title="View in source">Benchmark#DEFAULT_ASYNC</a>
 *(Boolean)*: A flag to indicate methods will run asynchronously by default.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="DETECT_INFINITY" href="../benchmark.js#L1549" title="View in source">Benchmark#DETECT_INFINITY</a>
+## <a name="DETECT_INFINITY" href="../benchmark.js#L1546" title="View in source">Benchmark#DETECT_INFINITY</a>
 *(Boolean)*: A flag to indicate protection against large run counts if Infinity ops/sec is detected.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1556" title="View in source">Benchmark#INIT_RUN_COUNT</a>
+## <a name="INIT_RUN_COUNT" href="../benchmark.js#L1553" title="View in source">Benchmark#INIT_RUN_COUNT</a>
 *(Number)*: The default number of times to execute a test on a benchmark's first cycle.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1563" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
+## <a name="MAX_TIME_ELAPSED" href="../benchmark.js#L1560" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
 *(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MIN_TIME" href="../benchmark.js#L1570" title="View in source">Benchmark#MIN_TIME</a>
+## <a name="MIN_TIME" href="../benchmark.js#L1567" title="View in source">Benchmark#MIN_TIME</a>
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MoE" href="../benchmark.js#L1577" title="View in source">Benchmark#MoE</a>
+## <a name="MoE" href="../benchmark.js#L1574" title="View in source">Benchmark#MoE</a>
 *(Number)*: The margin of error.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="RME" href="../benchmark.js#L1584" title="View in source">Benchmark#RME</a>
+## <a name="RME" href="../benchmark.js#L1581" title="View in source">Benchmark#RME</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="SD" href="../benchmark.js#L1591" title="View in source">Benchmark#SD</a>
+## <a name="SD" href="../benchmark.js#L1588" title="View in source">Benchmark#SD</a>
 *(Number)*: The sample standard deviation.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="SEM" href="../benchmark.js#L1598" title="View in source">Benchmark#SEM</a>
+## <a name="SEM" href="../benchmark.js#L1595" title="View in source">Benchmark#SEM</a>
 *(Number)*: The standard error of the mean.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="aborted" href="../benchmark.js#L1633" title="View in source">Benchmark#aborted</a>
+## <a name="aborted" href="../benchmark.js#L1630" title="View in source">Benchmark#aborted</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="count" href="../benchmark.js#L1605" title="View in source">Benchmark#count</a>
+## <a name="count" href="../benchmark.js#L1602" title="View in source">Benchmark#count</a>
 *(Number)*: The number of times a test was executed.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycles" href="../benchmark.js#L1612" title="View in source">Benchmark#cycles</a>
+## <a name="cycles" href="../benchmark.js#L1609" title="View in source">Benchmark#cycles</a>
 *(Number)*: The number of cycles performed while benchmarking.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="error" href="../benchmark.js#L1619" title="View in source">Benchmark#error</a>
+## <a name="error" href="../benchmark.js#L1616" title="View in source">Benchmark#error</a>
 *(Object|Null)*: The error object if the test failed.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="hz" href="../benchmark.js#L1626" title="View in source">Benchmark#hz</a>
+## <a name="hz" href="../benchmark.js#L1623" title="View in source">Benchmark#hz</a>
 *(Number)*: The number of executions per second.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="persist" href="../benchmark.js#L1640" title="View in source">Benchmark#persist</a>
+## <a name="persist" href="../benchmark.js#L1637" title="View in source">Benchmark#persist</a>
 *(Boolean)*: A flag to indicate if results persist for the browser session.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="running" href="../benchmark.js#L1647" title="View in source">Benchmark#running</a>
+## <a name="running" href="../benchmark.js#L1644" title="View in source">Benchmark#running</a>
 *(Boolean)*: A flag to indicate if the benchmark is running.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="times" href="../benchmark.js#L1660" title="View in source">Benchmark#times</a>
+## <a name="times" href="../benchmark.js#L1657" title="View in source">Benchmark#times</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycle" href="../benchmark.js#L1667" title="View in source">Benchmark#times.cycle</a>
+## <a name="cycle" href="../benchmark.js#L1664" title="View in source">Benchmark#times.cycle</a>
 *(Number)*: The time taken to complete the last cycle *(secs)*
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="elapsed" href="../benchmark.js#L1674" title="View in source">Benchmark#times.elapsed</a>
+## <a name="elapsed" href="../benchmark.js#L1671" title="View in source">Benchmark#times.elapsed</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="period" href="../benchmark.js#L1681" title="View in source">Benchmark#times.period</a>
+## <a name="period" href="../benchmark.js#L1678" title="View in source">Benchmark#times.period</a>
 *(Number)*: The time taken to execute the test once *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="start" href="../benchmark.js#L1688" title="View in source">Benchmark#times.start</a>
+## <a name="start" href="../benchmark.js#L1685" title="View in source">Benchmark#times.start</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="stop" href="../benchmark.js#L1695" title="View in source">Benchmark#times.stop</a>
+## <a name="stop" href="../benchmark.js#L1692" title="View in source">Benchmark#times.stop</a>
 *(Number)*: A timestamp of when the benchmark finished *(ms)*.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -429,7 +429,7 @@ Executes all registered listeners of a specified event type.
 ### Arguments
 1. `type` *(String)*: The event type.
 
-## <a name="on" href="../benchmark.js#L1653" title="View in source">Benchmark#on</a>
+## <a name="on" href="../benchmark.js#L1650" title="View in source">Benchmark#on</a>
 Alias of [`Benchmark#addListener`](#addListener).
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -458,7 +458,7 @@ Unregisters a single listener of a specified event type.
 Reset properties and abort if running.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="run" href="../benchmark.js#L1252" title="View in source">Benchmark#run(async)</a>
+## <a name="run" href="../benchmark.js#L1249" title="View in source">Benchmark#run(async)</a>
 Starts running the benchmark.
 <sup><code>[&#9650;][1]</code></sup>
 

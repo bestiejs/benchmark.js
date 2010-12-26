@@ -1050,7 +1050,6 @@
 
     function onInvokeCycle(clone) {
       var complete,
-          hiRme,
           mean,
           moe,
           rme,
@@ -1085,11 +1084,9 @@
         moe = sem * (T_DISTRIBUTION[sampleSize - 1] || T_DISTRIBUTION.Infinity);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
-        // is rme really high
-        hiRme = rme > 50;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (!maxedOut || calibrating || hiRme || queue.length)) {
+        if (rme > 1 && (!maxedOut || calibrating || queue.length)) {
           if (maxedOut && async) {
             // switch to sync mode
             queue.length = 0;
@@ -1097,7 +1094,7 @@
           }
           else if (!queue.length) {
             // quadruple sample size to cut the margin of error in half
-            enqueue(hiRme ? sampleSize * 3 : 1);
+            enqueue(rme > 50 ? sampleSize * 3 : 1);
           }
         }
         // finish up
