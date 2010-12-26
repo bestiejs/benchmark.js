@@ -409,6 +409,10 @@ test("user agent detection", function() {
       'process': { 'version': 'v0.3.1', 'platform': 'cygwin' },
     },
 
+    'Nook Browser 1.0': {
+      'ua': 'nook browser/1.0'
+    },
+
     'Opera Mobile 10.00 on Linux i686': {
       'ua': 'Opera/9.80 (Linux i686; Opera Mobi/1038; U; en) Presto/2.5.24 Version/10.00'
     },
