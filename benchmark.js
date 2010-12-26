@@ -12,7 +12,7 @@
   var HAS_TIMEOUT_API,
 
   /** Detect HTML5 web storage */
-  HAS_STORAGE = isHostType(window, 'sessionStorage') && isHostType(sessionStorage, 'setItem'),
+  HAS_STORAGE = isHostType(window, 'localStorage') && isHostType(localStorage, 'setItem'),
 
   /** Detect a Java environment */
   IN_JAVA = isHostType(window, 'java') && !isHostType(window, 'netscape'),
@@ -364,7 +364,7 @@
    */
   function store(me) {
     if (HAS_STORAGE) {
-      sessionStorage['bm:' + Benchmark.platform + ':' + me.fn.uid] =
+      localStorage['bm:' + Benchmark.platform + ':' + me.fn.uid] =
         join(reduce([me, me.times], function(record, object) {
           forIn(object, function(value, key) {
             if (isClassOf(value, 'Number') && /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
@@ -385,7 +385,10 @@
   function restore(me) {
     var data;
     if (HAS_STORAGE) {
-      data = sessionStorage['bm:' + Benchmark.platform + ':' + me.fn.uid];
+      // expires in 1 week
+      data = (data = localStorage['bm:' + Benchmark.platform + ':' + me.fn.uid]) &&
+        +new Date - /stop: (\d+)/.exec(data)[1] < 6048e5 && data;
+
       each(data && data.split(',') || [], function(pair) {
         pair = pair.split(': ');
         (/^(?:cycle|elapsed|period|start|stop)$/.test(pair[0]) ? me.times : me)[pair[0]] = +pair[1];
