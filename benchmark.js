@@ -1740,10 +1740,6 @@
   /*--------------------------------------------------------------------------*/
 
   extend(Calibration.prototype, {
-
-    // to infinity, and beyond!
-    'DETECT_INFINITY': false,
-
     // avoid repeat calibrations for 7 days
     'persist': 7
   });
