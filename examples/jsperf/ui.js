@@ -547,7 +547,7 @@
   addClass(document.documentElement, JS_CLASS);
 
   // don't let users alert, confirm, prompt, or open new windows
-  window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
+  //window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
 
   // re-parse hash query params when it changes
   addListener(window, 'hashchange', onHashChange);

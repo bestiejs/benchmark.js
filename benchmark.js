@@ -12,10 +12,12 @@
   var HAS_TIMEOUT_API,
 
   /** Detect HTML5 web storage */
-  HAS_STORAGE = isHostType(window, 'localStorage') && isHostType(localStorage, 'setItem'),
+  HAS_STORAGE = isHostType(window, 'localStorage') &&
+    isHostType(localStorage, 'removeItem'),
 
   /** Detect a Java environment */
-  IN_JAVA = isHostType(window, 'java') && !isHostType(window, 'netscape'),
+  IN_JAVA = isHostType(window, 'java') &&
+    !isHostType(window, 'netscape'),
 
   /** Integrity check for compiled tests */
   EMBEDDED_UID = +new Date,
@@ -119,6 +121,7 @@
     });
 
     me.fn = fn;
+    me.created = +new Date;
     me.options = options;
     me.times = extend({ }, me.times);
   }
@@ -367,6 +370,7 @@
       localStorage['bm:' + Benchmark.platform + ':' + me.fn.uid] =
         join(reduce([me, me.times], function(record, object) {
           forIn(object, function(value, key) {
+            // record properties with numeric values
             if (isClassOf(value, 'Number') && /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
               record[key] = value;
             }
@@ -383,12 +387,17 @@
    * @returns {Boolean} Returns true if results were restored, else false
    */
   function restore(me) {
-    var data;
-    if (HAS_STORAGE) {
-      // expires in 1 week
-      data = (data = localStorage['bm:' + Benchmark.platform + ':' + me.fn.uid]) &&
-        +new Date - /stop: (\d+)/.exec(data)[1] < 6048e5 && data;
+    var data,
+        key = 'bm:' + Benchmark.platform + ':' + me.fn.uid,
+        persist = me.persist,
+        expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity;
 
+    if (HAS_STORAGE) {
+      // load data and ensure it hasn't expired
+      data = (data = localStorage[key]) &&
+        +new Date - (/created: (\d+)/.exec(data) || 0)[1] < expires && data;
+
+      // copy persisted values to benchmark
       each(data && data.split(',') || [], function(pair) {
         pair = pair.split(': ');
         (/^(?:cycle|elapsed|period|start|stop)$/.test(pair[0]) ? me.times : me)[pair[0]] = +pair[1];
@@ -997,7 +1006,6 @@
     var calibrated = isCalibrated(),
         calibrating = me.constructor == Calibration,
         fn = me.fn,
-        initSize = 5,
         queue = [],
         runCount = me.INIT_RUN_COUNT;
 
@@ -1076,7 +1084,7 @@
         complete = true;
       }
       // simulate onComplete and enqueue additional runs if needed
-      else if (!queue.length || sampleSize > initSize) {
+      else if (!queue.length) {
         // compute values
         mean = reduce(sample, sumOf, 0) / sampleSize || 0;
         // standard deviation
@@ -1089,15 +1097,14 @@
         rme = (moe / mean) * 100 || 0;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (!maxedOut || calibrating || queue.length)) {
+        if (rme > 1 && (!maxedOut || calibrating)) {
           if (maxedOut && async) {
             // switch to sync mode
             queue.length = 0;
             compute(me, false, sample);
           }
-          else if (!queue.length) {
-            // quadruple sample size to cut the margin of error in half
-            enqueue(rme > 50 ? sampleSize * 3 : 1);
+          else {
+            enqueue(1);
           }
         }
         // finish up
@@ -1138,7 +1145,7 @@
 
     // init sample and queue
     sample || (sample = []);
-    enqueue(sample.length ? 1 : initSize);
+    enqueue(sample.length ? 1 : 5);
 
     // run them
     invoke(queue, {
@@ -1605,6 +1612,13 @@
     'count': 0,
 
     /**
+     * A timestamp of when the benchmark was created.
+     * @member Benchmark
+     * @type Number
+     */
+    'created': 0,
+
+    /**
      * The number of cycles performed while benchmarking.
      * @member Benchmark
      * @type Number
@@ -1633,9 +1647,9 @@
     'aborted': false,
 
     /**
-     * A flag to indicate if results persist for the browser session.
+     * A flag to indicate if results persist OR the number of days to persist.
      * @member Benchmark
-     * @type Boolean
+     * @type Mixed
      */
     'persist': false,
 
@@ -1730,8 +1744,8 @@
     // to infinity, and beyond!
     'DETECT_INFINITY': false,
 
-    // avoid repeat calibrations
-    'persist': true
+    // avoid repeat calibrations for 7 days
+    'persist': 7
   });
 
   /*--------------------------------------------------------------------------*/
