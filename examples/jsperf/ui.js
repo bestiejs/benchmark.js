@@ -217,9 +217,20 @@
    * @private
    */
   function onHashChange() {
+    var params = ui.params;
     ui.parseHash();
+
+    // call user provided init() function
     if (typeof window.init == 'function') {
       init();
+    }
+    // auto-run
+    if ('run' in params) {
+      onRun();
+    }
+    // clear stored results
+    if ('clear' in params) {
+      Benchmark.clearStorage();
     }
   }
 
@@ -238,6 +249,8 @@
    * @private
    */
   function onLoad() {
+    var hash = location.hash.slice(1, 4);
+
     addClass('run', 'show');
     addListener('run', 'click', onRun);
     setHTML('run', RUN_TEXT.READY);
@@ -251,14 +264,8 @@
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
       addClass('firebug', 'show');
     }
-    // call user provided init() function
-    if (typeof window.init == 'function') {
-      init();
-    }
-    // auto-run benchmarks when the URL has #run
-    if ('run' == location.hash.slice(1, 4)) {
-      onRun();
-    }
+    // evaluate hash values
+    onHashChange();
   }
 
   /**

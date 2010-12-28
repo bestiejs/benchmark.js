@@ -361,7 +361,7 @@
   }
 
   /**
-   * Records benchmark results to session storage.
+   * Records benchmark results to local storage.
    * @private
    * @param {Object} me The benchmark instance.
    */
@@ -407,6 +407,22 @@
   }
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Removes all benchmark data from local storage.
+   * @static
+   * @member Benchmark
+   */
+  function clearStorage() {
+    var partial = 'bm:' + Benchmark.platform + ':';
+    if (HAS_STORAGE) {
+      forIn(localStorage, function(value, key, object) {
+        if (!key.indexOf(partial)) {
+          object.removeItem(key);
+        }
+      });
+    }
+  }
 
   /**
    * A generic bare-bones Array#forEach solution.
@@ -1374,10 +1390,10 @@
           name = system.global == global ? 'Narwhal' : 'RingoJS';
           os = system.os || null;
         }
-        else if (typeof process == 'object' && process) {
+        else if (typeof process == 'object' && (data = process)) {
           name = 'Node.js';
-          version = /[\d.]+/.exec(process.version)[0];
-          os = process.platform;
+          version = /[\d.]+/.exec(data.version)[0];
+          os = data.platform;
         }
       } else if (isClassOf(me.environment, 'Environment')) {
         name = 'Rhino';
@@ -1475,6 +1491,9 @@
      * @type String
      */
     'version': '0.1.337',
+
+    // clears locally stored data
+    'clearStorage': clearStorage,
 
     // generic Array#forEach
     'each': each,
@@ -1751,8 +1770,8 @@
   /*--------------------------------------------------------------------------*/
 
   extend(Calibration.prototype, {
-    // avoid repeat calibrations for 7 days
-    'persist': 7
+    // avoid repeat calibrations
+    'persist': true
   });
 
   /*--------------------------------------------------------------------------*/
