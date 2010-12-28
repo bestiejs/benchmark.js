@@ -953,7 +953,7 @@
    * Determines if the benchmark's hertz is higher than another.
    * @member Benchmark
    * @param {Object} other The benchmark to compare.
-   * @returns {Number} Returns 1 if higher, -1 if lower, and 0 if indeterminate.
+   * @returns {Number} Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
    */
   function compare(other) {
     var me = this,

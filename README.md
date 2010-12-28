@@ -2,17 +2,19 @@
 
 A robust benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
 
+You can read more about [bulletproof JavaScript benchmarks](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/) if you like.
+
 ## Project history
 
 Benchmark.js started out as a heavily modified version of the excellent [JSLitmus](http://broofa.com/Tools/JSLitmus/) by Robert Kieffer ([GitHub](http://github.com/broofa/jslitmus)). It uses adaptive test cycles, meaning every test will roughly take the same amount of time, regardless of the operation. Thanks to this awesome feature, jsPerf tests can be run in any browser, on any device — including smartphones.
 
 In October 2010, [John-David Dalton](http://allyoucanleet.com/) started collaborating on the project, providing some major contributions to Benchmark.js and its UI for jsPerf ([`ui.js`](https://github.com/mathiasbynens/benchmark.js/blob/master/examples/jsperf/ui.js)).
 
-## Docs
+## Documentation
 
 The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/docs>
 
-## Installation
+## Installation and usage
 
 In a browser:
 
@@ -24,28 +26,28 @@ Via [npm](http://npmjs.org/):
 
 In [Node.js](http://nodejs.org/):
 
-    var Benchmark = require("benchmark");
+    var Benchmark = require('benchmark');
 
 In [Narwhal](http://narwhaljs.org/) and [RingoJS](http://ringojs.org/):
 
-    var Benchmark = require("benchmark").Benchmark;
+    var Benchmark = require('benchmark').Benchmark;
 
 In [Rhino](http://www.mozilla.org/rhino/):
 
-    load("benchmark.js");
+    load('benchmark.js');
 
 ## Cloning this repo
 
 To clone this repository including all submodules, using git 1.6.5 or later:
 
-    git clone --recursive git@github.com:mathiasbynens/benchmark.js.git
+    git clone --recursive https://github.com/mathiasbynens/benchmark.js.git
 
 For older git versions, just use:
 
-    git clone git@github.com:mathiasbynens/benchmark.js.git
+    git clone https://github.com/mathiasbynens/benchmark.js.git
     cd benchmark.js
     git submodule update --init
 
 Feel free to fork if you see possible improvements!
 
-_&mdash; [Mathias](http://mathiasbynens.be/)_
+_— [Mathias](http://mathiasbynens.be/)_
