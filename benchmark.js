@@ -1781,9 +1781,9 @@
   /*--------------------------------------------------------------------------*/
 
   // expose
-  if (/Narwhal|Node|RingoJS/.test(Benchmark.platform.name)) {
+  if (typeof exports == 'object' && exports && typeof global == 'object' && global) {
     window = global;
-    if (typeof module == 'object' && module.exports == exports) {
+    if (typeof module == 'object' && module && module.exports == exports) {
       module.exports = Benchmark;
     } else {
       exports.Benchmark = Benchmark;
