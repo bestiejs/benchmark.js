@@ -61,23 +61,23 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Android Browser 3.1.2 (WebKit) on Android 1.6': {
+    'Android Browser 3.1.2 (like Safari 3.x) on Android 1.6': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 1.6; en-us; HTC_TATTOO_A3288 Build/DRC79) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1'
     },
 
-    'Android Browser (WebKit) on Android 2.1': {
+    'Android Browser (like Safari 4.x) on Android 2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; Sprint APA9292KT Build/ERE27) AppleWebKit/530.17 (KHTML, like Gecko)'
     },
 
-    'Android Browser 4.0 (WebKit) on Android 2.2': {
+    'Android Browser 4.0 (like Safari 4+) on Android 2.2': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
-    'Android Browser 4.0 (WebKit) on Android 2.2.1': {
+    'Android Browser 4.0 (like Safari 4+) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
-    'Android Browser 4.1#{alpha} (platform preview rendered by WebKit) on Android 2.2.1': {
+    'Android Browser 4.1#{alpha} (platform preview like Safari 4+) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.1a Mobile Safari/533.1',
       'external': null
     },
@@ -90,7 +90,7 @@ test("user agent detection", function() {
       'ua': 'BlackBerry8900/4.5.1.231 Profile/MIDP-2.0 Configuration/CLDC-1.1 VendorID/100'
     },
 
-    'BlackBerry Browser 6.0.0.91 (WebKit) on BlackBerry 9800': {
+    'BlackBerry Browser 6.0.0.91 (like Safari 4+) on BlackBerry 9800': {
       'ua': 'Mozilla/5.0 (BlackBerry; U; BlackBerry 9800; en-US) AppleWebKit/534.1  (KHTML, like Gecko) Version/6.0.0.91 Mobile Safari/534.1 ,gzip(gfe),gzip(gfe)'
     },
 
@@ -339,7 +339,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/4.0 (compatible; Linux 2.6.22) NetFront/3.4 Kindle/2.0 (screen 600x800)'
     },
 
-    'Kindle Browser 4.0 (WebKit) on Kindle 3.0': {
+    'Kindle Browser 4.0 (like Safari 4.x) on Kindle 3.0': {
       'ua': 'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/528.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)'
     },
 
@@ -375,7 +375,7 @@ test("user agent detection", function() {
       'mode': 9
     },
 
-    'Lunascape 6.3.2.22803 (WebKit) on Windows XP': {
+    'Lunascape 6.3.2.22803 (like Safari 4+) on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Lunascape/6.3.2.22803 Safari/533.3'
     },
 
@@ -389,7 +389,7 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Maxthon 3.x (WebKit) on Windows XP': {
+    'Maxthon 3.x (like Safari 4+) on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.9 (KHTML, like Gecko) Maxthon/3.0 Safari/533.9'
     },
 
@@ -464,10 +464,6 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 2_2_1 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Mobile/5H11a'
     },
 
-    'Safari 3.x on webOS 1.2.9': {
-      'ua': 'Mozilla/5.0 (webOS/Palm webOS 1.2.9; U; en-US) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/1.0 Safari/525.27.1 Pixi/1.0'
-    },
-
     'Safari 3.0 on iPod iOS': {
       'ua': 'Mozila/5.0 (iPod; U; CPU like Mac OS X; en) AppleWebKit/420.1 (KHTML, like Geckto) Version/3.0 Mobile/3A101a Safari/419.3'
     },
@@ -536,16 +532,12 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/525.28.3 (KHTML, like Gecko) Version/3.2.3 Safari/525.29'
     },
 
-    'Safari 4+ on iPhone iOS 3.1': {
+    'Safari 4.x on iPhone iOS 3.1': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Mobile/7E18,gzip(gfe),gzip(gfe)'
     },
 
-    'Safari 4+ on iPhone iOS 4.1': {
+    'Safari 4.x on iPhone iOS 4.1': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Mobile/8B117'
-    },
-
-    'Safari 4+ on webOS 1.4.0': {
-      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
     },
 
     'Safari 4.0#{alpha}1 on Mac OS X 10.4.11': {
@@ -826,6 +818,14 @@ test("user agent detection", function() {
     'Swiftfox 3.0.10#{alpha} on Linux i686': {
       'ua': 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.10pre) Gecko/2009041814 Firefox/3.0.10pre (Swiftfox)',
      },
+
+    'webOS Browser 1.0 (like Safari 3.x) on webOS 1.2.9': {
+      'ua': 'Mozilla/5.0 (webOS/Palm webOS 1.2.9; U; en-US) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/1.0 Safari/525.27.1 Pixi/1.0'
+    },
+
+    'webOS Browser 1.0 (like Safari 4.x) on webOS 1.4.0': {
+      'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
+    },
 
     'Mozilla/5.0 (PLAYSTATION 3; 2.00)': {
       'ua': 'Mozilla/5.0 (PLAYSTATION 3; 2.00)'

@@ -1351,7 +1351,7 @@
     });
 
     // detect non Opera versions
-    version = reduce([/webOS/.test(os) ? name : 'version', /fox/.test(name) ? 'Firefox' : name, 'NetFront'], function(version, guess) {
+    version = reduce(['version', /fox/.test(name) ? 'Firefox' : name, 'NetFront'], function(version, guess) {
       return version || (version = (RegExp(guess + '[ /-]([^ ();/-]*)', 'i').exec(ua) || 0)[1]) || null;
     }, version);
 
@@ -1387,13 +1387,8 @@
       }
     }
     // detect non Safari WebKit based browsers
-    else if ((data = product || /Android/.exec(os)) && (!name || name == 'Safari' && !/^iP/.test(data))) {
+    else if ((data = product || os) && (!name || name == 'Safari' && !/(?:^iP|Linux|Mac OS|Windows)/.test(data))) {
       name = /[a-z]+/i.exec(data) + ' Browser';
-    }
-    // detect unspecified Safari versions
-    else if (name == 'Safari' && (!version || parseInt(version) > 45)) {
-      data = (/AppleWebKit\/(\d+)/.exec(ua) || 0)[1] || Infinity;
-      version = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 534 ? '4+' : version;
     }
     // detect IE compatibility mode
     else if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
@@ -1418,13 +1413,20 @@
     else if (name && !product && !/Browser/.test(name) && /Mobi/.test(ua)) {
       name += ' Mobile';
     }
+    // detect unspecified Safari versions
+    if (data = (/Safari\/(\d+)/.exec(ua) || /AppleWebKit\/(\d+)/.exec(ua) || 0)[1]) {
+      data = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 533 ? '4.x' : '4+';
+      version = name == 'Safari' && (!version || parseInt(version) > 45) ? data : version;
+      layout = 'like Safari ' + data;
+    }
     // detect platform preview
     if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
+      layout = layout && !/like /.test(layout) ? 'rendered by ' + layout : layout;
       description.unshift('platform preview');
     }
-    // detect layout engines
+    // add engine information
     if (layout && /Browser|Lunascape|Maxthon|Sleipnir/.test(name)) {
-      description.push((/preview/.test(description) ? 'rendered by ' : '') + layout);
+      description.push(layout);
     }
     // add contextual information
     if (description.length) {
