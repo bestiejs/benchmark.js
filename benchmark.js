@@ -437,7 +437,7 @@
 
   /**
    * A generic bare-bones `Array#forEach` solution.
-   * Callbacks may terminate the loop by explicitly returning false.
+   * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
@@ -499,7 +499,7 @@
   }
 
   /**
-   * Converts a number to a more readable comma separated string representation.
+   * Converts a number to a more readable comma-separated string representation.
    * @static
    * @member Benchmark
    * @param {Number} number The number to convert.
@@ -545,7 +545,7 @@
   }
 
   /**
-   * A generic bare-bones Array#indexOf solution.
+   * A generic bare-bones `Array#indexOf` solution.
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
@@ -791,7 +791,7 @@
   }
 
   /**
-   * A no operation function.
+   * A no-operation function.
    * @static
    * @member Benchmark
    */
@@ -1518,7 +1518,7 @@
     // iterate over an object's direct properties
     'forIn': forIn,
 
-    // converts a number to a comma separated string
+    // converts a number to a comma-separated string
     'formatNumber': formatNumber,
 
     // xbrowser Object#hasOwnProperty

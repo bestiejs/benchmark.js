@@ -1,5 +1,7 @@
 <?php
 
+  header('Content-Type: text/plain;charset=utf-8');
+
   /**
    * Modify a string by replacing named tokens with matching assoc. array values.
    * @param {String} string The string to modify.
@@ -120,7 +122,7 @@
       $hash = ($isStatic ? "static-" : "") . $name;
 
       // define #{link}
-      $link = "../benchmark.js#L" . $ln;
+      $link = "https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L" . $ln;
 
       // define #{separator}
       $separator = !$isStatic && strpos($member, "#") === false ? "#" : ".";
@@ -250,16 +252,8 @@
 
   // save it to a .md file
   file_put_contents("docs/" . basename($_GET["f"]) . ".md", $content);
+
+  // print
+  echo $content . PHP_EOL;
+
 ?>
-<!doctype html>
-<html>
-<head>
-<title>Markdown Output</title>
-<meta charset="utf-8">
-</head>
-<body>
-<pre>
-<?php echo $content . PHP_EOL; ?>
-</pre>
-</body>
-</html>
