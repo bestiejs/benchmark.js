@@ -1305,7 +1305,7 @@
         data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
         name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,Nook Browser,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
         os = 'Android,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
-        product = 'BlackBerry\\s?\\d+,iP[ao]d,iPhone,Nook',
+        product = 'BlackBerry\\s?\\d+,iP[ao]d,iPhone,Kindle,Nook',
         version = isClassOf(window.opera, 'Opera') && opera.version();
 
     function capitalize(string) {
@@ -1318,7 +1318,7 @@
     });
 
     product = reduce(product.split(','), function(product, guess) {
-      return product || (product = RegExp(guess + '[^ ();/-]*', 'i').exec(ua));
+      return product || (product = RegExp(guess + '[^ ();-]*', 'i').exec(ua));
     });
 
     os = reduce(os.split(','), function(os, guess) {
@@ -1351,19 +1351,28 @@
     });
 
     // detect non Opera versions
-    version = reduce(/webOS/.test(os) ? [name] : ['version', /fox/.test(name) ? 'Firefox' : name, product], function(version, guess, i) {
-      return version || (version = (RegExp(guess + (i == 1 ? '[ /-]' : '/') + '([^ ();/-]*)', 'i').exec(ua) || 0)[1]);
+    version = reduce([/webOS/.test(os) ? name : 'version', /fox/.test(name) ? 'Firefox' : name, 'NetFront'], function(version, guess) {
+      return version || (version = (RegExp(guess + '[ /-]([^ ();/-]*)', 'i').exec(ua) || 0)[1]) || null;
     }, version);
 
     // cleanup product
-    product = product && capitalize(trim(String(product).replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]));
-
+    if (product) {
+      product = (data = String(product).split('/'))[0];
+      if (data = data[1]) {
+        if (/\d+/.test(product)) {
+          version = version || data;
+        } else {
+          product += ' ' + data;
+        }
+      }
+      product = capitalize(trim(product.replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]));
+    }
     // detect server-side js
     if (me && isHostType(me, 'global')) {
       if (typeof exports == 'object' && exports) {
         if (me == window && typeof system == 'object' && system) {
           name = system.global == global ? 'Narwhal' : 'RingoJS';
-          os = system.os;
+          os = system.os || null;
         }
         else if (typeof process == 'object' && process) {
           name = 'Node.js';

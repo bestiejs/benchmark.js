@@ -331,6 +331,18 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Iron/7.0.520.1 Chrome/7.0.520.1 Safari/534.7'
     },
 
+    'Kindle Browser 3.3 on Kindle 1.0': {
+      'ua': 'Mozilla/4.0 (compatible; Linux 2.6.10) NetFront/3.3 Kindle/1.0 (screen 600x800)'
+    },
+
+    'Kindle Browser 3.4 on Kindle 2.0': {
+      'ua': 'Mozilla/4.0 (compatible; Linux 2.6.22) NetFront/3.4 Kindle/2.0 (screen 600x800)'
+    },
+
+    'Kindle Browser 4.0 (WebKit) on Kindle 3.0': {
+      'ua': 'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/528.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)'
+    },
+
     'K-Meleon 1.5.0#{beta}2 on Windows XP': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.14) Gecko/20080406 K-Meleon/1.5.0b2'
     },
@@ -821,7 +833,17 @@ test("user agent detection", function() {
   };
 
   Benchmark.forIn(Tests, function(value, key) {
+    var platform = getPlatform(value);
     key = Benchmark.interpolate(key, { 'alpha': '\u03b1', 'beta': '\u03b2' });
-    equals(String(getPlatform(value)), key, key);
+
+    // test toString()
+    equals(String(platform), key, key);
+
+    // test null values
+    Benchmark.forIn(platform, function(value, key) {
+      if (!value) {
+        strictEqual(value, null, 'Benchmark.platform.' + key);
+      }
+    });
   });
 });
