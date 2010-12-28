@@ -15,14 +15,17 @@
   HAS_STORAGE = isHostType(window, 'localStorage') &&
     isHostType(localStorage, 'removeItem'),
 
-  /** Detect a Java environment */
+  /** Detect Java environment */
   IN_JAVA = isHostType(window, 'java') &&
     !isHostType(window, 'netscape'),
 
-  /** Integrity check for compiled tests */
+  /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
-  /** Divisors used to avoid hz of Infinity */
+  /** Unit of the timer */
+  TIMER_UNIT = 'ms',
+
+  /** Used to avoid hz of Infinity */
   CYCLE_DIVISORS = {
     '1': 4096,
     '2': 512,
@@ -241,7 +244,7 @@
         Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
     };
 
-    function getRes() {
+    function getRes(unit) {
       var measured,
           start,
           count = 50,
@@ -251,12 +254,12 @@
 
       // get average smallest measurable time
       while (count--) {
-        if (timerUnit == 'us') {
+        if (unit == 'us') {
           divisor = 1e6;
           timerNS.start();
           while(!(measured = timerNS.microseconds()));
         }
-        else if (timerUnit == 'ns') {
+        else if (unit == 'ns') {
           divisor = 1e9;
           start = timerNS.nanoTime();
           while(!(measured = timerNS.nanoTime() - start));
@@ -282,7 +285,6 @@
         fallback,
         timerNS,
         timerRes,
-        timerUnit,
         min = 0.0015,
         proto = Benchmark.prototype,
         code = 'var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};return{time:r$,uid:"$"}|f$()|m$,n$';
@@ -302,10 +304,10 @@
     }
     try {
       // check type in case Safari returns an object instead of a number
-      timerNS = typeof timerNS.nanoTime() == 'number' && timerNS;
-      timerUnit = 'ns';
-      timerRes = getRes();
-      timerNS = timerRes <= min && timerNS;
+      timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
+      timerRes = getRes('ns');
+      timerNS  = timerRes <= min && timerNS;
+      TIMER_UNIT = 'ns';
     } catch(e) { }
 
     // detect microsecond support:
@@ -313,17 +315,16 @@
     // in at least Chrome 7 to use chrome.Interval
     if (!timerNS) {
       try {
-        timerNS = new (window.chrome || window.chromium).Interval;
-        timerUnit = 'us';
-        timerRes = getRes();
-        timerNS = timerRes <= min && timerNS;
+        timerNS  = new (window.chrome || window.chromium).Interval;
+        timerRes = getRes('us');
+        timerNS  = timerRes <= min && timerNS;
+        TIMER_UNIT = 'us';
       } catch(e) { }
     }
     // else milliseconds
     if (!timerNS) {
       timerNS = Date;
-      timerUnit = 'ms';
-      timerRes = getRes();
+      timerRes = getRes('ms');
     }
     // error if there are no working timers
     if (timerRes == Infinity) {
@@ -331,13 +332,13 @@
     }
 
     // use API of chosen timer
-    if (timerUnit == 'ns') {
+    if (TIMER_UNIT == 'ns') {
       code = interpolate(code, {
         'start': 's$=n$.nanoTime()',
         'end': 'r$=(n$.nanoTime()-s$)/1e9'
       });
     }
-    else if (timerUnit == 'us') {
+    else if (TIMER_UNIT == 'us') {
       code = interpolate(code, {
         'start': 's$=n$.start()',
         'end': 'r$=n$.microseconds()/1e6'
@@ -361,13 +362,23 @@
   }
 
   /**
+   * Gets the storage key of the benchmark.
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @returns {String} The storage key.
+   */
+  function getStoreKey(me) {
+    return ['benchmark.js', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
+  }
+
+  /**
    * Records benchmark results to local storage.
    * @private
    * @param {Object} me The benchmark instance.
    */
   function store(me) {
     if (HAS_STORAGE) {
-      localStorage['bm:' + Benchmark.platform + ':' + me.fn.uid] =
+      localStorage[getStoreKey(me)] =
         join(reduce([me, me.times], function(record, object) {
           forIn(object, function(value, key) {
             // record properties with numeric values
@@ -388,7 +399,7 @@
    */
   function restore(me) {
     var data,
-        key = 'bm:' + Benchmark.platform + ':' + me.fn.uid,
+        key = getStoreKey(me),
         persist = me.persist,
         expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity;
 
@@ -414,10 +425,9 @@
    * @member Benchmark
    */
   function clearStorage() {
-    var partial = 'bm:' + Benchmark.platform + ':';
     if (HAS_STORAGE) {
       forIn(localStorage, function(value, key, object) {
-        if (!key.indexOf(partial)) {
+        if (!key.indexOf('benchmark.js:')) {
           object.removeItem(key);
         }
       });
@@ -1029,11 +1039,11 @@
       while (count--) {
         sample.push(queue[queue.push(me.clone({
           'computing': queue,
-          'onAbort': noop,
-          'onReset': noop,
-          'onComplete': onComplete,
-          'onCycle': onCycle,
-          'onStart': onStart
+          'events': {
+            'complete': [onComplete],
+            'cycle': [onCycle],
+            'start': [onStart]
+          }
         })) - 1]);
       }
     }
