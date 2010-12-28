@@ -325,6 +325,7 @@
     if (!timerNS) {
       timerNS = Date;
       timerRes = getRes('ms');
+      TIMER_UNIT = 'ms';
     }
     // error if there are no working timers
     if (timerRes == Infinity) {
@@ -435,7 +436,7 @@
   }
 
   /**
-   * A generic bare-bones Array#forEach solution.
+   * A generic bare-bones `Array#forEach` solution.
    * Callbacks may terminate the loop by explicitly returning false.
    * @static
    * @member Benchmark
@@ -469,7 +470,7 @@
   }
 
   /**
-   * A generic bare-bones Array#filter solution.
+   * A generic bare-bones `Array#filter` solution.
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
@@ -775,7 +776,7 @@
   }
 
   /**
-   * A generic bare-bones Array#map solution.
+   * A generic bare-bones `Array#map` solution.
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
@@ -799,7 +800,7 @@
   }
 
   /**
-   * A generic bare-bones Array#reduce solution.
+   * A generic bare-bones `Array#reduce` solution.
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
@@ -815,7 +816,7 @@
   }
 
   /**
-   * A generic bare-bones String#trim solution.
+   * A generic bare-bones `String#trim` solution.
    * @static
    * @member Benchmark
    * @param {String} string The string to trim.
