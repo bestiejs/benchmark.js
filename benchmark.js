@@ -306,8 +306,7 @@
       // check type in case Safari returns an object instead of a number
       timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
       timerRes = getRes('ns');
-      timerNS  = timerRes <= min && timerNS;
-      TIMER_UNIT = 'ns';
+      timerNS  = timerRes <= min && (TIMER_UNIT = 'ns', timerNS);
     } catch(e) { }
 
     // detect microsecond support:
@@ -317,15 +316,13 @@
       try {
         timerNS  = new (window.chrome || window.chromium).Interval;
         timerRes = getRes('us');
-        timerNS  = timerRes <= min && timerNS;
-        TIMER_UNIT = 'us';
+        timerNS  = timerRes <= min && (TIMER_UNIT = 'us', timerNS);
       } catch(e) { }
     }
     // else milliseconds
     if (!timerNS) {
       timerNS = Date;
       timerRes = getRes('ms');
-      TIMER_UNIT = 'ms';
     }
     // error if there are no working timers
     if (timerRes == Infinity) {
