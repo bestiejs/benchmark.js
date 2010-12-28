@@ -77,7 +77,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
-    'Android Browser 4.1#{alpha} (platform preview like Safari 4+) on Android 2.2.1': {
+    'Android Browser 4.1#{alpha} (platform preview; like Safari 4+) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.1a Mobile Safari/533.1',
       'external': null
     },
@@ -274,21 +274,21 @@ test("user agent detection", function() {
       'mode': 9
     },
 
-    'IE 9.0#{beta} (platform preview running in IE 5 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 5 mode) on Windows 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 5
     },
 
-    'IE 9.0#{beta} (platform preview running in IE 7 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 7 mode) on Windows 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 7
     },
 
-    'IE 9.0#{beta} (platform preview running in IE 8 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 8 mode) on Windows 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
@@ -368,7 +368,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.13) Gecko/20100917 Firefox/3.5.13 Lunascape/6.2.1.22445'
     },
 
-    'Lunascape 6.3.1.22729#{beta} (platform preview rendered by Trident) on Windows Vista': {
+    'Lunascape 6.3.1.22729#{beta} (platform preview; rendered by Trident) on Windows Vista': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; Lunascape/6.3.1.22729',
       'appMinorVersion': 'beta',
       'external': null,
@@ -399,7 +399,7 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Maxthon 3.x#{alpha} (platform preview rendered by Trident) on Windows XP': {
+    'Maxthon 3.x#{alpha} (platform preview; rendered by Trident) on Windows XP': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; Maxthon/3.0)',
       'appMinorVersion': 'alpha',
       'external': null,
@@ -776,7 +776,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; Sleipnir 2.8.4)'
     },
 
-    'Sleipnir 2.9.2#{beta} (platform preview rendered by Trident) on Windows XP': {
+    'Sleipnir 2.9.2#{beta} (platform preview; rendered by Trident) on Windows XP': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; Sleipnir/2.9.2)',
       'appMinorVersion': 'beta',
       'external': null,

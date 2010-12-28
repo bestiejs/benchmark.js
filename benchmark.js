@@ -1454,7 +1454,7 @@
     }
     // add contextual information
     if (description.length) {
-      description = ['(' + description.join(' ') + ')'];
+      description = ['(' + description.join('; ') + ')'];
     }
     // add product to description
     if (product && String(name).indexOf(product) < 0) {
@@ -1559,6 +1559,9 @@
   });
 
   /*--------------------------------------------------------------------------*/
+
+  // avoid repeat calibrations
+  Calibration.prototype.persist = true;
 
   // IE may ignore `toString` in a for-in loop
   Benchmark.prototype.toString = toString;
@@ -1773,13 +1776,6 @@
 
     // run the benchmark
     'run': run
-  });
-
-  /*--------------------------------------------------------------------------*/
-
-  extend(Calibration.prototype, {
-    // avoid repeat calibrations
-    'persist': true
   });
 
   /*--------------------------------------------------------------------------*/
