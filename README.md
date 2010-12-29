@@ -12,7 +12,7 @@ In a browser:
 
     <script src="benchmark.js"></script>
 
-Optionally, add the `nanoTime` Java applet to the `<body>`:`
+Optionally, add the `nanoTime` Java applet to the `<body>`:
 
     <applet code="nano" archive="nano.jar"></applet>
 
