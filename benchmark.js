@@ -1096,7 +1096,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          maxedOut = burst ? !--burstCount : elapsed >= me.MAX_TIME_ELAPSED,
+          maxedOut = burst ? !--burstCount : async && elapsed >= me.MAX_TIME_ELAPSED,
           sampleSize = sample.length,
           sumOf = function(sum, clone) { return sum + clone.hz; },
           varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
