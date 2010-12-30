@@ -1024,19 +1024,21 @@
    * @private
    * @param {Object} me The benchmark instance.
    * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [burst=false] Flag to run in bursts.
    * @param {Array} [sample=[]] Benchmarks used for statistical analysis.
    */
-  function compute(me, async, sample) {
+  function compute(me, async, burst, sample) {
     var calibrated = isCalibrated(),
         calibrating = me.constructor == Calibration,
         fn = me.fn,
         queue = [],
+        burstCount = async ? 2 : 48,
         runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {
       while (count--) {
         sample.push(queue[queue.push(me.clone({
-          'computing': queue,
+          'computing': true,
           'events': {
             'complete': [onComplete],
             'cycle': [onCycle],
@@ -1094,7 +1096,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
+          maxedOut = burst ? !--burstCount : elapsed >= me.MAX_TIME_ELAPSED,
           sampleSize = sample.length,
           sumOf = function(sum, clone) { return sum + clone.hz; },
           varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
@@ -1122,10 +1124,10 @@
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
         if (rme > 1 && (!maxedOut || calibrating)) {
-          if (maxedOut && async) {
-            // switch to sync mode
+          if (maxedOut) {
+            // switch to burst mode
             queue.length = 0;
-            compute(me, false, sample);
+            compute(me, !async, true, sample);
           }
           else {
             enqueue(1);
