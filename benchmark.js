@@ -366,7 +366,7 @@
    * @returns {String} The storage key.
    */
   function getStoreKey(me) {
-    return ['benchmark.js', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
+    return ['benchmark.js', 'r1', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
   }
 
   /**
@@ -1562,9 +1562,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // avoid repeat calibrations
-  Calibration.prototype.persist = true;
-
   // IE may ignore `toString` in a for-in loop
   Benchmark.prototype.toString = toString;
 
@@ -1778,6 +1775,17 @@
 
     // run the benchmark
     'run': run
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  extend(Calibration.prototype, {
+
+    // allows extremely small clock speeds
+    'DETECT_INFINITY': false,
+
+    // avoid repeat calibrations
+    'persist': true
   });
 
   /*--------------------------------------------------------------------------*/
