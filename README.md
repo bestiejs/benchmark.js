@@ -6,6 +6,8 @@ A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks
 
 The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/docs>
 
+For a list of upcoming features, check out our [roadmap](https://github.com/mathiasbynens/benchmark.js/wiki/Roadmap).
+
 ## Installation and usage
 
 In a browser:
