@@ -106,7 +106,13 @@
    *   "onReset": onReset,
    *
    *   // called when benchmark is complete
-   *   "onComplete": onComplete
+   *   "onComplete": onComplete,
+   *
+   *   // compiled/called before the test loop
+   *   "setup": setup,
+   *
+   *   // compiled/called after the test loop
+   *   "teardown": teardown
    * });
    */
   function Benchmark(fn, options) {
@@ -206,8 +212,7 @@
    */
   function clock() {
     clock = function(me) {
-      var body,
-          embedded,
+      var embedded,
           result,
           fn = me.fn,
           compilable = fn.compilable,
@@ -215,10 +220,12 @@
 
       if (compilable == null || compilable) {
         try {
-          // extract test body
-          body = (String(fn).match(/^[^{]+{([\s\S]*)}\s*$/) || 0)[1];
-          // compile while-loop using extracted body
-          embedded = Function(args, code[0] + body + code[1]);
+          // insert test body into the while-loop
+          embedded = Function(args,
+            interpolate(code[0], { 'setup': getSource(me.setup) }) +
+            getSource(fn) +
+            interpolate(code[1], { 'teardown': getSource(me.teardown) })
+          );
 
           if (compilable == null) {
             // determine if compiled code is exited early, usually by a rogue
@@ -287,7 +294,7 @@
         timerRes,
         min = 0.0015,
         proto = Benchmark.prototype,
-        code = 'var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};return{time:r$,uid:"$"}|f$()|m$,n$';
+        code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
 
     // detect nanosecond support:
     // Java System.nanoTime()
@@ -348,15 +355,31 @@
         'end': 'r$=((new n$).getTime()-s$)/1e3'
       });
     }
+
     // inject uid into variable names to avoid collisions with
     // embedded tests and create non-embedding fallback
     code = code.replace(/\$/g, EMBEDDED_UID).split('|');
     args = code.pop();
-    fallback = Function(args, code[0] + code.pop() + code[1]);
+    fallback = Function(args,
+      interpolate(code[0], { 'setup': code.pop() }) +
+      code.pop() +
+      interpolate(code[1], { 'teardown': code.pop() })
+    );
 
     // resolve time to achieve a percent uncertainty of 1%
     proto.MIN_TIME || (proto.MIN_TIME = timerRes / 2 / 0.01);
     return clock.apply(null, arguments);
+  }
+
+  /**
+   * Gets the source code of a function.
+   * @private
+   * @param {Function} fn The function.
+   * @returns {String} The function's source code.
+   */
+  function getSource(fn) {
+    return trim((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
+      .replace(/([^\n])$/, '$1\n');
   }
 
   /**
@@ -1774,7 +1797,13 @@
     'reset': reset,
 
     // run the benchmark
-    'run': run
+    'run': run,
+
+    // used to perform operations immediately before the test loop
+    'setup': noop,
+
+    // used to perform operations immediately after the test loop
+    'teardown': noop
   });
 
   /*--------------------------------------------------------------------------*/
