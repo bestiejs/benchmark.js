@@ -1578,7 +1578,7 @@
      * @member Benchmark
      * @type String
      */
-    'version': '0.1.338',
+    'version': '0.1.339',
 
     // clears locally stored data
     'clearStorage': clearStorage,
