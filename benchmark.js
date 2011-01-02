@@ -372,6 +372,16 @@
   }
 
   /**
+   * Gets the critical value for the specified degrees of freedom.
+   * @private
+   * @param {Number} df The degrees of freedom.
+   * @returns {Number} The critical value.
+   */
+  function getCriticalValue(df) {
+    return T_DISTRIBUTION[df] || T_DISTRIBUTION.Infinity;
+  }
+
+  /**
    * Gets the source code of a function.
    * @private
    * @param {Function} fn The function.
@@ -1087,14 +1097,14 @@
 
     function enqueue(count) {
       while (count--) {
-        sample.push(queue[queue.push(me.clone({
+        queue.push(me.clone({
           'computing': true,
           'events': {
             'complete': [onComplete],
             'cycle': [onCycle],
             'start': [onStart]
           }
-        })) - 1]);
+        }));
       }
     }
 
@@ -1142,14 +1152,15 @@
           rme,
           sd,
           sem,
+          variance,
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
           maxedOut = burst ? !--burstCount : async && elapsed >= me.MAX_TIME_ELAPSED,
-          sampleSize = sample.length,
-          sumOf = function(sum, clone) { return sum + clone.hz; },
-          varianceOf = function(sum, clone) { return sum + Math.pow(clone.hz - mean, 2); };
+          size = sample.push(clone.hz),
+          sumOf = function(sum, hz) { return sum + hz; },
+          varOf = function(sum, hz) { return sum + Math.pow(hz - mean, 2); };
 
       // exit early for unclockable tests
       if (clone.hz == Infinity) {
@@ -1162,13 +1173,15 @@
       // simulate onComplete and enqueue additional runs if needed
       else if (!queue.length) {
         // compute values
-        mean = reduce(sample, sumOf, 0) / sampleSize || 0;
+        mean = reduce(sample, sumOf, 0) / size || 0;
+        // sample variance
+        variance = reduce(sample, varOf, 0) / (size - 1) || 0;
         // standard deviation
-        sd = Math.sqrt(reduce(sample, varianceOf, 0) / (sampleSize - 1)) || 0;
+        sd = Math.sqrt(variance) || 0;
         // standard error of the mean
-        sem =  sd / Math.sqrt(sampleSize) || 0;
+        sem = sd / Math.sqrt(size) || 0;
         // margin of error
-        moe = sem * (T_DISTRIBUTION[sampleSize - 1] || T_DISTRIBUTION.Infinity);
+        moe = sem * getCriticalValue(size - 1);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
