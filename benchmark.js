@@ -389,7 +389,7 @@
    * @returns {String} The storage key.
    */
   function getStoreKey(me) {
-    return ['benchmark.js', 'r1', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
+    return ['benchmark.js', 'r2', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
   }
 
   /**
@@ -398,17 +398,25 @@
    * @param {Object} me The benchmark instance.
    */
   function store(me) {
+    var objects = [me],
+        result = [];
+
+    function record(value, key) {
+      // record properties with numeric values
+      if (isClassOf(value, 'Number') &&
+          /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
+        result.push(key + ':' + value);
+      }
+      else if (value && isClassOf(value, 'Object')) {
+        objects.push(value);
+      }
+    }
+
     if (HAS_STORAGE) {
-      localStorage[getStoreKey(me)] =
-        join(reduce([me, me.times], function(record, object) {
-          forIn(object, function(value, key) {
-            // record properties with numeric values
-            if (isClassOf(value, 'Number') && /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
-              record[key] = value;
-            }
-          });
-          return record;
-        }, { }));
+      while (objects.length) {
+        forIn(objects.pop(), record);
+      }
+      localStorage[getStoreKey(me)] = result.join();
     }
   }
 
@@ -420,20 +428,36 @@
    */
   function restore(me) {
     var data,
-        key = getStoreKey(me),
+        key,
+        match,
+        object,
+        value,
+        objects = [me],
         persist = me.persist,
         expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity;
 
+    // load and ensure data hasn't expired
     if (HAS_STORAGE) {
-      // load data and ensure it hasn't expired
-      data = (data = localStorage[key]) &&
-        +new Date - (/created: (\d+)/.exec(data) || 0)[1] < expires && data;
-
-      // copy persisted values to benchmark
-      each(data && data.split(',') || [], function(pair) {
-        pair = pair.split(': ');
-        (/^(?:cycle|elapsed|period|start|stop)$/.test(pair[0]) ? me.times : me)[pair[0]] = +pair[1];
-      });
+      data = (data = localStorage[getStoreKey(me)]) &&
+        +new Date - (/created:(\d+)/.exec(data) || 0)[1] < expires && data;
+    }
+    // restore values
+    if (data) {
+      while (objects.length) {
+        object = objects.pop();
+        for (key in object) {
+          value = object[key];
+          match = RegExp(key + ':([^,]+)').exec(data);
+          // extract value and remove from data
+          if (match) {
+            data = data.replace(match[0], '');
+            object[key] = +match[1];
+          }
+          else if (value && isClassOf(value, 'Object')) {
+            objects.push(value);
+          }
+        }
+      }
     }
     return !!data;
   }
@@ -988,31 +1012,34 @@
    */
   function reset() {
     var changed,
+        pair,
         me = this,
-        keys = 'MoE RME SD SEM aborted count cycles error hz running'.split(' '),
-        timeKeys = 'cycle elapsed period start stop'.split(' '),
-        times = me.times,
-        proto = me.constructor.prototype;
+        source = extend(extend({ }, me.constructor.prototype), me.options),
+        pairs = [[source, me]];
+
+    function check(value, key) {
+      var other = pair[1][key];
+      if (value && isClassOf(value, 'Object')) {
+        pairs.push([value, other]);
+      }
+      else if (isClassOf(value, 'Number') &&
+          key != 'created' && value != other) {
+        pair[1][key] = value;
+        changed = true;
+      }
+    }
 
     if (me.running) {
       // no worries, reset() is called within abort()
       me.abort();
-      me.aborted = proto.aborted;
+      me.aborted = source.aborted;
     }
     else {
       // check if properties have changed and reset them
-      each(keys, function(key) {
-        if (me[key] != proto[key]) {
-          changed = true;
-          me[key] = proto[key];
-        }
-      });
-      each(timeKeys, function(key) {
-        if (times[key] != proto.times[key]) {
-          changed = true;
-          times[key] = proto.times[key];
-        }
-      });
+      while (pairs.length) {
+        pair = pairs.pop();
+        (isArray(pair[0]) ? each : forIn)(pair[0], check);
+      }
       if (changed) {
         me.emit('reset');
       }
