@@ -1012,10 +1012,20 @@
    * @returns {Number} Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
    */
   function compare(other) {
-    var me = this,
-        a = { 'lower': me.hz - me.MoE,       'upper': me.hz + me.MoE },
-        b = { 'lower': other.hz - other.MoE, 'upper': other.hz + other.MoE };
-    return a.lower <= b.upper && a.upper >= b.lower ? 0 : a.lower > b.lower ? 1 : -1;
+    // use welch t-test
+    // http://frank.mtsu.edu/~dkfuller/notes302/welcht.pdf
+    // http://www.public.iastate.edu/~alicia/stat328/Regression%20inference-part2.pdf
+    var a = this.stats,
+        b = other.stats,
+        pow = Math.pow,
+        bitA = a.variance / a.size,
+        bitB = b.variance / b.size,
+        df = pow(bitA + bitB, 2) / ((pow(bitA, 2) / a.size - 1) + (pow(bitB, 2) / b.size - 1)),
+        t = (a.mean - b.mean) / Math.sqrt(bitA + bitB),
+        c = getCriticalValue(Math.round(df));
+
+    // check if t-statistic is significant
+    return Math.abs(t) > c / 2 ? (t > 0 ? 1 : -1) : 0;
   }
 
   /**
@@ -1082,7 +1092,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Performs statistical calculations on benchmark results.
+   * Computes stats on benchmark results.
    * @private
    * @param {Object} me The benchmark instance.
    * @param {Boolean} [async=false] Flag to run asynchronously.
