@@ -437,7 +437,7 @@
               bench.times.cycle.toFixed(2) + ' seconds.';
 
             setHTML(cell, hz == Infinity ? hz :
-              formatNumber(hz) + ' <small>&plusmn;' + bench.RME.toFixed(2) + '%<\/small>');
+              formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
           }
           // status: pending
           else if (indexOf(me.queue, bench) > -1) {

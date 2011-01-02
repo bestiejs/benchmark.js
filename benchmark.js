@@ -132,6 +132,7 @@
     me.fn = fn;
     me.created = +new Date;
     me.options = options;
+    me.stats = extend({ }, me.stats);
     me.times = extend({ }, me.times);
   }
 
@@ -509,7 +510,7 @@
   }
 
   /**
-   * Copies source properties to the destination object.
+   * Copies own/inherited properties of a source object to the destination object.
    * @static
    * @member Benchmark
    * @param {Object} destination The destination object.
@@ -517,9 +518,10 @@
    * @returns {Object} The destination object.
    */
   function extend(destination, source) {
-    forIn(source || { }, function(value, key) {
-      destination[key] = value;
-    });
+    source || (source = { });
+    for (var key in source) {
+      destination[key] = source[key];
+    }
     return destination;
   }
 
@@ -1072,7 +1074,7 @@
       result += ': ' + join(error);
     } else {
       result += ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
-        me.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
+        me.stats.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
     }
     return result;
   }
@@ -1200,17 +1202,20 @@
         else {
           complete = true;
 
-          // set statistical data
-          me.MoE = moe;
-          me.RME = rme;
-          me.SD  = sd;
-          me.SEM = sem;
-
-          // set host results
+          // set host values
           me.count = clone.count;
           me.running = false;
           times.stop = now;
           times.elapsed = elapsed;
+          extend(me.stats, {
+            'MoE': moe,
+            'RME': rme,
+            'SD': sd,
+            'SEM': sem,
+            'mean': mean,
+            'size': size,
+            'variance': variance
+          });
 
           if (clone.hz != Infinity) {
             me.hz = mean;
@@ -1680,34 +1685,6 @@
     'MIN_TIME': 0,
 
     /**
-     * The margin of error.
-     * @member Benchmark
-     * @type Number
-     */
-    'MoE': 0,
-
-    /**
-     * The relative margin of error (expressed as a percentage of the mean).
-     * @member Benchmark
-     * @type Number
-     */
-    'RME': 0,
-
-    /**
-     * The sample standard deviation.
-     * @member Benchmark
-     * @type Number
-     */
-    'SD': 0,
-
-    /**
-     * The standard error of the mean.
-     * @member Benchmark
-     * @type Number
-     */
-    'SEM': 0,
-
-    /**
      * The number of times a test was executed.
      * @member Benchmark
      * @type Number
@@ -1768,6 +1745,63 @@
      * @member Benchmark
      */
     'on': addListener,
+
+    /**
+     * An object of stats including mean, margin or error, and standard deviation.
+     * @member Benchmark
+     * @type Object
+     */
+    'stats': {
+
+      /**
+       * The margin of error.
+       * @member Benchmark
+       * @type Number
+       */
+      'MoE': 0,
+
+      /**
+       * The relative margin of error (expressed as a percentage of the mean).
+       * @member Benchmark
+       * @type Number
+       */
+      'RME': 0,
+
+      /**
+       * The sample standard deviation.
+       * @member Benchmark
+       * @type Number
+       */
+      'SD': 0,
+
+      /**
+       * The standard error of the mean.
+       * @member Benchmark
+       * @type Number
+       */
+      'SEM': 0,
+
+      /**
+       * The sample arithmetic mean.
+       * @member Benchmark
+       * @type Number
+       */
+      'mean': 0,
+
+      /**
+       * The sample size.
+       * @member Benchmark
+       * @type Number
+       */
+      'size': 0,
+
+      /**
+       * The sample variance.
+       * @member Benchmark
+       * @type Number
+       */
+      'variance': 0
+    },
 
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
