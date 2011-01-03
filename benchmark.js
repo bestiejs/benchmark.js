@@ -1176,7 +1176,7 @@
 
       // exit early for unclockable tests
       if (clone.hz == Infinity) {
-        queue.length = sample.length = 0;
+        size = queue.length = sample.length = 0;
       }
       // exit early if aborted
       if (aborted) {
@@ -1187,9 +1187,9 @@
         // compute values
         mean = reduce(sample, sumOf, 0) / size || 0;
         // sample variance
-        variance = reduce(sample, varOf, 0) / (size - 1) || 0;
+        variance = reduce(sample, varOf, 0) / (size - 1);
         // standard deviation
-        sd = Math.sqrt(variance) || 0;
+        sd = Math.sqrt(variance);
         // standard error of the mean
         sem = sd / Math.sqrt(size) || 0;
         // margin of error
