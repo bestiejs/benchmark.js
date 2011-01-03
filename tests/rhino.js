@@ -1,7 +1,7 @@
 (function(global) {
 
   // load Benchmark
-  load('../benchmark/benchmark.js');
+  load('../benchmark.js');
 
   // hookup calibration notice
   Benchmark.CALIBRATIONS[0].on('start', function() {

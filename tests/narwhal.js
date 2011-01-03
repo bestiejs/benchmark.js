@@ -1,7 +1,7 @@
 (function() {
 
   // load Benchmark
-  var Benchmark = require('../../benchmark/benchmark.js').Benchmark;
+  var Benchmark = require('../benchmark.js').Benchmark;
 
   // hookup calibration notice
   Benchmark.CALIBRATIONS[0].on('start', function() {
