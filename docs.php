@@ -160,15 +160,15 @@
       $sortByB = array();
       $sortByC = array();
       foreach($api as $entry) {
-        // capitalized / ALL-CAPS properties first
-        $sortByA[] = preg_match("/^[A-Z]/", $entry["name"]);
-        // functions last
-        $sortByB[] = $entry["type"] == "Function" ? 1 : 0;
-        // group sub-object properties together
         $sub = array_pop(preg_split("/#/", $entry["member"]));
-        $sortByC[] = ($sub != $entry["member"] ? $sub : "") . $entry["name"];
+        // functions last
+        $sortByA[] = $entry["type"] == "Function" ? 1 : 0;
+        // group sub-object properties together
+        $sortByB[] = ($sub != $entry["member"] ? $sub : "") . $entry["name"];
+        // capitalized / ALL-CAPS properties first
+        $sortByC[] = preg_match("/^[A-Z]/", $entry["name"]);
       }
-      array_multisort($sortByA, SORT_DESC, $sortByB, SORT_ASC,  $sortByC, SORT_ASC, $api);
+      array_multisort($sortByA, SORT_ASC,  $sortByB, SORT_ASC, $sortByC, SORT_DESC, $api);
       unset($api);
     }
 

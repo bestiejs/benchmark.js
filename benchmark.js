@@ -1171,8 +1171,8 @@
           elapsed = (now - times.start) / 1e3,
           maxedOut = burst ? !--burstCount : async && elapsed >= me.MAX_TIME_ELAPSED,
           size = sample.push(clone.hz),
-          sumOf = function(sum, hz) { return sum + hz; },
-          varOf = function(sum, hz) { return sum + Math.pow(hz - mean, 2); };
+          sumOf = function(sum, x) { return sum + x; },
+          varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
 
       // exit early for unclockable tests
       if (clone.hz == Infinity) {
@@ -1765,49 +1765,49 @@
 
       /**
        * The margin of error.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'MoE': 0,
 
       /**
        * The relative margin of error (expressed as a percentage of the mean).
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'RME': 0,
 
       /**
        * The sample standard deviation.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'SD': 0,
 
       /**
        * The standard error of the mean.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'SEM': 0,
 
       /**
        * The sample arithmetic mean.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'mean': 0,
 
       /**
        * The sample size.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'size': 0,
 
       /**
        * The sample variance.
-       * @member Benchmark
+       * @member Benchmark#stats
        * @type Number
        */
       'variance': 0

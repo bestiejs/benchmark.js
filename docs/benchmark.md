@@ -30,28 +30,28 @@
 * [`Benchmark#INIT_RUN_COUNT`](#INIT_RUN_COUNT)
 * [`Benchmark#MAX_TIME_ELAPSED`](#MAX_TIME_ELAPSED)
 * [`Benchmark#MIN_TIME`](#MIN_TIME)
-* [`Benchmark#MoE`](#MoE)
-* [`Benchmark#RME`](#RME)
-* [`Benchmark#SD`](#SD)
-* [`Benchmark#SEM`](#SEM)
 * [`Benchmark#aborted`](#aborted)
 * [`Benchmark#count`](#count)
 * [`Benchmark#created`](#created)
 * [`Benchmark#cycles`](#cycles)
 * [`Benchmark#error`](#error)
 * [`Benchmark#hz`](#hz)
-* [`Benchmark#mean`](#mean)
 * [`Benchmark#persist`](#persist)
 * [`Benchmark#running`](#running)
-* [`Benchmark#size`](#size)
 * [`Benchmark#stats`](#stats)
+* [`Benchmark#stats.MoE`](#MoE)
+* [`Benchmark#stats.RME`](#RME)
+* [`Benchmark#stats.SD`](#SD)
+* [`Benchmark#stats.SEM`](#SEM)
+* [`Benchmark#stats.mean`](#mean)
+* [`Benchmark#stats.size`](#size)
+* [`Benchmark#stats.variance`](#variance)
 * [`Benchmark#times`](#times)
 * [`Benchmark#times.cycle`](#cycle)
 * [`Benchmark#times.elapsed`](#elapsed)
 * [`Benchmark#times.period`](#period)
 * [`Benchmark#times.start`](#start)
 * [`Benchmark#times.stop`](#stop)
-* [`Benchmark#variance`](#variance)
 * [`Benchmark#abort`](#abort)
 * [`Benchmark#addListener`](#addListener)
 * [`Benchmark#clone`](#clone)
@@ -324,22 +324,6 @@ A generic bare-bones `String#trim` solution.
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MoE" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1771" title="View in source">Benchmark#MoE</a>
-*(Number)*: The margin of error.
-<sup><code>[&#9650;][1]</code></sup>
-
-## <a name="RME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1778" title="View in source">Benchmark#RME</a>
-*(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
-<sup><code>[&#9650;][1]</code></sup>
-
-## <a name="SD" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1785" title="View in source">Benchmark#SD</a>
-*(Number)*: The sample standard deviation.
-<sup><code>[&#9650;][1]</code></sup>
-
-## <a name="SEM" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1792" title="View in source">Benchmark#SEM</a>
-*(Number)*: The standard error of the mean.
-<sup><code>[&#9650;][1]</code></sup>
-
 ## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1737" title="View in source">Benchmark#aborted</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
 <sup><code>[&#9650;][1]</code></sup>
@@ -364,10 +348,6 @@ A generic bare-bones `String#trim` solution.
 *(Number)*: The number of executions per second.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="mean" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1799" title="View in source">Benchmark#mean</a>
-*(Number)*: The sample arithmetic mean.
-<sup><code>[&#9650;][1]</code></sup>
-
 ## <a name="persist" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1744" title="View in source">Benchmark#persist</a>
 *(Mixed)*: A flag to indicate if results persist OR the number of days to persist.
 <sup><code>[&#9650;][1]</code></sup>
@@ -376,12 +356,36 @@ A generic bare-bones `String#trim` solution.
 *(Boolean)*: A flag to indicate if the benchmark is running.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="size" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1806" title="View in source">Benchmark#size</a>
+## <a name="stats" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1764" title="View in source">Benchmark#stats</a>
+*(Object)*: An object of stats including mean, margin or error, and standard deviation.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="MoE" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1771" title="View in source">Benchmark#stats.MoE</a>
+*(Number)*: The margin of error.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="RME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1778" title="View in source">Benchmark#stats.RME</a>
+*(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="SD" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1785" title="View in source">Benchmark#stats.SD</a>
+*(Number)*: The sample standard deviation.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="SEM" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1792" title="View in source">Benchmark#stats.SEM</a>
+*(Number)*: The standard error of the mean.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="mean" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1799" title="View in source">Benchmark#stats.mean</a>
+*(Number)*: The sample arithmetic mean.
+<sup><code>[&#9650;][1]</code></sup>
+
+## <a name="size" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1806" title="View in source">Benchmark#stats.size</a>
 *(Number)*: The sample size.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="stats" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1764" title="View in source">Benchmark#stats</a>
-*(Object)*: An object of stats including mean, margin or error, and standard deviation.
+## <a name="variance" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1813" title="View in source">Benchmark#stats.variance</a>
+*(Number)*: The sample variance.
 <sup><code>[&#9650;][1]</code></sup>
 
 ## <a name="times" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1821" title="View in source">Benchmark#times</a>
@@ -406,10 +410,6 @@ A generic bare-bones `String#trim` solution.
 
 ## <a name="stop" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1856" title="View in source">Benchmark#times.stop</a>
 *(Number)*: A timestamp of when the benchmark finished *(ms)*.
-<sup><code>[&#9650;][1]</code></sup>
-
-## <a name="variance" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1813" title="View in source">Benchmark#variance</a>
-*(Number)*: The sample variance.
 <sup><code>[&#9650;][1]</code></sup>
 
 ## <a name="abort" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L964" title="View in source">Benchmark#abort()</a>
