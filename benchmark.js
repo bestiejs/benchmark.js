@@ -35,7 +35,7 @@
   },
 
   /**
-   * T-Distribution critical values for 95% confidence
+   * T-Distribution two-tailed critical values for 95% confidence
    * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
    */
   T_DISTRIBUTION = {
@@ -1025,7 +1025,7 @@
         c = getCriticalValue(Math.round(df));
 
     // check if t-statistic is significant
-    return Math.abs(t) > c / 2 ? (t > 0 ? 1 : -1) : 0;
+    return Math.abs(t) > c ? (t > 0 ? 1 : -1) : 0;
   }
 
   /**
