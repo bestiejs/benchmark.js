@@ -34,6 +34,48 @@ In [Rhino](http://www.mozilla.org/rhino/):
 
     load('benchmark.js');
 
+Usage example:
+
+    function testA() {
+      /o/.test("Hello World!");
+    }
+    
+    function testB() {
+      "Hello World!".indexOf("o") > -1;
+    }
+    
+    var benches = [
+      new Benchmark(testA, { "name": "RegExp#test" }),
+      new Benchmark(testB, { "name": "String#indexOf" })
+    ];
+    
+    // add listeners
+    Benchmark.invoke(benches, "on", "complete", function(bench) {
+      console.log( bench.toString() );
+    });
+    
+    // run benchmarks
+    Benchmark.invoke(benches, {
+      "methodName": "run",
+      "onComplete": function() {
+        var a = benches[0],
+            b = benches[1],
+            rank = a.compare(b);
+
+        // report results
+        console.log(
+          a.name + " is " +
+          (rank == 0 ? " <indeterminate> " : rank > 0 ? "faster" : "slower") +
+          " than " + b.name
+        );
+      }
+    });
+    
+    // logs:
+    // > RegExp#test × 4,161,532 ±0.99% (59 cycles)
+    // > String#indexOf × 6,139,623 ±1.00% (131 cycles)
+    // > RegExp#test is slower than String#indexOf
+
 ## Cloning this repo
 
 To clone this repository including all submodules, using git 1.6.5 or later:

@@ -625,14 +625,14 @@
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} methodName Name of method to invoke or options object.
-   * @param {Mixed} args Arguments to invoke the method with.
+   * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
    * @example
    *
    * // invoke `reset` on all benchmarks
    * Benchmark.invoke(benches, "reset");
    *
    * // invoke `emit` with arguments
-   * Benchmark.invoke(benches, "emit", ["complete", b, c]);
+   * Benchmark.invoke(benches, "emit", "complete", listener);
    *
    * // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
    * Benchmark.invoke(benches, {
@@ -653,8 +653,9 @@
    *   "onComplete": onComplete
    * });
    */
-  function invoke(benches, methodName, args) {
-    var async,
+  function invoke(benches, methodName) {
+    var args,
+        async,
         bench,
         queued,
         i = 0,
@@ -671,7 +672,7 @@
         listeners.splice(0, 0, listeners.pop());
       }
       // execute method
-      me[methodName].apply(me, args || []);
+      me[methodName].apply(me, args);
       // if synchronous return next benchmark after completing the current
       return !async && onComplete(me);
     }
@@ -708,7 +709,7 @@
     }
 
     if (typeof methodName == 'string') {
-      args = isArray(args || (args = [])) ? args : [args];
+      args = slice.call(arguments, 2);
     }
     else {
       // juggle arguments
