@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-<title>benchmark.js test page | jsPerf</title>
+<title>Benchmark.js test page | jsPerf</title>
 <!-- http://jsperf.com/benchmark-js-test-page -->
 <meta charset="utf-8">
 <meta name="description" content="This is just a test document for benchmark.js.">
@@ -15,7 +15,7 @@
 <body>
 <article>
   <hgroup>
-    <h1><code>benchmark.js</code> test page</h1>
+    <h1>Benchmark.js test page</h1>
     <h2>JavaScript performance comparison</h2>
   </hgroup>
   <p class="meta">
@@ -24,156 +24,169 @@
     and last updated <time datetime="2010-08-02T18:45:51+02:00">12 seconds ago</time>
   </p>
 
-  <h2>Info</h2>
-  <p>
-    This is just a test document for
-    <code>benchmark.<span class="me1">js</span></code>.
-  </p>
+  <section>
+    <h2>Info</h2>
+    <p>
+      This is just a test document for
+      <code>benchmark.<span class="me1">js</span></code>.
+    </p>
+  </section>
 
-  <h2>Preparation code</h2>
-  <pre><code><span
-    class="sc2">&lt;<span class="kw2">div</span> <span class="kw3">id</span><span
-    class="sy0">=</span><span class="st0">&quot;foo&quot;</span>&gt;</span>Foo!<span
-    class="sc2">&lt;<span class="sy0">/</span><span class="kw2">div</span>&gt;</span><br><span
-    class="sc2">&lt;<span class="kw2">script</span>&gt;</span><br>&nbsp;<span
-    class="kw2">var</span> arr <span class="sy0">=</span> <span class="br0">&#91;</span><span
-    class="nu0">1</span><span class="sy0">,</span> <span class="nu0">5</span><span
-    class="sy0">,</span> <span class="nu0">4</span><span class="sy0">,</span> <span
-    class="nu0">2</span><span class="sy0">,</span> <span class="nu0">3</span><span
-    class="br0">&#93;</span><span class="sy0">,</span><br>&nbsp; &nbsp; &nbsp;i <span
-    class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span><br><span
-    class="sc2">&lt;<span class="sy0">/</span><span class="kw2">script</span>&gt;</span>
-  </code></pre>
+  <section>
+    <h2>Preparation code</h2>
+    <pre><code><span
+      class="sc2">&lt;<span class="kw2">div</span> <span class="kw3">id</span><span
+      class="sy0">=</span><span class="st0">&quot;foo&quot;</span>&gt;</span>Foo!<span
+      class="sc2">&lt;<span class="sy0">/</span><span class="kw2">div</span>&gt;</span><br><span
+      class="sc2">&lt;<span class="kw2">script</span>&gt;</span><br>&nbsp;<span
+      class="kw2">var</span> arr <span class="sy0">=</span> <span class="br0">&#91;</span><span
+      class="nu0">1</span><span class="sy0">,</span> <span class="nu0">5</span><span
+      class="sy0">,</span> <span class="nu0">4</span><span class="sy0">,</span> <span
+      class="nu0">2</span><span class="sy0">,</span> <span class="nu0">3</span><span
+      class="br0">&#93;</span><span class="sy0">,</span><br>&nbsp; &nbsp; &nbsp;i <span
+      class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span><br><span
+      class="sc2">&lt;<span class="sy0">/</span><span class="kw2">script</span>&gt;</
+    span></code></pre>
+  </section>
 
-  <h2>Preparation code output</h2>
-  <div id="foo">Foo!</div>
+  <section>
+    <h2>Preparation code output</h2>
+    <p>Foo!</p>
+  </section>
 
-  <p id="firebug"><strong>Warning! For accurate results, please disable Firebug before running the tests. <a href="http://jsperf.com/faq#firebug">(Why?)</a></strong></p>
+  <section id="runner">
+    <h2>Test runner</h2>
 
-  <p id="status">
-    <noscript>
-      <strong>
-        To run the tests, please
-        <a href="http://enable-javascript.com/">enable JavaScript</a>
-        and reload the page.
-      </strong>
-    </noscript>
-  </p>
+    <p id="firebug"><strong>Warning! For accurate results, please disable Firebug before running the tests. <a href="http://jsperf.com/faq#firebug">(Why?)</a></strong></p>
 
-  <button id="run" type="button"></button>
+    <p id="status">
+      <noscript>
+        <strong>
+          To run the tests, please
+          <a href="http://enable-javascript.com/">enable JavaScript</a>
+          and reload the page.
+        </strong>
+      </noscript>
+    </p>
 
-  <table id="test-table">
-    <caption>Testing in <span id="user-agent"></span></caption>
-    <thead>
-    <tr>
-      <th colspan="2">Test</th>
-      <th title="Operations per second (higher is better)">Ops/sec</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-      <th scope="row" id="title-1">Sort ascending</th>
-      <td>
-      <pre><code><span
-        class="kw2">var</span> x <span class="sy0">=</span> arr<span
-        class="sy0">;</span><br>x.<span class="me1">sort</span><span
-        class="br0">&#40;</span><span class="kw2">function</span><span
-        class="br0">&#40;</span>a<span class="sy0">,</span> b<span
-        class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
-        class="kw1">return</span> a <span class="sy0">-</span> b<span
-        class="sy0">;</span><br><span class="br0">&#125;</span><span
-        class="br0">&#41;</span><span class="sy0">;</span>
-      </code></pre>
-      </td>
-      <td id="results-1" class="results"></td>
-    </tr>
-    <tr>
-      <th scope="row" id="title-2">Sort descending</th>
-      <td>
-      <pre><code><span
-        class="kw2">var</span> x <span class="sy0">=</span> arr<span
-        class="sy0">;</span><br>x.<span class="me1">sort</span><span
-        class="br0">&#40;</span><span class="kw2">function</span><span
-        class="br0">&#40;</span>a<span class="sy0">,</span> b<span
-        class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
-        class="kw1">return</span> b <span class="sy0">-</span> a<span
-        class="sy0">;</span><br><span class="br0">&#125;</span><span
-        class="br0">&#41;</span><span class="sy0">;</span>
-      </code></pre>
-      </td>
-      <td id="results-2" class="results"></td>
-    </tr>
-    <tr>
-      <th scope="row" id="title-3">Don&rsquo;t sort at all</th>
-      <td>
-      <pre><code><span
-        class="kw2">var</span> foo<span class="sy0">,</span> x <span
-        class="sy0">=</span> i<span class="sy0">;</span><br><span
-        class="kw1">while</span> <span class="br0">&#40;</span>x<span
-        class="sy0">--</span><span class="br0">&#41;</span> <span
-        class="br0">&#123;</span><br>&nbsp; foo <span class="sy0">=</span> Array<span
-        class="br0">&#40;</span>x<span class="br0">&#41;</span>.<span
-        class="me1">join</span><span class="br0">&#40;</span><span
-        class="st0">&quot;-&quot;</span><span class="br0">&#41;</span><span
-        class="sy0">;</span><br><span class="br0">&#125;</span>
-      </code></pre>
-      </td>
-      <td id="results-3" class="results"></td>
-    </tr>
-    <tr>
-      <th scope="row" id="title-4">Error</th>
-      <td>
-      <pre><code>arr.<span
-        class="me1">foo</span><span class="br0">&#40;</span><span
-        class="br0">&#41;</span><span class="sy0">;</span> <span
-        class="co1">// unknown method</span>
-      </code></pre>
-      </td>
-      <td id="results-4" class="results"></td>
-    </tr>
-    <tr>
-      <th scope="row" id="title-5">Just another unrelated test</th>
-      <td>
-      <pre><code><span
-        class="kw2">var</span> x <span class="sy0">=</span> arr<span
-        class="sy0">,</span><br>&nbsp; &nbsp; y <span
-        class="sy0">=</span> ~~<span class="br0">&#40;</span>Math.<span
-        class="me1">random</span><span class="br0">&#40;</span><span
-        class="br0">&#41;</span> <span class="sy0">*</span> <span
-        class="nu0">100</span><span class="br0">&#41;</span><span
-        class="sy0">;</span><br><span class="kw1">while</span> <span
-        class="br0">&#40;</span>y<span class="sy0">--</span><span
-        class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
-        class="kw1">if</span> <span class="br0">&#40;</span>arr<span
-        class="br0">&#91;</span>y<span class="br0">&#93;</span><span
-        class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; &nbsp; arr<span
-        class="br0">&#91;</span>y<span
-        class="br0">&#93;</span><span class="sy0">;</span><br>&nbsp; <span
-        class="br0">&#125;</span> <span class="kw1">else</span> <span
-        class="br0">&#123;</span><br>&nbsp; &nbsp; <span class="co1">// Boohoo</span><br>&nbsp; <span
-        class="br0">&#125;</span><br><span class="br0">&#125;</span>
-      </code></pre>
-      </td>
-      <td id="results-5" class="results"></td>
-    </tr>
-    </tbody>
-  </table>
+    <button id="run" type="button"></button>
 
-  <h2 id="results">Results</h2>
-  <div id="bs-results"></div>
+    <table id="test-table">
+      <caption>Testing in <span id="user-agent"></span></caption>
+      <thead>
+      <tr>
+        <th colspan="2">Test</th>
+        <th title="Operations per second (higher is better)">Ops/sec</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <th scope="row" id="title-1">Sort ascending</th>
+        <td>
+        <pre><code><span
+          class="kw2">var</span> x <span class="sy0">=</span> arr<span
+          class="sy0">;</span><br>x.<span class="me1">sort</span><span
+          class="br0">&#40;</span><span class="kw2">function</span><span
+          class="br0">&#40;</span>a<span class="sy0">,</span> b<span
+          class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
+          class="kw1">return</span> a <span class="sy0">-</span> b<span
+          class="sy0">;</span><br><span class="br0">&#125;</span><span
+          class="br0">&#41;</span><span class="sy0">;</
+        span></code></pre>
+        </td>
+        <td id="results-1" class="results"></td>
+      </tr>
+      <tr>
+        <th scope="row" id="title-2">Sort descending</th>
+        <td>
+        <pre><code><span
+          class="kw2">var</span> x <span class="sy0">=</span> arr<span
+          class="sy0">;</span><br>x.<span class="me1">sort</span><span
+          class="br0">&#40;</span><span class="kw2">function</span><span
+          class="br0">&#40;</span>a<span class="sy0">,</span> b<span
+          class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
+          class="kw1">return</span> b <span class="sy0">-</span> a<span
+          class="sy0">;</span><br><span class="br0">&#125;</span><span
+          class="br0">&#41;</span><span class="sy0">;</
+        span></code></pre>
+        </td>
+        <td id="results-2" class="results"></td>
+      </tr>
+      <tr>
+        <th scope="row" id="title-3">Don&rsquo;t sort at all</th>
+        <td>
+        <pre><code><span
+          class="kw2">var</span> foo<span class="sy0">,</span> x <span
+          class="sy0">=</span> i<span class="sy0">;</span><br><span
+          class="kw1">while</span> <span class="br0">&#40;</span>x<span
+          class="sy0">--</span><span class="br0">&#41;</span> <span
+          class="br0">&#123;</span><br>&nbsp; foo <span class="sy0">=</span> Array<span
+          class="br0">&#40;</span>x<span class="br0">&#41;</span>.<span
+          class="me1">join</span><span class="br0">&#40;</span><span
+          class="st0">&quot;-&quot;</span><span class="br0">&#41;</span><span
+          class="sy0">;</span><br><span class="br0">&#125;</
+        span></code></pre>
+        </td>
+        <td id="results-3" class="results"></td>
+      </tr>
+      <tr>
+        <th scope="row" id="title-4">Error</th>
+        <td>
+        <pre><code>arr.<span
+          class="me1">foo</span><span class="br0">&#40;</span><span
+          class="br0">&#41;</span><span class="sy0">;</span> <span
+          class="co1">// unknown method</
+        span></code></pre>
+        </td>
+        <td id="results-4" class="results"></td>
+      </tr>
+      <tr>
+        <th scope="row" id="title-5">Just another unrelated test</th>
+        <td>
+        <pre><code><span
+          class="kw2">var</span> x <span class="sy0">=</span> arr<span
+          class="sy0">,</span><br>&nbsp; &nbsp; y <span
+          class="sy0">=</span> ~~<span class="br0">&#40;</span>Math.<span
+          class="me1">random</span><span class="br0">&#40;</span><span
+          class="br0">&#41;</span> <span class="sy0">*</span> <span
+          class="nu0">100</span><span class="br0">&#41;</span><span
+          class="sy0">;</span><br><span class="kw1">while</span> <span
+          class="br0">&#40;</span>y<span class="sy0">--</span><span
+          class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
+          class="kw1">if</span> <span class="br0">&#40;</span>arr<span
+          class="br0">&#91;</span>y<span class="br0">&#93;</span><span
+          class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; &nbsp; arr<span
+          class="br0">&#91;</span>y<span
+          class="br0">&#93;</span><span class="sy0">;</span><br>&nbsp; <span
+          class="br0">&#125;</span> <span class="kw1">else</span> <span
+          class="br0">&#123;</span><br>&nbsp; &nbsp; <span class="co1">// Boohoo</span><br>&nbsp; <span
+          class="br0">&#125;</span><br><span class="br0">&#125;</
+        span></code></pre>
+        </td>
+        <td id="results-5" class="results"></td>
+      </tr>
+      </tbody>
+    </table>
 
-  <p>
-    You can <a href="#" rel="nofollow">edit these tests or add even more tests to this page</a>
-    by appending <code>/edit</code> to the URL.
-  </p>
+    <p>
+      You can <a href="#" rel="nofollow">edit these tests or add even more tests to this page</a>
+      by appending <code>/edit</code> to the URL.
+    </p>
+  </section>
+
+  <section>
+    <h2>Compare results of other browsers</h2>
+    <div id="bs-results"></div>
+  </section>
 
   <section id="comments">
+    <h2>0 Comments</h2>
     <div class="question"><input type="text" name="question" id="question"></div>
   </section>
 </article>
 
 <footer>
-  &copy; 2010 <a href="http://jsperf.com/">jsPerf.com</a>
+  &copy; 2011 <a href="http://jsperf.com/">jsPerf.com</a>
   &bull; <a href="http://jsperf.com/browse">Browse</a>
   &bull; <a href="http://jsperf.com/faq">FAQ</a>
   &bull; <a href="http://twitter.com/jsprf" rel="nofollow">twitter: @jsprf</a>
