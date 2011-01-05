@@ -79,6 +79,10 @@ tbody th, td {
   border-width: 0 1px 1px 0;
 }
 
+tbody th {
+  background: #dde4ea;
+}
+
 td.results {
   text-align: center;
   border-right: 0;
@@ -105,7 +109,7 @@ td.slowest, td.error, .invalid {
   background: pink;
 }
 
-/* must have :invalid on its own rule because of buggy IE */
+/* needs its own rule because of buggy IE */
 :focus:invalid {
   background: pink;
 }
@@ -362,7 +366,8 @@ footer {
   margin-bottom: 1em;
 }
 
-tbody th, #comments article:target {
+/* needs its own rule (cannot be grouped with `tbody th`) because of buggy IE */
+#comments article:target {
   background: #dde4ea;
 }
 
