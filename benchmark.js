@@ -1044,7 +1044,7 @@
       if (value && isClassOf(value, 'Object')) {
         pairs.push([value, other]);
       }
-      else if (isClassOf(value, 'Number') &&
+      else if (!isClassOf(value, 'Function') &&
           key != 'created' && value != other) {
         pair[1][key] = value;
         changed = true;
