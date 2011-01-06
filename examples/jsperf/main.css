@@ -8,7 +8,7 @@ table, p, ul, h1, h2, h3, #error-info, form div, #faq, .bs-rt {
   margin-bottom: 1em;
 }
 
-button, input[type="text"], textarea, a, .bs-rt {
+button, input, textarea, a, .bs-rt {
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -201,9 +201,14 @@ textarea {
   *width: 42.4em; /* IE < 8 */
 }
 
-input[type="text"], textarea {
+input, textarea {
   border: 1px solid #b4b4b4;
   padding: .4em;
+}
+
+#visible, #calibrate { /* checkboxes, for IE */
+  border: 0;
+  padding: 0;
 }
 
 form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
