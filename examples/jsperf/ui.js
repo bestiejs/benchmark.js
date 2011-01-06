@@ -251,17 +251,27 @@
   function onLoad() {
     var hash = location.hash.slice(1, 4);
 
-    addClass('run', 'show');
+    addClass('controls', 'show');
+    addClass('calgroup', 'show');
+
+    addListener('calibrate', 'click', onSetCalibrationState);
     addListener('run', 'click', onRun);
+
     setHTML('run', RUN_TEXT.READY);
     setHTML('user-agent', Benchmark.platform);
     setStatus(STATUS_TEXT.READY);
 
+    // enable calibrations by default
+    $('calibrate').checked = true;
+
     // answer spammer question
     $('question').value = 'no';
 
-    // show warning when Firebug is enabled
+    // show warning and disable calibrations when Firebug is enabled
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
+      $('calibrate').checked = false;
+      $('calgroup').className = '';
+      onSetCalibrationState();
       addClass('firebug', 'show');
     }
     // evaluate hash values
@@ -306,8 +316,9 @@
     });
 
     // post results to Browserscope
-    ui.browserscope.post();
-
+    if ($('calibrate').checked) {
+      ui.browserscope.post();
+    }
     // all benchmarks are finished
     ui.running = false;
     setHTML('run', RUN_TEXT.READY_AGAIN);
@@ -325,6 +336,21 @@
     if (run) {
       logError(false);
       ui.run((e || window.event).shiftKey ? benches.slice(0).reverse() : benches);
+    }
+  }
+
+  /**
+   * The "calibrate" checkbox click event handler used to enable/disable calibrations.
+   * @private
+   */
+  function onSetCalibrationState() {
+    var length = Benchmark.CALIBRATIONS.length;
+    if ($('calibrate').checked) {
+      if (!length) {
+        Benchmark.CALIBRATIONS = cache.CALIBRATIONS;
+      }
+    } else if (length) {
+      cache.CALIBRATIONS = [Benchmark.CALIBRATIONS, Benchmark.CALIBRATIONS = []][0];
     }
   }
 

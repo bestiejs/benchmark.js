@@ -135,7 +135,7 @@ a:hover span, a:focus span, #comments .owner .meta a {
   color: #fff;
 }
 
-#run, .buttons {
+#controls, .buttons {
   float: right;
 }
 
@@ -149,7 +149,7 @@ button:hover, button:focus, .submit:hover, .submit:focus {
   font-weight: bold;
 }
 
-label {
+form label {
   float: left;
   width: 14em;
   cursor: pointer;
@@ -162,6 +162,12 @@ label.inline {
   float: none;
   padding: 0;
   margin: 0;
+}
+
+label[for=calibrate] {
+  font-size: .8em;
+  line-height: 1.8em;
+  vertical-align: top;
 }
 
 label[for=visible] {
@@ -209,7 +215,7 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
   display: block;
 }
 
-.js .question, hgroup h2, p#firebug, #run {
+.js .question, hgroup h2, p#firebug, #calgroup, #controls {
   display: none;
 }
 
@@ -326,6 +332,15 @@ footer {
   white-space: normal;
 }
 
+#calgroup {
+  float: right;
+  margin: .3em 0 .6em 0;
+}
+
+#controls {
+  margin-top: -3.1em;
+}
+
 #comments h1 {
   padding: 0;
 }
@@ -406,16 +421,12 @@ footer {
   padding: .3em 0;
 }
 
-#run {
-  margin-top: -3.1em;
-}
-
-#run.show, #firebug.show {
-  display: block;
-}
-
 #runner {
   max-height: none;
+}
+
+#run, #calgroup.show, #controls.show, #firebug.show {
+  display: block;
 }
 
 .co1, .co2, .coMULTI {
