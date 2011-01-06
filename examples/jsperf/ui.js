@@ -270,8 +270,8 @@
     // show warning and disable calibrations when Firebug is enabled
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
       $('calibrate').checked = false;
-      $('calgroup').className = '';
       onSetCalibrationState();
+      addClass('controls', 'reduce');
       addClass('firebug', 'show');
     }
     // evaluate hash values

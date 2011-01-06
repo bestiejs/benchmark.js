@@ -8,7 +8,7 @@ table, p, ul, h1, h2, h3, #error-info, form div, #faq, .bs-rt {
   margin-bottom: 1em;
 }
 
-button, input, textarea, a, .bs-rt {
+button, input[type="text"], textarea, a, .bs-rt {
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
@@ -135,7 +135,7 @@ a:hover span, a:focus span, #comments .owner .meta a {
   color: #fff;
 }
 
-#controls, .buttons {
+#calgroup, #controls, #run, .buttons {
   float: right;
 }
 
@@ -171,10 +171,6 @@ label#calgroup {
   vertical-align: top;
 }
 
-#calibrate {
-  padding: 0;
-}
-
 label[for=visible] {
   position: relative;
   top: -.37em;
@@ -205,7 +201,7 @@ textarea {
   *width: 42.4em; /* IE < 8 */
 }
 
-input, textarea {
+input[type="text"], textarea {
   border: 1px solid #b4b4b4;
   padding: .4em;
 }
@@ -317,8 +313,8 @@ footer {
 }
 
 #bs-results .rt-ua-cur {
-  font-style:italic;
-  font-weight:bold;
+  font-style: italic;
+  font-weight: bold;
 }
 
 #bs-results .bs-rt-message {
@@ -333,12 +329,19 @@ footer {
 }
 
 #calgroup {
-  float: right;
   margin: .3em 0 .6em 0;
 }
 
 #controls {
-  margin-top: -3.1em;
+  margin-top: -4.6em;
+}
+
+#controls.reduce {
+  margin-top: -3.2em;
+}
+
+#controls.reduce label#calgroup {
+  display: none;
 }
 
 #comments h1 {
@@ -426,8 +429,12 @@ footer {
   overflow: auto;
 }
 
-#run, #calgroup.show, #controls.show, #firebug.show {
+#calgroup.show, #controls.show, #firebug.show {
   display: block;
+}
+
+.clear {
+  clear: both;
 }
 
 .co1, .co2, .coMULTI {
