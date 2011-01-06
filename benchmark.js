@@ -22,15 +22,6 @@
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
-  /** Used as a flag for Benchmark.filter() */
-  FILTER_FASTEST = function FILTER_FASTEST() { },
-
-  /** Used as a flag for Benchmark.filter() */
-  FILTER_SLOWEST = function FILTER_SLOWEST() { },
-
-  /** Used as a flag for Benchmark.filter() */
-  FILTER_SUCCESSFUL = function FILTER_SUCCESSFUL() { },
-
   /** Unit of the timer */
   TIMER_UNIT = 'ms',
 
@@ -548,7 +539,7 @@
    * @static
    * @member Benchmark
    * @param {Array} array The array to iterate over.
-   * @param {Function} callback The function called per iteration.
+   * @param {Function|String} callback The function/alias called per iteration.
    * @returns {Array} A new array of values that passed callback filter.
    * @example
    *
@@ -558,27 +549,27 @@
    * }); // -> [1, 3, 5];
    *
    * // get fastest benchmarks
-   * Benchmark.filter(benches, Benchmark.FILTER_FASTEST);
+   * Benchmark.filter(benches, "fastest");
    *
    * // get slowest benchmarks
-   * Benchmark.filter(benches, Benchmark.FILTER_SLOWEST);
+   * Benchmark.filter(benches, "slowest");
    *
    * // get benchmarks that completed without erroring
-   * Benchmark.filter(benches, Benchmark.FILTER_SUCCESSFUL);
+   * Benchmark.filter(benches, "successful");
    */
   function filter(array, callback) {
     var source;
-    if (callback == FILTER_SUCCESSFUL) {
+    if (callback == 'successful') {
       // callback to exclude errored or unrun benchmarks
       callback = function(bench) { return bench.cycles; };
     }
-    else if (callback == FILTER_FASTEST || callback == FILTER_SLOWEST) {
+    else if (/^(?:fast|slow)est$/.test(callback)) {
       // get successful benchmarks
-      array = filter(array, FILTER_SUCCESSFUL);
+      array = filter(array, 'successful');
       // sort descending fastest to slowest
       array.sort(function(a, b) { return b.compare(a); });
       // set source benchmark
-      source = array[callback == FILTER_FASTEST ? 0 : array.length - 1];
+      source = array[callback == 'fastest' ? 0 : array.length - 1];
       // callback to filter fastest/slowest
       callback = function(bench) { return !source.compare(bench); };
     }
@@ -1600,30 +1591,6 @@
   /*--------------------------------------------------------------------------*/
 
   extend(Benchmark, {
-
-    /**
-     * A token, passed to [`Benchmark.filter`](#static-filter), to get the fastest benchmarks.
-     * @static
-     * @member Benchmark
-     * @type Function
-     */
-    'FILTER_FASTEST': FILTER_FASTEST,
-
-    /**
-     * A token, passed to [`Benchmark.filter`](#static-filter), to get the slowest benchmarks.
-     * @static
-     * @member Benchmark
-     * @type Function
-     */
-    'FILTER_SLOWEST': FILTER_SLOWEST,
-
-    /**
-     * A token, passed to [`Benchmark.filter`](#static-filter), to get benchmarks that completed without erroring.
-     * @static
-     * @member Benchmark
-     * @type Function
-     */
-    'FILTER_SUCCESSFUL': FILTER_SUCCESSFUL,
 
     /**
      * The version number.

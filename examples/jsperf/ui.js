@@ -283,9 +283,9 @@
    * @private
    */
   function onQueueComplete() {
-    var benches = Benchmark.filter(ui.benchmarks, Benchmark.FILTER_SUCCESSFUL),
-        fastest = Benchmark.filter(benches, Benchmark.FILTER_FASTEST),
-        slowest = Benchmark.filter(benches, Benchmark.FILTER_SLOWEST);
+    var benches = Benchmark.filter(ui.benchmarks, 'successful'),
+        fastest = Benchmark.filter(benches, 'fastest'),
+        slowest = Benchmark.filter(benches, 'slowest');
 
     // display contextual information
     each(benches, function(bench) {
