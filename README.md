@@ -54,9 +54,10 @@ Usage example:
       console.log( bench.toString() );
     });
     
-    // run benchmarks
+    // run benchmarks (async)
     Benchmark.invoke(benches, {
       "methodName": "run",
+      "args": true,
       "onComplete": function() {
         var a = benches[0],
             b = benches[1],
