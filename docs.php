@@ -161,12 +161,12 @@
       $sortByC = array();
       foreach($api as $entry) {
         $sub = array_pop(preg_split("/#/", $entry["member"]));
-        // functions last
-        $sortByA[] = $entry["type"] == "Function" ? 1 : 0;
+        // functions w/o ALL-CAPs names are last
+        $sortByA[] = $entry["type"] == "Function" && !preg_match("/^[A-Z_]+$/", $entry["name"]) ? 1 : 0;
         // group sub-object properties together
         $sortByB[] = ($sub != $entry["member"] ? $sub : "") . $entry["name"];
-        // capitalized / ALL-CAPS properties first
-        $sortByC[] = preg_match("/^[A-Z]/", $entry["name"]);
+        // ALL-CAPs properties first
+        $sortByC[] = preg_match("/^[A-Z_]+$/", $entry["name"]);
       }
       array_multisort($sortByA, SORT_ASC,  $sortByB, SORT_ASC, $sortByC, SORT_DESC, $api);
       unset($api);

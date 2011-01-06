@@ -22,6 +22,15 @@
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
+  /** Used as a flag for Benchmark.filter() */
+  FILTER_FASTEST = function FILTER_FASTEST() { },
+
+  /** Used as a flag for Benchmark.filter() */
+  FILTER_SLOWEST = function FILTER_SLOWEST() { },
+
+  /** Used as a flag for Benchmark.filter() */
+  FILTER_SUCCESSFUL = function FILTER_SUCCESSFUL() { },
+
   /** Unit of the timer */
   TIMER_UNIT = 'ms',
 
@@ -532,8 +541,38 @@
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
    * @returns {Array} A new array of values that passed callback filter.
+   * @example
+   *
+   * // get odd numbers
+   * Benchmark.filter([1, 2, 3, 4, 5], function(n) {
+   *   return n % 2;
+   * }); // -> [1, 3, 5];
+   *
+   * // get fastest benchmarks
+   * Benchmark.filter(benches, Benchmark.FILTER_FASTEST);
+   *
+   * // get slowest benchmarks
+   * Benchmark.filter(benches, Benchmark.FILTER_SLOWEST);
+   *
+   * // get benchmarks that completed without erroring
+   * Benchmark.filter(benches, Benchmark.FILTER_SUCCESSFUL);
    */
   function filter(array, callback) {
+    var source;
+    if (callback == FILTER_SUCCESSFUL) {
+      // callback to exclude errored or unrun benchmarks
+      callback = function(bench) { return bench.cycles; };
+    }
+    else if (callback == FILTER_FASTEST || callback == FILTER_SLOWEST) {
+      // get successful benchmarks
+      array = filter(array, FILTER_SUCCESSFUL);
+      // sort descending fastest to slowest
+      array.sort(function(a, b) { return b.compare(a); });
+      // set source benchmark
+      source = array[callback == FILTER_FASTEST ? 0 : array.length - 1];
+      // callback to filter fastest/slowest
+      callback = function(bench) { return !source.compare(bench); };
+    }
     return reduce(array, function(result, value, index) {
       return callback(value, index, array) ? result.push(value) && result : result;
     }, []);
@@ -1569,6 +1608,30 @@
       b.compilable = false;
       return [new Calibration(a), new Calibration(b)];
     }()),
+
+    /**
+     * A token, passed to [`Benchmark.filter`](#static-filter), to get the fastest benchmarks.
+     * @static
+     * @member Benchmark
+     * @type Function
+     */
+    'FILTER_FASTEST': FILTER_FASTEST,
+
+    /**
+     * A token, passed to [`Benchmark.filter`](#static-filter), to get the slowest benchmarks.
+     * @static
+     * @member Benchmark
+     * @type Function
+     */
+    'FILTER_SLOWEST': FILTER_SLOWEST,
+
+    /**
+     * A token, passed to [`Benchmark.filter`](#static-filter), to get benchmarks that completed without erroring.
+     * @static
+     * @member Benchmark
+     * @type Function
+     */
+    'FILTER_SUCCESSFUL': FILTER_SUCCESSFUL,
 
     /**
      * The version number.

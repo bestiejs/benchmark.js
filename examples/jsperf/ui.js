@@ -273,48 +273,40 @@
    * @private
    */
   function onQueueComplete() {
-    // populate result array (skipping unrun and errored benchmarks)
-    var first,
-        last,
-        result = Benchmark.filter(ui.benchmarks, function(bench) { return bench.cycles; });
+    var benches = Benchmark.filter(ui.benchmarks, Benchmark.FILTER_SUCCESSFUL),
+        fastest = Benchmark.filter(benches, Benchmark.FILTER_FASTEST),
+        slowest = Benchmark.filter(benches, Benchmark.FILTER_SLOWEST);
 
-    if (result.length > 1) {
-      // sort descending fastest to slowest
-      result.sort(function(a, b) { return b.compare(a); });
-      first = result[0];
-      last  = result[result.length - 1];
+    // display contextual information
+    each(benches, function(bench) {
+      var percent,
+          text = 'fastest',
+          elResult = $(RESULTS_PREFIX + bench.id),
+          elSpan = elResult.getElementsByTagName('span')[0];
 
-      // print contextual information
-      each(result, function(bench) {
-        var percent,
-            text = 'fastest',
-            elResult = $(RESULTS_PREFIX + bench.id),
-            elSpan = elResult.getElementsByTagName('span')[0];
+      if (indexOf(fastest, bench) > -1) {
+        // mark fastest
+        addClass(elResult, text);
+      }
+      else {
+        percent = Math.floor((1 - bench.hz / fastest[0].hz) * 100);
+        text = percent + '% slower';
 
-        if (!bench.compare(first)) {
-          // mark fastest
-          addClass(elResult, text);
+        // mark slowest
+        if (indexOf(slowest, bench) > -1) {
+          addClass(elResult, 'slowest');
         }
-        else {
-          percent = Math.floor((1 - bench.hz / first.hz) * 100);
-          text = percent + '% slower';
+      }
+      // write ranking
+      if (elSpan) {
+        setHTML(elSpan, text);
+      } else {
+        appendHTML(elResult, '<span>' + text + '<\/span>');
+      }
+    });
 
-          // mark slowest
-          if (!bench.compare(last)) {
-            addClass(elResult, 'slowest');
-          }
-        }
-        // write ranking
-        if (elSpan) {
-          setHTML(elSpan, text);
-        } else {
-          appendHTML(elResult, '<span>' + text + '<\/span>');
-        }
-      });
-
-      // post results to Browserscope
-      ui.browserscope.post();
-    }
+    // post results to Browserscope
+    ui.browserscope.post();
 
     // all benchmarks are finished
     ui.running = false;
