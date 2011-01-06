@@ -405,11 +405,18 @@
   /**
    * Gets the storage key of the benchmark.
    * @private
-   * @param {Object} me The benchmark instance.
+   * @param {Object} me The benchmark instance OR options object.
    * @returns {String} The storage key.
    */
   function getStoreKey(me) {
-    return ['benchmark.js', 'r2', TIMER_UNIT, me.fn.uid, Benchmark.platform].join(':');
+    var options = extend({
+      'rev': 'r2',
+      'unit': TIMER_UNIT,
+      'uid': me.fn && me.fn.uid,
+      'platform': Benchmark.platform
+    }, me.constructor == Object && me);
+
+    return ['benchmark.js', options.rev, options.unit, options.uid, options.platform].join(':');
   }
 
   /**
@@ -490,13 +497,15 @@
    * @member Benchmark
    */
   function clearStorage() {
-    if (HAS_STORAGE) {
-      forIn(localStorage, function(value, key, object) {
-        if (!key.indexOf('benchmark.js:')) {
-          object.removeItem(key);
+    // use brute force because Firefox errors attempting for-in on localStorage
+    each(HAS_STORAGE ? ['ns', 'us', 'ms'] : [], function(unit) {
+      each(['r1', 'r2'], function(rev) {
+        var uid = -3;
+        while (++uid < 100) {
+          localStorage.removeItem(getStoreKey({ 'rev': rev, 'unit': unit, 'uid': uid }));
         }
       });
-    }
+    });
   }
 
   /**
@@ -1593,21 +1602,6 @@
   extend(Benchmark, {
 
     /**
-     * Benchmarks to establish iteration overhead.
-     * @static
-     * @member Benchmark
-     * @type Array
-     */
-    'CALIBRATIONS': (function() {
-      var a = function() { },
-          b = function() { };
-      a.uid = -1;
-      b.uid = -2;
-      b.compilable = false;
-      return [new Calibration(a), new Calibration(b)];
-    }()),
-
-    /**
      * A token, passed to [`Benchmark.filter`](#static-filter), to get the fastest benchmarks.
      * @static
      * @member Benchmark
@@ -1950,6 +1944,21 @@
   });
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Benchmarks to establish iteration overhead.
+   * @static
+   * @member Benchmark
+   * @type Array
+   */
+  Benchmark.CALIBRATIONS = (function() {
+    var a = function() { },
+        b = function() { };
+    a.uid = -1;
+    b.uid = -2;
+    b.compilable = false;
+    return [new Calibration(a), new Calibration(b)];
+  }());
 
   extend(Calibration.prototype, {
 
