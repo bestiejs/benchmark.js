@@ -198,11 +198,6 @@ section {
   margin: 2em 0;
 }
 
-.foo {
-  max-height: 500px;
-  overflow: auto;
-}
-
 textarea {
   resize: vertical;
   height: 15em;
@@ -426,8 +421,9 @@ footer {
   padding: .3em 0;
 }
 
-#runner {
-  max-height: none;
+#prep-code pre {
+  max-height: 500px;
+  overflow: auto;
 }
 
 #run, #calgroup.show, #controls.show, #firebug.show {
