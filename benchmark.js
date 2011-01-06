@@ -747,23 +747,21 @@
       return false;
     }
 
+    // juggle arguments
     if (typeof methodName == 'string') {
       args = slice.call(arguments, 2);
     }
     else {
-      // juggle arguments
       options = extend(options, methodName);
       methodName = options.methodName;
-      args = isArray(args = options.args || []) ? args : [args];
+      args = isArray(args = 'args' in options ? options.args : []) ? args : [args];
       queued = options.queued;
-
-      // async for use with Benchmark#run only
-      if (methodName == 'run') {
-        async = (args[0] == null ? Benchmark.prototype.DEFAULT_ASYNC :
-          args[0]) && HAS_TIMEOUT_API;
-      }
     }
-
+    // async for use with Benchmark#run only
+    if (methodName == 'run') {
+      async = (args[0] == null ? Benchmark.prototype.DEFAULT_ASYNC :
+        args[0]) && HAS_TIMEOUT_API;
+    }
     // start iterating over the array
     if (bench = queued ? benches.shift() : benches[0]) {
       if (async) {
@@ -1206,7 +1204,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          maxedOut = burst ? !--burstCount : async && elapsed >= me.MAX_TIME_ELAPSED,
+          maxedOut = burst ? !--burstCount : elapsed >= me.MAX_TIME_ELAPSED,
           size = sample.push(clone.hz),
           sumOf = function(sum, x) { return sum + x; },
           varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
@@ -1236,7 +1234,7 @@
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
         if (!maxedOut || (calibrating && rme > 1)) {
-          if (maxedOut) {
+          if (maxedOut && (async || burst)) {
             // switch to burst mode
             queue.length = 0;
             compute(me, !async, true, sample);
