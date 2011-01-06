@@ -164,10 +164,15 @@ label.inline {
   margin: 0;
 }
 
-label[for=calibrate] {
+label#calgroup {
+  cursor: pointer;
   font-size: .8em;
   line-height: 1.8em;
   vertical-align: top;
+}
+
+#calibrate {
+  padding: 0;
 }
 
 label[for=visible] {
