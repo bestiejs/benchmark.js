@@ -83,6 +83,12 @@ tbody th {
   background: #dde4ea;
 }
 
+tbody th div {
+  max-width: 200px;
+  word-wrap: break-word;
+  overflow: auto;
+}
+
 td.results {
   text-align: center;
   border-right: 0;
