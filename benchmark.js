@@ -172,8 +172,8 @@
     // calibrate all if one has not ran
     if (!result) {
       invoke(Benchmark.CALIBRATIONS, {
-        'async': async,
         'methodName': 'run',
+        'args': async,
         'onCycle': onCycle,
         'onComplete': callback
       });
@@ -718,14 +718,11 @@
       args = isArray(args = options.args || []) ? args : [args];
       queued = options.queued;
 
-      // for use with Benchmark#run only
-      if ('async' in options) {
-        async = options.async;
-      } else if (isClassOf(args[0], 'Boolean')) {
-        async = args[0];
+      // async for use with Benchmark#run only
+      if (methodName == 'run') {
+        async = (args[0] == null ? Benchmark.prototype.DEFAULT_ASYNC :
+          args[0]) && HAS_TIMEOUT_API;
       }
-      async = (async == null ? Benchmark.prototype.DEFAULT_ASYNC :
-        async) && HAS_TIMEOUT_API;
     }
 
     // start iterating over the array
@@ -1199,7 +1196,7 @@
         rme = (moe / mean) * 100 || 0;
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (rme > 1 && (!maxedOut || calibrating)) {
+        if (!maxedOut || (calibrating && rme > 1)) {
           if (maxedOut) {
             // switch to burst mode
             queue.length = 0;
@@ -1254,8 +1251,8 @@
 
     // run them
     invoke(queue, {
-      'async': async,
       'methodName': 'run',
+      'args': async,
       'queued': true,
       'onCycle': onInvokeCycle
     });
@@ -1686,7 +1683,7 @@
      * @member Benchmark
      * @type Number
      */
-    'MAX_TIME_ELAPSED': 8,
+    'MAX_TIME_ELAPSED': 5,
 
     /**
      * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
