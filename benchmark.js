@@ -74,6 +74,7 @@
   /**
    * Benchmark constructor.
    * @constructor
+   * @param {String} name A name to identify the benchmark.
    * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    * @example
@@ -81,14 +82,14 @@
    * // basic usage
    * var bench = new Benchmark(fn);
    *
-   * // with options
-   * var bench = new Benchmark(fn, {
+   * // or using a name first
+   * var bench = new Benchmark("foo", fn);
    *
-   *   // name used by Benchmark#toString to identify a benchmark.
-   *   "name": "apples",
+   * // or with options
+   * var bench = new Benchmark("foo", fn, {
    *
-   *   // id, displayed by Benchmark#toString if `name` is not available
-   *   "id": "a1",
+   *   // displayed by Benchmark#toString if `name` is not available
+   *   "id": "xyz",
    *
    *   // called when the benchmark starts
    *   "onStart": onStart,
@@ -115,11 +116,17 @@
    *   "teardown": teardown
    * });
    */
-  function Benchmark(fn, options) {
+  function Benchmark(name, fn, options) {
+    // juggle arguments
     var me = this;
-    fn.uid || (fn.uid = ++cache.counter);
+    if (isClassOf(name, 'Function')) {
+      options = fn;
+      fn = name;
+    } else {
+      me.name = name;
+    }
+    // apply options
     options = extend({ }, options);
-
     forIn(options, function(value, key) {
       // add event listeners
       if (/^on[A-Z]/.test(key)) {
@@ -130,6 +137,7 @@
     });
 
     me.fn = fn;
+    fn.uid || (fn.uid = ++cache.counter);
     me.created = +new Date;
     me.options = options;
     me.stats = extend({ }, me.stats);
@@ -624,7 +632,7 @@
 
     // for modern browsers
     object = Object(object);
-    if (typeof hasOwnProperty == 'function') {
+    if (isClassOf(hasOwnProperty, 'Function')) {
       result = hasOwnProperty.call(object, key);
     }
     // for Safari 2
@@ -751,7 +759,7 @@
     }
 
     // juggle arguments
-    if (typeof name == 'string') {
+    if (isClassOf(name, 'String')) {
       args = slice.call(arguments, 2);
     } else {
       options = extend(options, name);
@@ -1148,7 +1156,7 @@
         calibrating = me.constructor == Calibration,
         fn = me.fn,
         queue = [],
-        burstCount = async ? 2 : 48,
+        burstCount = async ? 1 : 49,
         runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {

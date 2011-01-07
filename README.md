@@ -45,8 +45,8 @@ Usage example:
     }
     
     var benches = [
-      new Benchmark(testA, { "name": "RegExp#test" }),
-      new Benchmark(testB, { "name": "String#indexOf" })
+      new Benchmark("RegExp#test", testA),
+      new Benchmark("String#indexOf", testB)
     ];
     
     // add listeners
