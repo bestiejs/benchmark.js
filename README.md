@@ -50,13 +50,13 @@ Usage example:
     ];
     
     // add listeners
-    Benchmark.invoke(benches, "on", "complete", function(bench) {
-      console.log( bench.toString() );
+    Benchmark.invoke(benches, "on", "complete", function() {
+      console.log( this.toString() );
     });
     
     // run benchmarks (async)
     Benchmark.invoke(benches, {
-      "methodName": "run",
+      "name": "run",
       "args": true,
       "onComplete": function() {
         var a = benches[0],
