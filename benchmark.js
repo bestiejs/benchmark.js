@@ -663,7 +663,7 @@
    * @static
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
-   * @param {String|Object} name Name of method to invoke or options object.
+   * @param {String|Object} name The name of the method to invoke OR options object.
    * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
    * @returns {Array} A new array of values returned from each method invoked.
    * @example

@@ -190,7 +190,7 @@ Invokes a given method, with arguments, on all benchmarks in an array.
 
 ### Arguments
 1. `benches` *(Array)*: Array of benchmarks to iterate over.
-2. `name` *(String|Object)*: Name of method to invoke or options object.
+2. `name` *(String|Object)*: The name of the method to invoke OR options object.
 3. `[, arg1, arg2, ...]` *(Mixed)*: Arguments to invoke the method with.
 
 ### Returns
