@@ -176,6 +176,7 @@
   /**
    * The title table cell click event handler used to run the corresponding benchmark.
    * @private
+   * @param {Object} e The event object.
    */
   function onClick(e) {
     e || (e = window.event);
@@ -192,20 +193,20 @@
   /**
    * The onComplete callback assigned to new benchmarks.
    * @private
-   * @param {Object} bench The benchmark.
    */
-  function onComplete(bench) {
+  function onComplete() {
     setStatus(STATUS_TEXT.READY_AGAIN);
-    ui.render(bench);
+    ui.render(this);
   }
 
   /**
    * The onCycle callback, used for onStart as well, assigned to new benchmarks.
    * @private
-   * @param {Object} bench The benchmark.
    */
-  function onCycle(bench) {
-    var cycles = bench.cycles;
+  function onCycle() {
+    var bench = this,
+        cycles = bench.cycles;
+
     if (!bench.aborted) {
       setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
         cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
@@ -237,6 +238,7 @@
   /**
    * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
    * @private
+   * @param {Object} e The event object.
    */
   function onKeyUp(e) {
     if (13 == (e || window.event).keyCode) {
@@ -327,6 +329,7 @@
   /**
    * The "run" button click event handler used to run or abort the benchmarks.
    * @private
+   * @param {Object} e The event object.
    */
   function onRun(e) {
     var benches = ui.benchmarks,
@@ -497,7 +500,7 @@
           me.running = true;
           setHTML('run', RUN_TEXT.RUNNING);
           invoke(queue, {
-            'methodName': 'run',
+            'name': 'run',
             'queued': true,
             'onComplete': onQueueComplete
           });

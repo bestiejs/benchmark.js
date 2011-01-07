@@ -172,7 +172,7 @@
     // calibrate all if one has not ran
     if (!result) {
       invoke(Benchmark.CALIBRATIONS, {
-        'methodName': 'run',
+        'name': 'run',
         'args': async,
         'onCycle': onCycle,
         'onComplete': callback
@@ -212,6 +212,14 @@
    * @returns {Number} The time taken.
    */
   function clock() {
+    var args,
+        fallback,
+        timerNS,
+        timerRes,
+        min = 0.0015,
+        proto = Benchmark.prototype,
+        code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
+
     clock = function(me) {
       var embedded,
           result,
@@ -288,14 +296,6 @@
       // convert average to seconds
       return sum / size / divisor;
     }
-
-    var args,
-        fallback,
-        timerNS,
-        timerRes,
-        min = 0.0015,
-        proto = Benchmark.prototype,
-        code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
 
     // detect nanosecond support:
     // Java System.nanoTime()
@@ -645,7 +645,7 @@
    * @member Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Mixed} value The value to search for.
-   * @returns {Number} The index of the matched value or -1.
+   * @returns {Number} The index of the matched value or `-1`.
    */
   function indexOf(array, value) {
     var result = -1;
@@ -663,8 +663,9 @@
    * @static
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
-   * @param {String|Object} methodName Name of method to invoke or options object.
+   * @param {String|Object} name Name of method to invoke or options object.
    * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
+   * @returns {Array} A new array of values returned from each method invoked.
    * @example
    *
    * // invoke `reset` on all benchmarks
@@ -677,13 +678,16 @@
    * Benchmark.invoke(benches, {
    *
    *   // invoke the `run` method
-   *   "methodName": "run",
+   *   "name": "run",
    *
    *   // pass a single argument
    *   "args": true,
    *
    *   // treat as queue, removing benchmarks from front of `benches` until empty
    *   "queued": true,
+   *
+   *   // called before any benchmarks have been invoked.
+   *   "onStart": onStart,
    *
    *   // called between invoking benchmarks
    *   "onCycle": onCycle,
@@ -692,54 +696,53 @@
    *   "onComplete": onComplete
    * });
    */
-  function invoke(benches, methodName) {
+  function invoke(benches, name) {
     var args,
         async,
         bench,
         queued,
         i = 0,
-        length = benches.length,
-        options = { 'onComplete': noop, 'onCycle': noop };
+        options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+        result = benches.slice(0);
 
-    function onInvoke(me) {
+    function execute() {
       var listeners;
-
-      // insert invoke's "complete" listener before others so it's executed first
       if (async) {
-        me.on('complete', onComplete);
-        listeners = me.events['complete'];
+        // use "next" as a listener
+        bench.on('complete', next);
+        listeners = bench.events['complete'];
         listeners.splice(0, 0, listeners.pop());
       }
       // execute method
-      me[methodName].apply(me, args);
-      // if synchronous return next benchmark after completing the current
-      return !async && onComplete(me);
+      result[i] = bench[name].apply(bench, args);
+      // if synchronous return true until finished
+      return async || next();
     }
 
-    function onComplete(me) {
-      var next;
+    function next() {
+      var last = bench;
+      bench = false;
 
-      // remove invoke's "complete" listener and call the rest
       if (async) {
-        me.removeListener('complete', onComplete);
-        me.emit('complete');
+        last.removeListener('complete', next);
+        last.emit('complete');
       }
       // choose next benchmark if not exiting early
-      if (options.onCycle(me) !== false) {
+      if (options.onCycle.call(benches, last) !== false) {
         if (queued) {
-          next = benches.shift();
-        } else if (++i < length) {
-          next = benches[i];
+          bench = benches.shift();
+        } else {
+          bench = benches[++i];
         }
       }
-      if (next) {
+      if (bench) {
         if (async) {
-          call(next, onInvoke, async);
+          call(bench, execute, async);
         } else {
-          return next;
+          return true;
         }
       } else {
-        options.onComplete(me);
+        options.onComplete.call(benches, last);
       }
       // when async the `return false` will cancel the rest of the "complete"
       // listeners because they were called above and when synchronous it will
@@ -748,28 +751,30 @@
     }
 
     // juggle arguments
-    if (typeof methodName == 'string') {
+    if (typeof name == 'string') {
       args = slice.call(arguments, 2);
-    }
-    else {
-      options = extend(options, methodName);
-      methodName = options.methodName;
+    } else {
+      options = extend(options, name);
+      name = options.name;
       args = isArray(args = 'args' in options ? options.args : []) ? args : [args];
       queued = options.queued;
     }
     // async for use with Benchmark#run only
-    if (methodName == 'run') {
+    if (name == 'run') {
       async = (args[0] == null ? Benchmark.prototype.DEFAULT_ASYNC :
         args[0]) && HAS_TIMEOUT_API;
     }
     // start iterating over the array
     if (bench = queued ? benches.shift() : benches[0]) {
+      options.onStart.call(benches, bench);
       if (async) {
-        onInvoke(bench);
+        call(bench, execute, async);
       } else {
-        while (bench = onInvoke(bench));
+        result.length = 0;
+        while (execute());
       }
     }
+    return result;
   }
 
   /**
@@ -942,7 +947,7 @@
    */
   function emit(type) {
     var me = this,
-        args = [me].concat(slice.call(arguments, 1)),
+        args = slice.call(arguments, 1),
         events = me.events,
         listeners = events && events[type] || [],
         successful = true;
@@ -995,6 +1000,7 @@
   /**
    * Aborts the benchmark as well as in progress calibrations without recording times.
    * @member Benchmark
+   * @returns {Object} The benchmark instance.
    */
   function abort() {
     var me = this;
@@ -1013,6 +1019,7 @@
       me.aborted = true;
       me.emit('abort');
     }
+    return me;
   }
 
   /**
@@ -1066,6 +1073,7 @@
   /**
    * Reset properties and abort if running.
    * @member Benchmark
+   * @returns {Object} The benchmark instance.
    */
   function reset() {
     var changed,
@@ -1101,6 +1109,7 @@
         me.emit('reset');
       }
     }
+    return me;
   }
 
   /**
@@ -1146,28 +1155,21 @@
       while (count--) {
         queue.push(me.clone({
           'computing': true,
-          'events': {
-            'complete': [onComplete],
-            'cycle': [onCycle],
-            'start': [onStart]
-          }
+          'events': { 'start': [update], 'cycle': [update] }
         }));
       }
     }
 
-    function onComplete(clone) {
-      // update host run count
-      me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
-    }
-
-    function onCycle(clone) {
-      // map changes from clone to host
+    function update() {
+      // port changes from clone to host
+      var clone = this;
       if (me.running) {
         if (clone.cycles) {
           me.count = clone.count;
           me.cycles += clone.cycles;
           me.hz = clone.hz;
           me.times.period = clone.times.period;
+          me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
           me.emit('cycle');
         }
         else if (clone.error) {
@@ -1175,26 +1177,22 @@
           me.error = clone.error;
           me.emit('error');
         }
-      }
-      else if (me.aborted) {
+        else {
+          // reset timer if interrupted by calibrations
+          if (!calibrating && !calibrated && isCalibrated()) {
+            calibrated = true;
+            me.times.start = +new Date;
+          }
+          // use hosts last run count
+          clone.count = me.INIT_RUN_COUNT;
+        }
+      } else if (me.aborted) {
         clone.abort();
       }
     }
 
-    function onStart(clone) {
-      // reset timer if interrupted by calibrations
-      if (!calibrating && !calibrated && isCalibrated()) {
-        calibrated = true;
-        me.times.start = +new Date;
-      }
-      // sync clone's initial run count with host
-      clone.count = me.INIT_RUN_COUNT;
-      onCycle(clone);
-    }
-
-    function onInvokeCycle(clone) {
-      var complete,
-          mean,
+    function evaluate(clone) {
+      var mean,
           moe,
           rme,
           sd,
@@ -1209,16 +1207,12 @@
           sumOf = function(sum, x) { return sum + x; },
           varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
 
-      // exit early for unclockable tests
-      if (clone.hz == Infinity) {
-        size = queue.length = sample.length = 0;
-      }
-      // exit early if aborted
-      if (aborted) {
-        complete = true;
+      // exit early for aborted or unclockable tests
+      if (aborted || clone.hz == Infinity) {
+        maxedOut = !(calibrating = size = queue.length = sample.length = 0);
       }
       // simulate onComplete and enqueue additional runs if needed
-      else if (!queue.length) {
+      if (!queue.length) {
         // compute values
         mean = reduce(sample, sumOf, 0) / size || 0;
         // sample variance
@@ -1238,73 +1232,82 @@
             // switch to burst mode
             queue.length = 0;
             compute(me, !async, true, sample);
-          }
-          else {
+          } else {
             enqueue(1);
           }
         }
-        // finish up
         else {
-          complete = true;
-
           // set host values
-          me.count = clone.count;
-          me.running = false;
-          times.stop = now;
-          times.elapsed = elapsed;
-          extend(me.stats, {
-            'MoE': moe,
-            'RME': rme,
-            'SD': sd,
-            'SEM': sem,
-            'mean': mean,
-            'size': size,
-            'variance': variance
-          });
-
-          if (clone.hz != Infinity) {
-            me.hz = mean;
-            times.period = 1 / mean;
-            times.cycle = times.period * me.count;
+          if (!aborted) {
+            me.count = clone.count;
+            me.running = false;
+            times.stop = now;
+            times.elapsed = elapsed;
+            extend(me.stats, {
+              'MoE': moe,
+              'RME': rme,
+              'SD': sd,
+              'SEM': sem,
+              'mean': mean,
+              'size': size,
+              'variance': variance
+            });
+            if (clone.hz != Infinity) {
+              me.hz = mean;
+              times.period = 1 / mean;
+              times.cycle = times.period * me.count;
+            }
+            if (me.persist) {
+              store(me);
+            }
           }
-          // record results
-          if (me.persist) {
-            store(me);
-          }
+          me.INIT_RUN_COUNT = runCount;
+          me.emit('complete');
         }
       }
-      // cleanup
-      if (complete) {
-        queue.length = 0;
-        me.INIT_RUN_COUNT = runCount;
-        me.emit('complete');
-      }
-      return !aborted;
     }
 
-    // init sample and queue
+    // init sample/queue and begin
     sample || (sample = []);
     enqueue(sample.length ? 1 : 5);
-
-    // run them
-    invoke(queue, {
-      'methodName': 'run',
-      'args': async,
-      'queued': true,
-      'onCycle': onInvokeCycle
-    });
+    invoke(queue, { 'name': 'run', 'args': async, 'queued': true, 'onCycle': evaluate });
   }
 
   /**
-   * Executes each run cycle and computes results.
-   * @private
-   * @param {Object} me The benchmark instance.
+   * Starts running the benchmark.
+   * @member Benchmark
    * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @returns {Object} The benchmark instance.
    */
-  function _run(me, async) {
-    var clocked;
+  function run(async) {
+    var clocked,
+        me = this;
 
-    function onCalibrate(cal) {
+    function cycle() {
+      // continue, if not aborted between cycles
+      if (me.running) {
+        me.cycles++;
+        try {
+          // used by finish()
+          clocked = clock(me);
+        }
+        catch(e) {
+          me.abort();
+          me.error = e;
+          me.emit('error');
+        }
+      }
+      // check if calibration is needed
+      if (me.running) {
+        if (me.constructor == Calibration || calibrate(me, resume, async)) {
+          finish();
+        }
+      } else {
+        finish();
+      }
+    }
+
+    function resume(cal) {
       if (cal.aborted) {
         me.abort();
         me.emit('complete');
@@ -1331,13 +1334,10 @@
 
         // seconds per operation
         period = times.period = clocked / count;
-
         // ops per second
         me.hz = 1 / period;
-
         // do we need to do another cycle?
         me.running = clocked < minTime;
-
         // avoid working our way up to this next time
         me.INIT_RUN_COUNT = count;
 
@@ -1361,52 +1361,22 @@
       // figure out what to do next
       if (me.running) {
         me.count = count;
-        call(me, _run, async);
+        call(me, cycle, async);
       } else {
         me.emit('complete');
       }
     }
 
-    // continue, if not aborted between cycles
-    if (me.running) {
-      me.cycles++;
-      try {
-        // used by finish()
-        clocked = clock(me);
-      }
-      catch(e) {
-        me.abort();
-        me.error = e;
-        me.emit('error');
-      }
-    }
-    // check if calibration is needed
-    if (me.running) {
-      if (me.constructor == Calibration || calibrate(me, onCalibrate, async)) {
-        finish();
-      }
-    } else {
-      finish();
-    }
-  }
-
-  /**
-   * Starts running the benchmark.
-   * @member Benchmark
-   * @param {Boolean} [async=false] Flag to run asynchronously.
-   */
-  function run(async) {
-    var me = this;
-    async = (async == null ? me.DEFAULT_ASYNC : async) && HAS_TIMEOUT_API;
-
     // set running to false so reset() won't call abort()
     me.running = false;
     me.reset();
     me.running = true;
+
     me.count = me.INIT_RUN_COUNT;
     me.times.start = +new Date;
     me.emit('start');
 
+    async = (async == null ? me.DEFAULT_ASYNC : async) && HAS_TIMEOUT_API;
     if (me.persist && restore(me)) {
       // use restored data
       call(me, function() {
@@ -1418,10 +1388,11 @@
       }, async);
     }
     else if (me.computing) {
-      _run(me, async);
+      cycle();
     } else {
       compute(me, async);
     }
+    return me;
   }
 
   /*--------------------------------------------------------------------------*/
