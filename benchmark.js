@@ -23,7 +23,7 @@
   EMBEDDED_UID = +new Date,
 
   /** Used to control expiration of persisted data */
-  STORE_KEY_REV = 3,
+  STORE_KEY_REV = 2,
 
   /** Unit of the timer */
   TIMER_UNIT = 'ms',
