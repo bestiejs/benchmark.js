@@ -22,6 +22,9 @@
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
+  /** Used to control expiration of persisted data */
+  STORE_KEY_REV = 3,
+
   /** Unit of the timer */
   TIMER_UNIT = 'ms',
 
@@ -409,13 +412,13 @@
    */
   function getStoreKey(me) {
     var options = extend({
-      'rev': 'r2',
+      'rev': STORE_KEY_REV,
       'unit': TIMER_UNIT,
       'uid': me.fn && me.fn.uid,
       'platform': Benchmark.platform
     }, me.constructor == Object && me);
 
-    return ['benchmark.js', options.rev, options.unit, options.uid, options.platform].join(':');
+    return ['benchmark.js', 'r' + options.rev, options.unit, options.uid, options.platform].join(':');
   }
 
   /**
@@ -498,12 +501,15 @@
   function clearStorage() {
     // use brute force because Firefox errors attempting for-in on localStorage
     each(HAS_STORAGE ? ['ns', 'us', 'ms'] : [], function(unit) {
-      each(['r1', 'r2'], function(rev) {
-        var uid = -3;
+      var uid,
+          rev = 0;
+
+      while (++rev <= STORE_KEY_REV) {
+        uid = -3;
         while (++uid < 100) {
           localStorage.removeItem(getStoreKey({ 'rev': rev, 'unit': unit, 'uid': uid }));
         }
-      });
+      }
     });
   }
 
@@ -1212,6 +1218,9 @@
           sd,
           sem,
           variance,
+          index = me.CALIBRATION_INDEX,
+          cals = me.constructor.CALIBRATIONS || [],
+          cal = cals[index > 1 ? index : fn.compilable ? 0 : 1],
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
@@ -1253,7 +1262,6 @@
         else {
           // set host values
           if (!aborted) {
-            me.count = clone.count;
             me.running = false;
             times.stop = now;
             times.elapsed = elapsed;
@@ -1266,7 +1274,12 @@
               'size': size,
               'variance': variance
             });
-            if (clone.hz != Infinity) {
+
+            if (me.hz != Infinity) {
+              // calibrate by subtracting iteration overhead
+              if (cal && cal.compare(me) > 0) {
+                mean = 1 / ((1 / mean) - cal.times.period);
+              }
               me.hz = mean;
               times.period = 1 / mean;
               times.cycle = times.period * me.count;
@@ -1334,18 +1347,13 @@
       var divisor,
           period,
           fn = me.fn,
-          index = me.CALIBRATION_INDEX,
           times = me.times,
-          cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[index > 1 ? index : fn.compilable ? 0 : 1],
           count = me.count,
           minTime = me.MIN_TIME;
 
       if (me.running) {
-        // calibrate by subtracting iteration overhead
-        clocked = times.cycle = Math.max(0,
-          clocked - ((cal && cal.times.period || 0) * count));
-
+        // time taken to complete last test cycle
+        times.cycle = clocked;
         // seconds per operation
         period = times.period = clocked / count;
         // ops per second

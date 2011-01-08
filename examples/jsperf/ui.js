@@ -455,7 +455,7 @@
           // status: finished
           else if (bench.cycles) {
             cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
-              bench.times.cycle.toFixed(2) + ' seconds.';
+              bench.times.cycle.toFixed(3) + ' seconds.';
 
             setHTML(cell, hz == Infinity ? hz :
               formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
