@@ -514,6 +514,7 @@
    * @member Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
+   * @returns {Array} The array iterated over.
    */
   function each(array, callback) {
     var i = -1,
@@ -524,6 +525,7 @@
         break;
       }
     }
+    return array;
   }
 
   /**
@@ -592,6 +594,7 @@
    * @member Benchmark
    * @param {Object} object The object to iterate over.
    * @param {Function} callback The function called per iteration.
+   * @returns {Object} The object iterated over.
    */
   function forIn(object, callback) {
     for (var key in object) {
@@ -599,6 +602,7 @@
         break;
       }
     }
+    return object;
   }
 
   /**
@@ -825,8 +829,10 @@
    * @returns {Boolean} Returns true if calibrated, false if not.
    */
   function isCalibrated() {
-    return !filter(Benchmark.CALIBRATIONS,
-      function(cal) { return !cal.cycles; }).length;
+    return !filter(Benchmark.CALIBRATIONS, function(cal) {
+      cal.persist && restore(cal);
+      return !cal.cycles;
+    }).length;
   }
 
   /**
@@ -1891,6 +1897,15 @@
 
   /*--------------------------------------------------------------------------*/
 
+  extend(Calibration.prototype, {
+
+    // allows extremely small clock speeds
+    'DETECT_INFINITY': false,
+
+    // avoid repeat calibrations
+    'persist': true
+  });
+
   /**
    * Benchmarks to establish iteration overhead.
    * @static
@@ -1905,15 +1920,6 @@
     b.compilable = false;
     return [new Calibration(a), new Calibration(b)];
   }());
-
-  extend(Calibration.prototype, {
-
-    // allows extremely small clock speeds
-    'DETECT_INFINITY': false,
-
-    // avoid repeat calibrations
-    'persist': true
-  });
 
   /*--------------------------------------------------------------------------*/
 
