@@ -177,7 +177,7 @@ label#calgroup {
   vertical-align: top;
 }
 
-label[for=visible] {
+label[for="visible"] {
   position: relative;
   top: -.37em;
 }
@@ -345,6 +345,7 @@ footer {
 
 #controls {
   margin-top: -4.6em;
+  _display: block; /* IE6 */
 }
 
 #controls.reduce {
@@ -374,7 +375,7 @@ footer {
 #comments .meta {
   padding-left: 35px;
   top: 0;
-  width: 843px;
+  width: 923px;
   line-height: 30px;
 }
 
