@@ -169,34 +169,6 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Runs calibration benchmarks, if needed, and fires a callback when completed.
-   * @private
-   * @param {Object} me The benchmark instance waiting for calibrations to complete.
-   * @param {Function} callback Function executed after calibration.
-   * @param {Boolean} [async=false] Flag to run asynchronously.
-   * @returns {Boolean} Returns true if calibrated, else false.
-   */
-  function calibrate(me, callback, async) {
-    var result = isCalibrated(),
-        onCycle = function(cal) { return !(cal.aborted || me.aborted); };
-
-    // calibrate all if one has not ran
-    if (!result) {
-      invoke(Benchmark.CALIBRATIONS, {
-        'name': 'run',
-        'args': async,
-        'onCycle': onCycle,
-        'onComplete': callback
-      });
-      // synchronous calibrations have now completed
-      if (!async) {
-        result = true;
-      }
-    }
-    return result;
-  }
-
-  /**
    * Executes a function asynchronously or synchronously.
    * @private
    * @param {Object} me The benchmark instance passed to `fn`.
@@ -208,11 +180,11 @@
     if (async && HAS_TIMEOUT_API) {
       me.timerId = setTimeout(function() {
         delete me.timerId;
-        fn(me, async);
+        fn();
       }, me.CYCLE_DELAY * 1e3);
     }
     else {
-      fn(me);
+      fn();
     }
   }
 
@@ -363,8 +335,8 @@
     }
     else {
       code = interpolate(code, {
-        'start': 's$=(new n$).getTime()',
-        'end': 'r$=((new n$).getTime()-s$)/1e3'
+        'start': 's$=new n$',
+        'end': 'r$=(new n$-s$)/1e3'
       });
     }
 
@@ -456,35 +428,25 @@
    * @returns {Boolean} Returns `true` if results were restored, else `false`.
    */
   function restore(me) {
-    var data,
-        key,
+    var key,
         match,
         object,
-        value,
         objects = [me],
         persist = me.persist,
-        expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity;
+        expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity,
+        data = HAS_STORAGE && (data = localStorage[getStoreKey(me)]) &&
+          +new Date - (/created:(\d+)/.exec(data) || 0)[1] < expires && data;
 
-    // load and ensure data hasn't expired
-    if (HAS_STORAGE) {
-      data = (data = localStorage[getStoreKey(me)]) &&
-        +new Date - (/created:(\d+)/.exec(data) || 0)[1] < expires && data;
-    }
-    // restore values
-    if (data) {
-      while (objects.length) {
-        object = objects.pop();
-        for (key in object) {
-          value = object[key];
-          match = RegExp(key + ':([^,]+)').exec(data);
-          // extract value and remove from data
-          if (match) {
-            data = data.replace(match[0], '');
-            object[key] = +match[1];
-          }
-          else if (value && isClassOf(value, 'Object')) {
-            objects.push(value);
-          }
+    while (data && objects.length) {
+      object = objects.pop();
+      for (key in object) {
+        // extract value and remove from data
+        if (match = RegExp(key + ':([^,]+),?').exec(data)) {
+          data = data.replace(match[0], '');
+          object[key] = +match[1];
+        }
+        else if (isClassOf(object[key], 'Object')) {
+          objects.push(object[key]);
         }
       }
     }
@@ -850,7 +812,7 @@
    * @returns {Boolean} Returns true if of the class, else false.
    */
   function isClassOf(object, name) {
-    return {}.toString.call(object).slice(8, -1) == name;
+    return object != null && {}.toString.call(object).slice(8, -1) == name;
   }
 
   /**
@@ -1310,6 +1272,25 @@
     var clocked,
         me = this;
 
+    function calibrate() {
+      invoke(Benchmark.CALIBRATIONS, {
+        'name': 'run',
+        'args': async,
+        'onCycle': function(cal) {
+          return !(cal.aborted || me.aborted);
+        },
+        'onComplete': function(cal) {
+          if (cal.aborted) {
+            me.abort();
+            me.emit('complete');
+          } else if (me.running) {
+            // resume benchmark
+            call(me, finish, async);
+          }
+        }
+      });
+    }
+
     function cycle() {
       // continue, if not aborted between cycles
       if (me.running) {
@@ -1324,22 +1305,15 @@
           me.emit('error');
         }
       }
-      // check if calibration is needed
+      // check if calibrations need to run
       if (me.running) {
-        if (me.constructor == Calibration || calibrate(me, resume, async)) {
+        if (me.constructor == Calibration || isCalibrated()) {
           finish();
+        } else {
+          calibrate();
         }
       } else {
         finish();
-      }
-    }
-
-    function resume(cal) {
-      if (cal.aborted) {
-        me.abort();
-        me.emit('complete');
-      } else if (me.running) {
-        call(me, finish, async);
       }
     }
 
