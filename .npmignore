@@ -1,6 +1,2 @@
 .git*
-examples/
-docs*
-plugins/
-tests/
-vendor/
+docs.php
