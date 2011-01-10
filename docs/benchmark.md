@@ -122,13 +122,13 @@ A generic bare-bones `Array#filter` solution.
     }); // -> [1, 3, 5];
 
     // get fastest benchmarks
-    Benchmark.filter(benches, "fastest");
+    Benchmark.filter(benches, 'fastest');
 
     // get slowest benchmarks
-    Benchmark.filter(benches, "slowest");
+    Benchmark.filter(benches, 'slowest');
 
     // get benchmarks that completed without erroring
-    Benchmark.filter(benches, "successful");
+    Benchmark.filter(benches, 'successful');
 
 ## <a name="static-forIn" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L605" title="View in source">Benchmark.forIn(object, callback)</a>
 A generic bare-bones for-in solution for an object's own properties.
@@ -160,7 +160,7 @@ Checks if an object has the specified key as a direct property.
 2. `key` *(String)*: The key to check for.
 
 ### Returns
-*(Boolean)*: Returns true if key is a direct property, else false.
+*(Boolean)*: Returns `true` if key is a direct property, else `false`.
 
 ## <a name="static-indexOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L668" title="View in source">Benchmark.indexOf(array, value)</a>
 A generic bare-bones `Array#indexOf` solution.
@@ -185,10 +185,10 @@ Modify a string by replacing named tokens with matching object property values.
 *(String)*: The modified string.
 
 ### Example
-    Benchmark.interpolate("#{greet} #{who}!", {
-      "greet": "Hello",
-      "who": "world"
-    }); // -> "Hello world!"
+    Benchmark.interpolate('#{greet} #{who}!', {
+      'greet': 'Hello',
+      'who': 'world'
+    }); // -> 'Hello world!'
 
 ## <a name="static-invoke" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L717" title="View in source">Benchmark.invoke(benches, name)</a>
 Invokes a given method, with arguments, on all benchmarks in an array.
@@ -204,31 +204,31 @@ Invokes a given method, with arguments, on all benchmarks in an array.
 
 ### Example
     // invoke `reset` on all benchmarks
-    Benchmark.invoke(benches, "reset");
+    Benchmark.invoke(benches, 'reset');
 
     // invoke `emit` with arguments
-    Benchmark.invoke(benches, "emit", "complete", listener);
+    Benchmark.invoke(benches, 'emit', 'complete', listener);
 
     // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
     Benchmark.invoke(benches, {
 
       // invoke the `run` method
-      "name": "run",
+      'name': 'run',
 
       // pass a single argument
-      "args": true,
+      'args': true,
 
       // treat as queue, removing benchmarks from front of `benches` until empty
-      "queued": true,
+      'queued': true,
 
       // called before any benchmarks have been invoked.
-      "onStart": onStart,
+      'onStart': onStart,
 
       // called between invoking benchmarks
-      "onCycle": onCycle,
+      'onCycle': onCycle,
 
       // called after all benchmarks have been invoked.
-      "onComplete": onComplete
+      'onComplete': onComplete
     });
 
 ## <a name="static-isArray" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L827" title="View in source">Benchmark.isArray(value)</a>
@@ -469,7 +469,7 @@ Creates a cloned benchmark with the same test function and options.
 
 ### Example
     var bizarro = bench.clone({
-      "name": "doppelganger"
+      'name': 'doppelganger'
     });
 
 ## <a name="compare" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1076" title="View in source">Benchmark#compare(other)</a>
