@@ -45,7 +45,7 @@
       "url": "http://mths.be/mit"
     }
   ],
-  "repositories": [
+  "repository": [
     {
       "type": "git",
       "url": "https://github.com/mathiasbynens/benchmark.js"
