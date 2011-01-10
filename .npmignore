@@ -1,0 +1,6 @@
+.git*
+examples/
+docs*
+plugins/
+tests/
+vendor/

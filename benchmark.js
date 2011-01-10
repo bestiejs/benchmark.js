@@ -86,37 +86,37 @@
    * var bench = new Benchmark(fn);
    *
    * // or using a name first
-   * var bench = new Benchmark("foo", fn);
+   * var bench = new Benchmark('foo', fn);
    *
    * // or with options
-   * var bench = new Benchmark("foo", fn, {
+   * var bench = new Benchmark('foo', fn, {
    *
    *   // displayed by Benchmark#toString if `name` is not available
-   *   "id": "xyz",
+   *   'id': 'xyz',
    *
    *   // called when the benchmark starts
-   *   "onStart": onStart,
+   *   'onStart': onStart,
    *
    *   // called after each run cycle
-   *   "onCycle": onCycle,
+   *   'onCycle': onCycle,
    *
    *   // called when aborted
-   *   "onAbort": onAbort,
+   *   'onAbort': onAbort,
    *
    *   // called when a test errors
-   *   "onError": onError,
+   *   'onError': onError,
    *
    *   // called when reset
-   *   "onReset": onReset,
+   *   'onReset': onReset,
    *
    *   // called when benchmark is complete
-   *   "onComplete": onComplete,
+   *   'onComplete': onComplete,
    *
    *   // compiled/called before the test loop
-   *   "setup": setup,
+   *   'setup': setup,
    *
    *   // compiled/called after the test loop
-   *   "teardown": teardown
+   *   'teardown': teardown
    * });
    */
   function Benchmark(name, fn, options) {
@@ -453,7 +453,7 @@
    * Restores recorded benchmark results.
    * @private
    * @param {Object} me The benchmark instance.
-   * @returns {Boolean} Returns true if results were restored, else false
+   * @returns {Boolean} Returns `true` if results were restored, else `false`.
    */
   function restore(me) {
     var data,
@@ -565,13 +565,13 @@
    * }); // -> [1, 3, 5];
    *
    * // get fastest benchmarks
-   * Benchmark.filter(benches, "fastest");
+   * Benchmark.filter(benches, 'fastest');
    *
    * // get slowest benchmarks
-   * Benchmark.filter(benches, "slowest");
+   * Benchmark.filter(benches, 'slowest');
    *
    * // get benchmarks that completed without erroring
-   * Benchmark.filter(benches, "successful");
+   * Benchmark.filter(benches, 'successful');
    */
   function filter(array, callback) {
     var source;
@@ -634,7 +634,7 @@
    * @member Benchmark
    * @param {Object} object The object to check.
    * @param {String} key The key to check for.
-   * @returns {Boolean} Returns true if key is a direct property, else false.
+   * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
    */
   function hasKey(object, key) {
     var result,
@@ -687,31 +687,31 @@
    * @example
    *
    * // invoke `reset` on all benchmarks
-   * Benchmark.invoke(benches, "reset");
+   * Benchmark.invoke(benches, 'reset');
    *
    * // invoke `emit` with arguments
-   * Benchmark.invoke(benches, "emit", "complete", listener);
+   * Benchmark.invoke(benches, 'emit', 'complete', listener);
    *
    * // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
    * Benchmark.invoke(benches, {
    *
    *   // invoke the `run` method
-   *   "name": "run",
+   *   'name': 'run',
    *
    *   // pass a single argument
-   *   "args": true,
+   *   'args': true,
    *
    *   // treat as queue, removing benchmarks from front of `benches` until empty
-   *   "queued": true,
+   *   'queued': true,
    *
    *   // called before any benchmarks have been invoked.
-   *   "onStart": onStart,
+   *   'onStart': onStart,
    *
    *   // called between invoking benchmarks
-   *   "onCycle": onCycle,
+   *   'onCycle': onCycle,
    *
    *   // called after all benchmarks have been invoked.
-   *   "onComplete": onComplete
+   *   'onComplete': onComplete
    * });
    */
   function invoke(benches, name) {
@@ -726,7 +726,7 @@
     function execute() {
       var listeners;
       if (async) {
-        // use "next" as a listener
+        // use `next` as a listener
         bench.on('complete', next);
         listeners = bench.events['complete'];
         listeners.splice(0, 0, listeners.pop());
@@ -804,10 +804,10 @@
    * @returns {String} The modified string.
    * @example
    *
-   * Benchmark.interpolate("#{greet} #{who}!", {
-   *   "greet": "Hello",
-   *   "who": "world"
-   * }); // -> "Hello world!"
+   * Benchmark.interpolate('#{greet} #{who}!', {
+   *   'greet': 'Hello',
+   *   'who': 'world'
+   * }); // -> 'Hello world!'
    */
   function interpolate(string, object) {
     string = string == null ? '' : string;
@@ -1050,7 +1050,7 @@
    * @example
    *
    * var bizarro = bench.clone({
-   *   "name": "doppelganger"
+   *   'name': 'doppelganger'
    * });
    */
   function clone(options) {

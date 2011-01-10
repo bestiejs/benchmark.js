@@ -37,37 +37,37 @@ In [Rhino](http://www.mozilla.org/rhino/):
 Usage example:
 
     function testA() {
-      /o/.test("Hello World!");
+      /o/.test('Hello World!');
     }
     
     function testB() {
-      "Hello World!".indexOf("o") > -1;
+      'Hello World!'.indexOf('o') > -1;
     }
     
     var benches = [
-      new Benchmark("RegExp#test", testA),
-      new Benchmark("String#indexOf", testB)
+      new Benchmark('RegExp#test', testA),
+      new Benchmark('String#indexOf', testB)
     ];
     
     // add listeners
-    Benchmark.invoke(benches, "on", "complete", function() {
+    Benchmark.invoke(benches, 'on', 'complete', function() {
       console.log( this.toString() );
     });
     
     // run benchmarks (async)
     Benchmark.invoke(benches, {
-      "name": "run",
-      "args": true,
-      "onComplete": function() {
+      'name': 'run',
+      'args': true,
+      'onComplete': function() {
         var a = benches[0],
             b = benches[1],
             rank = a.compare(b);
 
         // report results
         console.log(
-          a.name + " is " +
-          (rank == 0 ? " <indeterminate> " : rank > 0 ? "faster" : "slower") +
-          " than " + b.name
+          a.name + ' is ' +
+          (rank == 0 ? ' <indeterminate> ' : rank > 0 ? 'faster' : 'slower') +
+          ' than ' + b.name
         );
       }
     });
