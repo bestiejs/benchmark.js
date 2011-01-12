@@ -4,7 +4,7 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
-    'timer': null,
+    'timers': { 'cleanup': null, 'load': null },
     'trash': createElement('div')
   },
 
@@ -56,13 +56,15 @@
     benches = Benchmark.map(benches, function(bench) {
       var clone = bench.clone();
       clone.hz = Math.round(bench.hz - bench.stats.MoE);
+      clone.id || (clone.id = Benchmark.indexOf(ui.benchmarks, bench) + 1);
       return clone;
     });
 
     return Benchmark.reduce(benches, function(result, bench, key) {
-      // duplicate and non alphanumeric benchmark names have their ids appended
       key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
       result || (result = { });
+
+      // duplicate and non alphanumeric benchmark names have their ids appended
       result[key && !result[key] ? key : key + bench.id ] = bench.hz;
       return result;
     }, null);
@@ -145,10 +147,11 @@
         name,
         me = ui.browserscope,
         delay = me.CLEANUP_INTERVAL * 1e3,
+        timers = cache.timers,
         trash = cache.trash;
 
     // remove injected scripts and old iframes
-    if (onCleanup.id) {
+    if (timers.cleanup) {
       Benchmark.each(query('script').concat(query('iframe')), function(element) {
         // check if element is expired
         name = element.name;
@@ -164,7 +167,7 @@
       });
     }
     // schedule another round
-    onCleanup.id = setTimeout(onCleanup, delay);
+    timers.cleanup = setTimeout(onCleanup, delay);
   }
 
   /**
@@ -212,16 +215,17 @@
    */
   function load() {
     var me = ui.browserscope,
-        cont = me.container;
+        cont = me.container,
+        timers = cache.timers;
 
     function onComplete(response) {
-      clearTimeout(cache.timer);
+      clearTimeout(timers.load);
       me.render(response);
     }
 
     // start timer
-    clearTimeout(cache.timer);
-    cache.timer = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
+    clearTimeout(timers.load);
+    timers.load = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
 
     // request data
     if (cont) {

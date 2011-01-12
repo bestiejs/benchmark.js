@@ -1317,15 +1317,14 @@
    * @private
    * @param {Object} me The benchmark instance.
    * @param {Boolean} [async=false] Flag to run asynchronously.
-   * @param {Boolean} [burst=false] Flag to run in bursts.
+   * @param {Number} burstStart Timestamp of when the synchronous cycle burst started.
    * @param {Array} [sample=[]] Benchmarks used for statistical analysis.
    */
-  function compute(me, async, burst, sample) {
+  function compute(me, async, burstStart, sample) {
     var calibrated = isCalibrated(),
         calibrating = me.constructor == Calibration,
         fn = me.fn,
         queue = [],
-        burstCount = async ? 10 : 50,
         runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {
@@ -1381,8 +1380,9 @@
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
-          elapsed = (now - times.start) / 1e3,
-          maxedOut = burst ? !--burstCount : elapsed >= me.MAX_TIME_ELAPSED,
+          burstElapsed = (now - burstStart) / 1e3,
+          timeElapsed = (now - times.start) / 1e3,
+          maxedOut = !async && burstStart ? burstElapsed >= me.MAX_BURST_TIME : timeElapsed >= me.MAX_TIME_ELAPSED,
           size = sample.push(clone.hz),
           sumOf = function(sum, x) { return sum + x; },
           varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
@@ -1408,10 +1408,10 @@
 
         // if time permits, or calibrating, increase sample size to reduce the margin of error
         if (!maxedOut || (calibrating && rme > 1)) {
-          if (maxedOut && (async || burst)) {
+          if (maxedOut && (async || burstStart)) {
             // switch to burst mode
             queue.length = 0;
-            compute(me, !async, true, sample);
+            compute(me, !async, now, sample);
           } else {
             enqueue(1);
           }
@@ -1421,7 +1421,7 @@
           if (!aborted) {
             me.running = false;
             times.stop = now;
-            times.elapsed = elapsed;
+            times.elapsed = timeElapsed;
             extend(me.stats, {
               'MoE': moe,
               'RME': rme,
@@ -1863,6 +1863,13 @@
      * @type Number
      */
     'INIT_RUN_COUNT': 5,
+
+    /**
+     * The maximum time an async run is allowed to perform a burst of synchronous cycles (secs).
+     * @member Benchmark
+     * @type Number
+     */
+    'MAX_BURST_TIME': 0.5,
 
     /**
      * The maximum time a benchmark is allowed to run before finishing (secs).
