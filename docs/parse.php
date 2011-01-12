@@ -302,10 +302,10 @@
   $_GET["f"] = array_shift(preg_split("/\./", $_GET["f"]));
 
   // generate markdown
-  $content = parse($_GET["f"] . ".js");
+  $content = parse("../" . $_GET["f"] . ".js");
 
   // save it to a .md file
-  file_put_contents("docs/" . basename($_GET["f"]) . ".md", $content);
+  file_put_contents(basename($_GET["f"]) . ".md", $content);
 
   // print
   echo $content . PHP_EOL;
