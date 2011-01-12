@@ -203,32 +203,28 @@
         i = 1;
   } catch(e) { }
 
-  ui.addTest('Sort ascending', 1, function() {
+  ui.add('Sort ascending', function() {
     var x = arr;
     x.sort(function(a, b) {
       return a - b;
     });
-  });
-
-  ui.addTest('Sort descending', 2, function() {
+  })
+  .add('Sort descending', function() {
     var x = arr;
     x.sort(function(a, b) {
       return b - a;
     });
-  });
-
-  ui.addTest('Don\'t sort at all', 3, function() {
+  })
+  .add('Don\'t sort at all', function() {
     var foo, x = i;
     while (x--) {
       foo = Array(x).join('-');
     }
-  });
-
-  ui.addTest('Error', 4, function() {
+  })
+  .add('Error', function() {
     arr.foo(); // unknown method
-  });
-
-  ui.addTest('Just another unrelated test', 5, function() {
+  })
+  .add('Just another unrelated test', function() {
     var x = arr,
         y = ~~(Math.random() * 100);
     while (y--) {

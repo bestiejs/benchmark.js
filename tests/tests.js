@@ -19,7 +19,7 @@ test("user agent detection", function() {
 
     Benchmark.each(document.getElementsByTagName('script'), function(element) {
       var src = element.src;
-      if (/benchmark\.js/.test(src)) {
+      if (/benchmark\.js$/.test(src)) {
         xhr.open('get', src, false);
         xhr.send();
         compiled = Function('isClassOf,isHostType,reduce,toString,trim,options',

@@ -22,6 +22,9 @@
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
+  /** Used to skip Benchmark's initializations */
+  HEADLESS = function() { },
+
   /** Used to control expiration of persisted data */
   STORE_KEY_REV = 2,
 
@@ -94,7 +97,7 @@
    *   // displayed by Benchmark#toString if `name` is not available
    *   'id': 'xyz',
    *
-   *   // called when the benchmark starts
+   *   // called when the benchmark starts running
    *   'onStart': onStart,
    *
    *   // called after each run cycle
@@ -109,7 +112,7 @@
    *   // called when reset
    *   'onReset': onReset,
    *
-   *   // called when benchmark is complete
+   *   // called when the benchmark completes running
    *   'onComplete': onComplete,
    *
    *   // compiled/called before the test loop
@@ -128,23 +131,52 @@
     } else {
       me.name = name;
     }
-    // apply options
-    options = extend({ }, options);
-    forIn(options, function(value, key) {
-      // add event listeners
-      if (/^on[A-Z]/.test(key)) {
-        me.on(key.slice(2).toLowerCase(), value);
-      } else {
-        me[key] = value;
-      }
-    });
+    // initialize if not headless
+    if (name != HEADLESS) {
+      me.fn = fn;
+      fn.uid || (fn.uid = ++cache.counter);
+      setOptions(me, options);
 
-    me.fn = fn;
-    fn.uid || (fn.uid = ++cache.counter);
-    me.created = +new Date;
-    me.options = options;
-    me.stats = extend({ }, me.stats);
-    me.times = extend({ }, me.times);
+      me.created = +new Date;
+      me.stats = extend({ }, me.stats);
+      me.times = extend({ }, me.times);
+    }
+  }
+
+  /**
+   * Suite constructor.
+   * @constructor
+   * @member Benchmark
+   * @param {Object} [options={}] Options object.
+   * @example
+   *
+   * // basic usage
+   * var suite = new Benchmark.Suite;
+   *
+   * // or with options
+   * var suite = new Benchmark.Suite({
+   *
+   *   // called when the suite starts running
+   *   'onStart': onStart,
+   *
+   *   // called between running benchmarks
+   *   'onCycle': onCycle,
+   *
+   *   // called when aborted
+   *   'onAbort': onAbort,
+   *
+   *   // called when a test errors
+   *   'onError': onError,
+   *
+   *   // called when reset
+   *   'onReset': onReset,
+   *
+   *   // called when the suite completes running
+   *   'onComplete': onComplete
+   * });
+   */
+  function Suite(options) {
+    setOptions(this, options);
   }
 
   /**
@@ -158,13 +190,6 @@
   function Calibration(fn, options) {
     Benchmark.call(this, fn, options);
   }
-
-  // Calibration inherits from Benchmark
-  (function() {
-    function Klass() { }
-    Klass.prototype = Benchmark.prototype;
-    (Calibration.prototype = new Klass).constructor = Calibration;
-  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -356,6 +381,18 @@
   }
 
   /**
+   * Wraps a function and passes `this` to the original function as the first argument.
+   * @private
+   * @param {Function} fn The function to be wrapped.
+   * @returns {Function} The new function.
+   */
+  function methodize(fn) {
+    return function() {
+      return fn.apply(this, [this].concat(slice.call(arguments)));
+    };
+  }
+
+  /**
    * Gets the critical value for the specified degrees of freedom.
    * @private
    * @param {Number} df The degrees of freedom.
@@ -391,6 +428,25 @@
     }, me.constructor == Object && me);
 
     return ['benchmark.js', 'r' + options.rev, options.unit, options.uid, options.platform].join(':');
+  }
+
+  /**
+   * Sets the options of a benchmark.
+   * @private
+   * @param {Object} me The benchmark instance.
+   * @param {Object} [options={}] Options object.
+   */
+  function setOptions(me, options) {
+    me.options = forIn(extend({ }, options), function(value, key) {
+      // add event listeners
+      if (/^on[A-Z]/.test(key)) {
+        each(key.split(' '), function(key) {
+          me.on(key.slice(2).toLowerCase(), value);
+        });
+      } else {
+        me[key] = value;
+      }
+    });
   }
 
   /**
@@ -683,7 +739,7 @@
         queued,
         i = 0,
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-        result = benches.slice(0);
+        result = slice.call(benches, 0);
 
     function execute() {
       var listeners;
@@ -710,7 +766,9 @@
       // choose next benchmark if not exiting early
       if (options.onCycle.call(benches, last) !== false) {
         if (queued) {
-          bench = benches.shift();
+          // use generic shift
+          result.shift.call(benches);
+          bench = benches[0];
         } else {
           bench = benches[++i];
         }
@@ -745,7 +803,7 @@
         args[0]) && HAS_TIMEOUT_API;
     }
     // start iterating over the array
-    if (bench = queued ? benches.shift() : benches[0]) {
+    if (bench = benches[0]) {
       options.onStart.call(benches, bench);
       if (async) {
         call(bench, execute, async);
@@ -907,24 +965,169 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Registers a single listener of a specified event type.
-   * @member Benchmark
-   * @param {String} type The event type.
-   * @param {Function} listener The function called when the event occurs.
-   * @returns {Object} The benchmark instance.
+   * Aborts all benchmarks in the suite.
+   * @name abort
+   * @member Benchmark.Suite
+   * @returns {Object} The suite instance.
    */
-  function addListener(type, listener) {
-    var me = this,
-        events = me.events || (me.events = { }),
-        listeners = events[type] || (events[type] = []);
-
-    listeners.push(listener);
+  function abortSuite() {
+    var me = this;
+    me.aborted = true;
+    me.running = false;
+    invoke(me, 'abort');
+    me.emit('abort');
     return me;
   }
 
   /**
+   * Adds a test to the benchmark suite.
+   * @member Benchmark.Suite
+   * @param {String} name A name to identify the benchmark.
+   * @param {Function} fn The test to benchmark.
+   * @param {Object} [options={}] Options object.
+   * @returns {Object} The benchmark instance.
+   * @example
+   *
+   * // basic usage
+   * suite.add(fn);
+   *
+   * // or using a name first
+   * suite.add('foo', fn);
+   *
+   * // or with options
+   * suite.add('foo', fn, {
+   *   'onCycle': onCycle,
+   *   'onComplete': onComplete
+   * });
+   */
+  function add(name, fn, options) {
+    var me = this,
+        bench = new Benchmark(HEADLESS);
+
+    Benchmark.call(bench, name, fn, options);
+    me.push(bench);
+    me.emit('add', bench);
+    return me;
+  }
+
+  /**
+   * A bare-bones `Array#filter` solution.
+   * @name filter
+   * @member Benchmark.Suite
+   * @param {Function|String} callback The function/alias called per iteration.
+   * @returns {Object} A new suite of benchmarks that passed callback filter.
+   */
+  function filterSuite(callback) {
+    var me = this;
+    return reduce(filter(me, callback), function(suite, bench, i) {
+      suite[i] = bench;
+      return suite;
+    }, me.clone());
+  }
+
+  /**
+   * Resets all benchmarks in the suite.
+   * @name reset
+   * @member Benchmark.Suite
+   * @returns {Object} The suite instance.
+   */
+  function resetSuite() {
+    var me = this;
+    me.aborted = me.running = false;
+    invoke(me, 'reset');
+    me.emit('reset');
+    return me;
+  }
+
+  /**
+   * Runs the suite.
+   * @name run
+   * @member Benchmark.Suite
+   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [queued=false] Flag to treat benchmarks as a queue.
+   * @returns {Object} The suite instance.
+   */
+  function runSuite(async, queued) {
+    var me = this;
+    me.reset();
+    me.running = true;
+    invoke(me, {
+      'name': 'run',
+      'args': async,
+      'queued': queued,
+      'onStart': function(bench) {
+        me.emit('start', bench);
+      },
+      'onCycle': function(bench) {
+        if (bench.error) {
+          me.emit('error', bench);
+        }
+        return !me.aborted && me.emit('cycle', bench);
+      },
+      'onComplete': function(bench) {
+        me.running = false;
+        me.emit('complete', bench);
+      }
+    });
+    return me;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Registers a single listener of a specified event type.
+   * @member Benchmark, Benchmark.Suite
+   * @param {String} type The event type.
+   * @param {Function} listener The function called when the event occurs.
+   * @returns {Object} The benchmark instance.
+   * @example
+   *
+   * // basic usage
+   * bench.addListener('cycle', listener);
+   *
+   * // register a listener for multiple event types
+   * bench.addListener('start cycle', listener);
+   */
+  function addListener(type, listener) {
+    var me = this,
+        events = me.events || (me.events = { });
+
+    each(type.split(' '), function(type) {
+      (events[type] || (events[type] = [])).push(listener);
+    });
+    return me;
+  }
+
+  /**
+   * Creates a cloned benchmark with the same test function and options.
+   * @member Benchmark, Benchmark.Suite
+   * @param {Object} options Overwrite cloned options.
+   * @returns {Object} Cloned instance.
+   * @example
+   *
+   * var bizarro = bench.clone({
+   *   'name': 'doppelganger'
+   * });
+   */
+  function clone(options) {
+    var me = this,
+        ctor = me.constructor,
+        options = extend(extend({ }, me.options), options),
+        result = ctor == Suite ? new ctor(options) : new ctor(me.fn, options);
+
+    // copy manually added properties
+    forIn(me, function(value, key) {
+      if (!hasKey(result, key)) {
+        result[key] = value;
+      }
+    });
+    result.reset();
+    return result;
+  }
+
+  /**
    * Executes all registered listeners of a specified event type.
-   * @member Benchmark
+   * @member Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    */
   function emit(type) {
@@ -945,35 +1148,52 @@
 
   /**
    * Unregisters a single listener of a specified event type.
-   * @member Benchmark
+   * @member Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function to unregister.
    * @returns {Object} The benchmark instance.
+   * @example
+   *
+   * // basic usage
+   * bench.removeListener('cycle', listener);
+   *
+   * // unregister a listener for multiple event types
+   * bench.removeListener('start cycle', listener);
    */
   function removeListener(type, listener) {
     var me = this,
-        events = me.events,
-        listeners = events && events[type] || [],
-        index = indexOf(listeners, listener);
+        events = me.events;
 
-    if (index > -1) {
-      listeners.splice(index, 1);
-    }
+    each(type.split(' '), function(type) {
+      var listeners = events && events[type] || [],
+          index = indexOf(listeners, listener);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
+    });
     return me;
   }
 
   /**
    * Unregisters all listeners of a specified event type.
-   * @member Benchmark
+   * @member Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @returns {Object} The benchmark instance.
+   * @example
+   *
+   * // basic usage
+   * bench.removeAllListeners('cycle');
+   *
+   * // unregister all listeners for multiple event types
+   * bench.removeListener('start cycle');
    */
   function removeAllListeners(type) {
     var me = this,
-        events = me.events,
-        listeners = events && events[type] || [];
+        events = me.events;
 
-    listeners.length = 0;
+    each(type.split(' '), function(type) {
+      (events && events[type] || []).length = 0;
+    });
     return me;
   }
 
@@ -986,10 +1206,10 @@
    */
   function abort() {
     var me = this;
+    if (me.constructor != Calibration) {
+      invoke(Benchmark.CALIBRATIONS, 'abort');
+    }
     if (me.running) {
-      if (me.constructor != Calibration) {
-        invoke(Benchmark.CALIBRATIONS, 'abort');
-      }
       if (me.timerId && HAS_TIMEOUT_API) {
         clearTimeout(me.timerId);
         delete me.timerId;
@@ -1002,31 +1222,6 @@
       me.emit('abort');
     }
     return me;
-  }
-
-  /**
-   * Creates a cloned benchmark with the same test function and options.
-   * @member Benchmark
-   * @param {Object} options Overwrite cloned options.
-   * @returns {Object} Cloned instance.
-   * @example
-   *
-   * var bizarro = bench.clone({
-   *   'name': 'doppelganger'
-   * });
-   */
-  function clone(options) {
-    var me = this,
-        result = new me.constructor(me.fn, extend(extend({ }, me.options), options));
-
-    // copy manually added properties
-    forIn(me, function(value, key) {
-      if (!hasKey(result, key)) {
-        result[key] = value;
-      }
-    });
-    result.reset();
-    return result;
   }
 
   /**
@@ -1130,7 +1325,7 @@
         calibrating = me.constructor == Calibration,
         fn = me.fn,
         queue = [],
-        burstCount = async ? 1 : 49,
+        burstCount = async ? 10 : 50,
         runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {
@@ -1194,10 +1389,10 @@
 
       // exit early for aborted or unclockable tests
       if (aborted || clone.hz == Infinity) {
-        maxedOut = !(calibrating = size = queue.length = sample.length = 0);
+         maxedOut = !(calibrating = size = sample.length = queue.length = 0);
       }
       // simulate onComplete and enqueue additional runs if needed
-      if (!queue.length) {
+      if (queue.length < 2) {
         // compute values
         mean = reduce(sample, sumOf, 0) / size || 0;
         // sample variance
@@ -1239,6 +1434,7 @@
 
             if (me.hz != Infinity) {
               // calibrate by subtracting iteration overhead
+              // TODO: look at adjusting MoE too
               if (cal && cal.compare(me) > 0) {
                 mean = 1 / ((1 / mean) - cal.times.period);
               }
@@ -1252,6 +1448,7 @@
           }
           me.INIT_RUN_COUNT = runCount;
           me.emit('complete');
+          return !aborted;
         }
       }
     }
@@ -1263,7 +1460,7 @@
   }
 
   /**
-   * Starts running the benchmark.
+   * Runs the benchmark.
    * @member Benchmark
    * @param {Boolean} [async=false] Flag to run asynchronously.
    * @returns {Object} The benchmark instance.
@@ -1739,7 +1936,7 @@
 
     /**
      * Alias of [`Benchmark#addListener`](#addListener).
-     * @member Benchmark
+     * @member Benchmark, Benchmark.Suite
      */
     'on': addListener,
 
@@ -1867,7 +2064,7 @@
     // reset benchmark properties
     'reset': reset,
 
-    // run the benchmark
+    // runs the benchmark
     'run': run,
 
     // used to perform operations immediately before the test loop
@@ -1879,10 +2076,140 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // expose Suite
+  Benchmark.Suite = Suite;
+
+  extend(Suite.prototype, {
+
+    /**
+     * The number of benchmarks in the suite.
+     * @member Benchmark.Suite
+     * @type Number
+     */
+    'length': 0,
+
+    /**
+     * A flag to indicate if the suite is aborted.
+     * @member Benchmark.Suite
+     * @type Boolean
+     */
+    'aborted': false,
+
+    /**
+     * A flag to indicate if the suite is running.
+     * @member Benchmark.Suite
+     * @type Boolean
+     */
+    'running': false,
+
+    /**
+     * A bare-bones `Array#forEach` solution.
+     * Callbacks may terminate the loop by explicitly returning `false`.
+     * @member Benchmark.Suite
+     * @param {Function} callback The function called per iteration.
+     * @returns {Object} The suite iterated over.
+     */
+    'each': methodize(each),
+
+    /**
+     * A bare-bones `Array#indexOf` solution.
+     * @member Benchmark.Suite
+     * @param {Mixed} value The value to search for.
+     * @returns {Number} The index of the matched value or `-1`.
+     */
+    'indexOf': methodize(indexOf),
+
+    /**
+     * Invokes a given method, with arguments on all benchmarks in the suite.
+     * @member Benchmark.Suite
+     * @param {String|Object} name The name of the method to invoke OR options object.
+     * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
+     * @returns {Array} A new array of values returned from each method invoked.
+     */
+    'invoke': methodize(invoke),
+
+    /**
+     * A bare-bones `Array#map` solution.
+     * @member Benchmark.Suite
+     * @param {Function} callback The function called per iteration.
+     * @returns {Array} A new array of values returned by the callback.
+     */
+    'map': methodize(map),
+
+    /**
+     * A bare-bones `Array#reduce` solution.
+     * @member Benchmark.Suite
+     * @param {Function} callback The function called per iteration.
+     * @param {Mixed} accumulator Initial value of the accumulator.
+     * @returns {Mixed} The accumulator.
+     */
+    'reduce': methodize(reduce),
+
+    // aborts all benchmarks in the suite
+    'abort': abortSuite,
+
+    // add benchmarks to the suite
+    'add': add,
+
+    // registers a single listener
+    'addListener': addListener,
+
+    // clones the suite
+    'clone': clone,
+
+    // executes listeners of a specified type
+    'emit': emit,
+
+    // creates a new suite of filtered benchmarks
+    'filter': filterSuite,
+
+    // alias of addListener
+    'on': addListener,
+
+    // removes all listeners of a specified type
+    'removeAllListeners': removeAllListeners,
+
+    // removes a single listener
+    'removeListener': removeListener,
+
+    // resets all benchmarks in the suite
+    'reset': resetSuite,
+
+    // runs all benchmarks in the suite
+    'run': runSuite,
+
+    // array methods
+    'concat': [].concat,
+
+    'join': [].join,
+
+    'push': [].push,
+
+    'reverse': [].reverse,
+
+    'shift': [].shift,
+
+    'slice': slice,
+
+    'sort': [].sort,
+
+    'splice': [].splice,
+
+    'unshift': [].unshift
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  // inherit from Benchmark
+  Calibration.prototype = new Benchmark(HEADLESS);
+
   extend(Calibration.prototype, {
 
     // allows extremely small clock speeds
     'DETECT_INFINITY': false,
+
+    // point to the right constructor
+    'constructor': Calibration,
 
     // avoid repeat calibrations
     'persist': true
@@ -1896,16 +2223,19 @@
    */
   Benchmark.CALIBRATIONS = (function() {
     var a = function() { },
-        b = function() { };
+        b = function() { },
+        suite = new Suite;
+
     a.uid = -1;
     b.uid = -2;
     b.compilable = false;
-    return [new Calibration(a), new Calibration(b)];
+    suite.push(new Calibration(a), new Calibration(b));
+    return suite;
   }());
 
   /*--------------------------------------------------------------------------*/
 
-  // expose
+  // expose Benchmark
   if (typeof exports == 'object' && exports && typeof global == 'object' && global) {
     window = global;
     if (typeof module == 'object' && module && module.exports == exports) {

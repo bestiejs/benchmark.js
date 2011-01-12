@@ -43,15 +43,16 @@
      'errors': []
    },
 
+   /** Namespace */
+   ui = new Benchmark.Suite,
+
    each = Benchmark.each,
+
+   filter = Benchmark.filter,
 
    formatNumber = Benchmark.formatNumber,
 
-   indexOf = Benchmark.indexOf,
-
-   invoke = Benchmark.invoke,
-
-   isArray = Benchmark.isArray;
+   indexOf = Benchmark.indexOf;
 
   /*--------------------------------------------------------------------------*/
 
@@ -123,35 +124,6 @@
   function hasClass(element, className) {
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
   }
-
-  /**
-   * Appends to or clears the error log.
-   * @private
-   * @param {String|Boolean} text The the text to append or false to clear.
-   */
-  function logError(text) {
-    var elTable,
-        elDiv = $('error-info');
-
-    if (!elDiv) {
-      elTable = $('test-table');
-      elDiv = createElement('div');
-      elDiv.id = 'error-info';
-      elTable.parentNode.insertBefore(elDiv, elTable.nextSibling);
-    }
-    if (text === false) {
-      elDiv.className = elDiv.innerHTML = '';
-      cache.errors.length = 0;
-    }
-    else {
-      if (indexOf(cache.errors, text) < 0) {
-        cache.errors.push(text);
-        addClass(elDiv, SHOW_CLASS);
-        appendHTML(elDiv, text);
-      }
-    }
-  }
-
   /**
    * Set an element's innerHTML property.
    * @private
@@ -160,6 +132,36 @@
    */
   function setHTML(element, html) {
     $(element).innerHTML = html == null ? '' : html;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * Appends to or clears the error log.
+   * @private
+   * @param {String|Boolean} text The the text to append or false to clear.
+   */
+  function logError(text) {
+    var table,
+        div = $('error-info');
+
+    if (!div) {
+      table = $('test-table');
+      div = createElement('div');
+      div.id = 'error-info';
+      table.parentNode.insertBefore(div, table.nextSibling);
+    }
+    if (text === false) {
+      div.className = div.innerHTML = '';
+      cache.errors.length = 0;
+    }
+    else {
+      if (indexOf(cache.errors, text) < 0) {
+        cache.errors.push(text);
+        addClass(div, SHOW_CLASS);
+        appendHTML(div, text);
+      }
+    }
   }
 
   /**
@@ -180,23 +182,13 @@
    */
   function onClick(e) {
     e || (e = window.event);
-    var id = (e.target || e.srcElement).id.split('-')[1];
+    var target = e.target || e.srcElement,
+        index = --(target.id || target.parentNode.id).split('-')[1];
 
-    each(ui.benchmarks, function(bench) {
-      if (bench.id == id) {
-        ui.run(bench);
-        return false;
-      }
-    });
-  }
-
-  /**
-   * The onComplete callback assigned to new benchmarks.
-   * @private
-   */
-  function onComplete() {
-    setStatus(STATUS_TEXT.READY_AGAIN);
-    ui.render(this);
+    ui.push(ui.benchmarks[index]);
+    if (!ui.running) {
+      ui.run(true, true);
+    }
   }
 
   /**
@@ -206,7 +198,6 @@
   function onCycle() {
     var bench = this,
         cycles = bench.cycles;
-
     if (!bench.aborted) {
       setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
         cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
@@ -251,8 +242,6 @@
    * @private
    */
   function onLoad() {
-    var hash = location.hash.slice(1, 4);
-
     addClass('controls', 'show');
     addClass('calgroup', 'show');
 
@@ -281,64 +270,18 @@
   }
 
   /**
-   * The callback fired when the run queue is complete.
-   * @private
-   */
-  function onQueueComplete() {
-    var benches = Benchmark.filter(ui.benchmarks, 'successful'),
-        fastest = Benchmark.filter(benches, 'fastest'),
-        slowest = Benchmark.filter(benches, 'slowest');
-
-    // display contextual information
-    each(benches, function(bench) {
-      var percent,
-          text = 'fastest',
-          elResult = $(RESULTS_PREFIX + bench.id),
-          elSpan = elResult.getElementsByTagName('span')[0];
-
-      if (indexOf(fastest, bench) > -1) {
-        // mark fastest
-        addClass(elResult, text);
-      }
-      else {
-        percent = Math.floor((1 - bench.hz / fastest[0].hz) * 100);
-        text = percent + '% slower';
-
-        // mark slowest
-        if (indexOf(slowest, bench) > -1) {
-          addClass(elResult, 'slowest');
-        }
-      }
-      // write ranking
-      if (elSpan) {
-        setHTML(elSpan, text);
-      } else {
-        appendHTML(elResult, '<span>' + text + '<\/span>');
-      }
-    });
-
-    // post results to Browserscope
-    if ($('calibrate').checked) {
-      ui.browserscope.post();
-    }
-    // all benchmarks are finished
-    ui.running = false;
-    setHTML('run', RUN_TEXT.READY_AGAIN);
-  }
-
-  /**
    * The "run" button click event handler used to run or abort the benchmarks.
    * @private
    * @param {Object} e The event object.
    */
   function onRun(e) {
-    var benches = ui.benchmarks,
-        run = $('run').innerHTML != RUN_TEXT.RUNNING;
-
+    var run = $('run').innerHTML != RUN_TEXT.RUNNING;
     ui.abort();
     if (run) {
       logError(false);
-      ui.run((e || window.event).shiftKey ? benches.slice(0).reverse() : benches);
+      ui.length = 0;
+      ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
+      ui.run(true, true);
     }
   }
 
@@ -360,51 +303,6 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Aborts any running benchmarks, clears the run queue, and renders results.
-   * @static
-   * @member ui
-   */
-  function abort() {
-    var me = this,
-        benches = me.benchmarks;
-
-    me.queue.length = 0;
-    invoke(benches.concat(Benchmark.CALIBRATIONS), 'abort');
-    me.render(benches);
-    setHTML('run', RUN_TEXT.READY);
-  }
-
-  /**
-   * Adds a benchmark the the collection.
-   * @static
-   * @member ui
-   * @param {String} name The name assigned to the benchmark.
-   * @param {String} id The id assigned to the benchmark.
-   * @param {Function} fn The function to benchmark.
-   */
-  function addTest(name, id, fn) {
-    var me = this,
-        elTitle = $('title-' + id),
-        bench = new Benchmark(fn, {
-          'id': id,
-          'name': name,
-          'onStart': onCycle,
-          'onCycle': onCycle,
-          'onComplete': onComplete
-        });
-
-    elTitle.tabIndex = 0;
-    elTitle.title = 'Click to run this test again.';
-
-    addListener(elTitle, 'click', onClick);
-    addListener(elTitle, 'keyup', onKeyUp);
-
-    me.benchmarks.push(bench);
-    me.elResults.push($(RESULTS_PREFIX + id));
-    me.render(bench);
-  }
-
-  /**
    * Parses the window.location.hash value into an object assigned to `ui.params`.
    * @static
    * @member ui
@@ -423,45 +321,45 @@
    * Renders the results table cell of the corresponding benchmark(s).
    * @static
    * @member ui
-   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
+   * @returns {Object} The suite instance.
    */
-  function render(benches) {
-    var me = this;
-    if (!isArray(benches)) {
-      benches = benches ? [benches] : me.benchmarks;
-    }
-    each(benches, function(bench) {
-      var cell = $(RESULTS_PREFIX + bench.id),
+  function render() {
+    each(ui.benchmarks, function(bench, index) {
+      var cell = $(RESULTS_PREFIX + (index + 1)),
           error = bench.error,
           hz = bench.hz;
 
-      if (cell) {
-        cell.title = '';
+      cell.title = '';
 
-        // status: error
-        if (error) {
-          setHTML(cell, 'Error');
-          if (!hasClass(cell, ERROR_CLASS)) {
-            addClass(cell, ERROR_CLASS);
-          }
-          logError('<p>' + error + '.<\/p><ul><li>' +
-            Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
+      // status: error
+      if (error) {
+        setHTML(cell, 'Error');
+        if (!hasClass(cell, ERROR_CLASS)) {
+          addClass(cell, ERROR_CLASS);
+        }
+        logError('<p>' + error + '.<\/p><ul><li>' +
+          Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
+      }
+      else {
+        // status: running
+        if (bench.running) {
+          setHTML(cell, 'running&hellip;');
+        }
+        // status: finished
+        else if (bench.cycles) {
+          cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
+            bench.times.cycle.toFixed(3) + ' seconds.';
+
+          setHTML(cell, hz == Infinity ? hz :
+            formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
         }
         else {
-          // status: running
-          if (bench.running) {
-            setHTML(cell, 'running&hellip;');
-          }
-          // status: finished
-          else if (bench.cycles) {
-            cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
-              bench.times.cycle.toFixed(3) + ' seconds.';
-
-            setHTML(cell, hz == Infinity ? hz :
-              formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
+          // reset class
+          if (!hasClass(cell, ERROR_CLASS)) {
+            cell.className = RESULTS_CLASS;
           }
           // status: pending
-          else if (indexOf(me.queue, bench) > -1) {
+          if (ui.running && ui.indexOf(bench) > -1) {
             setHTML(cell, 'pending&hellip;');
           }
           // status: ready
@@ -471,81 +369,80 @@
         }
       }
     });
-  }
-
-  /**
-   * Adds given benchmark(s) to the queue and runs.
-   * @static
-   * @member ui
-   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
-   */
-  function run(benches) {
-    var added,
-        me = this,
-        queue = me.queue;
-
-    if (!isArray(benches)) {
-      benches = benches ? [benches] : me.benchmarks;
-    }
-    each(benches, function(bench) {
-      if (!bench.error && indexOf(queue, bench) < 0) {
-        // reset before (re)running so the previous run's results are
-        // not re-recorded if the operation is aborted mid queue
-        bench.reset();
-        queue.push(bench);
-        me.render(bench);
-        added = true;
-
-        if (!me.running) {
-          me.running = true;
-          setHTML('run', RUN_TEXT.RUNNING);
-          invoke(queue, {
-            'name': 'run',
-            'queued': true,
-            'onComplete': onQueueComplete
-          });
-        }
-      }
-    });
-
-    // reset result classNames
-    if (added) {
-      each(me.elResults, function(elResult) {
-        if (!hasClass(elResult, ERROR_CLASS)) {
-          elResult.className = RESULTS_CLASS;
-        }
-      });
-    }
+    return ui;
   }
 
   /*--------------------------------------------------------------------------*/
 
+  ui.on('add', function(bench) {
+    var id = ui.benchmarks.length + 1,
+        title = $('title-' + id);
+
+    title.tabIndex = 0;
+    title.title = 'Click to run this test again.';
+
+    addListener(title, 'click', onClick);
+    addListener(title, 'keyup', onKeyUp);
+    bench.on('start cycle', onCycle);
+
+    delete ui[--ui.length];
+    ui.benchmarks.push(bench);
+    ui.render();
+  })
+  .on('start', function() {
+    ui.render();
+    setHTML('run', RUN_TEXT.RUNNING);
+  })
+  .on('cycle', function() {
+    ui.render();
+  })
+  .on('complete', function() {
+    var benches = filter(ui.benchmarks, 'successful'),
+        fastest = filter(benches, 'fastest'),
+        slowest = filter(benches, 'slowest');
+
+    each(benches, function(bench) {
+      var percent,
+          text = 'fastest',
+          cell = $(RESULTS_PREFIX + (indexOf(ui.benchmarks, bench) + 1)),
+          span = cell.getElementsByTagName('span')[0];
+
+      if (fastest.indexOf(bench) > -1) {
+        // mark fastest
+        addClass(cell, text);
+      }
+      else {
+        percent = Math.floor((1 - bench.hz / fastest[0].hz) * 100);
+        text = percent + '% slower';
+
+        // mark slowest
+        if (slowest.indexOf(bench) > -1) {
+          addClass(cell, 'slowest');
+        }
+      }
+      // write ranking
+      if (span) {
+        setHTML(span, text);
+      } else {
+        appendHTML(cell, '<span>' + text + '<\/span>');
+      }
+    });
+
+    ui.render();
+    setHTML('run', RUN_TEXT.READY_AGAIN);
+    setStatus(STATUS_TEXT.READY_AGAIN);
+
+    if ($('calibrate').checked) {
+      ui.browserscope.post();
+    }
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   // expose
-  window.ui = {
+  window.ui = ui;
 
-    /**
-     * An array of table cells used to display benchmark results.
-     * @member ui
-     */
-    'elResults': [],
-
-    /**
-     * The parsed query parameters of the pages url hash.
-     * @member ui
-     */
-    'params': {},
-
-    /**
-     * The queue of benchmarks to run.
-     * @member ui
-     */
-    'queue': [],
-
-    /**
-     * A flag to indicate if the benchmarks are running.
-     * @member ui
-     */
-    'running': false,
+  Benchmark.extend(ui, {
 
     /**
      * An array of benchmarks created from test cases.
@@ -553,21 +450,18 @@
      */
     'benchmarks': [],
 
-    // abort, dequeue, and render results
-    'abort': abort,
-
-    // create a new benchmark from a test case
-    'addTest': addTest,
+    /**
+     * The parsed query parameters of the pages url hash.
+     * @member ui
+     */
+    'params': {},
 
     // parse query params into ui.params[] hash
     'parseHash': parseHash,
 
     // (re)render the results of one or more benchmarks
-    'render': render,
-
-    // add one or more benchmarks to the queue and run
-    'run': run
-  };
+    'render': render
+  });
 
   /*--------------------------------------------------------------------------*/
 
@@ -586,15 +480,10 @@
   // parse location hash string
   ui.parseHash();
 
-  // force benchmarks to run asynchronously for a more responsive UI
-  Benchmark.prototype.DEFAULT_ASYNC = true;
-
   // customize calibration benchmarks
-  each(Benchmark.CALIBRATIONS, function(cal) {
+  Benchmark.CALIBRATIONS.each(function(cal) {
     cal.name = 'Calibrating';
-    cal.on('complete', onComplete)
-       .on('cycle', onCycle)
-       .on('start', onCycle);
+    cal.on('cycle start', onCycle);
   });
 
   // optimized asynchronous Google Analytics snippet based on
