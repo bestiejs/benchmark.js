@@ -48,8 +48,7 @@
 
       // parse @member
       preg_match("/@member ([^\n]+)/", $entry, $members);
-      $members = array_pop($members);
-      if ($members) {
+      if ($members = array_pop($members)) {
         $members = preg_split("/,\s*/", $members);
       }
       if ($isCtor) {
@@ -78,8 +77,7 @@
 
         // parse #{call}
         preg_match("#\*/\s*(?:function ([^{]*)|(?:". $member ."\.)?([^:=,]*))#", $entry, $call);
-        $call = array_pop($call);
-        if ($call) {
+        if ($call = array_pop($call)) {
           $call = trim(trim($call), "'");
         }
 
@@ -99,16 +97,14 @@
 
         // parse #{desc}
         preg_match("#/\*\*([^@]+)#", $entry, $desc);
-        $desc = array_pop($desc);
-        if ($desc) {
+        if ($desc = array_pop($desc)) {
           $desc = preg_replace("/\n\s*\*\s*/", "\n", $desc);
           $desc = ($type == "Function" ? "" : "(" . $type . "): ") . trim($desc);
         }
 
         // parse @example
         preg_match("#@example([\s\S]*)?(?=\*\s\@[a-z]|\*/)#", $entry, $example);
-        $example = array_pop($example);
-        if ($example) {
+        if ($example = array_pop($example)) {
           $example = "    " . trim(preg_replace("/\n\s*\* ?/", "\n    ", $example));
         }
 
@@ -246,9 +242,11 @@
           // description
           if ($entry["name"]) {
             if ($type == "ctor") {
+              // clip "call"
+              $entry["call"] = substr($entry["call"], strpos($entry["call"], "("));
               $result[] = interpolate(
                 "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">" .
-                "#{member}</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
+                "#{member}#{call}</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
             } else {
               $result[] = interpolate(
                 "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">" .

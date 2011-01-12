@@ -90,7 +90,7 @@
 * [`Benchmark.Suite#run`](#run)
 
 # Benchmark
-## <a name="Benchmark" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L125" title="View in source">Benchmark</a>
+## <a name="Benchmark" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L125" title="View in source">Benchmark(name, fn, options)</a>
 Benchmark constructor.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -630,7 +630,7 @@ Displays relevant benchmark information when coerced to a string.
 
 
 # Benchmark.Suite
-## <a name="Suite" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L178" title="View in source">Benchmark.Suite</a>
+## <a name="Suite" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L178" title="View in source">Benchmark.Suite(options)</a>
 Suite constructor.
 <sup><code>[&#9650;][1]</code></sup>
 
