@@ -1,9 +1,7 @@
 .git*
 nano.*
-examples/
-docs/
-plugins/
-tests/
-vendor/
-!docs/*.md
-!tests/node.js
+examples
+plugins
+vendor
+docs/*.php
+tests/*.html
