@@ -695,7 +695,7 @@
   }
 
   /**
-   * Invokes a given method, with arguments, on all benchmarks in an array.
+   * Invokes a method on all items in an array.
    * @static
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
@@ -936,6 +936,20 @@
   }
 
   /**
+   * Retrieves the value of a specified property from all items in an array.
+   * @static
+   * @member Benchmark
+   * @param {Array} array The array to iterate over.
+   * @param {String} property The property to pluck.
+   * @returns {Array} A new array of property values.
+   */
+  function pluck(array, property) {
+    return map(array, function(object) {
+      return object[property];
+    });
+  }
+
+  /**
    * A generic bare-bones `Array#reduce` solution.
    * @static
    * @member Benchmark
@@ -1011,6 +1025,25 @@
   }
 
   /**
+   * Creates a new suite with cloned benchmarks.
+   * @name clone
+   * @member Benchmark.Suite
+   * @param {Object} options Options object to overwrite cloned options.
+   * @returns {Object} The new suite instance.
+   */
+  function cloneSuite(options) {
+    var me = this,
+        result = new me.constructor(extend(extend({ }, me.options), options));
+    // copy own properties
+    forIn(me, function(value, key) {
+      if (!hasKey(result, key)) {
+        result[key] = /^\d+$/.test(key) ? value.clone() : value;
+      }
+    });
+    return result.reset();
+  }
+
+  /**
    * A bare-bones `Array#filter` solution.
    * @name filter
    * @member Benchmark.Suite
@@ -1018,11 +1051,11 @@
    * @returns {Object} A new suite of benchmarks that passed callback filter.
    */
   function filterSuite(callback) {
-    var me = this;
-    return reduce(filter(me, callback), function(suite, bench, i) {
-      suite[i] = bench;
-      return suite;
-    }, me.clone());
+    var me = this,
+        result = new me.constructor;
+
+    result.push.apply(result, filter(me, callback));
+    return result;
   }
 
   /**
@@ -1096,33 +1129,6 @@
       (events[type] || (events[type] = [])).push(listener);
     });
     return me;
-  }
-
-  /**
-   * Creates a cloned benchmark with the same test function and options.
-   * @member Benchmark, Benchmark.Suite
-   * @param {Object} options Overwrite cloned options.
-   * @returns {Object} Cloned instance.
-   * @example
-   *
-   * var bizarro = bench.clone({
-   *   'name': 'doppelganger'
-   * });
-   */
-  function clone(options) {
-    var me = this,
-        ctor = me.constructor,
-        options = extend(extend({ }, me.options), options),
-        result = ctor == Suite ? new ctor(options) : new ctor(me.fn, options);
-
-    // copy manually added properties
-    forIn(me, function(value, key) {
-      if (!hasKey(result, key)) {
-        result[key] = value;
-      }
-    });
-    result.reset();
-    return result;
   }
 
   /**
@@ -1222,6 +1228,29 @@
       me.emit('abort');
     }
     return me;
+  }
+
+  /**
+   * Creates a new benchmark using the same test and options.
+   * @member Benchmark
+   * @param {Object} options Options object to overwrite cloned options.
+   * @returns {Object} The new benchmark instance.
+   * @example
+   *
+   * var bizarro = bench.clone({
+   *   'name': 'doppelganger'
+   * });
+   */
+  function clone(options) {
+    var me = this,
+        result = new me.constructor(me.fn, extend(extend({ }, me.options), options));
+    // copy own properties
+    forIn(me, function(value, key) {
+      if (!hasKey(result, key)) {
+        result[key] = value;
+      }
+    });
+    return result.reset();
   }
 
   /**
@@ -1788,7 +1817,7 @@
     // generic Array#indexOf
     'indexOf': indexOf,
 
-    // invokes a method of each benchmark in a collection
+    // invokes a method on each item in an array
     'invoke': invoke,
 
     // modifies a string using a template object
@@ -1814,6 +1843,9 @@
 
     // no operation
     'noop': noop,
+
+    // retrieves a property value from each item in an array
+    'pluck': pluck,
 
     // generic Array#reduce
     'reduce': reduce,
@@ -2053,7 +2085,7 @@
     // registers a single listener
     'addListener': addListener,
 
-    // create new benchmark with the same test function and options
+    // creates a new benchmark using the same test and options
     'clone': clone,
 
     // compares benchmark's hertz with another
@@ -2082,9 +2114,6 @@
   });
 
   /*--------------------------------------------------------------------------*/
-
-  // expose Suite
-  Benchmark.Suite = Suite;
 
   extend(Suite.prototype, {
 
@@ -2127,7 +2156,7 @@
     'indexOf': methodize(indexOf),
 
     /**
-     * Invokes a given method, with arguments on all benchmarks in the suite.
+     * Invokes a method on all benchmarks in the suite.
      * @member Benchmark.Suite
      * @param {String|Object} name The name of the method to invoke OR options object.
      * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
@@ -2144,6 +2173,14 @@
     'map': methodize(map),
 
     /**
+     * Retrieves the value of a specified property from all benchmarks in the suite.
+     * @member Benchmark.Suite
+     * @param {String} property The property to pluck.
+     * @returns {Array} A new array of property values.
+     */
+    'pluck': methodize(pluck),
+
+    /**
      * A bare-bones `Array#reduce` solution.
      * @member Benchmark.Suite
      * @param {Function} callback The function called per iteration.
@@ -2155,14 +2192,14 @@
     // aborts all benchmarks in the suite
     'abort': abortSuite,
 
-    // add benchmarks to the suite
+    // adds a benchmark to the suite
     'add': add,
 
     // registers a single listener
     'addListener': addListener,
 
-    // clones the suite
-    'clone': clone,
+    // creates a new suite with cloned benchmarks
+    'clone': cloneSuite,
 
     // executes listeners of a specified type
     'emit': emit,
@@ -2241,6 +2278,9 @@
   }());
 
   /*--------------------------------------------------------------------------*/
+
+  // expose Suite
+  Benchmark.Suite = Suite;
 
   // expose Benchmark
   if (typeof exports == 'object' && exports && typeof global == 'object' && global) {

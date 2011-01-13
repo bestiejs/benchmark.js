@@ -36,46 +36,29 @@ In [Rhino](http://www.mozilla.org/rhino/):
 
 Usage example:
 
-    function testA() {
+    var suite = new Benchmark.Suite;
+    
+    // add tests
+    suite.add('RegExp#test', function() {
       /o/.test('Hello World!');
-    }
-    
-    function testB() {
+    })
+    .add('String#indexOf', function() {
       'Hello World!'.indexOf('o') > -1;
-    }
-    
-    var benches = [
-      new Benchmark('RegExp#test', testA),
-      new Benchmark('String#indexOf', testB)
-    ];
-    
+    })
     // add listeners
-    Benchmark.invoke(benches, 'on', 'complete', function() {
-      console.log( this.toString() );
-    });
-    
-    // run benchmarks (async)
-    Benchmark.invoke(benches, {
-      'name': 'run',
-      'args': true,
-      'onComplete': function() {
-        var a = benches[0],
-            b = benches[1],
-            rank = a.compare(b);
-
-        // report results
-        console.log(
-          a.name + ' is ' +
-          (rank == 0 ? ' <indeterminate> ' : rank > 0 ? 'faster' : 'slower') +
-          ' than ' + b.name
-        );
-      }
-    });
+    .on('cycle', function(bench) {
+      console.log(String(bench));
+    })
+    .on('complete', function() {
+      console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+    })
+    // run async
+    .run(true);
     
     // logs:
     // > RegExp#test × 4,161,532 ±0.99% (59 cycles)
     // > String#indexOf × 6,139,623 ±1.00% (131 cycles)
-    // > RegExp#test is slower than String#indexOf
+    // > Fastest is String#indexOf
 
 ## Cloning this repo
 
