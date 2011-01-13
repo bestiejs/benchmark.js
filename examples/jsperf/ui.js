@@ -411,7 +411,7 @@
           cell = $(RESULTS_PREFIX + (indexOf(ui.benchmarks, bench) + 1)),
           span = cell.getElementsByTagName('span')[0];
 
-      if (fastest.indexOf(bench) > -1) {
+      if (indexOf(fastest, bench) > -1) {
         // mark fastest
         addClass(cell, text);
       }
@@ -420,7 +420,7 @@
         text = percent + '% slower';
 
         // mark slowest
-        if (slowest.indexOf(bench) > -1) {
+        if (indexOf(slowest, bench) > -1) {
           addClass(cell, 'slowest');
         }
       }
