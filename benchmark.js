@@ -1683,8 +1683,8 @@
     });
 
     // detect non Opera versions
-    version = reduce(['version', /fox/.test(name) ? 'Firefox' : name, 'NetFront'], function(version, guess) {
-      return version || (version = (RegExp(guess + '[ /-]([^ ();/-]*)', 'i').exec(ua) || 0)[1]) || null;
+    version = reduce(['version', name, 'Firefox', 'NetFront'], function(version, guess) {
+      return version || (version = (RegExp(guess + '(?:-[\\d.]+/|[ /-])([^ ();/-]*)', 'i').exec(ua) || 0)[1]) || null;
     }, version);
 
     // cleanup product
