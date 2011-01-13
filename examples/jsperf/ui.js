@@ -401,6 +401,10 @@
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest');
 
+    ui.render();
+    setHTML('run', RUN_TEXT.READY_AGAIN);
+    setStatus(STATUS_TEXT.READY_AGAIN);
+
     each(benches, function(bench) {
       var percent,
           text = 'fastest',
@@ -427,10 +431,6 @@
         appendHTML(cell, '<span>' + text + '<\/span>');
       }
     });
-
-    ui.render();
-    setHTML('run', RUN_TEXT.READY_AGAIN);
-    setStatus(STATUS_TEXT.READY_AGAIN);
 
     if ($('calibrate').checked) {
       ui.browserscope.post();
