@@ -1901,7 +1901,7 @@
      * @member Benchmark
      * @type Number
      */
-    'MAX_BURST_TIME': 0.5,
+    'MAX_BURST_TIME': 0.25,
 
     /**
      * The maximum time a benchmark is allowed to run before finishing (secs).
@@ -2248,7 +2248,6 @@
   (Calibration.prototype = new Benchmark(HEADLESS)).constructor = Calibration;
 
   extend(Calibration.prototype, {
-
     // allows extremely small clock speeds
     'DETECT_INFINITY': false,
 
