@@ -24,7 +24,7 @@ test("user agent detection", function() {
         xhr.send();
         compiled = Function('isClassOf,isHostType,reduce,toString,trim,options',
           'return ' +
-          (/(\s*)Benchmark.platform\s*=((?:.|\n)*?)\1}/.exec(xhr.responseText)[2] + '}())')
+          (/(\s*)Benchmark.platform\s*=((?:.|\n|\r)*?)\1}/.exec(xhr.responseText)[2] + '}())')
             .replace(/\bme\s*=[^,;]+([,;])/, 'me=options$1')
             .replace(/\bua\s*=[^,;]+([,;])/, 'ua=me.ua$1')
             .replace(/\bopera\.version\(\)/, 'opera')
