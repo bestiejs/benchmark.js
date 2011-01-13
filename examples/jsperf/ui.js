@@ -13,7 +13,7 @@
    /** CSS clasName used for `js enabled` styles */
    JS_CLASS = 'js',
 
-   /** CSS class name used to display error-info */
+   /** CSS class name used to make content visible */
    SHOW_CLASS = 'show',
 
    /** CSS class name used to reset result styles */
@@ -242,8 +242,8 @@
    * @private
    */
   function onLoad() {
-    addClass('controls', 'show');
-    addClass('calgroup', 'show');
+    addClass('controls', SHOW_CLASS);
+    addClass('calgroup', SHOW_CLASS);
 
     addListener('calibrate', 'click', onSetCalibrationState);
     addListener('run', 'click', onRun);
@@ -263,7 +263,7 @@
       $('calibrate').checked = false;
       onSetCalibrationState();
       addClass('controls', 'reduce');
-      addClass('firebug', 'show');
+      addClass('firebug', SHOW_CLASS);
     }
     // evaluate hash values
     onHashChange();
@@ -306,15 +306,18 @@
    * Parses the window.location.hash value into an object assigned to `ui.params`.
    * @static
    * @member ui
+   * @returns {Object} The suite instance.
    */
   function parseHash() {
-    var hashes = location.hash.slice(1).split('&'),
-        params = this.params = { };
+    var me = this,
+        hashes = location.hash.slice(1).split('&'),
+        params = me.params = { };
 
     each(hashes[0] && hashes, function(hash) {
       var pair = hashes[length].split('=');
       params[pair[0]] = pair[1];
     });
+    return me;
   }
 
   /**
@@ -389,12 +392,9 @@
     ui.benchmarks.push(bench);
     ui.render();
   })
-  .on('start', function() {
+  .on('start cycle', function() {
     ui.render();
     setHTML('run', RUN_TEXT.RUNNING);
-  })
-  .on('cycle', function() {
-    ui.render();
   })
   .on('complete', function() {
     var benches = filter(ui.benchmarks, 'successful'),
@@ -439,9 +439,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // expose
-  window.ui = ui;
-
   Benchmark.extend(ui, {
 
     /**
@@ -456,7 +453,7 @@
      */
     'params': {},
 
-    // parse query params into ui.params[] hash
+    // parse query params into ui.params hash
     'parseHash': parseHash,
 
     // (re)render the results of one or more benchmarks
@@ -465,11 +462,14 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // signal JavaScript detected
-  addClass(document.documentElement, JS_CLASS);
+  // expose
+  window.ui = ui;
 
   // don't let users alert, confirm, prompt, or open new windows
   window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
+
+  // signal JavaScript detected
+  addClass(document.documentElement, JS_CLASS);
 
   // re-parse hash query params when it changes
   addListener(window, 'hashchange', onHashChange);
