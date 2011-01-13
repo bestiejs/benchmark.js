@@ -140,7 +140,7 @@ Benchmark constructor.
       'teardown': teardown
     });
 
-## <a name="static-CALIBRATIONS" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L2268" title="View in source">Benchmark.CALIBRATIONS</a>
+## <a name="static-CALIBRATIONS" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L2265" title="View in source">Benchmark.CALIBRATIONS</a>
 *(Array)*: Benchmarks to establish iteration overhead.
 <sup><code>[&#9650;][1]</code></sup>
 

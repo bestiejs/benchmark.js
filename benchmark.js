@@ -2245,15 +2245,12 @@
   /*--------------------------------------------------------------------------*/
 
   // inherit from Benchmark
-  Calibration.prototype = new Benchmark(HEADLESS);
+  (Calibration.prototype = new Benchmark(HEADLESS)).constructor = Calibration;
 
   extend(Calibration.prototype, {
 
     // allows extremely small clock speeds
     'DETECT_INFINITY': false,
-
-    // point to the right constructor
-    'constructor': Calibration,
 
     // avoid repeat calibrations
     'persist': true
