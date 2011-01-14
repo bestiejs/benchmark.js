@@ -209,7 +209,6 @@
    * @private
    */
   function onHashChange() {
-    var params = ui.params;
     ui.parseHash();
 
     // call user provided init() function
@@ -217,12 +216,8 @@
       init();
     }
     // auto-run
-    if ('run' in params) {
+    if ('run' in ui.params) {
       onRun();
-    }
-    // clear stored results
-    if ('clear' in params) {
-      Benchmark.clearStorage();
     }
   }
 
@@ -243,26 +238,17 @@
    */
   function onLoad() {
     addClass('controls', SHOW_CLASS);
-    addClass('calgroup', SHOW_CLASS);
-
-    addListener('calibrate', 'click', onSetCalibrationState);
     addListener('run', 'click', onRun);
 
     setHTML('run', RUN_TEXT.READY);
     setHTML('user-agent', Benchmark.platform);
     setStatus(STATUS_TEXT.READY);
 
-    // enable calibrations by default
-    $('calibrate').checked = true;
-
     // answer spammer question
     $('question').value = 'no';
 
-    // show warning and disable calibrations when Firebug is enabled
+    // show warning when Firebug is enabled
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
-      $('calibrate').checked = false;
-      onSetCalibrationState();
-      addClass('controls', 'reduce');
       addClass('firebug', SHOW_CLASS);
     }
     // evaluate hash values
@@ -282,21 +268,6 @@
       ui.length = 0;
       ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
       ui.run(true, true);
-    }
-  }
-
-  /**
-   * The "calibrate" checkbox click event handler used to enable/disable calibrations.
-   * @private
-   */
-  function onSetCalibrationState() {
-    var length = Benchmark.CALIBRATIONS.length;
-    if ($('calibrate').checked) {
-      if (!length) {
-        Benchmark.CALIBRATIONS = cache.CALIBRATIONS;
-      }
-    } else if (length) {
-      cache.CALIBRATIONS = [Benchmark.CALIBRATIONS, Benchmark.CALIBRATIONS = []][0];
     }
   }
 
@@ -432,9 +403,7 @@
       }
     });
 
-    if ($('calibrate').checked) {
-      ui.browserscope.post();
-    }
+    ui.browserscope.post();
   });
 
   /*--------------------------------------------------------------------------*/
@@ -479,12 +448,6 @@
 
   // parse location hash string
   ui.parseHash();
-
-  // customize calibration benchmarks
-  Benchmark.CALIBRATIONS.each(function(cal) {
-    cal.name = 'Calibrating';
-    cal.on('cycle start', onCycle);
-  });
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet

@@ -11,10 +11,6 @@
   /** Detect DOM0 timeout API (performed at the bottom) */
   var HAS_TIMEOUT_API,
 
-  /** Detect HTML5 web storage */
-  HAS_STORAGE = isHostType(window, 'localStorage') &&
-    isHostType(localStorage, 'removeItem'),
-
   /** Detect Java environment */
   IN_JAVA = isHostType(window, 'java') &&
     !isHostType(window, 'netscape'),
@@ -24,9 +20,6 @@
 
   /** Used to skip Benchmark's initializations */
   HEADLESS = function() { },
-
-  /** Used to control expiration of persisted data */
-  STORE_KEY_REV = 2,
 
   /** Unit of the timer */
   TIMER_UNIT = 'ms',
@@ -49,19 +42,7 @@
     '7':  2.365, '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
     '13': 2.160, '14': 2.145, '15': 2.131, '16': 2.120, '17': 2.110, '18': 2.101,
     '19': 2.093, '20': 2.086, '21': 2.080, '22': 2.074, '23': 2.069, '24': 2.064,
-    '25': 2.060, '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
-    '31': 2.040, '32': 2.037, '33': 2.035, '34': 2.032, '35': 2.030, '36': 2.028,
-    '37': 2.026, '38': 2.024, '39': 2.023, '40': 2.021, '41': 2.020, '42': 2.018,
-    '43': 2.017, '44': 2.015, '45': 2.014, '46': 2.013, '47': 2.012, '48': 2.011,
-    '49': 2.010, '50': 2.009, '51': 2.008, '52': 2.007, '53': 2.006, '54': 2.005,
-    '55': 2.004, '56': 2.003, '57': 2.002, '58': 2.002, '59': 2.001, '60': 2.000,
-    '61': 2.000, '62': 1.999, '63': 1.998, '64': 1.998, '65': 1.997, '66': 1.997,
-    '67': 1.996, '68': 1.995, '69': 1.995, '70': 1.994, '71': 1.994, '72': 1.993,
-    '73': 1.993, '74': 1.993, '75': 1.992, '76': 1.992, '77': 1.991, '78': 1.991,
-    '79': 1.990, '80': 1.990, '81': 1.990, '82': 1.989, '83': 1.989, '84': 1.989,
-    '85': 1.988, '86': 1.988, '87': 1.988, '88': 1.987, '89': 1.987, '90': 1.987,
-    '91': 1.986, '92': 1.986, '93': 1.986, '94': 1.986, '95': 1.985, '96': 1.985,
-    '97': 1.985, '98': 1.984, '99': 1.984, '100': 1.984,'Infinity': 1.960
+    '25': 2.060, '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, 'Infinity': 1.960
   },
 
   /** Internal cached used by various methods */
@@ -73,7 +54,14 @@
   hasOwnProperty = cache.hasOwnProperty,
 
   /** Used to convert array-like objects to arrays */
-  slice = [].slice;
+  slice = [].slice,
+
+  /** Math shortcuts */
+  abs  = Math.abs,
+  max  = Math.max,
+  min  = Math.min,
+  pow  = Math.pow,
+  sqrt = Math.sqrt;
 
   /*--------------------------------------------------------------------------*/
 
@@ -179,18 +167,6 @@
     setOptions(this, options);
   }
 
-  /**
-   * Subclass of Benchmark used specifically for calibration.
-   * @private
-   * @constructor
-   * @base Benchmark
-   * @param {Function} fn The test to benchmark.
-   * @param {Object} [options={}] Options object.
-   */
-  function Calibration(fn, options) {
-    Benchmark.call(this, fn, options);
-  }
-
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -224,8 +200,8 @@
         fallback,
         timerNS,
         timerRes,
-        min = 0.0015,
         proto = Benchmark.prototype,
+        resLimit = 0.0015,
         code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
 
     clock = function(me) {
@@ -265,7 +241,7 @@
       }
       // smells like Infinity?
       return me.DETECT_INFINITY &&
-        Math.min(timerRes, result) / Math.max(timerRes, result) > 0.9 ? 0 : result;
+        min(timerRes, result) / max(timerRes, result) > 0.9 ? 0 : result;
     };
 
     function getRes(unit) {
@@ -322,7 +298,7 @@
       // check type in case Safari returns an object instead of a number
       timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
       timerRes = getRes('ns');
-      timerNS  = timerRes <= min && (TIMER_UNIT = 'ns', timerNS);
+      timerNS  = timerRes <= resLimit && (TIMER_UNIT = 'ns', timerNS);
     } catch(e) { }
 
     // detect microsecond support:
@@ -332,7 +308,7 @@
       try {
         timerNS  = new (window.chrome || window.chromium).Interval;
         timerRes = getRes('us');
-        timerNS  = timerRes <= min && (TIMER_UNIT = 'us', timerNS);
+        timerNS  = timerRes <= resLimit && (TIMER_UNIT = 'us', timerNS);
       } catch(e) { }
     }
     // else milliseconds
@@ -399,35 +375,7 @@
    * @returns {Number} The critical value.
    */
   function getCriticalValue(df) {
-    return T_DISTRIBUTION[df] || T_DISTRIBUTION.Infinity;
-  }
-
-  /**
-   * Gets the source code of a function.
-   * @private
-   * @param {Function} fn The function.
-   * @returns {String} The function's source code.
-   */
-  function getSource(fn) {
-    return trim((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
-      .replace(/([^\n])$/, '$1\n');
-  }
-
-  /**
-   * Gets the storage key of the benchmark.
-   * @private
-   * @param {Object} me The benchmark instance OR options object.
-   * @returns {String} The storage key.
-   */
-  function getStoreKey(me) {
-    var options = extend({
-      'rev': STORE_KEY_REV,
-      'unit': TIMER_UNIT,
-      'uid': me.fn && me.fn.uid,
-      'platform': Benchmark.platform
-    }, me.constructor == Object && me);
-
-    return ['benchmark.js', 'r' + options.rev, options.unit, options.uid, options.platform].join(':');
+    return T_DISTRIBUTION[Math.round(df) || 1] || T_DISTRIBUTION.Infinity;
   }
 
   /**
@@ -449,87 +397,7 @@
     });
   }
 
-  /**
-   * Records benchmark results to local storage.
-   * @private
-   * @param {Object} me The benchmark instance.
-   */
-  function store(me) {
-    var objects = [me],
-        result = [];
-
-    function record(value, key) {
-      // record properties with numeric values
-      if (isClassOf(value, 'Number') &&
-          /^(?:MoE|RME|SD|SEM|[^A-Z]+)$/.test(key)) {
-        result.push(key + ':' + value);
-      }
-      else if (value && isClassOf(value, 'Object')) {
-        objects.push(value);
-      }
-    }
-
-    if (HAS_STORAGE) {
-      while (objects.length) {
-        forIn(objects.pop(), record);
-      }
-      localStorage[getStoreKey(me)] = result.join();
-    }
-  }
-
-  /**
-   * Restores recorded benchmark results.
-   * @private
-   * @param {Object} me The benchmark instance.
-   * @returns {Boolean} Returns `true` if results were restored, else `false`.
-   */
-  function restore(me) {
-    var key,
-        match,
-        object,
-        objects = [me],
-        persist = me.persist,
-        expires = isClassOf(persist, 'Number') ? persist * 864e5 : Infinity,
-        data = HAS_STORAGE && (data = localStorage[getStoreKey(me)]) &&
-          +new Date - (/created:(\d+)/.exec(data) || 0)[1] < expires && data;
-
-    while (data && objects.length) {
-      object = objects.pop();
-      for (key in object) {
-        // extract value and remove from data
-        if (match = RegExp(key + ':([^,]+),?').exec(data)) {
-          data = data.replace(match[0], '');
-          object[key] = +match[1];
-        }
-        else if (isClassOf(object[key], 'Object')) {
-          objects.push(object[key]);
-        }
-      }
-    }
-    return !!data;
-  }
-
   /*--------------------------------------------------------------------------*/
-
-  /**
-   * Removes all benchmark data from local storage.
-   * @static
-   * @member Benchmark
-   */
-  function clearStorage() {
-    // use brute force because Firefox errors attempting for-in on localStorage
-    each(HAS_STORAGE ? ['ns', 'us', 'ms'] : [], function(unit) {
-      var uid,
-          rev = 0;
-
-      while (++rev <= STORE_KEY_REV) {
-        uid = -3;
-        while (++uid < 100) {
-          localStorage.removeItem(getStoreKey({ 'rev': rev, 'unit': unit, 'uid': uid }));
-        }
-      }
-    });
-  }
 
   /**
    * A generic bare-bones `Array#forEach` solution.
@@ -638,7 +506,7 @@
    */
   function formatNumber(number) {
     var comma = ',',
-        string = String(Math.max(0, Math.abs(number).toFixed(0))),
+        string = String(max(0, abs(number).toFixed(0))),
         length = string.length,
         end = /^\d{4,}$/.test(string) ? length % 3 : 0;
 
@@ -846,19 +714,6 @@
    */
   function isArray(value) {
     return isClassOf(value, 'Array');
-  }
-
-  /**
-   * Checks if calibration benchmarks have completed.
-   * @static
-   * @member Benchmark
-   * @returns {Boolean} Returns true if calibrated, false if not.
-   */
-  function isCalibrated() {
-    return !filter(Benchmark.CALIBRATIONS, function(cal) {
-      cal.persist && restore(cal);
-      return !cal.cycles;
-    }).length;
   }
 
   /**
@@ -1206,15 +1061,12 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Aborts the benchmark as well as in progress calibrations without recording times.
+   * Aborts the benchmark without recording times.
    * @member Benchmark
    * @returns {Object} The benchmark instance.
    */
   function abort() {
     var me = this;
-    if (me.constructor != Calibration) {
-      invoke(Benchmark.CALIBRATIONS, 'abort');
-    }
     if (me.running) {
       if (me.timerId && HAS_TIMEOUT_API) {
         clearTimeout(me.timerId);
@@ -1254,26 +1106,24 @@
   }
 
   /**
-   * Determines if the benchmark's hertz is higher than another.
+   * Determines if the benchmark's period is smaller than another.
    * @member Benchmark
    * @param {Object} other The benchmark to compare.
-   * @returns {Number} Returns `1` if higher, `-1` if lower, and `0` if indeterminate.
+   * @returns {Number} Returns `1` if smaller, `-1` if larger, and `0` if indeterminate.
    */
   function compare(other) {
     // use welch t-test
-    // http://frank.mtsu.edu/~dkfuller/notes302/welcht.pdf
-    // http://www.public.iastate.edu/~alicia/stat328/Regression%20inference-part2.pdf
-    var a = this.stats,
-        b = other.stats,
-        pow = Math.pow,
-        bitA = a.variance / a.size,
-        bitB = b.variance / b.size,
-        df = pow(bitA + bitB, 2) / ((pow(bitA, 2) / a.size - 1) + (pow(bitB, 2) / b.size - 1)),
-        t = (a.mean - b.mean) / Math.sqrt(bitA + bitB),
-        c = getCriticalValue(Math.round(df));
+    // http://en.wikipedia.org/wiki/Student's_t-test
+    // http://www.chem.utoronto.ca/coursenotes/analsci/StatsTutorial/12tailed.html
+    var a  = this.stats,
+        b  = other.stats,
+        va = a.variance,
+        vb = b.variance,
+        df = pow(va + vb, 2) / ((pow(va, 2) / a.size - 1) + (pow(vb, 2) / b.size - 1)),
+        t  = (a.mean - b.mean) / sqrt(va + vb);
 
     // check if t-statistic is significant
-    return Math.abs(t) > c ? (t > 0 ? 1 : -1) : 0;
+    return abs(t) > getCriticalValue(df) ? (t > 0 ? -1 : 1) : 0;
   }
 
   /**
@@ -1346,14 +1196,11 @@
    * @private
    * @param {Object} me The benchmark instance.
    * @param {Boolean} [async=false] Flag to run asynchronously.
-   * @param {Number} burstStart Timestamp of when the synchronous cycle burst started.
-   * @param {Array} [sample=[]] Benchmarks used for statistical analysis.
    */
-  function compute(me, async, burstStart, sample) {
-    var calibrated = isCalibrated(),
-        calibrating = me.constructor == Calibration,
-        fn = me.fn,
+  function compute(me, async) {
+    var fn = me.fn,
         queue = [],
+        sample = [],
         runCount = me.INIT_RUN_COUNT;
 
     function enqueue(count) {
@@ -1383,12 +1230,7 @@
           me.emit('error');
         }
         else {
-          // reset timer if interrupted by calibrations
-          if (!calibrating && !calibrated && isCalibrated()) {
-            calibrated = true;
-            me.times.start = +new Date;
-          }
-          // use hosts last run count
+          // on start
           clone.count = me.INIT_RUN_COUNT;
         }
       } else if (me.aborted) {
@@ -1401,90 +1243,69 @@
           moe,
           rme,
           sd,
-          sem,
           variance,
-          index = me.CALIBRATION_INDEX,
-          cals = me.constructor.CALIBRATIONS || [],
-          cal = cals[index > 1 ? index : fn.compilable ? 0 : 1],
           now = +new Date,
           times = me.times,
           aborted = me.aborted,
-          burstElapsed = (now - burstStart) / 1e3,
-          timeElapsed = (now - times.start) / 1e3,
-          maxedOut = !async && burstStart ? burstElapsed >= me.MAX_BURST_TIME : timeElapsed >= me.MAX_TIME_ELAPSED,
-          size = sample.push(clone.hz),
+          elapsed = (now - times.start) / 1e3,
+          size = sample.push(clone.times.period),
+          maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
           sumOf = function(sum, x) { return sum + x; },
-          varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
+          varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
       // exit early for aborted or unclockable tests
       if (aborted || clone.hz == Infinity) {
-         maxedOut = !(calibrating = size = sample.length = queue.length = 0);
+         maxedOut = !(size = sample.length = queue.length = 0);
       }
       // simulate onComplete and enqueue additional runs if needed
       if (queue.length < 2) {
-        // compute values
+        // sample mean (estimate of the population mean)
         mean = reduce(sample, sumOf, 0) / size || 0;
-        // sample variance
+        // sample variance (estimate of the population variance)
         variance = reduce(sample, varOf, 0) / (size - 1);
-        // standard deviation
-        sd = Math.sqrt(variance);
-        // standard error of the mean
-        sem = sd / Math.sqrt(size) || 0;
+        // variance of the sampling distribution of the sample mean
+        variance = variance / size || 0;
+        // standard deviation of the sampling distribution of the sample mean (aka the standard error of the mean)
+        sd = sqrt(variance);
         // margin of error
-        moe = sem * getCriticalValue(size - 1);
+        moe = sd * getCriticalValue(size - 1);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
-        // if time permits, or calibrating, increase sample size to reduce the margin of error
-        if (!maxedOut || (calibrating && rme > 1)) {
-          if (maxedOut && (async || burstStart)) {
-            // switch to burst mode
-            queue.length = 0;
-            compute(me, !async, now, sample);
-          } else {
-            enqueue(1);
-          }
+        // if time permits, increase sample size to reduce the margin of error
+        if (!maxedOut) {
+          enqueue(1);
         }
         else {
           // set host values
           if (!aborted) {
             me.running = false;
             times.stop = now;
-            times.elapsed = timeElapsed;
+            times.elapsed = elapsed;
             extend(me.stats, {
-              'MoE': moe,
+              'ME': moe,
               'RME': rme,
-              'SD': sd,
-              'SEM': sem,
+              'deviation': sd,
               'mean': mean,
               'size': size,
               'variance': variance
             });
 
             if (me.hz != Infinity) {
-              // calibrate by subtracting iteration overhead
-              // TODO: look at adjusting MoE too
-              if (cal && cal.compare(me) > 0) {
-                mean = 1 / ((1 / mean) - cal.times.period);
-              }
-              me.hz = mean;
-              times.period = 1 / mean;
-              times.cycle = times.period * me.count;
-            }
-            if (me.persist) {
-              store(me);
+              times.period = mean;
+              times.cycle = mean * me.count;
+              me.hz = 1 / mean;
             }
           }
           me.INIT_RUN_COUNT = runCount;
           me.emit('complete');
-          return !aborted;
         }
       }
+      return !aborted;
     }
 
     // init sample/queue and begin
-    sample || (sample = []);
-    enqueue(sample.length ? 1 : 5);
+    enqueue(sample.length ? 1 : me.MIN_SAMPLE_SIZE);
     invoke(queue, { 'name': 'run', 'args': async, 'queued': true, 'onCycle': evaluate });
   }
 
@@ -1495,62 +1316,30 @@
    * @returns {Object} The benchmark instance.
    */
   function run(async) {
-    var clocked,
-        me = this;
-
-    function calibrate() {
-      invoke(Benchmark.CALIBRATIONS, {
-        'name': 'run',
-        'args': async,
-        'onCycle': function(cal) {
-          return !(cal.aborted || me.aborted);
-        },
-        'onComplete': function(cal) {
-          if (cal.aborted) {
-            me.abort();
-            me.emit('complete');
-          } else if (me.running) {
-            // resume benchmark
-            call(me, finish, async);
-          }
-        }
-      });
-    }
+    var me = this;
 
     function cycle() {
+      var clocked,
+          divisor,
+          minTime,
+          period,
+          fn = me.fn,
+          times = me.times,
+          count = me.count;
+
       // continue, if not aborted between cycles
       if (me.running) {
         me.cycles++;
         try {
-          // used by finish()
           clocked = clock(me);
-        }
-        catch(e) {
+          minTime = me.MIN_TIME;
+        } catch(e) {
           me.abort();
           me.error = e;
           me.emit('error');
         }
       }
-      // check if calibrations need to run
-      if (me.running) {
-        if (me.constructor == Calibration || isCalibrated()) {
-          finish();
-        } else {
-          calibrate();
-        }
-      } else {
-        finish();
-      }
-    }
-
-    function finish() {
-      var divisor,
-          period,
-          fn = me.fn,
-          times = me.times,
-          count = me.count,
-          minTime = me.MIN_TIME;
-
+      // continue, if not errored
       if (me.running) {
         // time taken to complete last test cycle
         times.cycle = clocked;
@@ -1599,17 +1388,7 @@
     me.emit('start');
 
     async = (async == null ? me.DEFAULT_ASYNC : async) && HAS_TIMEOUT_API;
-    if (me.persist && restore(me)) {
-      // use restored data
-      call(me, function() {
-        me.running = false;
-        if (me.emit('cycle') === false) {
-          me.abort();
-        }
-        me.emit('complete');
-      }, async);
-    }
-    else if (me.computing) {
+    if (me.computing) {
       cycle();
     } else {
       compute(me, async);
@@ -1793,9 +1572,6 @@
      */
     'version': '0.1.341',
 
-    // clears locally stored data
-    'clearStorage': clearStorage,
-
     // generic Array#forEach
     'each': each,
 
@@ -1825,9 +1601,6 @@
 
     // xbrowser Array.isArray
     'isArray': isArray,
-
-    // checks calibration status
-    'isCalibrated': isCalibrated,
 
     // checks internal [[Class]] of an object
     'isClassOf': isClassOf,
@@ -1862,13 +1635,6 @@
   extend(Benchmark.prototype, {
 
     /**
-     * The index of the calibration benchmark to use when computing results.
-     * @member Benchmark
-     * @type Number
-     */
-    'CALIBRATION_INDEX': 0,
-
-    /**
      * The delay between test cycles (secs).
      * @member Benchmark
      * @type Number
@@ -1897,18 +1663,18 @@
     'INIT_RUN_COUNT': 5,
 
     /**
-     * The maximum time an async run is allowed to perform a burst of synchronous cycles (secs).
-     * @member Benchmark
-     * @type Number
-     */
-    'MAX_BURST_TIME': 0.25,
-
-    /**
      * The maximum time a benchmark is allowed to run before finishing (secs).
      * @member Benchmark
      * @type Number
      */
     'MAX_TIME_ELAPSED': 5,
+
+    /**
+     * The minimum sample size required to perform statistical analysis.
+     * @member Benchmark
+     * @type Number
+     */
+    'MIN_SAMPLE_SIZE': 5,
 
     /**
      * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
@@ -1960,13 +1726,6 @@
     'aborted': false,
 
     /**
-     * A flag to indicate if results persist OR the number of days to persist.
-     * @member Benchmark
-     * @type Mixed
-     */
-    'persist': false,
-
-    /**
      * A flag to indicate if the benchmark is running.
      * @member Benchmark
      * @type Boolean
@@ -1991,7 +1750,7 @@
        * @member Benchmark#stats
        * @type Number
        */
-      'MoE': 0,
+      'ME': 0,
 
       /**
        * The relative margin of error (expressed as a percentage of the mean).
@@ -2005,14 +1764,7 @@
        * @member Benchmark#stats
        * @type Number
        */
-      'SD': 0,
-
-      /**
-       * The standard error of the mean.
-       * @member Benchmark#stats
-       * @type Number
-       */
-      'SEM': 0,
+      'deviation': 0,
 
       /**
        * The sample arithmetic mean.
@@ -2241,37 +1993,6 @@
 
     'unshift': [].unshift
   });
-
-  /*--------------------------------------------------------------------------*/
-
-  // inherit from Benchmark
-  (Calibration.prototype = new Benchmark(HEADLESS)).constructor = Calibration;
-
-  extend(Calibration.prototype, {
-    // allows extremely small clock speeds
-    'DETECT_INFINITY': false,
-
-    // avoid repeat calibrations
-    'persist': true
-  });
-
-  /**
-   * Benchmarks to establish iteration overhead.
-   * @static
-   * @member Benchmark
-   * @type Array
-   */
-  Benchmark.CALIBRATIONS = (function() {
-    var a = function() { },
-        b = function() { },
-        suite = new Suite;
-
-    a.uid = -1;
-    b.uid = -2;
-    b.compilable = false;
-    suite.push(new Calibration(a), new Calibration(b));
-    return suite;
-  }());
 
   /*--------------------------------------------------------------------------*/
 

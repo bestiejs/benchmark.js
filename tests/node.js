@@ -3,11 +3,6 @@
   // load Benchmark
   var Benchmark = require('../benchmark.js');
 
-  // hookup calibration notice
-  Benchmark.CALIBRATIONS[0].on('start', function() {
-    console.log('Calibrating...');
-  });
-
   // check Benchmark.platform
   console.log('Benchmark.platform: expected at least "Node.js"; got "' +
     Benchmark.platform + '";');

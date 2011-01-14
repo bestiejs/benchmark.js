@@ -141,7 +141,7 @@ a:hover span, a:focus span, #comments .owner .meta a {
   color: #fff;
 }
 
-#calgroup, #controls, #run, .buttons {
+#controls, #run, .buttons {
   float: right;
 }
 
@@ -168,13 +168,6 @@ label.inline {
   float: none;
   padding: 0;
   margin: 0;
-}
-
-label#calgroup {
-  cursor: pointer;
-  font-size: .8em;
-  line-height: 1.8em;
-  vertical-align: top;
 }
 
 label[for="visible"] {
@@ -222,7 +215,7 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
   display: block;
 }
 
-.js .question, hgroup h2, p#firebug, #calgroup, #controls {
+.js .question, hgroup h2, p#firebug, #controls {
   display: none;
 }
 
@@ -339,21 +332,9 @@ footer {
   white-space: normal;
 }
 
-#calgroup {
-  margin: .3em 0 .6em 0;
-}
-
 #controls {
   margin-top: -4.6em;
   _display: block; /* IE6 */
-}
-
-#controls.reduce {
-  margin-top: -3.2em;
-}
-
-#controls.reduce label#calgroup {
-  display: none;
 }
 
 #comments h1 {
@@ -441,12 +422,8 @@ footer {
   overflow: auto;
 }
 
-#calgroup.show, #controls.show, #firebug.show {
+#controls.show, #firebug.show {
   display: block;
-}
-
-.clear {
-  clear: both;
 }
 
 .co1, .co2, .coMULTI {

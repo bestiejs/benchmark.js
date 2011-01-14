@@ -55,7 +55,7 @@
     // clone benchmarks using lower limit of the confidence interval
     benches = Benchmark.map(benches, function(bench) {
       var clone = bench.clone();
-      clone.hz = Math.round(bench.hz - bench.stats.MoE);
+      clone.hz = Math.round(bench.hz - bench.stats.ME);
       clone.id || (clone.id = Benchmark.indexOf(ui.benchmarks, bench) + 1);
       return clone;
     });

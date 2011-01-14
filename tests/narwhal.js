@@ -3,11 +3,6 @@
   // load Benchmark
   var Benchmark = require('../benchmark.js').Benchmark;
 
-  // hookup calibration notice
-  Benchmark.CALIBRATIONS[0].on('start', function() {
-    print('Calibrating...');
-  });
-
   // check Benchmark.platform
   print('Benchmark.platform: expected at least "Narwhal"; got "' +
     Benchmark.platform + '";');
