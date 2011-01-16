@@ -1198,8 +1198,7 @@
    * @param {Boolean} [async=false] Flag to run asynchronously.
    */
   function compute(me, async) {
-    var fn = me.fn,
-        queue = [],
+    var queue = [],
         sample = [],
         runCount = me.INIT_RUN_COUNT;
 
@@ -1248,8 +1247,8 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          size = sample.push(clone.times.period),
           maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
+          size = sample.push(clone.times.period),
           sumOf = function(sum, x) { return sum + x; },
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
@@ -1323,9 +1322,8 @@
           divisor,
           minTime,
           period,
-          fn = me.fn,
-          times = me.times,
-          count = me.count;
+          count = me.count,
+          times = me.times;
 
       // continue, if not aborted between cycles
       if (me.running) {
