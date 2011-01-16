@@ -56,6 +56,9 @@
   /** Used to convert array-like objects to arrays */
   slice = [].slice,
 
+  /** Used generically when invoking over queued arrays */
+  shift = aloClean([].shift),
+
   /** Math shortcuts */
   abs  = Math.abs,
   max  = Math.max,
@@ -168,6 +171,24 @@
   }
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Wraps an array function to ensure array-like-objects (ALO) are empty when their length is `0`.
+   * @private
+   * @param {Function} fn The array function to be wrapped.
+   * @returns {Function} The new function.
+   */
+  function aloClean(fn) {
+    return function() {
+      var me = this,
+          result = fn.apply(me, arguments);
+      // fixes IE<9 and IE8 compatibility mode bugs
+      if (!me.length) {
+        delete me[0];
+      }
+      return result;
+    };
+  }
 
   /**
    * Executes a function asynchronously or synchronously.
@@ -635,11 +656,7 @@
       if (options.onCycle.call(benches, last) !== false) {
         if (queued) {
           // use generic shift
-          result.shift.call(benches);
-          // fix IE8 compatibility mode bug
-          if (!benches.length) {
-            delete benches[0];
-          }
+          shift.call(benches);
           bench = benches[0];
         } else {
           bench = benches[++i];
@@ -1981,17 +1998,19 @@
 
     'join': [].join,
 
+    'pop': aloClean([].pop),
+
     'push': [].push,
 
     'reverse': [].reverse,
 
-    'shift': [].shift,
+    'shift': shift,
 
     'slice': slice,
 
     'sort': [].sort,
 
-    'splice': [].splice,
+    'splice': aloClean([].splice),
 
     'unshift': [].unshift
   });
