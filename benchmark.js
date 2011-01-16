@@ -636,6 +636,10 @@
         if (queued) {
           // use generic shift
           result.shift.call(benches);
+          // fix IE8 compatibility mode bug
+          if (!benches.length) {
+            delete benches[0];
+          }
           bench = benches[0];
         } else {
           bench = benches[++i];
