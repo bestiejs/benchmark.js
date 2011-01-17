@@ -52,10 +52,12 @@
       return bench.cycles && isFinite(bench.hz);
     });
 
-    // clone benchmarks using lower limit of the confidence interval
+    // clone benchmarks using the upper limit of the confidence interval to compute hz
     benches = Benchmark.map(benches, function(bench) {
-      var clone = bench.clone();
-      clone.hz = Math.round(bench.hz - bench.stats.ME);
+      var clone = bench.clone(),
+          stats = bench.stats;
+
+      clone.hz = Math.round(1 / (stats.mean + stats.ME));
       clone.id || (clone.id = Benchmark.indexOf(ui.benchmarks, bench) + 1);
       return clone;
     });
