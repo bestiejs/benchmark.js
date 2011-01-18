@@ -36,6 +36,8 @@ test("user agent detection", function() {
             .replace(/\bsystem\b/g, 'me.system')
             .replace(/\bEnvironment\b/g, 'Object')
             .replace(/\bnav\.appMinorVersion/g, 'me.appMinorVersion')
+            .replace(/\bnav\.cpuClass/g, 'me.cpuClass')
+            .replace(/\bnav\.platform/g, 'me.platform')
             .replace(/\bexternal/g, 'me.external')
             .replace(/\bdoc\.documentMode/g, 'me.mode'));
       }
@@ -51,7 +53,7 @@ test("user agent detection", function() {
   }());
 
   var Tests = {
-    'Avant Browser on Windows Vista': {
+    'Avant Browser on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Avant Browser)',
       'mode': 8
     },
@@ -162,6 +164,16 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.3a5pre) Gecko/20100418 Minefield/3.7a5pre'
     },
 
+    'Firefox 4.0#{beta}8 on Windows Server 2008 / Vista x64': {
+      'ua': 'Mozilla/5.0 (Windows NT 6.0; Win64; x64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre',
+      'platform': 'Win64'
+    },
+
+    'Firefox 4.0#{beta}8 x86 on Windows Server 2008 R2 / 7 x64': {
+      'ua': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:2.0b8pre) Gecko/20101114 Firefox/4.0b8pre',
+      'platform': 'Win32'
+    },
+
     'Firefox 4.0#{beta}9 on Linux x86_64': {
       'ua': 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0b9pre) Gecko/20110105 Firefox/4.0b9pre'
     },
@@ -182,7 +194,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; es-AR; rv:1.9.0.2) Gecko/2008091920 Firefox/3.0.2 Flock/2.0b3'
     },
 
-    'Flock 2.0.3 on Windows Vista': {
+    'Flock 2.0.3 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.5) Gecko/2008121620 Firefox/3.0.5 Flock/2.0.3'
     },
 
@@ -254,11 +266,13 @@ test("user agent detection", function() {
 
     'IE 8.0#{beta}2 on Windows XP': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0)',
-      'appMinorVersion': 'beta 2'
+      'appMinorVersion': 'beta 2',
+      'mode': 8
     },
 
     'IE 8.0 on Windows XP': {
-      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; chromeframe)'
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; chromeframe)',
+      'mode': 8
     },
 
     'IE 8.0 (running in IE 5 mode) on Windows XP': {
@@ -271,63 +285,77 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'IE 9.0#{beta} (platform preview) on Windows 7': {
+    'IE 8.0 x86 on Windows Server 2008 / Vista x64': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; WOW64; Trident/4.0)',
+      'mode': 8,
+      'cpuClass': 'x86',
+      'platform': 'Win32'
+    },
+
+    'IE 8.0 on Windows Server 2008 R2 / 7 x64': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Win64; x64; Trident/4.0)',
+      'mode': 8,
+      'cpuClass': 'x64',
+      'platform': 'Win64'
+    },
+
+    'IE 9.0#{beta} (platform preview) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 9
     },
 
-    'IE 9.0#{beta} (platform preview; running in IE 5 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 5 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 5
     },
 
-    'IE 9.0#{beta} (platform preview; running in IE 7 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 7 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 7
     },
 
-    'IE 9.0#{beta} (platform preview; running in IE 8 mode) on Windows 7': {
+    'IE 9.0#{beta} (platform preview; running in IE 8 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 8
     },
 
-    'IE 9.0#{beta} on Windows Vista': {
+    'IE 9.0#{beta} on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0)',
       'appMinorVersion': 'beta'
     },
 
-    'IE 9.0#{beta} (running in IE 5 mode) on Windows 7': {
+    'IE 9.0#{beta} (running in IE 5 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'mode': 5
     },
 
-    'IE 9.0#{beta} (running in IE 7 mode) on Windows 7': {
+    'IE 9.0#{beta} (running in IE 7 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'mode': 7
     },
 
-    'IE 9.0#{beta} (running in IE 8 mode) on Windows 7': {
+    'IE 9.0#{beta} (running in IE 8 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'appMinorVersion': 'beta',
       'mode': 8
     },
 
-    'IE 9.0 on Windows 7': {
+    'IE 9.0 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)',
       'mode': 9
     },
 
-    'Iron 0.2.152.0 on Windows Vista': {
+    'Iron 0.2.152.0 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Iron/0.2.152.0 Safari/41562480.525'
     },
 
@@ -363,16 +391,16 @@ test("user agent detection", function() {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.2; Lunascape 5.0 alpha3)'
     },
 
-    'Lunascape 6.1.7.21880 (Trident) on Windows 7': {
+    'Lunascape 6.1.7.21880 (Trident) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Lunascape 6.1.7.21880)',
       'mode': 8
     },
 
-    'Lunascape 6.2.1.22445 (Gecko) on Windows Vista': {
+    'Lunascape 6.2.1.22445 (Gecko) on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.13) Gecko/20100917 Firefox/3.5.13 Lunascape/6.2.1.22445'
     },
 
-    'Lunascape 6.3.1.22729#{beta} (platform preview; rendered by Trident) on Windows Vista': {
+    'Lunascape 6.3.1.22729#{beta} (platform preview; rendered by Trident) on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; Lunascape/6.3.1.22729',
       'appMinorVersion': 'beta',
       'external': null,
@@ -480,7 +508,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; de-de) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.20'
     },
 
-    'Safari 3.1.1 on Windows Vista': {
+    'Safari 3.1.1 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.18 (KHTML, like Gecko) Version/3.1.1 Safari/525.17'
     },
 
@@ -488,7 +516,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_6; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.2 Safari/525.20.1'
     },
 
-    'Safari 3.1.2 on Windows Vista': {
+    'Safari 3.1.2 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; pl-PL) AppleWebKit/525.19 (KHTML, like Gecko) Version/3.1.2 Safari/525.21'
     },
 
@@ -496,7 +524,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X 10_5_5; en-us) AppleWebKit/525.26.2 (KHTML, like Gecko) Version/3.2 Safari/525.26.12'
     },
 
-    'Safari 3.2 on Windows Vista': {
+    'Safari 3.2 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; hu-HU) AppleWebKit/525.26.2 (KHTML, like Gecko) Version/3.2 Safari/525.26.13'
     },
 
@@ -508,7 +536,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; it-it) AppleWebKit/528.8+ (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1'
     },
 
-    'Safari 3.2.1 on Windows Vista': {
+    'Safari 3.2.1 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; sv-SE) AppleWebKit/525.27.1 (KHTML, like Gecko) Version/3.2.1 Safari/525.27.1'
     },
 
@@ -520,7 +548,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
     },
 
-    'Safari 3.2.2 on Windows 7': {
+    'Safari 3.2.2 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; de-DE) AppleWebKit/525.28 (KHTML, like Gecko) Version/3.2.2 Safari/525.28.1'
     },
 
@@ -600,7 +628,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-TW) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
     },
 
-    'Safari 4.0 on Windows Vista': {
+    'Safari 4.0 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ru-RU) AppleWebKit/528.16 (KHTML, like Gecko) Version/4.0 Safari/528.16'
     },
 
@@ -620,11 +648,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; de-DE) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
-    'Safari 4.0.2 on Windows Vista': {
+    'Safari 4.0.2 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; zh-TW) AppleWebKit/530.19.2 (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
-    'Safari 4.0.2 on Windows 7': {
+    'Safari 4.0.2 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/532+ (KHTML, like Gecko) Version/4.0.2 Safari/530.19.1'
     },
 
@@ -636,7 +664,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_1; nl-nl) AppleWebKit/532.3+ (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
     },
 
-    'Safari 4.0.3 on Windows Vista': {
+    'Safari 4.0.3 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
     },
 
@@ -668,11 +696,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.2; en-US) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.4 on Windows Vista': {
+    'Safari 4.0.4 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.4 on Windows 7': {
+    'Safari 4.0.4 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ko-KR) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
@@ -700,11 +728,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
-    'Safari 4.0.5 on Windows Vista': {
+    'Safari 4.0.5 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
-    'Safari 4.0.5 on Windows 7': {
+    'Safari 4.0.5 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; es-ES) AppleWebKit/531.22.7 (KHTML, like Gecko) Version/4.0.5 Safari/531.22.7'
     },
 
@@ -732,11 +760,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_3; zh-cn) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
     },
 
-    'Safari 5.0 on Windows Vista': {
+    'Safari 5.0 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
     },
 
-    'Safari 5.0 on Windows 7': {
+    'Safari 5.0 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ja-JP) AppleWebKit/533.16 (KHTML, like Gecko) Version/5.0 Safari/533.16'
     },
 
@@ -752,11 +780,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; ru-RU) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
-    'Safari 5.0.2 on Windows Vista': {
+    'Safari 5.0.2 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; tr-TR) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
-    'Safari 5.0.2 on Windows 7': {
+    'Safari 5.0.2 on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-HK) AppleWebKit/533.18.1 (KHTML, like Gecko) Version/5.0.2 Safari/533.18.5'
     },
 
@@ -768,8 +796,12 @@ test("user agent detection", function() {
       'ua': 'Seamonkey-1.1.13-1(X11; U; GNU Fedora fc 10) Gecko/20081112'
     },
 
-    'SeaMonkey 2.0#{beta}1 on Windows Vista': {
+    'SeaMonkey 2.0#{beta}1 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.1pre) Gecko/20090717 SeaMonkey/2.0b1'
+    },
+
+    'SeaMonkey 2.0.3 on Linux x86_64': {
+      'ua': 'Mozilla/5.0 (X11; U; Linux x86_64; en-US; rv:1.9.1.8) Gecko/20100205 SeaMonkey/2.0.3'
     },
 
     'SeaMonkey 2.0.8 on Windows XP': {
@@ -787,12 +819,12 @@ test("user agent detection", function() {
       'mode': 8
     },
 
-    'Sleipnir 2.9.4 (running in IE 7 mode) on Windows Vista': {
+    'Sleipnir 2.9.4 (running in IE 7 mode) on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; Trident/4.0; Sleipnir/2.9.4)',
       'mode': 7
     },
 
-    'Sleipnir 2.9.6 (Trident) on Windows 7': {
+    'Sleipnir 2.9.6 (Trident) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; Sleipnir/2.9.6)',
       'mode': 8
     },
@@ -802,7 +834,7 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'SlimBrowser (running in IE 5 mode) on Windows 7': {
+    'SlimBrowser (running in IE 5 mode) on Windows Server 2008 R2 / 7': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; Trident/4.0; SlimBrowser)',
       'mode': 5
     },

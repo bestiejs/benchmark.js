@@ -1432,7 +1432,7 @@
         nav = window.navigator || {},
         ua = nav.userAgent || 'unknown platform',
         layout = /Gecko|Trident|WebKit/.exec(ua),
-        data = { '6.1': '7', '6.0': 'Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
+        data = { '6.1': 'Server 2008 R2 / 7', '6.0': 'Server 2008 / Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
         name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,Nook Browser,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
         os = 'Android,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'BlackBerry\\s?\\d+,iP[ao]d,iPhone,Kindle,Nook',
@@ -1554,17 +1554,24 @@
       layout = layout && !/like /.test(layout) ? 'rendered by ' + layout : layout;
       description.unshift('platform preview');
     }
-    // add engine information
+    // add layout engine
     if (layout && /Browser|Lunascape|Maxthon|Sleipnir/.test(name)) {
       description.push(layout);
     }
-    // add contextual information
+    // combine contextual information
     if (description.length) {
       description = ['(' + description.join('; ') + ')'];
     }
-    // add product to description
+    // append product
     if (product && String(name).indexOf(product) < 0) {
       description.push('on ' + product);
+    }
+    // add browser/os architecture
+    if (/\b(?:WOW|x)64\b/.test(ua)) {
+      os = os && os + (/64/.test(os) ? '' : ' x64');
+      if (name && (/\bWOW64\b/.test(ua) || /\w(?:86|32)$/.test(nav.cpuClass || nav.platform))) {
+        description.unshift('x86');
+      }
     }
     // cleanup os
     os = os && trim(/^iOS/.test(os = String(os)) ? os : capitalize(os));
