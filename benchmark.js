@@ -268,10 +268,9 @@
     function getRes(unit) {
       var measured,
           start,
-          count = 50,
+          count = 40,
           divisor = 1e3,
-          size = count,
-          sum = 0;
+          sample = [];
 
       // get average smallest measurable time
       while (count--) {
@@ -291,15 +290,20 @@
         }
         // check for broken timers (nanoTime may have issues)
         // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
-        if (measured < 0) {
-          sum = Infinity;
-          break;
+        if (measured > 0) {
+          sample.push(measured);
         } else {
-          sum += measured;
+          sample.push(Infinity);
+          break;
         }
       }
-      // convert average to seconds
-      return sum / size / divisor;
+      // trim mean by 10%
+      if ((getMean(sample) / divisor) <= resLimit) {
+        sample.sort();
+        sample = sample.slice(4, -4);
+      }
+      // convert to seconds
+      return getMean(sample) / divisor;
     }
 
     // detect nanosecond support:
@@ -397,6 +401,18 @@
    */
   function getCriticalValue(df) {
     return T_DISTRIBUTION[Math.round(df) || 1] || T_DISTRIBUTION.Infinity;
+  }
+
+  /**
+   * Computes the the arithmetic mean of a sample.
+   * @private
+   * @param {Array} sample The sample.
+   * @returns {Number} The mean.
+   */
+  function getMean(sample) {
+    return reduce(sample, function(sum, x) {
+      return sum + x;
+    }, 0) / sample.length || 0;
   }
 
   /**
@@ -1270,7 +1286,6 @@
           elapsed = (now - times.start) / 1e3,
           maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
           size = sample.push(clone.times.period),
-          sumOf = function(sum, x) { return sum + x; },
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
       // exit early for aborted or unclockable tests
@@ -1280,7 +1295,7 @@
       // simulate onComplete and enqueue additional runs if needed
       if (queue.length < 2) {
         // sample mean (estimate of the population mean)
-        mean = reduce(sample, sumOf, 0) / size || 0;
+        mean = getMean(sample);
         // sample variance (estimate of the population variance)
         variance = reduce(sample, varOf, 0) / (size - 1);
         // variance of the sampling distribution of the sample mean
