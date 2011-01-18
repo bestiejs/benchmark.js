@@ -268,7 +268,7 @@
     function getRes(unit) {
       var measured,
           start,
-          count = 40,
+          count = 80,
           divisor = 1e3,
           sample = [];
 
@@ -297,10 +297,10 @@
           break;
         }
       }
-      // trim mean by 10%
+      // trim mean by 20%
       if ((getMean(sample) / divisor) <= resLimit) {
         sample.sort();
-        sample = sample.slice(4, -4);
+        sample = sample.slice(16, -16);
       }
       // convert to seconds
       return getMean(sample) / divisor;
