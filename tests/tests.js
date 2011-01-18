@@ -287,15 +287,15 @@ test("user agent detection", function() {
 
     'IE 8.0 x86 on Windows Server 2008 / Vista x64': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; WOW64; Trident/4.0)',
-      'mode': 8,
       'cpuClass': 'x86',
+      'mode': 8,
       'platform': 'Win32'
     },
 
     'IE 8.0 on Windows Server 2008 R2 / 7 x64': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Win64; x64; Trident/4.0)',
-      'mode': 8,
       'cpuClass': 'x64',
+      'mode': 8,
       'platform': 'Win64'
     },
 

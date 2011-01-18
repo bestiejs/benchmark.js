@@ -1569,7 +1569,7 @@
     // add browser/os architecture
     if (/\b(?:WOW|x)64\b/.test(ua)) {
       os = os && os + (/64/.test(os) ? '' : ' x64');
-      if (name && (/\bWOW64\b/.test(ua) || /\w(?:86|32)$/.test(nav.cpuClass || nav.platform))) {
+      if (name && (/WOW64/.test(ua) || /\w(?:86|32)$/.test(nav.cpuClass || nav.platform))) {
         description.unshift('x86');
       }
     }

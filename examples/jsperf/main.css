@@ -333,8 +333,7 @@ footer {
 }
 
 #controls {
-  margin-top: -4.6em;
-  _display: block; /* IE6 */
+  margin-top: -3.35em;
 }
 
 #comments h1 {
