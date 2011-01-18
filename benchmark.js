@@ -404,7 +404,7 @@
   }
 
   /**
-   * Computes the the arithmetic mean of a sample.
+   * Computes the arithmetic mean of a sample.
    * @private
    * @param {Array} sample The sample.
    * @returns {Number} The mean.
@@ -1611,7 +1611,7 @@
      * @member Benchmark
      * @type String
      */
-    'version': '0.1.341',
+    'version': '0.1.342',
 
     // generic Array#forEach
     'each': each,
