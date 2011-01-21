@@ -497,22 +497,31 @@
    * Benchmark.filter(benches, 'successful');
    */
   function filter(array, callback) {
-    var source;
-    if (callback == 'successful') {
+    var result,
+        source,
+        fastest = callback == 'fastest';
+
+    if (/^(?:fast|slow)est$/.test(callback)) {
+      // get successful benchmarks
+      result = filter(array, 'successful');
+      // sort fastest to slowest
+      result.sort(function(a, b) { return b.compare(a); });
+      // set source benchmark to compare others against
+      source = result[fastest ? 0 : result.length - 1];
+      // filter fastest/slowest
+      result = filter(result, function(bench) { return !source.compare(bench); });
+      // sort by period + margin or error
+      result.sort(function(a, b) {
+        a = a.stats;
+        b = b.stats;
+        return (a.mean + a.ME > b.mean + b.ME ? 1 : -1) * (fastest ? 1 : -1);
+      });
+    }
+    else if (callback == 'successful') {
       // callback to exclude errored or unrun benchmarks
       callback = function(bench) { return bench.cycles; };
     }
-    else if (/^(?:fast|slow)est$/.test(callback)) {
-      // get successful benchmarks
-      array = filter(array, 'successful');
-      // sort descending fastest to slowest
-      array.sort(function(a, b) { return b.compare(a); });
-      // set source benchmark
-      source = array[callback == 'fastest' ? 0 : array.length - 1];
-      // callback to filter fastest/slowest
-      callback = function(bench) { return !source.compare(bench); };
-    }
-    return reduce(array, function(result, value, index) {
+    return result || reduce(array, function(result, value, index) {
       return callback(value, index, array) ? result.push(value) && result : result;
     }, []);
   }

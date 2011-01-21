@@ -303,14 +303,14 @@
           error = bench.error,
           hz = bench.hz;
 
+      // reset title and class
       cell.title = '';
+      cell.className = RESULTS_CLASS;
 
       // status: error
       if (error) {
         setHTML(cell, 'Error');
-        if (!hasClass(cell, ERROR_CLASS)) {
-          addClass(cell, ERROR_CLASS);
-        }
+        addClass(cell, ERROR_CLASS);
         logError('<p>' + error + '.<\/p><ul><li>' +
           Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
       }
@@ -323,15 +323,10 @@
         else if (bench.cycles) {
           cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
             bench.times.cycle.toFixed(3) + ' seconds.';
-
           setHTML(cell, hz == Infinity ? hz :
             formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
         }
         else {
-          // reset class
-          if (!hasClass(cell, ERROR_CLASS)) {
-            cell.className = RESULTS_CLASS;
-          }
           // status: pending
           if (ui.running && ui.indexOf(bench) > -1) {
             setHTML(cell, 'pending&hellip;');
