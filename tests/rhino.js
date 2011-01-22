@@ -1,7 +1,8 @@
-(function(global) {
+(function(global, path) {
 
   // load Benchmark
-  load('../benchmark.js');
+  path || (path = '../benchmark.js');
+  load(path + '/benchmark.js');
 
   // check Benchmark.platform
   print('Benchmark.platform: expected at least "Rhino"; got "' +
@@ -38,4 +39,4 @@
     counter++;
   })();
 
-}(this));
+}(this, arguments[0]));
