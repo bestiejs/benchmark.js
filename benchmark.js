@@ -43,18 +43,7 @@
     '13': 2.160, '14': 2.145, '15': 2.131, '16': 2.120, '17': 2.110, '18': 2.101,
     '19': 2.093, '20': 2.086, '21': 2.080, '22': 2.074, '23': 2.069, '24': 2.064,
     '25': 2.060, '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
-    '31': 2.040, '32': 2.037, '33': 2.035, '34': 2.032, '35': 2.030, '36': 2.028,
-    '37': 2.026, '38': 2.024, '39': 2.023, '40': 2.021, '41': 2.020, '42': 2.018,
-    '43': 2.017, '44': 2.015, '45': 2.014, '46': 2.013, '47': 2.012, '48': 2.011,
-    '49': 2.010, '50': 2.009, '51': 2.008, '52': 2.007, '53': 2.006, '54': 2.005,
-    '55': 2.004, '56': 2.003, '57': 2.002, '58': 2.002, '59': 2.001, '60': 2.000,
-    '61': 2.000, '62': 1.999, '63': 1.998, '64': 1.998, '65': 1.997, '66': 1.997,
-    '67': 1.996, '68': 1.995, '69': 1.995, '70': 1.994, '71': 1.994, '72': 1.993,
-    '73': 1.993, '74': 1.993, '75': 1.992, '76': 1.992, '77': 1.991, '78': 1.991,
-    '79': 1.990, '80': 1.990, '81': 1.990, '82': 1.989, '83': 1.989, '84': 1.989,
-    '85': 1.988, '86': 1.988, '87': 1.988, '88': 1.987, '89': 1.987, '90': 1.987,
-    '91': 1.986, '92': 1.986, '93': 1.986, '94': 1.986, '95': 1.985, '96': 1.985,
-    '97': 1.985, '98': 1.984, '99': 1.984, '100': 1.984,'Infinity': 1.960
+    'Infinity': 1.960
   },
 
   /** Internal cached used by various methods */
@@ -1170,15 +1159,14 @@
    * @returns {Number} Returns `1` if smaller, `-1` if larger, and `0` if indeterminate.
    */
   function compare(other) {
-    // use welch t-test
+    // unpaired two-sample t-test assuming equal variance
     // http://en.wikipedia.org/wiki/Student's_t-test
     // http://www.chem.utoronto.ca/coursenotes/analsci/StatsTutorial/12tailed.html
     var a  = this.stats,
         b  = other.stats,
-        va = a.variance,
-        vb = b.variance,
-        df = pow(va + vb, 2) / ((pow(va, 2) / a.size - 1) + (pow(vb, 2) / b.size - 1)),
-        t  = (a.mean - b.mean) / sqrt(va + vb);
+        df = a.size + b.size - 2,
+        pv = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
+        t  = (a.mean - b.mean) / sqrt(pv * (1 / a.size + 1 / b.size));
 
     // check if t-statistic is significant
     return abs(t) > getCriticalValue(df) ? (t > 0 ? -1 : 1) : 0;
@@ -1300,6 +1288,7 @@
           moe,
           rme,
           sd,
+          sem,
           variance,
           now = +new Date,
           times = me.times,
@@ -1319,12 +1308,12 @@
         mean = getMean(sample);
         // sample variance (estimate of the population variance)
         variance = reduce(sample, varOf, 0) / (size - 1);
-        // variance of the sampling distribution of the sample mean
-        variance = variance / size || 0;
-        // standard deviation of the sampling distribution of the sample mean (aka the standard error of the mean)
+        // sample standard deviation (estimate of the population standard deviation)
         sd = sqrt(variance);
+        // standard error of the mean (aka the standard deviation of the sampling distribution of the sample mean)
+        sem = sd / sqrt(size);
         // margin of error
-        moe = sd * getCriticalValue(size - 1);
+        moe = sem * getCriticalValue(size - 1);
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
@@ -1341,6 +1330,7 @@
             extend(me.stats, {
               'ME': moe,
               'RME': rme,
+              'SEM': sem,
               'deviation': sd,
               'mean': mean,
               'size': size,
@@ -1820,6 +1810,13 @@
        * @type Number
        */
       'RME': 0,
+
+      /**
+       * The standard error of the mean.
+       * @member Benchmark#stats
+       * @type Number
+       */
+      'SEM': 0,
 
       /**
        * The sample standard deviation.
