@@ -498,24 +498,19 @@
    * Benchmark.filter(benches, 'successful');
    */
   function filter(array, callback) {
-    var result,
-        source,
-        fastest = callback == 'fastest';
-
+    var result;
     if (/^(?:fast|slow)est$/.test(callback)) {
       // get successful benchmarks
       result = filter(array, 'successful');
-      // sort fastest to slowest
-      result.sort(function(a, b) { return b.compare(a); });
-      // set source benchmark to compare others against
-      source = result[fastest ? 0 : result.length - 1];
-      // filter fastest/slowest
-      result = filter(result, function(bench) { return !source.compare(bench); });
       // sort by period + margin or error
       result.sort(function(a, b) {
         a = a.stats;
         b = b.stats;
-        return (a.mean + a.ME > b.mean + b.ME ? 1 : -1) * (fastest ? 1 : -1);
+        return (a.mean + a.ME > b.mean + b.ME ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
+      });
+      // filter fastest/slowest
+      result = filter(result, function(bench) {
+        return !result[0].compare(bench);
       });
     }
     else if (callback == 'successful') {
