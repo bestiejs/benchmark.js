@@ -4,7 +4,7 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
-    'timers': { 'cleanup': null, 'load': null },
+    'timers': { 'cleanup': null, 'load': null, 'post': null },
     'trash': createElement('div')
   },
 
@@ -225,14 +225,13 @@
       me.render(response);
     }
 
-    // start timer
+    cache.lastAction = 'load';
     clearTimeout(timers.load);
     timers.load = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
 
     // request data
     if (cont) {
       setMessage(me.LOADING_TEXT);
-      cache.lastAction = 'load';
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?' +
         'category=usertest_' + me.KEY + '&' +
@@ -263,6 +262,9 @@
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot(benches);
 
+    cache.lastAction = 'post';
+    clearTimeout(cache.timers.post);
+
     if (key && snapshot) {
       // create new beacon
       try {
@@ -277,9 +279,7 @@
 
       // expose results snapshot
       me.snapshot = snapshot;
-
       setMessage(me.POST_TEXT);
-      cache.lastAction = 'post';
 
       // perform inception :3
       idoc.write(interpolate(
@@ -310,7 +310,8 @@
    */
   function render(response) {
     var me = this,
-        cont = me.container;
+        cont = me.container,
+        action = cache.lastAction;
 
     // visualization table options
     // http://code.google.com/apis/visualization/documentation/gallery/table.html
@@ -325,7 +326,7 @@
       }
       else {
         setMessage(me.ERROR_TEXT);
-        setTimeout(me[cache.lastAction], me.RETRY_INTERVAL * 1e3);
+        cache.timers[action] = setTimeout(me[action], me.RETRY_INTERVAL * 1e3);
       }
     }
   }
