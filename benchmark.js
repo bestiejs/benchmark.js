@@ -1157,9 +1157,9 @@
         df = a.size + b.size - 2,
         pooled = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
         tstat = (a.mean - b.mean) / sqrt(pooled * (1 / a.size + 1 / b.size)),
-        near = abs(1 - a.mean / b.mean) < 0.02 && a.RME < 1 && b.RME < 1;
+        near = abs(1 - a.mean / b.mean) < 0.05 && a.RME < 3 && b.RME < 3;
 
-    // not indeterminate if the difference is >= 2% and the t-statistic is significant
+    // check if the means aren't close and the t-statistic is significant
     return !near && abs(tstat) > getCriticalValue(df) ? (tstat > 0 ? -1 : 1) : 0;
   }
 
