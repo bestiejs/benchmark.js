@@ -261,9 +261,7 @@
       if (!compilable) {
         result = fallback(me, timerNS).time;
       }
-      // smells like Infinity?
-      return me.DETECT_INFINITY &&
-        min(timerRes, result) / max(timerRes, result) > 0.9 ? 0 : result;
+      return result;
     };
 
     function getRes(unit) {
@@ -499,23 +497,20 @@
    */
   function filter(array, callback) {
     var result;
-    if (/^(?:fast|slow)est$/.test(callback)) {
-      // get successful benchmarks
-      result = filter(array, 'successful');
-      // sort by period + margin or error
-      result.sort(function(a, b) {
+    if (callback == 'successful') {
+      // callback to exclude errored or unrun benchmarks
+      callback = function(bench) { return bench.cycles; };
+    }
+    else if (/^(?:fast|slow)est$/.test(callback)) {
+      // get successful, sort by period + margin of error, and filter fastest/slowest
+      result = filter(array, 'successful').sort(function(a, b) {
         a = a.stats;
         b = b.stats;
         return (a.mean + a.ME > b.mean + b.ME ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
       });
-      // filter fastest/slowest
       result = filter(result, function(bench) {
         return !result[0].compare(bench);
       });
-    }
-    else if (callback == 'successful') {
-      // callback to exclude errored or unrun benchmarks
-      callback = function(bench) { return bench.cycles; };
     }
     return result || reduce(array, function(result, value, index) {
       return callback(value, index, array) ? result.push(value) && result : result;
@@ -1157,14 +1152,15 @@
     // unpaired two-sample t-test assuming equal variance
     // http://en.wikipedia.org/wiki/Student's_t-test
     // http://www.chem.utoronto.ca/coursenotes/analsci/StatsTutorial/12tailed.html
-    var a  = this.stats,
-        b  = other.stats,
+    var a = this.stats,
+        b = other.stats,
         df = a.size + b.size - 2,
-        pv = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
-        t  = (a.mean - b.mean) / sqrt(pv * (1 / a.size + 1 / b.size));
+        pooled = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
+        tstat = (a.mean - b.mean) / sqrt(pooled * (1 / a.size + 1 / b.size)),
+        near = abs(1 - a.mean / b.mean) < 0.02 && a.RME < 1 && b.RME < 1;
 
-    // check if t-statistic is significant
-    return abs(t) > getCriticalValue(df) ? (t > 0 ? -1 : 1) : 0;
+    // not indeterminate if the difference is >= 2% and the t-statistic is significant
+    return !near && abs(tstat) > getCriticalValue(df) ? (tstat > 0 ? -1 : 1) : 0;
   }
 
   /**
@@ -1694,13 +1690,6 @@
      * @type Boolean
      */
     'DEFAULT_ASYNC': false,
-
-    /**
-     * A flag to indicate protection against large run counts if Infinity ops/sec is detected.
-     * @member Benchmark
-     * @type Boolean
-     */
-    'DETECT_INFINITY': true,
 
     /**
      * The default number of times to execute a test on a benchmark's first cycle.
