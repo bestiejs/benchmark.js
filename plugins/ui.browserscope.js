@@ -310,23 +310,41 @@
    */
   function render(response) {
     var me = this,
+        action = cache.lastAction,
         cont = me.container,
-        action = cache.lastAction;
+        delay = me.RETRY_INTERVAL * 1e3,
+        timers = cache.timers;
+
+    function retry() {
+      if (ui.running) {
+        timers[action] = setTimeout(retry, delay);
+      } else if (action == 'render') {
+        me[action](response);
+      } else {
+        me[action]();
+      }
+    }
 
     // visualization table options
     // http://code.google.com/apis/visualization/documentation/gallery/table.html
     if (cont) {
       if (response && !response.isError()) {
-        cont.className = '';
-        (new google.visualization.Table(cont)).draw(response.getDataTable(), {
-          'width': 'auto',
-          'height': 'auto',
-          'alternatingRowStyle': false
-        });
+        if (ui.running) {
+          action = cache.lastAction = 'render';
+          timers[action] = setTimeout(retry, delay);
+        }
+        else {
+          cont.className = '';
+          (new google.visualization.Table(cont)).draw(response.getDataTable(), {
+            'width': 'auto',
+            'height': 'auto',
+            'alternatingRowStyle': false
+          });
+        }
       }
       else {
         setMessage(me.ERROR_TEXT);
-        cache.timers[action] = setTimeout(me[action], me.RETRY_INTERVAL * 1e3);
+        timers[action] = setTimeout(retry, delay);
       }
     }
   }

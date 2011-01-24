@@ -1410,7 +1410,7 @@
         me.count = count;
         call(me, cycle, async);
       } else {
-        // quick fix for a TraceMonkey bug
+        // quick fix for TraceMonkey bug
         // http://bugzil.la/509069
         if (window.Benchmark == Benchmark) {
           delete window.Benchmark;
