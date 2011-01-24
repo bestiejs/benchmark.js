@@ -134,11 +134,11 @@ Benchmark constructor.
       'teardown': teardown
     });
 
-## <a name="static-platform" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1443" title="View in source">Benchmark.platform</a>
+## <a name="static-platform" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1449" title="View in source">Benchmark.platform</a>
 *(Boolean)*: Platform object containing browser name, version, and operating system.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="static-version" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1616" title="View in source">Benchmark.version</a>
+## <a name="static-version" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1622" title="View in source">Benchmark.version</a>
 *(String)*: The version number.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -388,111 +388,111 @@ A generic bare-bones `String#trim` solution.
 
 
 # Benchmark.prototype
-## <a name="CYCLE_DELAY" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1685" title="View in source">Benchmark#CYCLE_DELAY</a>
+## <a name="CYCLE_DELAY" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1691" title="View in source">Benchmark#CYCLE_DELAY</a>
 *(Number)*: The delay between test cycles *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="DEFAULT_ASYNC" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1692" title="View in source">Benchmark#DEFAULT_ASYNC</a>
+## <a name="DEFAULT_ASYNC" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1698" title="View in source">Benchmark#DEFAULT_ASYNC</a>
 *(Boolean)*: A flag to indicate methods will run asynchronously by default.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="INIT_RUN_COUNT" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1699" title="View in source">Benchmark#INIT_RUN_COUNT</a>
+## <a name="INIT_RUN_COUNT" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1705" title="View in source">Benchmark#INIT_RUN_COUNT</a>
 *(Number)*: The default number of times to execute a test on a benchmark's first cycle.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MAX_TIME_ELAPSED" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1706" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
+## <a name="MAX_TIME_ELAPSED" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1712" title="View in source">Benchmark#MAX_TIME_ELAPSED</a>
 *(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="ME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1789" title="View in source">Benchmark#ME</a>
+## <a name="ME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1795" title="View in source">Benchmark#ME</a>
 *(Number)*: The margin of error.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MIN_SAMPLE_SIZE" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1713" title="View in source">Benchmark#MIN_SAMPLE_SIZE</a>
+## <a name="MIN_SAMPLE_SIZE" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1719" title="View in source">Benchmark#MIN_SAMPLE_SIZE</a>
 *(Number)*: The minimum sample size required to perform statistical analysis.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="MIN_TIME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1720" title="View in source">Benchmark#MIN_TIME</a>
+## <a name="MIN_TIME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1726" title="View in source">Benchmark#MIN_TIME</a>
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="RME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1796" title="View in source">Benchmark#RME</a>
+## <a name="RME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1802" title="View in source">Benchmark#RME</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="SEM" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1803" title="View in source">Benchmark#SEM</a>
+## <a name="SEM" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1809" title="View in source">Benchmark#SEM</a>
 *(Number)*: The standard error of the mean.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1762" title="View in source">Benchmark#aborted</a>
+## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1768" title="View in source">Benchmark#aborted</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="count" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1727" title="View in source">Benchmark#count</a>
+## <a name="count" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1733" title="View in source">Benchmark#count</a>
 *(Number)*: The number of times a test was executed.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="created" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1734" title="View in source">Benchmark#created</a>
+## <a name="created" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1740" title="View in source">Benchmark#created</a>
 *(Number)*: A timestamp of when the benchmark was created.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycle" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1846" title="View in source">Benchmark#cycle</a>
+## <a name="cycle" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1852" title="View in source">Benchmark#cycle</a>
 *(Number)*: The time taken to complete the last cycle *(secs)*
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="cycles" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1741" title="View in source">Benchmark#cycles</a>
+## <a name="cycles" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1747" title="View in source">Benchmark#cycles</a>
 *(Number)*: The number of cycles performed while benchmarking.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="deviation" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1810" title="View in source">Benchmark#deviation</a>
+## <a name="deviation" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1816" title="View in source">Benchmark#deviation</a>
 *(Number)*: The sample standard deviation.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="elapsed" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1853" title="View in source">Benchmark#elapsed</a>
+## <a name="elapsed" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1859" title="View in source">Benchmark#elapsed</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="error" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1748" title="View in source">Benchmark#error</a>
+## <a name="error" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1754" title="View in source">Benchmark#error</a>
 *(Object|Null)*: The error object if the test failed.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="hz" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1755" title="View in source">Benchmark#hz</a>
+## <a name="hz" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1761" title="View in source">Benchmark#hz</a>
 *(Number)*: The number of executions per second.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="mean" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1817" title="View in source">Benchmark#mean</a>
+## <a name="mean" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1823" title="View in source">Benchmark#mean</a>
 *(Number)*: The sample arithmetic mean.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="period" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1860" title="View in source">Benchmark#period</a>
+## <a name="period" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1866" title="View in source">Benchmark#period</a>
 *(Number)*: The time taken to execute the test once *(secs)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1769" title="View in source">Benchmark#running</a>
+## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1775" title="View in source">Benchmark#running</a>
 *(Boolean)*: A flag to indicate if the benchmark is running.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="size" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1824" title="View in source">Benchmark#size</a>
+## <a name="size" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1830" title="View in source">Benchmark#size</a>
 *(Number)*: The sample size.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="start" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1867" title="View in source">Benchmark#start</a>
+## <a name="start" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1873" title="View in source">Benchmark#start</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="stats" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1782" title="View in source">Benchmark#stats</a>
+## <a name="stats" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1788" title="View in source">Benchmark#stats</a>
 *(Object)*: An object of stats including mean, margin or error, and standard deviation.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="stop" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1874" title="View in source">Benchmark#stop</a>
+## <a name="stop" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1880" title="View in source">Benchmark#stop</a>
 *(Number)*: A timestamp of when the benchmark finished *(ms)*.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="times" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1839" title="View in source">Benchmark#times</a>
+## <a name="times" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1845" title="View in source">Benchmark#times</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="variance" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1831" title="View in source">Benchmark#variance</a>
+## <a name="variance" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1837" title="View in source">Benchmark#variance</a>
 *(Number)*: The sample variance.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -553,7 +553,7 @@ Executes all registered listeners of a specified event type.
 ### Arguments
 1. `type` *(String)*: The event type.
 
-## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1775" title="View in source">Benchmark#on</a>
+## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1781" title="View in source">Benchmark#on</a>
 Alias of [`Benchmark#addListener`](#addListener).
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -650,15 +650,15 @@ Suite constructor.
 
 
 # Benchmark.Suite.prototype
-## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1927" title="View in source">Benchmark.Suite#aborted</a>
+## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1933" title="View in source">Benchmark.Suite#aborted</a>
 *(Boolean)*: A flag to indicate if the suite is aborted.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="length" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1920" title="View in source">Benchmark.Suite#length</a>
+## <a name="length" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1926" title="View in source">Benchmark.Suite#length</a>
 *(Number)*: The number of benchmarks in the suite.
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1934" title="View in source">Benchmark.Suite#running</a>
+## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1940" title="View in source">Benchmark.Suite#running</a>
 *(Boolean)*: A flag to indicate if the suite is running.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -722,7 +722,7 @@ Creates a new suite with cloned benchmarks.
 ### Returns
 *(Object)*: The new suite instance.
 
-## <a name="each" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1943" title="View in source">Benchmark.Suite#each</a>
+## <a name="each" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1949" title="View in source">Benchmark.Suite#each</a>
 A bare-bones `Array#forEach` solution.
 Callbacks may terminate the loop by explicitly returning `false`.
 <sup><code>[&#9650;][1]</code></sup>
@@ -750,7 +750,7 @@ A bare-bones `Array#filter` solution.
 ### Returns
 *(Object)*: A new suite of benchmarks that passed callback filter.
 
-## <a name="indexOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1951" title="View in source">Benchmark.Suite#indexOf</a>
+## <a name="indexOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1957" title="View in source">Benchmark.Suite#indexOf</a>
 A bare-bones `Array#indexOf` solution.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -760,7 +760,7 @@ A bare-bones `Array#indexOf` solution.
 ### Returns
 *(Number)*: The index of the matched value or `-1`.
 
-## <a name="invoke" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1960" title="View in source">Benchmark.Suite#invoke</a>
+## <a name="invoke" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1966" title="View in source">Benchmark.Suite#invoke</a>
 Invokes a method on all benchmarks in the suite.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -771,7 +771,7 @@ Invokes a method on all benchmarks in the suite.
 ### Returns
 *(Array)*: A new array of values returned from each method invoked.
 
-## <a name="map" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1968" title="View in source">Benchmark.Suite#map</a>
+## <a name="map" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1974" title="View in source">Benchmark.Suite#map</a>
 A bare-bones `Array#map` solution.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -781,11 +781,11 @@ A bare-bones `Array#map` solution.
 ### Returns
 *(Array)*: A new array of values returned by the callback.
 
-## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1775" title="View in source">Benchmark.Suite#on</a>
+## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1781" title="View in source">Benchmark.Suite#on</a>
 Alias of [`Benchmark#addListener`](#addListener).
 <sup><code>[&#9650;][1]</code></sup>
 
-## <a name="pluck" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1976" title="View in source">Benchmark.Suite#pluck</a>
+## <a name="pluck" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1982" title="View in source">Benchmark.Suite#pluck</a>
 Retrieves the value of a specified property from all benchmarks in the suite.
 <sup><code>[&#9650;][1]</code></sup>
 
@@ -795,7 +795,7 @@ Retrieves the value of a specified property from all benchmarks in the suite.
 ### Returns
 *(Array)*: A new array of property values.
 
-## <a name="reduce" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1985" title="View in source">Benchmark.Suite#reduce</a>
+## <a name="reduce" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1991" title="View in source">Benchmark.Suite#reduce</a>
 A bare-bones `Array#reduce` solution.
 <sup><code>[&#9650;][1]</code></sup>
 
