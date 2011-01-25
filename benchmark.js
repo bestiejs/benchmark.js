@@ -139,14 +139,18 @@
    * Suite constructor.
    * @constructor
    * @member Benchmark
+   * @param {String} name A name to identify the suite.
    * @param {Object} [options={}] Options object.
    * @example
    *
    * // basic usage
    * var suite = new Benchmark.Suite;
    *
+   * // or using a name first
+   * var suite = new Benchmark.Suite('foo');
+   *
    * // or with options
-   * var suite = new Benchmark.Suite({
+   * var suite = new Benchmark.Suite('foo', {
    *
    *   // called when the suite starts running
    *   'onStart': onStart,
@@ -167,8 +171,15 @@
    *   'onComplete': onComplete
    * });
    */
-  function Suite(options) {
-    setOptions(this, options);
+  function Suite(name, options) {
+    // juggle arguments
+    var me = this;
+    if (isClassOf(name, 'Object')) {
+      options = name;
+    } else {
+      me.name = name;
+    }
+    setOptions(me, options);
   }
 
   /*--------------------------------------------------------------------------*/
@@ -1413,7 +1424,8 @@
         // quick fix for TraceMonkey bug
         // http://bugzil.la/509069
         if (window.Benchmark == Benchmark) {
-          delete window.Benchmark;
+          // avoid error in IE
+          try { delete window.Benchmark; } catch(e) { }
           window.Benchmark = Benchmark;
         }
         me.emit('complete');
