@@ -33,7 +33,7 @@
    */
   function parse($filepath) {
     $api = array();
-    $result = array();
+    $result = array('# Benchmark.js documentation');
 
     // load file and extract comment blocks
     $source = str_replace(PHP_EOL, "\n", file_get_contents($filepath));
@@ -209,13 +209,13 @@
       foreach($class as $type => $entries) {
         if ($type == "ctor") {
           $result[] = "";
-          $result[] = "# " . $name;
+          $result[] = "## `" . $name . "`";
           $result[] = interpolate("* [`#{member}`](##{hash})", $entries[0]);
         }
         else {
           if ($type == "plugin") {
             $result[] = "";
-            $result[] = "# " . $name . ".prototype";
+            $result[] = "## `" . $name . ".prototype`";
           }
           foreach($entries as $entry) {
             $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
@@ -232,10 +232,10 @@
         // title
         if ($type == "ctor") {
           $result[] = "";
-          $result[] = "# " . $name;
+          $result[] = "## `" . $name . "`";
         } else if ($type == "plugin") {
           $result[] = "";
-          $result[] = "# " . $name . ".prototype";
+          $result[] = "## `" . $name . ".prototype`";
         }
         // body
         foreach($entries as $entry) {
@@ -245,18 +245,18 @@
               // clip "call"
               $entry["call"] = substr($entry["call"], strpos($entry["call"], "("));
               $result[] = interpolate(
-                "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">" .
-                "#{member}#{call}</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
+                "### <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
+                "#{member}#{call}`</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
             } else {
               $result[] = interpolate(
-                "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">" .
-                "#{member}#{separator}#{call}</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
+                "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
+                "#{member}#{separator}#{call}`</a>\n#{desc}\n<sup><code>[&#9650;][1]</code></sup>", $entry);
             }
           }
           // @param
           if (!empty($entry["args"])) {
             $result[] = "";
-            $result[] = "### Arguments";
+            $result[] = "#### Arguments";
             foreach ($entry["args"] as $index => $arr) {
               $result[] = interpolate("#{num}. `#{name}` (#{type}): #{desc}", array(
                 "desc" => $arr[2],
@@ -269,7 +269,7 @@
           // @returns
           if (!empty($entry["returns"])) {
             $result[] = "";
-            $result[] = "### Returns";
+            $result[] = "#### Returns";
             $result[] = interpolate("(#{type}): #{desc}", array(
               "desc" => $entry["returns"][1],
               "type" => $entry["returns"][0]
@@ -278,7 +278,7 @@
           // @example
           if ($entry["example"]) {
             $result[] = "";
-            $result[] = "### Example";
+            $result[] = "#### Example";
             $result[] = $entry["example"];
           }
           $result[] = "";
