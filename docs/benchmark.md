@@ -91,7 +91,7 @@
 ## `Benchmark`
 ### <a name="Benchmark" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L117" title="View in source">`Benchmark(name, fn, options)`</a>
 Benchmark constructor.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `name` *(String)*: A name to identify the benchmark.
@@ -138,16 +138,16 @@ Benchmark constructor.
 
 ## <a name="static-platform" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1461" title="View in source">`Benchmark.platform`</a>
 *(Boolean)*: Platform object containing browser name, version, and operating system.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="static-version" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1634" title="View in source">`Benchmark.version`</a>
 *(String)*: The version number.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="static-each" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L458" title="View in source">`Benchmark.each(array, callback)`</a>
 A generic bare-bones `Array#forEach` solution.
 Callbacks may terminate the loop by explicitly returning `false`.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -158,7 +158,7 @@ Callbacks may terminate the loop by explicitly returning `false`.
 
 ## <a name="static-extend" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L478" title="View in source">`Benchmark.extend(destination, source)`</a>
 Copies own/inherited properties of a source object to the destination object.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `destination` *(Object)*: The destination object.
@@ -169,7 +169,7 @@ Copies own/inherited properties of a source object to the destination object.
 
 ## <a name="static-filter" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L509" title="View in source">`Benchmark.filter(array, callback)`</a>
 A generic bare-bones `Array#filter` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -195,7 +195,7 @@ A generic bare-bones `Array#filter` solution.
 
 ## <a name="static-forIn" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L539" title="View in source">`Benchmark.forIn(object, callback)`</a>
 A generic bare-bones for-in solution for an object's own properties.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `object` *(Object)*: The object to iterate over.
@@ -206,7 +206,7 @@ A generic bare-bones for-in solution for an object's own properties.
 
 ## <a name="static-formatNumber" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L555" title="View in source">`Benchmark.formatNumber(number)`</a>
 Converts a number to a more readable comma-separated string representation.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `number` *(Number)*: The number to convert.
@@ -216,7 +216,7 @@ Converts a number to a more readable comma-separated string representation.
 
 ## <a name="static-hasKey" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L573" title="View in source">`Benchmark.hasKey(object, key)`</a>
 Checks if an object has the specified key as a direct property.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `object` *(Object)*: The object to check.
@@ -227,7 +227,7 @@ Checks if an object has the specified key as a direct property.
 
 ## <a name="static-indexOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L602" title="View in source">`Benchmark.indexOf(array, value)`</a>
 A generic bare-bones `Array#indexOf` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -238,7 +238,7 @@ A generic bare-bones `Array#indexOf` solution.
 
 ## <a name="static-interpolate" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L748" title="View in source">`Benchmark.interpolate(string, object)`</a>
 Modify a string by replacing named tokens with matching object property values.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `string` *(String)*: The string to modify.
@@ -255,7 +255,7 @@ Modify a string by replacing named tokens with matching object property values.
 
 ## <a name="static-invoke" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L651" title="View in source">`Benchmark.invoke(benches, name)`</a>
 Invokes a method on all items in an array.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `benches` *(Array)*: Array of benchmarks to iterate over.
@@ -296,7 +296,7 @@ Invokes a method on all items in an array.
 
 ## <a name="static-isArray" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L763" title="View in source">`Benchmark.isArray(value)`</a>
 Determines if the given value is an array.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `value` *(Mixed)*: The value to check.
@@ -306,7 +306,7 @@ Determines if the given value is an array.
 
 ## <a name="static-isClassOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L775" title="View in source">`Benchmark.isClassOf(object, name)`</a>
 Checks if an object is of the specified class.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `object` *(Object)*: The object.
@@ -319,7 +319,7 @@ Checks if an object is of the specified class.
 Host objects can return type values that are different from their actual
 data type. The objects we are concerned with usually return non-primitive
 types of object, function, or unknown.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `object` *(Mixed)*: The owner of the property.
@@ -330,7 +330,7 @@ types of object, function, or unknown.
 
 ## <a name="static-join" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L803" title="View in source">`Benchmark.join(object, separator1, separator2)`</a>
 Creates a string of joined array values or object key-value pairs.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `object` *(Array|Object)*: The object to operate on.
@@ -342,7 +342,7 @@ Creates a string of joined array values or object key-value pairs.
 
 ## <a name="static-map" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L825" title="View in source">`Benchmark.map(array, callback)`</a>
 A generic bare-bones `Array#map` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -353,11 +353,11 @@ A generic bare-bones `Array#map` solution.
 
 ## <a name="static-noop" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L837" title="View in source">`Benchmark.noop()`</a>
 A no-operation function.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="static-pluck" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L849" title="View in source">`Benchmark.pluck(array, property)`</a>
 Retrieves the value of a specified property from all items in an array.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -368,7 +368,7 @@ Retrieves the value of a specified property from all items in an array.
 
 ## <a name="static-reduce" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L864" title="View in source">`Benchmark.reduce(array, callback, accumulator)`</a>
 A generic bare-bones `Array#reduce` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
@@ -380,7 +380,7 @@ A generic bare-bones `Array#reduce` solution.
 
 ## <a name="static-trim" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L878" title="View in source">`Benchmark.trim(string)`</a>
 A generic bare-bones `String#trim` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `string` *(String)*: The string to trim.
@@ -392,122 +392,122 @@ A generic bare-bones `String#trim` solution.
 ## `Benchmark.prototype`
 ## <a name="CYCLE_DELAY" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1703" title="View in source">`Benchmark#CYCLE_DELAY`</a>
 *(Number)*: The delay between test cycles *(secs)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="DEFAULT_ASYNC" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1710" title="View in source">`Benchmark#DEFAULT_ASYNC`</a>
 *(Boolean)*: A flag to indicate methods will run asynchronously by default.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="INIT_RUN_COUNT" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1717" title="View in source">`Benchmark#INIT_RUN_COUNT`</a>
 *(Number)*: The default number of times to execute a test on a benchmark's first cycle.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="MAX_TIME_ELAPSED" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1724" title="View in source">`Benchmark#MAX_TIME_ELAPSED`</a>
 *(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="ME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1807" title="View in source">`Benchmark#ME`</a>
 *(Number)*: The margin of error.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="MIN_SAMPLE_SIZE" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1731" title="View in source">`Benchmark#MIN_SAMPLE_SIZE`</a>
 *(Number)*: The minimum sample size required to perform statistical analysis.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="MIN_TIME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1738" title="View in source">`Benchmark#MIN_TIME`</a>
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="RME" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1814" title="View in source">`Benchmark#RME`</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="SEM" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1821" title="View in source">`Benchmark#SEM`</a>
 *(Number)*: The standard error of the mean.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1780" title="View in source">`Benchmark#aborted`</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="count" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1745" title="View in source">`Benchmark#count`</a>
 *(Number)*: The number of times a test was executed.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="created" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1752" title="View in source">`Benchmark#created`</a>
 *(Number)*: A timestamp of when the benchmark was created.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="cycle" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1864" title="View in source">`Benchmark#cycle`</a>
 *(Number)*: The time taken to complete the last cycle *(secs)*
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="cycles" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1759" title="View in source">`Benchmark#cycles`</a>
 *(Number)*: The number of cycles performed while benchmarking.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="deviation" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1828" title="View in source">`Benchmark#deviation`</a>
 *(Number)*: The sample standard deviation.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="elapsed" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1871" title="View in source">`Benchmark#elapsed`</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="error" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1766" title="View in source">`Benchmark#error`</a>
 *(Object|Null)*: The error object if the test failed.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="hz" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1773" title="View in source">`Benchmark#hz`</a>
 *(Number)*: The number of executions per second.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="mean" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1835" title="View in source">`Benchmark#mean`</a>
 *(Number)*: The sample arithmetic mean.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="period" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1878" title="View in source">`Benchmark#period`</a>
 *(Number)*: The time taken to execute the test once *(secs)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1787" title="View in source">`Benchmark#running`</a>
 *(Boolean)*: A flag to indicate if the benchmark is running.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="size" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1842" title="View in source">`Benchmark#size`</a>
 *(Number)*: The sample size.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="start" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1885" title="View in source">`Benchmark#start`</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="stats" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1800" title="View in source">`Benchmark#stats`</a>
 *(Object)*: An object of stats including mean, margin or error, and standard deviation.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="stop" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1892" title="View in source">`Benchmark#stop`</a>
 *(Number)*: A timestamp of when the benchmark finished *(ms)*.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="times" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1857" title="View in source">`Benchmark#times`</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="variance" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1849" title="View in source">`Benchmark#variance`</a>
 *(Number)*: The sample variance.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="abort" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1116" title="View in source">`Benchmark#abort()`</a>
 Aborts the benchmark without recording times.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Returns
 *(Object)*: The benchmark instance.
 
 ## <a name="addListener" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1027" title="View in source">`Benchmark#addListener(type, listener)`</a>
 Registers a single listener of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -525,7 +525,7 @@ Registers a single listener of a specified event type.
 
 ## <a name="clone" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1144" title="View in source">`Benchmark#clone(options)`</a>
 Creates a new benchmark using the same test and options.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `options` *(Object)*: Options object to overwrite cloned options.
@@ -540,7 +540,7 @@ Creates a new benchmark using the same test and options.
 
 ## <a name="compare" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1162" title="View in source">`Benchmark#compare(other)`</a>
 Determines if the benchmark's period is smaller than another.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `other` *(Object)*: The benchmark to compare.
@@ -550,18 +550,18 @@ Determines if the benchmark's period is smaller than another.
 
 ## <a name="emit" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1042" title="View in source">`Benchmark#emit(type)`</a>
 Executes all registered listeners of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
 
 ## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1793" title="View in source">`Benchmark#on`</a>
 Alias of [`Benchmark#addListener`](#addListener).
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="removeAllListeners" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1099" title="View in source">`Benchmark#removeAllListeners(type)`</a>
 Unregisters all listeners of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -578,7 +578,7 @@ Unregisters all listeners of a specified event type.
 
 ## <a name="removeListener" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1072" title="View in source">`Benchmark#removeListener(type, listener)`</a>
 Unregisters a single listener of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -596,14 +596,14 @@ Unregisters a single listener of a specified event type.
 
 ## <a name="reset" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1182" title="View in source">`Benchmark#reset()`</a>
 Reset properties and abort if running.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Returns
 *(Object)*: The benchmark instance.
 
 ## <a name="run" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1366" title="View in source">`Benchmark#run(async)`</a>
 Runs the benchmark.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `[async=false]` *(Boolean)*: Flag to run asynchronously.
@@ -613,13 +613,13 @@ Runs the benchmark.
 
 ## <a name="toString" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1223" title="View in source">`Benchmark#toString()`</a>
 Displays relevant benchmark information when coerced to a string.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 
 ## `Benchmark.Suite`
 ### <a name="Suite" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L174" title="View in source">`Benchmark.Suite(name, options)`</a>
 Suite constructor.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `name` *(String)*: A name to identify the suite.
@@ -658,26 +658,26 @@ Suite constructor.
 ## `Benchmark.Suite.prototype`
 ## <a name="aborted" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1945" title="View in source">`Benchmark.Suite#aborted`</a>
 *(Boolean)*: A flag to indicate if the suite is aborted.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="length" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1938" title="View in source">`Benchmark.Suite#length`</a>
 *(Number)*: The number of benchmarks in the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="running" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1952" title="View in source">`Benchmark.Suite#running`</a>
 *(Boolean)*: A flag to indicate if the suite is running.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="abort" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L890" title="View in source">`Benchmark.Suite#abortSuite()`</a>
 Aborts all benchmarks in the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Returns
 *(Object)*: The suite instance.
 
 ## <a name="add" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L920" title="View in source">`Benchmark.Suite#add(name, fn, options)`</a>
 Adds a test to the benchmark suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `name` *(String)*: A name to identify the benchmark.
@@ -702,7 +702,7 @@ Adds a test to the benchmark suite.
 
 ## <a name="addListener" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1027" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
 Registers a single listener of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -720,7 +720,7 @@ Registers a single listener of a specified event type.
 
 ## <a name="clone" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L937" title="View in source">`Benchmark.Suite#cloneSuite(options)`</a>
 Creates a new suite with cloned benchmarks.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `options` *(Object)*: Options object to overwrite cloned options.
@@ -731,7 +731,7 @@ Creates a new suite with cloned benchmarks.
 ## <a name="each" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1961" title="View in source">`Benchmark.Suite#each`</a>
 A bare-bones `Array#forEach` solution.
 Callbacks may terminate the loop by explicitly returning `false`.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `callback` *(Function)*: The function called per iteration.
@@ -741,14 +741,14 @@ Callbacks may terminate the loop by explicitly returning `false`.
 
 ## <a name="emit" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1042" title="View in source">`Benchmark.Suite#emit(type)`</a>
 Executes all registered listeners of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
 
 ## <a name="filter" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L956" title="View in source">`Benchmark.Suite#filterSuite(callback)`</a>
 A bare-bones `Array#filter` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `callback` *(Function|String)*: The function/alias called per iteration.
@@ -758,7 +758,7 @@ A bare-bones `Array#filter` solution.
 
 ## <a name="indexOf" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1969" title="View in source">`Benchmark.Suite#indexOf`</a>
 A bare-bones `Array#indexOf` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `value` *(Mixed)*: The value to search for.
@@ -768,7 +768,7 @@ A bare-bones `Array#indexOf` solution.
 
 ## <a name="invoke" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1978" title="View in source">`Benchmark.Suite#invoke`</a>
 Invokes a method on all benchmarks in the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `name` *(String|Object)*: The name of the method to invoke OR options object.
@@ -779,7 +779,7 @@ Invokes a method on all benchmarks in the suite.
 
 ## <a name="map" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1986" title="View in source">`Benchmark.Suite#map`</a>
 A bare-bones `Array#map` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `callback` *(Function)*: The function called per iteration.
@@ -789,11 +789,11 @@ A bare-bones `Array#map` solution.
 
 ## <a name="on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1793" title="View in source">`Benchmark.Suite#on`</a>
 Alias of [`Benchmark#addListener`](#addListener).
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 ## <a name="pluck" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1994" title="View in source">`Benchmark.Suite#pluck`</a>
 Retrieves the value of a specified property from all benchmarks in the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `property` *(String)*: The property to pluck.
@@ -803,7 +803,7 @@ Retrieves the value of a specified property from all benchmarks in the suite.
 
 ## <a name="reduce" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L2003" title="View in source">`Benchmark.Suite#reduce`</a>
 A bare-bones `Array#reduce` solution.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `callback` *(Function)*: The function called per iteration.
@@ -814,7 +814,7 @@ A bare-bones `Array#reduce` solution.
 
 ## <a name="removeAllListeners" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1099" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
 Unregisters all listeners of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -831,7 +831,7 @@ Unregisters all listeners of a specified event type.
 
 ## <a name="removeListener" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1072" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
 Unregisters a single listener of a specified event type.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `type` *(String)*: The event type.
@@ -849,14 +849,14 @@ Unregisters a single listener of a specified event type.
 
 ## <a name="reset" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L970" title="View in source">`Benchmark.Suite#resetSuite()`</a>
 Resets all benchmarks in the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Returns
 *(Object)*: The suite instance.
 
 ## <a name="run" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L986" title="View in source">`Benchmark.Suite#runSuite(async, queued)`</a>
 Runs the suite.
-<sup><code>[&#9650;][1]</code></sup>
+[&#9650;][1]
 
 #### Arguments
 1. `[async=false]` *(Boolean)*: Flag to run asynchronously.
