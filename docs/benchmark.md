@@ -1,4 +1,4 @@
-# Benchmark.js documentation
+# Benchmark.js API documentation
 
 ## `Benchmark`
 * [`Benchmark`](#Benchmark)

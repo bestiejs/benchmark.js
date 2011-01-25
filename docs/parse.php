@@ -33,7 +33,7 @@
    */
   function parse($filepath) {
     $api = array();
-    $result = array('# Benchmark.js documentation');
+    $result = array('# Benchmark.js API documentation');
 
     // load file and extract comment blocks
     $source = str_replace(PHP_EOL, "\n", file_get_contents($filepath));
