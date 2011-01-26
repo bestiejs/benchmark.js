@@ -34,11 +34,12 @@ test("user agent detection", function() {
             .replace(/([^.\x22\x27])global\b/g, '$1me.global')
             .replace(/\bprocess\b/g, 'me.process')
             .replace(/\bsystem\b/g, 'me.system')
-            .replace(/\bEnvironment\b/g, 'Object')
+            .replace(/\b(?:Environment|RuntimeObject)\b/g, 'Object')
             .replace(/\bnav\.appMinorVersion/g, 'me.appMinorVersion')
             .replace(/\bnav\.cpuClass/g, 'me.cpuClass')
             .replace(/\bnav\.platform/g, 'me.platform')
             .replace(/\bexternal/g, 'me.external')
+            .replace(/\b(?:me\.)?phantom/g, 'me.phantom')
             .replace(/\bdoc\.documentMode/g, 'me.mode'));
       }
     });
@@ -63,23 +64,23 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Android Browser 3.1.2 (like Safari 3.x) on Android 1.6': {
+    'Android Browser 3.1.2 (like Chrome 1.x) on Android 1.6': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 1.6; en-us; HTC_TATTOO_A3288 Build/DRC79) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1'
     },
 
-    'Android Browser (like Safari 4.x) on Android 2.1': {
+    'Android Browser (like Chrome 2.x) on Android 2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; Sprint APA9292KT Build/ERE27) AppleWebKit/530.17 (KHTML, like Gecko)'
     },
 
-    'Android Browser 4.0 (like Safari 4+) on Android 2.2': {
+    'Android Browser 4.0 (like Chrome 5.x) on Android 2.2': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2; zh-cn;) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
-    'Android Browser 4.0 (like Safari 4+) on Android 2.2.1': {
+    'Android Browser 4.0 (like Chrome 5.x) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1'
     },
 
-    'Android Browser 4.1#{alpha} (platform preview; like Safari 4+) on Android 2.2.1': {
+    'Android Browser 4.1#{alpha} (platform preview; like Chrome 5.x) on Android 2.2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.2.1; en-us; Nexus One Build/FRG83) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.1a Mobile Safari/533.1',
       'external': null
     },
@@ -464,6 +465,17 @@ test("user agent detection", function() {
     'Opera 11.00 on Windows XP': {
       'ua': 'Opera/9.80 (Windows NT 5.1; U; en) Presto/2.6.37 Version/11.00',
       'opera': '11.00'
+    },
+
+    'PhantomJS 1.0.0 (like Safari 4.x) on Cygwin': {
+      'ua': 'Mozilla/5.0 (X11; U; Cygwin; C -) AppleWebKit/527+ (KHTML, like Gecko, Safari/419.3)  PhantomJS/1.0.0',
+      'phantom': {
+        'version': {
+          'major': 1,
+          'minor': 0,
+          'patch': 0
+        }
+      }
     },
 
     'Rhino': {

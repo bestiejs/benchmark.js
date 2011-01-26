@@ -1469,7 +1469,7 @@
         layout = /Gecko|Trident|WebKit/.exec(ua),
         data = { '6.1': 'Server 2008 R2 / 7', '6.0': 'Server 2008 / Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
         name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,Nook Browser,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera,Chrome,Firefox,IE,Safari',
-        os = 'Android,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
+        os = 'Android,Cygwin,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
         product = 'BlackBerry\\s?\\d+,iP[ao]d,iPhone,Kindle,Nook',
         version = isClassOf(window.opera, 'Opera') && opera.version();
 
@@ -1551,6 +1551,11 @@
         os = String(java.lang.System.getProperty('os.name'));
       }
     }
+    // detect PhantomJS
+    else if (isClassOf(window.phantom, 'RuntimeObject')) {
+      name = 'PhantomJS';
+      version = (data = phantom.version) && (data.major + '.' + data.minor + '.' + data.patch);
+    }
     // detect non Safari WebKit based browsers
     else if ((data = product || os) && (!name || name == 'Safari' && !/(?:^iP|Linux|Mac OS|Windows)/.test(data))) {
       name = /[a-z]+/i.exec(data) + ' Browser';
@@ -1578,11 +1583,17 @@
     else if (name && !product && !/Browser/.test(name) && /Mobi/.test(ua)) {
       name += ' Mobile';
     }
-    // detect unspecified Safari versions
-    if (data = (/Safari\/(\d+)/.exec(ua) || /AppleWebKit\/(\d+)/.exec(ua) || 0)[1]) {
-      data = data < 400 ? '1.x' : data < 500 ? '2.x' : data < 526 ? '3.x' : data < 533 ? '4.x' : '4+';
+    // detect unspecified Chrome/Safari versions
+    if (data = (/AppleWebKit\/(\d+(?:\.\d+)?)/.exec(ua) || 0)[1]) {
+      if (/Android/.exec(ua)) {
+        data = data < 530 ? 1 : data < 532 ? 2 : data < 532.5 ? 3 : data < 533 ? 4 : data < 534.3 ? 5 : data < 534.7 ? 6 : data < 534.10 ? 7 : data < 534.13 ? 8 : data < 534.16 ? 9 : '10';
+        layout = 'like Chrome';
+      } else {
+        data = data < 400 ? 1 : data < 500 ? 2 : data < 526 ? 3 : data < 533 ? 4 : '4';
+        layout = 'like Safari';
+      }
+      layout += ' ' + (data += typeof data == 'number' ? '.x' : '+');
       version = name == 'Safari' && (!version || parseInt(version) > 45) ? data : version;
-      layout = 'like Safari ' + data;
     }
     // detect platform preview
     if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
@@ -1590,7 +1601,7 @@
       description.unshift('platform preview');
     }
     // add layout engine
-    if (layout && /Browser|Lunascape|Maxthon|Sleipnir/.test(name)) {
+    if (layout && /Browser|Lunascape|Maxthon|Phantom|Sleipnir/.test(name)) {
       description.push(layout);
     }
     // combine contextual information
