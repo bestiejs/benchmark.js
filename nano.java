@@ -4,7 +4,7 @@
  * Compile using
  *   javac -g:none -target 1.5 nano.java
  *   jar cfM nano.jar nano.class
- *   java -jar progaurd.jar @options.txt
+ *   java -jar proguard.jar @options.txt
  *
  * ProGuard (http://proguard.sourceforge.net)
  * options.txt
