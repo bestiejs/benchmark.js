@@ -1421,11 +1421,10 @@
         me.count = count;
         call(me, cycle, async);
       } else {
-        // quick fix for TraceMonkey bug
+        // fix TraceMonkey bug
         // http://bugzil.la/509069
         if (window.Benchmark == Benchmark) {
-          // avoid error in IE
-          try { delete window.Benchmark; } catch(e) { }
+          window.Benchmark = 1;
           window.Benchmark = Benchmark;
         }
         me.emit('complete');
