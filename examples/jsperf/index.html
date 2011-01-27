@@ -194,11 +194,6 @@
 <applet code="nano" archive="../../nano.jar"></applet>
 
 <script>
-  try {
-    var arr = [1, 5, 4, 2, 3],
-        i = 1;
-  } catch(e) { }
-
   ui.add('Sort ascending', function() {
     var x = arr;
     x.sort(function(a, b) {
@@ -231,6 +226,11 @@
       }
     }
   });
+
+  try {
+    var arr = [1, 5, 4, 2, 3],
+        i = 1;
+  } catch(e) { }
 </script>
 </body>
 </html>
