@@ -426,6 +426,17 @@
   }
 
   /**
+   * Gets the source code of a function.
+   * @private
+   * @param {Function} fn The function.
+   * @returns {String} The function's source code.
+   */
+  function getSource(fn) {
+    return trim((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
+      .replace(/([^\n])$/, '$1\n');
+  }
+
+  /**
    * Sets the options of a benchmark.
    * @private
    * @param {Object} me The benchmark instance.
