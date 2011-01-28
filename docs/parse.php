@@ -76,7 +76,7 @@
         $ln = count($lines) + 1;
 
         // parse #{call}
-        preg_match("#\*/\s*(?:function ([^{]*)|(?:". $member ."\.)?([^:=,]*))#", $entry, $call);
+        preg_match("#\*/\s*(?:function ([^(]*)|(?:". $member ."\.)?([^:=,]*))#", $entry, $call);
         if ($call = array_pop($call)) {
           $call = trim(trim($call), "'");
         }
@@ -112,15 +112,22 @@
         preg_match_all("/@param \{([^}]+)\} (\[[^]]+\]|\w+) ([^\n]+)/", $entry, $args);
         array_shift($args);
         $args = array_filter($args);
-        if (!empty($args)) {
+        if (count($args)) {
+          // compile "call"
+          $call = array($call);
+          // compile "args"
           foreach ($args as $arr) {
             foreach ($arr as $index => $value) {
               if (!is_array($args[0][$index])) {
                 $args[0][$index] = array();
               }
+              if (count($args[0][$index]) == 1) {
+                $call[] = $value;
+              }
               $args[0][$index][] = $value;
             }
           }
+          $call = array_shift($call) ."(". implode($call, ", ") .")";
           array_splice($args, 1);
           $args = array_pop($args);
         }
@@ -140,7 +147,7 @@
         }
 
         // define #{hash}
-        $hash = ($isStatic ? "static-" : "") . $name;
+        $hash = ($member == $name ? "" : str_replace("#", ":", $member) . ($isStatic ? "." : ":")) . $name;
 
         // define #{link}
         $link = "https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L" . $ln;

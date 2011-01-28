@@ -627,7 +627,7 @@
    * @member Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} name The name of the method to invoke OR options object.
-   * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
+   * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
    * @returns {Array} A new array of values returned from each method invoked.
    * @example
    *
@@ -1230,6 +1230,7 @@
   /**
    * Displays relevant benchmark information when coerced to a string.
    * @member Benchmark
+   * @returns {String} A string representation of the benchmark instance.
    */
   function toString() {
     var me = this,
@@ -1993,7 +1994,7 @@
      * Invokes a method on all benchmarks in the suite.
      * @member Benchmark.Suite
      * @param {String|Object} name The name of the method to invoke OR options object.
-     * @param {Mixed} [, arg1, arg2, ...] Arguments to invoke the method with.
+     * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
      * @returns {Array} A new array of values returned from each method invoked.
      */
     'invoke': methodize(invoke),
