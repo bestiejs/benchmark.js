@@ -12,12 +12,10 @@
   var HAS_TIMEOUT_API,
 
   /** Detect Adobe AIR environment */
-  IN_AIR = isHostType(window, 'runtime') &&
-    isClassOf(runtime, 'ScriptBridgingProxyObject'),
+  IN_AIR = isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
 
   /** Detect Java environment */
-  IN_JAVA = isHostType(window, 'java') &&
-    !isHostType(window, 'netscape'),
+  IN_JAVA = isClassOf(window.java, 'JavaPackage'),
 
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
@@ -798,7 +796,7 @@
    * @static
    * @member Benchmark
    * @param {Mixed} object The owner of the property.
-   * @param {String} property The property name to check.
+   * @param {String} property The property to check.
    * @returns {Boolean} Returns true if the property value is a non-primitive, else false.
    */
   function isHostType(object, property) {
