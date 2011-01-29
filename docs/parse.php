@@ -84,10 +84,7 @@
         // parse #{name}
         preg_match("/@name ([^\n]+)/", $entry, $name);
         if (!($name = array_pop($name))) {
-          preg_match("/^[^(]+/", (string) $call, $name);
-          if ($name = array_pop($name)) {
-            $name = trim($name);
-          }
+          $name = $call;
         }
 
         // parse #{type}
@@ -127,7 +124,11 @@
               $args[0][$index][] = $value;
             }
           }
+          // format "call"
           $call = array_shift($call) ."(". implode($call, ", ") .")";
+          $call = str_replace(", [", " [, ", str_replace("], [", ", ", $call));
+
+          // flatten "args"
           array_splice($args, 1);
           $args = array_pop($args);
         }
@@ -256,7 +257,7 @@
                 "#{member}#{call}`</a>\n#{desc}\n[&#9650;][1]", $entry);
             } else {
               $result[] = interpolate(
-                "## <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
+                "### <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
                 "#{member}#{separator}#{call}`</a>\n#{desc}\n[&#9650;][1]", $entry);
             }
           }
