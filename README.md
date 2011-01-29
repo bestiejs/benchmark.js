@@ -10,7 +10,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/math
 
 ## Installation and usage
 
-In a browser:
+In a browser or Adobe AIR:
 
     <script src="benchmark.js"></script>
 

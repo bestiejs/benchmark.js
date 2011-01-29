@@ -28,17 +28,19 @@ test("user agent detection", function() {
             .replace(/\bme\s*=[^,;]+([,;])/, 'me=options$1')
             .replace(/\bua\s*=[^,;]+([,;])/, 'ua=me.ua$1')
             .replace(/\bopera\.version\(\)/, 'opera')
+            .replace(/\bIN_AIR\b/g, 'me.runtime')
             .replace(/\bIN_JAVA\b/g, 'false')
             .replace(/\bwindow\b/g, 'me')
-            .replace(/\bexports\b/g, 'me.exports')
-            .replace(/([^.\x22\x27])global\b/g, '$1me.global')
-            .replace(/\bprocess\b/g, 'me.process')
-            .replace(/\bsystem\b/g, 'me.system')
+            .replace(/([^.\x22\x27])\bglobal\b/g, '$1me.global')
+            .replace(/([^.])\bsystem\b/g, '$1me.system')
             .replace(/\b(?:Environment|RuntimeObject)\b/g, 'Object')
             .replace(/\bnav\.appMinorVersion/g, 'me.appMinorVersion')
             .replace(/\bnav\.cpuClass/g, 'me.cpuClass')
             .replace(/\bnav\.platform/g, 'me.platform')
+            .replace(/\bexports\b/g, 'me.exports')
             .replace(/\bexternal/g, 'me.external')
+            .replace(/\bprocess\b/g, 'me.process')
+            .replace(/\b(?:me\.)?runtime/g, 'me.runtime')
             .replace(/\b(?:me\.)?phantom/g, 'me.phantom')
             .replace(/\bdoc\.documentMode/g, 'me.mode'));
       }
@@ -54,6 +56,11 @@ test("user agent detection", function() {
   }());
 
   var Tests = {
+    'Adobe AIR 2.5 (like Safari 4.x) on Windows XP': {
+      'ua': 'Mozilla/5.0 (Windows; U; en-US) AppleWebKit/531.9 (KHTML, like Gecko) AdobeAIR/2.5',
+      'runtime': { 'flash': { 'system': { 'Capabilities': { 'os': 'Windows XP' }}}}
+    },
+
     'Avant Browser on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Avant Browser)',
       'mode': 8

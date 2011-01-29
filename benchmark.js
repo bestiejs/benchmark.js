@@ -11,6 +11,10 @@
   /** Detect DOM0 timeout API (performed at the bottom) */
   var HAS_TIMEOUT_API,
 
+  /** Detect Adobe AIR environment */
+  IN_AIR = isHostType(window, 'runtime') &&
+    isClassOf(runtime, 'ScriptBridgingProxyObject'),
+
   /** Detect Java environment */
   IN_JAVA = isHostType(window, 'java') &&
     !isHostType(window, 'netscape'),
@@ -1236,14 +1240,13 @@
     var me = this,
         cycles = me.cycles,
         error = me.error,
-        pm = IN_JAVA ? '\xf1' : '\xb1',
-        x = IN_JAVA ? 'x' : '\xd7',
+        pm = IN_JAVA ? '+/-' : '\xb1',
         result = me.name || me.id || ('<Test #' + me.fn.uid + '>');
 
     if (error) {
       result += ': ' + join(error);
     } else {
-      result += ' ' + x + ' ' + formatNumber(me.hz) + ' ' + pm +
+      result += ' x ' + formatNumber(me.hz) + ' ' + pm +
         me.stats.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
     }
     return result;
@@ -1471,8 +1474,8 @@
    */
   Benchmark.platform = (function() {
     var me = this,
-        alpha = IN_JAVA ? '\xe0' : '\u03b1',
-        beta = IN_JAVA ? '\xe1' : '\u03b2',
+        alpha = IN_JAVA ? 'a' : '\u03b1',
+        beta = IN_JAVA ? 'b' : '\u03b2',
         description = [],
         doc = window.document || {},
         nav = window.navigator || {},
@@ -1527,7 +1530,7 @@
     });
 
     // detect non Opera versions
-    version = reduce(['version', name, 'Firefox', 'NetFront'], function(version, guess) {
+    version = reduce(['version', name, 'AdobeAIR', 'Firefox', 'NetFront'], function(version, guess) {
       return version || (version = (RegExp(guess + '(?:-[\\d.]+/|[ /-])([^ ();/-]*)', 'i').exec(ua) || 0)[1]) || null;
     }, version);
 
@@ -1561,6 +1564,11 @@
       if (IN_JAVA && !os) {
         os = String(java.lang.System.getProperty('os.name'));
       }
+    }
+    // detect Adobe AIR
+    else if (IN_AIR) {
+      name = 'Adobe AIR';
+      os = runtime.flash.system.Capabilities.os;
     }
     // detect PhantomJS
     else if (isClassOf(window.phantom, 'RuntimeObject')) {
@@ -1612,7 +1620,7 @@
       description.unshift('platform preview');
     }
     // add layout engine
-    if (layout && /Browser|Lunascape|Maxthon|Phantom|Sleipnir/.test(name)) {
+    if (layout && /Adobe|Browser|Lunascape|Maxthon|Phantom|Sleipnir/.test(name)) {
       description.push(layout);
     }
     // combine contextual information
@@ -2094,6 +2102,11 @@
     }
   } else {
     window.Benchmark = Benchmark;
+  }
+
+  // trigger clock's lazy define early to avoid a security error
+  if (IN_AIR) {
+    clock({ 'fn': noop, 'count': 1 });
   }
 
   // feature detect
