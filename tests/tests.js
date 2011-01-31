@@ -363,6 +363,10 @@ test("user agent detection", function() {
       'mode': 9
     },
 
+    'IE Mobile 7.0 on Samsung (Windows Phone OS 7.0)': {
+      'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0; SAMSUNG; OMNIA7)'
+    },
+
     'Iron 0.2.152.0 on Windows Server 2008 / Vista': {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US) AppleWebKit/525.19 (KHTML, like Gecko) Iron/0.2.152.0 Safari/41562480.525'
     },
@@ -371,15 +375,15 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Iron/7.0.520.1 Chrome/7.0.520.1 Safari/534.7'
     },
 
-    'Kindle Browser 3.3 on Kindle 1.0': {
+    'Kindle Browser 3.3 on Kindle 1.0 (Linux 2.6.10)': {
       'ua': 'Mozilla/4.0 (compatible; Linux 2.6.10) NetFront/3.3 Kindle/1.0 (screen 600x800)'
     },
 
-    'Kindle Browser 3.4 on Kindle 2.0': {
+    'Kindle Browser 3.4 on Kindle 2.0 (Linux 2.6.22)': {
       'ua': 'Mozilla/4.0 (compatible; Linux 2.6.22) NetFront/3.4 Kindle/2.0 (screen 600x800)'
     },
 
-    'Kindle Browser 4.0 (like Safari 4.x) on Kindle 3.0': {
+    'Kindle Browser 4.0 (like Safari 4.x) on Kindle 3.0 (Linux)': {
       'ua': 'Mozilla/5.0 (Linux; U; en-US) AppleWebKit/528.5+ (KHTML, like Gecko, Safari/528.5+) Version/4.0 Kindle/3.0 (screen 600x800; rotate)'
     },
 
@@ -461,8 +465,16 @@ test("user agent detection", function() {
       'process': { 'version': 'v0.3.1', 'platform': 'cygwin' }
     },
 
+    'Nokia Browser (like Safari 3.x) on Nokia 5530c (SymbianOS)': {
+      'ua': 'Mozilla/5.0 (SymbianOS/9.4; U; Series60/5.0 Nokia5530c-2/10.0.050; Profile MIDP-2.1 Configuration/CLDC-1.1) AppleWebKit/525 (KHTML, like Gecko) Safari/525'
+    },
+
     'Nook Browser 1.0': {
       'ua': 'nook browser/1.0'
+    },
+
+    'Opera Mini 4.1.11355': {
+      'ua': 'Opera/9.50 (J2ME/MIDP; Opera Mini/4.1.11355/542; U; en)'
     },
 
     'Opera Mobile 10.00 on Linux i686': {
@@ -511,15 +523,15 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Macintosh; U; PPC Mac OS; en-en) AppleWebKit/412 (KHTML, like Gecko) Safari/412'
     },
 
-    'Safari 3.x on iPod iOS 2.2.1': {
+    'Safari 3.x on iPod (iOS 2.2.1)': {
       'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 2_2_1 like Mac OS X; en-us) AppleWebKit/525.18.1 (KHTML, like Gecko) Mobile/5H11a'
     },
 
-    'Safari 3.0 on iPod iOS': {
+    'Safari 3.0 on iPod (iOS)': {
       'ua': 'Mozila/5.0 (iPod; U; CPU like Mac OS X; en) AppleWebKit/420.1 (KHTML, like Gecko) Version/3.0 Mobile/3A101a Safari/419.3'
     },
 
-    'Safari 3.1.1 on iPhone iOS 2.0.1': {
+    'Safari 3.1.1 on iPhone (iOS 2.0.1)': {
       'ua': 'Mozilla/5.0 (Mozilla/5.0 (iPhone; U; CPU iPhone OS 2_0_1 like Mac OS X; fr-fr) AppleWebKit/525.18.1 (KHTML, like Gecko) Version/3.1.1 Mobile/5G77 Safari/525.20'
     },
 
@@ -583,11 +595,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; cs-CZ) AppleWebKit/525.28.3 (KHTML, like Gecko) Version/3.2.3 Safari/525.29'
     },
 
-    'Safari 4.x on iPhone iOS 3.1': {
+    'Safari 4.x on iPhone (iOS 3.1)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Mobile/7E18,gzip(gfe),gzip(gfe)'
     },
 
-    'Safari 4.x on iPhone iOS 4.1': {
+    'Safari 4.x on iPhone (iOS 4.1)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Mobile/8B117'
     },
 
@@ -607,23 +619,23 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en) AppleWebKit/526.9 (KHTML, like Gecko) Version/4.0dp1 Safari/526.8'
     },
 
-    'Safari 4.0 on iPhone iOS 3.0': {
+    'Safari 4.0 on iPhone (iOS 3.0)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; ko-kr) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
     },
 
-    'Safari 4.0 on iPod iOS 3.0': {
+    'Safari 4.0 on iPod (iOS 3.0)': {
       'ua': 'Mozilla/5.0 (iPod; U; CPU iPhone OS 3_0 like Mac OS X; ja-jp) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7A341 Safari/528.16'
     },
 
-    'Safari 4.0 on iPhone iOS 3.1': {
+    'Safari 4.0 on iPhone (iOS 3.1)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7C97d Safari/528.16'
     },
 
-    'Safari 4.0 on iPhone iOS 3.1.3': {
+    'Safari 4.0 on iPhone (iOS 3.1.3)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1_3 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7E18 Safari/528.16'
     },
 
-    'Safari 4.0 on iPhone iOS 4.1.1': {
+    'Safari 4.0 on iPhone (iOS 4.1.1)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1_1 like Mac OS X; en-en) AppleWebKit/548.18 (KHTML, like Gecko) Version/4.0 Mobile/8F12 Safari/548.16'
     },
 
@@ -687,11 +699,11 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-us) AppleWebKit/531.9 (KHTML, like Gecko) Version/4.0.3 Safari/531.9'
     },
 
-    'Safari 4.0.4 on iPad iOS 3.2': {
+    'Safari 4.0.4 on iPad (iOS 3.2)': {
       'ua': 'Mozilla/5.0(iPad; U; CPU iPhone OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B314 Safari/531.21.10'
     },
 
-    'Safari 4.0.4 on iPhone iOS 3.2': {
+    'Safari 4.0.4 on iPhone (iOS 3.2)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.10'
     },
 
@@ -723,7 +735,7 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; ko-KR) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10'
     },
 
-    'Safari 4.0.5 on iPhone iOS 4.1': {
+    'Safari 4.0.5 on iPhone (iOS 4.1)': {
       'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_1 like Mac OS X; en-us) AppleWebKit/532.9 (KHTML, like Gecko) Version/4.0.5 Mobile/8B5097d Safari/6531.22.7'
     },
 
