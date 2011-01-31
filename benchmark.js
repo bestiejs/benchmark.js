@@ -20,7 +20,7 @@
   /** Used to integrity check compiled tests */
   EMBEDDED_UID = +new Date,
 
-  /** Used to skip Benchmark's initializations */
+  /** Used to skip initialization of the Benchmark constructor */
   HEADLESS = function() { },
 
   /** Unit of the timer */
@@ -1573,9 +1573,14 @@
       name = 'PhantomJS';
       version = (data = phantom.version) && (data.major + '.' + data.minor + '.' + data.patch);
     }
-    // detect non Safari WebKit based browsers
-    else if ((data = product || os) && (!name || name == 'Safari' && !/(?:^iP|Linux|Mac OS|Windows)/.test(data))) {
-      name = /[a-z]+/i.exec(data) + ' Browser';
+    // detect non Firefox Gecko/Safari WebKit based browsers
+    else if (ua && (data = /^(?:Firefox|Safari|null)/.exec(name))) {
+      if (name && !product && /[/,]/.test(ua.slice(ua.indexOf(data + '/') + String(data).length + 1))) {
+        name = null;
+      }
+      if ((data = product || os) && !/^(?:iP|Lin|Mac|Win)/.test(data)) {
+        name = /[a-z]+/i.exec(data) + ' Browser';
+      }
     }
     // detect IE compatibility mode
     else if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
@@ -1642,7 +1647,7 @@
     return {
       'version': name && version && description.unshift(version) && version,
       'name': name && description.unshift(name) && name,
-      'os': os && description.push((product ? '' : 'on ') + os) && os,
+      'os': name && os && description.push((product ? '' : 'on ') + os) && os,
       'product': product,
       'description': description.length ? description.join(' ') : ua,
       'toString': function() { return this.description; }
