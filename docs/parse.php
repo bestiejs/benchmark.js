@@ -67,16 +67,13 @@
       }
 
       foreach($members as $member) {
-        // isolate root member
-        $member = array_shift(preg_split("/#/", $member));
-
         // find line number
         preg_match_all("/\n/", substr($source, 0, strrpos($source, $entry) + strlen($entry)), $lines);
         $lines = array_pop($lines);
         $ln = count($lines) + 1;
 
         // parse #{call}
-        preg_match("#\*/\s*(?:function ([^(]*)|(?:". $member ."\.)?([^:=,]*))#", $entry, $call);
+        preg_match("@\*/\s*(?:function ([^(]*)|(?:". $member ."\.)?([^:=,]*))@", $entry, $call);
         if ($call = array_pop($call)) {
           $call = trim(trim($call), "'");
         }
@@ -85,6 +82,22 @@
         preg_match("/@name ([^\n]+)/", $entry, $name);
         if (!($name = array_pop($name))) {
           $name = $call;
+        }
+
+        // set isStatic in cases where it isn't explicitly stated
+        $oldStatic = $isStatic;
+        if (!$isStatic && !$isCtor && preg_match("/[#.]/", $member)) {
+          $parentMember = preg_replace("/[#.][^#.]+$/", "", $member);
+          $parentAPI = $api[$parentMember]["plugin"];
+          $ownMember = substr($member, strlen($parentMember) + 1);
+
+          // if ownMember exits on its parent then its not a constructor and has static properties
+          foreach ($parentAPI as $parentEntry) {
+            if ($parentEntry["name"] == $ownMember) {
+              $isStatic = true;
+              break;
+            }
+          }
         }
 
         // parse #{type}
@@ -148,12 +161,12 @@
         }
 
         // define #{hash}
-        $hash = ($member == $name ? "" : str_replace("#", ":", $member) . ($isStatic ? "." : ":")) . $name;
+        $hash = str_replace("#", ":", $member) . ($isCtor ? "" : ($isStatic ? "." : ":") . $name);
 
         // define #{link}
         $link = "https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L" . $ln;
 
-        // append entry to api collection
+        // create entry
         $item = array(
           "args"      => $args,
           "call"      => $call,
@@ -169,6 +182,18 @@
           "type"      => $type
         );
 
+        // create api category arrays
+        if (!isset($api[$member]["ctor"])) {
+          $api[$member]["ctor"] = array();
+        }
+        if (!isset($api[$member]["static"])) {
+          $api[$member]["static"] = array();
+        }
+        if (!isset($api[$member]["plugin"])) {
+          $api[$member]["plugin"] = array();
+        }
+
+        // append entry to api category
         if ($isCtor) {
           $api[$member]["ctor"] = array($item);
         } else if ($isStatic) {
@@ -176,6 +201,8 @@
         } else {
           $api[$member]["plugin"][] = $item;
         }
+        // reset isStatic
+        $isStatic = $oldStatic;
       }
     }
 
@@ -183,50 +210,72 @@
 
     // sort classes
     ksort($api);
-    foreach($api as &$class) {
+    foreach($api as &$object) {
       // make "plugin" the last type key
-      ksort($class);
-      if ($tmp = @$class["plugin"]) {
-        unset($class["plugin"]);
-        $class["plugin"] = $tmp;
-      }
+      ksort($object);
+      $tmp = $object["plugin"];
+      unset($object["plugin"]);
+      $object["plugin"] = $tmp;
+
       // sort entries
-      foreach($class as $type => &$entries) {
+      foreach($object as $type => &$entries) {
         $sortByA = array();
         $sortByB = array();
         $sortByC = array();
-        foreach($entries as $entry) {
-          $sub = array_pop(preg_split("/#/", $entry["member"]));
+        foreach($entries as $index => $entry) {
           // functions w/o ALL-CAPs names are last
           $sortByA[] = $entry["type"] == "Function" && !preg_match("/^[A-Z_]+$/", $entry["name"]) ? 1 : 0;
-          // group sub-object properties together
-          $sortByB[] = ($sub != $entry["member"] ? $sub : "") . $entry["name"];
           // ALL-CAPs properties first
-          $sortByC[] = preg_match("/^[A-Z_]+$/", $entry["name"]);
+          $sortByB[] = preg_match("/^[A-Z_]+$/", $entry["name"]);
+          // alphanumerically
+          $sortByC[] = $entry["name"];
         }
-        array_multisort($sortByA, SORT_ASC,  $sortByB, SORT_ASC, $sortByC, SORT_DESC, $entries);
+        $entries = array_filter($entries);
+        array_multisort($sortByA, SORT_ASC,  $sortByB, SORT_DESC, $sortByC, SORT_ASC, $entries);
         unset($entries);
       }
-      unset($class);
+      unset($object);
+    }
+
+    /*------------------------------------------------------------------------*/
+
+    // move object entries into the top of their own api category
+    foreach($api as $member => &$object) {
+      if (preg_match("/[#.]/", $member)) {
+        $parentMember = preg_replace("/[#.][^#.]+$/", "", $member);
+        $parentType = substr(substr($member, strlen($parentMember)), 0, 1) == "#" ? "plugin" : "static";
+        $parentAPI = &$api[$parentMember];
+        $ownMember = substr($member, strlen($parentMember) + 1);
+
+        foreach ($parentAPI[$parentType] as $index => $parentEntry) {
+          if ($parentEntry["name"] == $ownMember) {
+            array_unshift($object["static"], $parentEntry);
+            unset($parentAPI[$parentType][$index]);
+          }
+        }
+      }
+      unset($object, $parentAPI);
     }
 
     /*------------------------------------------------------------------------*/
 
     // compile TOC
-    foreach($api as $name => $class) {
-      foreach($class as $type => $entries) {
-        if ($type == "ctor") {
-          $result[] = "";
-          $result[] = "## `" . $name . "`";
-          $result[] = interpolate("* [`#{member}`](##{hash})", $entries[0]);
-        }
-        else {
-          if ($type == "plugin") {
+    foreach($api as $name => $object) {
+      foreach($object as $type => $entries) {
+        if (count($entries)) {
+          if ($type == "ctor") {
             $result[] = "";
-            $result[] = "## `" . $name . ".prototype`";
+            $result[] = "## `" . $name . "`";
+            $result[] = interpolate("* [`#{member}`](##{hash})", $entries[0]);
           }
-          foreach($entries as $entry) {
-            $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
+          else {
+            if ($type == "plugin") {
+              $result[] = "";
+              $result[] = "## `" . $name . ".prototype`";
+            }
+            foreach($entries as $entry) {
+              $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
+            }
           }
         }
       }
@@ -235,15 +284,17 @@
     /*------------------------------------------------------------------------*/
 
     // compile content
-    foreach($api as $name => $class) {
-      foreach($class as $type => $entries) {
+    foreach($api as $name => $object) {
+      foreach($object as $type => $entries) {
         // title
-        if ($type == "ctor") {
-          $result[] = "";
-          $result[] = "## `" . $name . "`";
-        } else if ($type == "plugin") {
-          $result[] = "";
-          $result[] = "## `" . $name . ".prototype`";
+        if (count($entries)) {
+          if ($type == "ctor") {
+            $result[] = "";
+            $result[] = "## `" . $name . "`";
+          } else if ($type == "plugin") {
+            $result[] = "";
+            $result[] = "## `" . $name . ".prototype`";
+          }
         }
         // body
         foreach($entries as $entry) {
