@@ -48,7 +48,7 @@
       $isPrivate = strripos($entry, "@private") !== false;
       $isStatic = strripos($entry, "@static") !== false;
 
-      // parse @member
+      // parse @member(s)
       preg_match("/@member ([^\n]+)/", $entry, $members);
       if ($members = array_pop($members)) {
         $members = preg_split("/,\s*/", $members);
@@ -151,7 +151,7 @@
         // parse @returns
         preg_match("/@returns \{([^}]+)\} ([^*]+)/", $entry, $returns);
         array_shift($returns);
-        if (!empty($returns)) {
+        if (count($returns)) {
           $returns = array_map("trim", $returns);
         }
 
@@ -215,16 +215,17 @@
     foreach($api as &$object) {
       // make "plugin" the last type key
       ksort($object);
-      $tmp = $object["plugin"];
+      $object["temp"] = $object["plugin"];
       unset($object["plugin"]);
-      $object["plugin"] = $tmp;
+      $object["plugin"] = $object["temp"];
+      unset($object["temp"]);
 
       // sort entries
-      foreach($object as $type => &$entries) {
+      foreach($object as &$entries) {
         $sortByA = array();
         $sortByB = array();
         $sortByC = array();
-        foreach($entries as $index => $entry) {
+        foreach($entries as $entry) {
           // functions w/o ALL-CAPs names are last
           $sortByA[] = $entry["type"] == "Function" && !preg_match("/^[A-Z_]+$/", $entry["name"]) ? 1 : 0;
           // ALL-CAPs properties first
@@ -232,7 +233,6 @@
           // alphanumerically
           $sortByC[] = $entry["name"];
         }
-        $entries = array_filter($entries);
         array_multisort($sortByA, SORT_ASC,  $sortByB, SORT_DESC, $sortByC, SORT_ASC, $entries);
         unset($entries);
       }
@@ -262,26 +262,26 @@
     /*------------------------------------------------------------------------*/
 
     // compile TOC
-    $tocStarted = false;
+    $started = false;
     $result[] = $openTag;
 
-    foreach($api as $name => $object) {
+    foreach($api as $member => $object) {
       foreach($object as $type => $entries) {
         if (count($entries)) {
           if ($type == "ctor") {
-            if ($tocStarted) {
+            if ($started) {
               $result[] = $closeTag;
             }
-            $tocStarted = true;
-            array_push($result, $openTag, "## `" . $name . "`", interpolate("* [`#{member}`](##{hash})", $entries[0]));
+            $started = true;
+            array_push($result, $openTag, "## `" . $member . "`", interpolate("* [`#{member}`](##{hash})", $entries[0]));
           }
           else {
             if ($type == "plugin") {
-              if ($tocStarted) {
+              if ($started) {
                 $result[] = $closeTag;
               }
-              $tocStarted = true;
-              array_push($result, $openTag, "## `" . $name . ".prototype`");
+              $started = true;
+              array_push($result, $openTag, "## `" . $member . ".prototype`");
             }
             foreach($entries as $entry) {
               $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
@@ -295,28 +295,28 @@
     /*------------------------------------------------------------------------*/
 
     // compile content
-    $contStarted = false;
+    $started = false;
     $result[] = $openTag;
 
-    foreach($api as $name => $object) {
+    foreach($api as $member => $object) {
       foreach($object as $type => $entries) {
         // title
         if (count($entries)) {
           if ($type == "ctor") {
-            if ($contStarted) {
+            if ($started) {
               array_pop($result);
               array_push($result, $closeTag, "", "");
             }
-            $contStarted = true;
-            array_push($result, $openTag, "## `" . $name . "`");
+            $started = true;
+            array_push($result, $openTag, "## `" . $member . "`");
           }
           else if ($type == "plugin") {
-            if ($contStarted) {
+            if ($started) {
               array_pop($result);
               array_push($result, $closeTag, "", "");
             }
-            $contStarted = true;
-            array_push($result, $openTag, "## `" . $name . ".prototype`");
+            $started = true;
+            array_push($result, $openTag, "## `" . $member . ".prototype`");
           }
         }
         // body
@@ -338,7 +338,7 @@
             }
           }
           // @param
-          if (!empty($entry["args"])) {
+          if (count($entry["args"])) {
             array_push($result, "", "#### Arguments");
             foreach ($entry["args"] as $index => $arr) {
               $result[] = interpolate("#{num}. `#{name}` (#{type}): #{desc}", array(
@@ -350,7 +350,7 @@
             }
           }
           // @returns
-          if (!empty($entry["returns"])) {
+          if (count($entry["returns"])) {
             array_push($result, "", "#### Returns", interpolate("(#{type}): #{desc}", array(
               "desc" => $entry["returns"][1],
               "type" => $entry["returns"][0]
