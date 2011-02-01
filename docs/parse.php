@@ -327,11 +327,11 @@
               // clip "call"
               $entry["call"] = substr($entry["call"], strpos($entry["call"], "("));
               $result[] = interpolate(
-                "### <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
+                "### <a id=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
                 "#{member}#{call}`</a>\n#{desc}\n[&#9650;][1]", $entry);
             } else {
               $result[] = interpolate(
-                "### <a name=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
+                "### <a id=\"#{hash}\" href=\"#{link}\" title=\"View in source\">`" .
                 "#{member}#{separator}#{call}`</a>\n#{desc}\n[&#9650;][1]", $entry);
             }
           }
