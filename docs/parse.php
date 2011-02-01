@@ -33,6 +33,8 @@
    */
   function parse($filepath) {
     $api = array();
+    $openTag = "<!-- div -->";
+    $closeTag = "<!-- /div -->";
     $result = array("# Benchmark.js API documentation", "");
 
     // load file and extract comment blocks
@@ -261,25 +263,25 @@
 
     // compile TOC
     $tocStarted = false;
-    $result[] = "<div>";
+    $result[] = $openTag;
 
     foreach($api as $name => $object) {
       foreach($object as $type => $entries) {
         if (count($entries)) {
           if ($type == "ctor") {
             if ($tocStarted) {
-              $result[] = "</div>";
+              $result[] = $closeTag;
             }
             $tocStarted = true;
-            array_push($result, "<div>", "## `" . $name . "`", interpolate("* [`#{member}`](##{hash})", $entries[0]));
+            array_push($result, $openTag, "## `" . $name . "`", interpolate("* [`#{member}`](##{hash})", $entries[0]));
           }
           else {
             if ($type == "plugin") {
               if ($tocStarted) {
-                $result[] = "</div>";
+                $result[] = $closeTag;
               }
               $tocStarted = true;
-              array_push($result, "<div>", "## `" . $name . ".prototype`");
+              array_push($result, $openTag, "## `" . $name . ".prototype`");
             }
             foreach($entries as $entry) {
               $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
@@ -288,13 +290,13 @@
         }
       }
     }
-    array_push($result, "</div>", "</div>", "", "");
+    array_push($result, $closeTag, $closeTag, "", "");
 
     /*------------------------------------------------------------------------*/
 
     // compile content
     $contStarted = false;
-    $result[] = "<div>";
+    $result[] = $openTag;
 
     foreach($api as $name => $object) {
       foreach($object as $type => $entries) {
@@ -303,23 +305,23 @@
           if ($type == "ctor") {
             if ($contStarted) {
               array_pop($result);
-              array_push($result, "</div>", "", "");
+              array_push($result, $closeTag, "", "");
             }
             $contStarted = true;
-            array_push($result, "<div>", "## `" . $name . "`");
+            array_push($result, $openTag, "## `" . $name . "`");
           }
           else if ($type == "plugin") {
             if ($contStarted) {
               array_pop($result);
-              array_push($result, "</div>", "", "");
+              array_push($result, $closeTag, "", "");
             }
             $contStarted = true;
-            array_push($result, "<div>", "## `" . $name . ".prototype`");
+            array_push($result, $openTag, "## `" . $name . ".prototype`");
           }
         }
         // body
         foreach($entries as $entry) {
-          array_push($result, "<div>");
+          array_push($result, $openTag);
 
           // description
           if ($entry["name"]) {
@@ -358,14 +360,14 @@
           if ($entry["example"]) {
             array_push($result, "", "#### Example", $entry["example"]);
           }
-          array_push($result, "</div>", "");
+          array_push($result, $closeTag, "");
         }
       }
     }
 
     // close tags add TOC link reference
     array_pop($result);
-    array_push($result, "</div>", "</div>", "", "  [1]: #readme \"Jump back to the TOC.\"");
+    array_push($result, $closeTag, $closeTag, "", "  [1]: #readme \"Jump back to the TOC.\"");
 
     // cleanup whitespace
     return trim(preg_replace("/ +\n/", "\n", join($result, "\n")));
