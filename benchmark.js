@@ -1515,8 +1515,7 @@
         // cleanup
         os = String(os).replace(RegExp(guess = /\w+/.exec(guess), 'i'), guess)
           .replace(/\/(\d)/, ' $1').replace(/_/g, '.').replace(/x86\.64/g, 'x86_64')
-          .replace('Macintosh', 'Mac OS').replace(/(OS X) Mach$/, '$1')
-          .split(' on ')[0];
+          .replace('Macintosh', 'Mac OS').replace(/(OS X) Mach$/, '$1').split(' on ')[0];
       }
       return os;
     });

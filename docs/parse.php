@@ -33,7 +33,7 @@
    */
   function parse($filepath) {
     $api = array();
-    $result = array('# Benchmark.js API documentation');
+    $result = array("# Benchmark.js API documentation", "");
 
     // load file and extract comment blocks
     $source = str_replace(PHP_EOL, "\n", file_get_contents($filepath));
@@ -260,18 +260,26 @@
     /*------------------------------------------------------------------------*/
 
     // compile TOC
+    $tocStarted = false;
+    $result[] = "<div>";
+
     foreach($api as $name => $object) {
       foreach($object as $type => $entries) {
         if (count($entries)) {
           if ($type == "ctor") {
-            $result[] = "";
-            $result[] = "## `" . $name . "`";
-            $result[] = interpolate("* [`#{member}`](##{hash})", $entries[0]);
+            if ($tocStarted) {
+              $result[] = "</div>";
+            }
+            $tocStarted = true;
+            array_push($result, "<div>", "## `" . $name . "`", interpolate("* [`#{member}`](##{hash})", $entries[0]));
           }
           else {
             if ($type == "plugin") {
-              $result[] = "";
-              $result[] = "## `" . $name . ".prototype`";
+              if ($tocStarted) {
+                $result[] = "</div>";
+              }
+              $tocStarted = true;
+              array_push($result, "<div>", "## `" . $name . ".prototype`");
             }
             foreach($entries as $entry) {
               $result[] = interpolate("* [`#{member}#{separator}#{name}`](##{hash})", $entry);
@@ -280,24 +288,39 @@
         }
       }
     }
+    array_push($result, "</div>", "</div>", "", "");
 
     /*------------------------------------------------------------------------*/
 
     // compile content
+    $contStarted = false;
+    $result[] = "<div>";
+
     foreach($api as $name => $object) {
       foreach($object as $type => $entries) {
         // title
         if (count($entries)) {
           if ($type == "ctor") {
-            $result[] = "";
-            $result[] = "## `" . $name . "`";
-          } else if ($type == "plugin") {
-            $result[] = "";
-            $result[] = "## `" . $name . ".prototype`";
+            if ($contStarted) {
+              array_pop($result);
+              array_push($result, "</div>", "", "");
+            }
+            $contStarted = true;
+            array_push($result, "<div>", "## `" . $name . "`");
+          }
+          else if ($type == "plugin") {
+            if ($contStarted) {
+              array_pop($result);
+              array_push($result, "</div>", "", "");
+            }
+            $contStarted = true;
+            array_push($result, "<div>", "## `" . $name . ".prototype`");
           }
         }
         // body
         foreach($entries as $entry) {
+          array_push($result, "<div>");
+
           // description
           if ($entry["name"]) {
             if ($type == "ctor") {
@@ -314,8 +337,7 @@
           }
           // @param
           if (!empty($entry["args"])) {
-            $result[] = "";
-            $result[] = "#### Arguments";
+            array_push($result, "", "#### Arguments");
             foreach ($entry["args"] as $index => $arr) {
               $result[] = interpolate("#{num}. `#{name}` (#{type}): #{desc}", array(
                 "desc" => $arr[2],
@@ -327,27 +349,25 @@
           }
           // @returns
           if (!empty($entry["returns"])) {
-            $result[] = "";
-            $result[] = "#### Returns";
-            $result[] = interpolate("(#{type}): #{desc}", array(
+            array_push($result, "", "#### Returns", interpolate("(#{type}): #{desc}", array(
               "desc" => $entry["returns"][1],
               "type" => $entry["returns"][0]
-            ));
+            )));
           }
           // @example
           if ($entry["example"]) {
-            $result[] = "";
-            $result[] = "#### Example";
-            $result[] = $entry["example"];
+            array_push($result, "", "#### Example", $entry["example"]);
           }
-          $result[] = "";
+          array_push($result, "</div>", "");
         }
       }
     }
-    // add TOC link reference
-    $result[] = "";
-    $result[] = "  [1]: #readme \"Jump back to the TOC.\"";
 
+    // close tags add TOC link reference
+    array_pop($result);
+    array_push($result, "</div>", "</div>", "", "  [1]: #readme \"Jump back to the TOC.\"");
+
+    // cleanup whitespace
     return trim(preg_replace("/ +\n/", "\n", join($result, "\n")));
   }
 
