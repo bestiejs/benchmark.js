@@ -1468,7 +1468,7 @@
    * Platform object containing browser name, version, and operating system.
    * @static
    * @member Benchmark
-   * @type Boolean
+   * @type Object
    */
   Benchmark.platform = (function() {
     var me = this,
@@ -1811,7 +1811,7 @@
     'running': false,
 
     /**
-     * Alias of [`Benchmark#addListener`](#addListener).
+     * Alias of [`Benchmark#addListener`](#Benchmark:addListener).
      * @member Benchmark, Benchmark.Suite
      */
     'on': addListener,

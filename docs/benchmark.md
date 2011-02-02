@@ -150,7 +150,7 @@ Benchmark constructor.
 
 <!-- div -->
 ### <a id="Benchmark.platform" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1473" title="View in source">`Benchmark.platform`</a>
-*(Boolean)*: Platform object containing browser name, version, and operating system.
+*(Object)*: Platform object containing browser name, version, and operating system.
 [&#9650;][1]
 <!-- /div -->
 
@@ -591,7 +591,7 @@ Executes all registered listeners of a specified event type.
 
 <!-- div -->
 ### <a id="Benchmark:on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1817" title="View in source">`Benchmark#on`</a>
-Alias of [`Benchmark#addListener`](#addListener).
+Alias of [`Benchmark#addListener`](#Benchmark:addListener).
 [&#9650;][1]
 <!-- /div -->
 
@@ -954,7 +954,7 @@ A bare-bones `Array#map` solution.
 
 <!-- div -->
 ### <a id="Benchmark.Suite:on" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L1817" title="View in source">`Benchmark.Suite#on`</a>
-Alias of [`Benchmark#addListener`](#addListener).
+Alias of [`Benchmark#addListener`](#Benchmark:addListener).
 [&#9650;][1]
 <!-- /div -->
 
