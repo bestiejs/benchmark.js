@@ -173,7 +173,7 @@ test("user agent detection", function() {
     },
 
     'Firefox 4.0#{beta}8 on Windows Server 2008 / Vista x64': {
-      'ua': 'Mozilla/5.0 (Windows NT 6.0; Win64; x64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre',
+      'ua': 'Mozilla/5.0 (Windows NT 6.0; Win64; IA64; rv:2.0b8pre) Gecko/20101213 Firefox/4.0b8pre',
       'platform': 'Win64'
     },
 
@@ -894,8 +894,8 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (webOS/1.4.0; U; en-US) AppleWebKit/532.2 (KHTML, like Gecko) Version/1.0 Safari/532.2 Pre/1.0'
     },
 
-    'Firefox 3.6.8 is not Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100728 Firefox/3.6.8 CometBird/3.6.8,gzip(gfe),gzip(gfe)': {
-      'ua': 'Firefox 3.6.8 is not Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100728 Firefox/3.6.8 CometBird/3.6.8,gzip(gfe),gzip(gfe)'
+    'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100728 Firefox/3.6.8 CometBird/3.6.8,gzip(gfe),gzip(gfe)': {
+      'ua': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.2.8) Gecko/20100728 Firefox/3.6.8 CometBird/3.6.8,gzip(gfe),gzip(gfe)'
     },
 
     'Mozilla/5.0 (PLAYSTATION 3; 2.00)': {

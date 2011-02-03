@@ -1629,7 +1629,7 @@
       description.push('on ' + product);
     }
     // add browser/os architecture
-    if (/\b(?:WOW|x)64\b/.test(ua)) {
+    if (/\b(?:WOW|x|IA)64\b/.test(ua)) {
       os = os && os + (/64/.test(os) ? '' : ' x64');
       if (name && (/WOW64/.test(ua) || /\w(?:86|32)$/.test(nav.cpuClass || nav.platform))) {
         description.unshift('x86');
