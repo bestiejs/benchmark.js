@@ -124,6 +124,7 @@
   function hasClass(element, className) {
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
   }
+
   /**
    * Set an element's innerHTML property.
    * @private
@@ -382,7 +383,7 @@
         addClass(cell, text);
       }
       else {
-        percent = Math.floor((1 - bench.hz / fastest[0].hz) * 100);
+        percent = Math.round((1 - bench.hz / fastest[0].hz) * 100);
         text = percent + '% slower';
 
         // mark slowest
