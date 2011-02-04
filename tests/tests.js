@@ -413,7 +413,7 @@ test("user agent detection", function() {
     },
 
     'Lunascape 6.3.1.22729#{beta} (platform preview; rendered by Trident) on Windows Server 2008 / Vista': {
-      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; Lunascape/6.3.1.22729',
+      'ua': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.0; Trident/5.0; Lunascape/6.3.1.22729)',
       'appMinorVersion': 'beta',
       'external': null,
       'mode': 9
