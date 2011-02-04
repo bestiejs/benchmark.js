@@ -78,3 +78,7 @@ Feel free to fork if you see possible improvements!
 
 * [Mathias Bynens](http://mathiasbynens.be/)
 * [John-David Dalton](http://allyoucanleet.com/)
+
+## Contributors
+
+* [Kit Goncharov](http://kitgoncharov.github.com/)
