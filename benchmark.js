@@ -23,9 +23,6 @@
   /** Used to skip initialization of the Benchmark constructor */
   HEADLESS = function() { },
 
-  /** Unit of the timer */
-  TIMER_UNIT = 'ms',
-
   /** Used to avoid hz of Infinity */
   CYCLE_DIVISORS = {
     '1': 4096,
@@ -233,8 +230,10 @@
   function clock() {
     var args,
         fallback,
+        timerApplet,
         timerNS,
         timerRes,
+        timerUnit,
         proto = Benchmark.prototype,
         resLimit = 0.0015,
         code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
@@ -246,6 +245,14 @@
           compilable = fn.compilable,
           count = me.count;
 
+      if (timerUnit == 'ns') {
+        // repair nanosecond timer
+        try {
+          timerNS.nanoTime();
+        } catch(e) {
+          timerNS = new timerApplet.Packages.nano;
+        }
+      }
       if (compilable == null || compilable) {
         try {
           // insert test body into the while-loop
@@ -327,7 +334,7 @@
       each(window.document && document.applets || [], function(applet) {
         try {
           // use non-element to avoid issues with libs that augment them
-          timerNS || (timerNS = 'nanoTime' in applet && new applet.Packages.nano);
+          timerNS || (timerNS = 'nanoTime' in applet && (timerApplet = applet));
         } catch(e) { }
       });
     }
@@ -335,7 +342,7 @@
       // check type in case Safari returns an object instead of a number
       timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
       timerRes = getRes('ns');
-      timerNS  = timerRes <= resLimit && (TIMER_UNIT = 'ns', timerNS);
+      timerNS  = timerRes <= resLimit && (timerUnit = 'ns', timerNS);
     } catch(e) { }
 
     // detect microsecond support:
@@ -345,7 +352,7 @@
       try {
         timerNS  = new (window.chrome || window.chromium).Interval;
         timerRes = getRes('us');
-        timerNS  = timerRes <= resLimit && (TIMER_UNIT = 'us', timerNS);
+        timerNS  = timerRes <= resLimit && (timerUnit = 'us', timerNS);
       } catch(e) { }
     }
     // else milliseconds
@@ -359,13 +366,13 @@
     }
 
     // use API of chosen timer
-    if (TIMER_UNIT == 'ns') {
+    if (timerUnit == 'ns') {
       code = interpolate(code, {
         'start': 's$=n$.nanoTime()',
         'end': 'r$=(n$.nanoTime()-s$)/1e9'
       });
     }
-    else if (TIMER_UNIT == 'us') {
+    else if (timerUnit == 'us') {
       code = interpolate(code, {
         'start': 's$=n$.start()',
         'end': 'r$=n$.microseconds()/1e6'
