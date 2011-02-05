@@ -64,12 +64,12 @@ Usage example:
 
 To clone this repository including all submodules, using git 1.6.5 or later:
 
-    git clone --recursive https://github.com/mathiasbynens/benchmark.js.git
+    git clone --recursive https://github.com/mathiasbynens/Benchmark.js.git
 
 For older git versions, just use:
 
-    git clone https://github.com/mathiasbynens/benchmark.js.git
-    cd benchmark.js
+    git clone https://github.com/mathiasbynens/Benchmark.js.git
+    cd Benchmark.js
     git submodule update --init
 
 Feel free to fork if you see possible improvements!
