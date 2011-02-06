@@ -1,6 +1,6 @@
 {
   "name": "benchmark",
-  "version": "0.1.343",
+  "version": "0.1.344",
   "description": "A benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results.",
   "homepage": "http://benchmarkjs.com/",
   "main": "benchmark",
@@ -37,11 +37,11 @@
   ],
   "bugs": {
     "email": "bugs@benchmarkjs.com",
-    "url": "https://github.com/mathiasbynens/benchmark.js/issues"
+    "url": "https://github.com/mathiasbynens/Benchmark.js/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mathiasbynens/benchmark.js.git"
+    "url": "https://github.com/mathiasbynens/Benchmark.js.git"
   },
   "engines": [
     "node",

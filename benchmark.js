@@ -1662,7 +1662,7 @@
      * @member Benchmark
      * @type String
      */
-    'version': '0.1.343',
+    'version': '0.1.344',
 
     // generic Array#forEach
     'each': each,
