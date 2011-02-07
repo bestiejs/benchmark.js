@@ -1503,8 +1503,18 @@
     });
 
     product = reduce(product.split(','), function(product, guess) {
-      return product || (product = RegExp(guess + '[^ ();-]*', 'i').exec(ua)) &&
-        String(product).replace(RegExp(guess = /\w+/.exec(guess), 'i'), guess);
+      if (!product && (product = RegExp(guess + '[^ ();-]*', 'i').exec(ua))) {
+        // correct character case and split by forward slash
+        if ((product = String(product).replace(RegExp(guess = /\w+/.exec(guess), 'i'), guess).split('/'))[1]) {
+          if (/[\d.]+/.test(product[0])) {
+            version = version || product[1];
+          } else {
+            product[0] += ' ' + product[1];
+          }
+        }
+        product = format(product[0].replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
+      }
+      return product;
     });
 
     os = reduce(os.split(','), function(os, guess) {
@@ -1527,6 +1537,10 @@
       return os;
     });
 
+    // detect simulator
+    if (/Simulator/i.exec(ua)) {
+      product = (product ? product + ' ' : '') + 'Simulator';
+    }
     // detect non Firefox Gecko/Safari WebKit based browsers
     if (ua && (data = /^(?:Firefox|Safari|null)/.exec(name))) {
       if (name && !product && /[/,]/.test(ua.slice(ua.indexOf(data + '/') + 8))) {
@@ -1541,18 +1555,6 @@
       version = reduce(['version', name, 'AdobeAIR', 'Firefox', 'NetFront'], function(version, guess) {
         return version || (RegExp(guess + '(?:-[\\d.]+/|[ /-])([^ ();/-]*)', 'i').exec(ua) || 0)[1] || null;
       });
-    }
-    // cleanup product
-    if (product) {
-      product = (data = String(product).split('/'))[0];
-      if (data = data[1]) {
-        if (/\d+/.test(product)) {
-          version = version || data;
-        } else {
-          product += ' ' + data;
-        }
-      }
-      product = format(product.replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
     }
     // detect server-side js
     if (me && isHostType(me, 'global')) {
@@ -1617,10 +1619,6 @@
       }
       layout += ' ' + (data += typeof data == 'number' ? '.x' : '+');
       version = name == 'Safari' && (!version || parseInt(version) > 45) ? data : version;
-    }
-    // detect simulator
-    if (/Simulator/i.exec(ua)) {
-      product = (product ? product + ' ' : '') + 'Simulator';
     }
     // detect platform preview
     if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
