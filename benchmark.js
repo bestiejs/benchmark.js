@@ -250,6 +250,7 @@
         try {
           timerNS.nanoTime();
         } catch(e) {
+          // use non-element to avoid issues with libs that augment them
           timerNS = new timerApplet.Packages.nano;
         }
       }
@@ -325,30 +326,33 @@
       return getMean(sample) / divisor;
     }
 
-    // detect nanosecond support:
-    // Java System.nanoTime()
+    // detect nanosecond support from an applet
+    each(window.document && document.applets || [], function(applet) {
+      timerApplet || (timerApplet = 'nanoTime' in applet && applet);
+      timerNS || (timerNS = timerApplet);
+    });
+
+    // or exposed Java API
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
-    try {
-      timerNS = java.lang.System;
-    } catch(e) {
-      each(window.document && document.applets || [], function(applet) {
-        try {
-          // use non-element to avoid issues with libs that augment them
-          timerNS || (timerNS = 'nanoTime' in applet && (timerApplet = applet));
-        } catch(e) { }
-      });
-    }
+    try { timerNS = java.lang.System; } catch(e) { }
+
     try {
       // check type in case Safari returns an object instead of a number
       timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
       timerRes = getRes('ns');
       timerNS  = timerRes <= resLimit && (timerUnit = 'ns', timerNS);
-    } catch(e) { }
+    } catch(e) {
+      timerNS  = null;
+    }
 
     // detect microsecond support:
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     if (!timerNS) {
+      // remove unused applet
+      if (timerApplet) {
+        timerApplet.parentNode.removeChild(timerApplet);
+      }
       try {
         timerNS  = new (window.chrome || window.chromium).Interval;
         timerRes = getRes('us');
