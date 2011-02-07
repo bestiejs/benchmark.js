@@ -40,15 +40,11 @@
   /**
    * Creates a Browserscope results object.
    * @private
-   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    * @returns {Object|Null} Browserscope results object or null.
    */
-  function createSnapshot(benches) {
-    if (!Benchmark.isArray(benches)) {
-      benches = benches ? [benches] : ui.benchmarks;
-    }
+  function createSnapshot() {
     // remove unrun, errored, or Infinity hz
-    benches = Benchmark.filter(benches, function(bench) {
+    benches = Benchmark.filter(ui.benchmarks, function(bench) {
       return bench.cycles && isFinite(bench.hz);
     });
 
@@ -251,16 +247,15 @@
    * Creates a Browserscope beacon and posts the benchmark results.
    * @static
    * @member ui.browserscope
-   * @param {Array|Object} [benches=ui.benchmarks] One or an array of benchmarks.
    */
-  function post(benches) {
+  function post() {
     var idoc,
         iframe,
         body = document.body,
         me = ui.browserscope,
         key = me.KEY,
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
-        snapshot = createSnapshot(benches);
+        snapshot = createSnapshot();
 
     cache.lastAction = 'post';
     clearTimeout(cache.timers.post);
