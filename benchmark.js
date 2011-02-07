@@ -1618,6 +1618,10 @@
       layout += ' ' + (data += typeof data == 'number' ? '.x' : '+');
       version = name == 'Safari' && (!version || parseInt(version) > 45) ? data : version;
     }
+    // detect simulator
+    if (/Simulator/i.exec(ua)) {
+      product = (product ? product + ' ' : '') + 'Simulator';
+    }
     // detect platform preview
     if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
       layout = layout && !/like /.test(layout) ? 'rendered by ' + layout : layout;

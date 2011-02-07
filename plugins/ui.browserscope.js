@@ -265,7 +265,7 @@
     cache.lastAction = 'post';
     clearTimeout(cache.timers.post);
 
-    if (key && snapshot) {
+    if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
       try {
         iframe = createElement('<iframe name=' + name + '>');
@@ -287,7 +287,7 @@
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
-        '_bT=setTimeout(function(){document.body.innerHTML=render()},#{timeout}*1e3)' +
+        '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
         '<\/body><\/html>',
