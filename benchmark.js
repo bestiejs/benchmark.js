@@ -288,7 +288,7 @@
     function getRes(unit) {
       var measured,
           start,
-          count = 80,
+          count = 30,
           divisor = 1e3,
           sample = [];
 
@@ -305,8 +305,8 @@
           while(!(measured = timerNS.nanoTime() - start));
         }
         else {
-          start = +new timerNS;
-          while(!(measured = +new timerNS - start));
+          start = new timerNS;
+          while(!(measured = new timerNS - start));
         }
         // check for broken timers (nanoTime may have issues)
         // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
@@ -316,11 +316,6 @@
           sample.push(Infinity);
           break;
         }
-      }
-      // trim mean by 20%
-      if ((getMean(sample) / divisor) <= resLimit) {
-        sample.sort();
-        sample = sample.slice(16, -16);
       }
       // convert to seconds
       return getMean(sample) / divisor;
@@ -340,7 +335,7 @@
       // check type in case Safari returns an object instead of a number
       timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
       timerRes = getRes('ns');
-      timerNS  = timerRes <= resLimit && (timerUnit = 'ns', timerNS);
+      timerNS  = timerRes < resLimit && (timerUnit = 'ns', timerNS);
     } catch(e) {
       timerNS  = null;
     }
@@ -356,7 +351,7 @@
       try {
         timerNS  = new (window.chrome || window.chromium).Interval;
         timerRes = getRes('us');
-        timerNS  = timerRes <= resLimit && (timerUnit = 'us', timerNS);
+        timerNS  = timerRes < resLimit && (timerUnit = 'us', timerNS);
       } catch(e) { }
     }
     // else milliseconds
@@ -400,7 +395,7 @@
     );
 
     // resolve time to achieve a percent uncertainty of 1%
-    proto.MIN_TIME || (proto.MIN_TIME = timerRes / 2 / 0.01);
+    proto.MIN_TIME || (proto.MIN_TIME = max(timerRes / 2 / 0.01, 0.05));
     return clock.apply(null, arguments);
   }
 
@@ -1320,7 +1315,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          maxedOut = elapsed >= me.MAX_TIME_ELAPSED,
+          maxedOut = elapsed > me.MAX_TIME_ELAPSED,
           size = sample.push(clone.times.period),
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
