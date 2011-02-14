@@ -4,7 +4,6 @@
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
  */
-
 (function(window, document) {
 
   /** CSS class name used for error styles */

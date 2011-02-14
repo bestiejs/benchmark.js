@@ -5,7 +5,6 @@
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
  */
-
 (function(window) {
 
   /** Detect DOM0 timeout API (performed at the bottom) */
