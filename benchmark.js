@@ -227,14 +227,14 @@
    * @returns {Number} The time taken.
    */
   function clock() {
-    var args,
+    var applet,
+        args,
         fallback,
-        timerApplet,
-        timerNS,
-        timerRes,
-        timerUnit,
         proto = Benchmark.prototype,
-        resLimit = 0.0015,
+        timers = [],
+        timerNS = Date,
+        msRes = getRes('ms'),
+        timer = { 'ns': timerNS, 'res': max(0.0015, msRes), 'unit': 'ms' },
         code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
 
     clock = function(me) {
@@ -244,13 +244,13 @@
           compilable = fn.compilable,
           count = me.count;
 
-      if (timerUnit == 'ns') {
+      if (applet) {
         // repair nanosecond timer
         try {
           timerNS.nanoTime();
         } catch(e) {
           // use non-element to avoid issues with libs that augment them
-          timerNS = new timerApplet.Packages.nano;
+          timerNS = new applet.Packages.nano;
         }
       }
       if (compilable == null || compilable) {
@@ -321,56 +321,60 @@
     }
 
     // detect nanosecond support from an applet
-    each(window.document && document.applets || [], function(applet) {
-      timerApplet || (timerApplet = 'nanoTime' in applet && applet);
-      timerNS || (timerNS = timerApplet);
+    each(window.document && document.applets || [], function(element) {
+      if (timerNS = applet = 'nanoTime' in element && element) {
+        return false;
+      }
     });
 
     // or exposed Java API
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
-    try { timerNS = java.lang.System; } catch(e) { }
-
     try {
-      // check type in case Safari returns an object instead of a number
-      timerNS  = typeof timerNS.nanoTime() == 'number' && timerNS;
-      timerRes = getRes('ns');
-      timerNS  = timerRes < resLimit && (timerUnit = 'ns', timerNS);
-    } catch(e) {
-      timerNS  = null;
-    }
+      timerNS = java.lang.System;
+    } catch(e) { }
+
+    // check type in case Safari returns an object instead of a number
+    try {
+      if (typeof timerNS.nanoTime() == 'number') {
+        timers.push({ 'ns': timerNS, 'res': getRes('ns'), 'unit': 'ns' });
+      }
+    } catch(e) { }
 
     // detect microsecond support:
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
-    if (!timerNS) {
-      // remove unused applet
-      if (timerApplet) {
-        timerApplet.parentNode.removeChild(timerApplet);
+    try {
+      if (timerNS = new (window.chrome || window.chromium).Interval) {
+        timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
       }
-      try {
-        timerNS  = new (window.chrome || window.chromium).Interval;
-        timerRes = getRes('us');
-        timerNS  = timerRes < resLimit && (timerUnit = 'us', timerNS);
-      } catch(e) { }
+    } catch(e) { }
+
+    // pick timer with highest resolution
+    timerNS = (timer = reduce(timers, function(timer, other) {
+      return other.res < timer.res ? other : timer;
+    }, timer)).ns;
+
+    // restore ms res
+    if (timer.unit == 'ms') {
+      timer.res = msRes;
     }
-    // else milliseconds
-    if (!timerNS) {
-      timerNS = Date;
-      timerRes = getRes('ms');
+    // remove unused applet
+    if (timer.unit != 'ns' && applet) {
+      applet.parentNode.removeChild(applet);
+      applet = null;
     }
     // error if there are no working timers
-    if (timerRes == Infinity) {
+    if (timer.res == Infinity) {
       throw new Error('Benchmark.js was unable to find a working timer.');
     }
-
     // use API of chosen timer
-    if (timerUnit == 'ns') {
+    if (timer.unit == 'ns') {
       code = interpolate(code, {
         'start': 's$=n$.nanoTime()',
         'end': 'r$=(n$.nanoTime()-s$)/1e9'
       });
     }
-    else if (timerUnit == 'us') {
+    else if (timer.unit == 'us') {
       code = interpolate(code, {
         'start': 's$=n$.start()',
         'end': 'r$=n$.microseconds()/1e6'
@@ -394,7 +398,7 @@
     );
 
     // resolve time to achieve a percent uncertainty of 1%
-    proto.MIN_TIME || (proto.MIN_TIME = max(timerRes / 2 / 0.01, 0.05));
+    proto.MIN_TIME || (proto.MIN_TIME = max(timer.res / 2 / 0.01, 0.05));
     return clock.apply(null, arguments);
   }
 
