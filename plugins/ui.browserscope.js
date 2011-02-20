@@ -44,7 +44,7 @@
    */
   function createSnapshot() {
     // remove unrun, errored, or Infinity hz
-    benches = Benchmark.filter(ui.benchmarks, function(bench) {
+    var benches = Benchmark.filter(ui.benchmarks, function(bench) {
       return bench.cycles && isFinite(bench.hz);
     });
 
