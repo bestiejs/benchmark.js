@@ -18,6 +18,10 @@ Optionally, add the `nanoTime` Java applet to the `<body>`:
 
     <applet code="nano" archive="nano.jar"></applet>
 
+Or enable Chrome's microsecond timer by using the flag:
+
+    [--enable-benchmarking flag](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking)
+
 Via [npm](http://npmjs.org/):
 
     npm install benchmark
@@ -25,6 +29,10 @@ Via [npm](http://npmjs.org/):
 In [Node.js](http://nodejs.org/):
 
     var Benchmark = require('benchmark');
+
+Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
+
+    npm install microtime
 
 In [Narwhal](http://narwhaljs.org/) and [RingoJS](http://ringojs.org/):
 
@@ -37,7 +45,7 @@ In [Rhino](http://www.mozilla.org/rhino/):
 Usage example:
 
     var suite = new Benchmark.Suite;
-    
+
     // add tests
     suite.add('RegExp#test', function() {
       /o/.test('Hello World!');
@@ -54,7 +62,7 @@ Usage example:
     })
     // run async
     .run(true);
-    
+
     // logs:
     // > RegExp#test × 4,161,532 ±0.99% (59 cycles)
     // > String#indexOf × 6,139,623 ±1.00% (131 cycles)

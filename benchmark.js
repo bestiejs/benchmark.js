@@ -295,8 +295,13 @@
       while (count--) {
         if (unit == 'us') {
           divisor = 1e6;
-          timerNS.start();
-          while(!(measured = timerNS.microseconds()));
+          if (timerNS.stop) {
+            timerNS.start();
+            while(!(measured = timerNS.microseconds()));
+          } else {
+            start = timerNS();
+            while(!(measured = timerNS() - start));
+          }
         }
         else if (unit == 'ns') {
           divisor = 1e9;
@@ -320,14 +325,14 @@
       return getMean(sample) / divisor;
     }
 
-    // detect nanosecond support from an applet
+    // detect nanosecond support from a Java applet
     each(window.document && document.applets || [], function(element) {
       if (timerNS = applet = 'nanoTime' in element && element) {
         return false;
       }
     });
 
-    // or exposed Java API
+    // or the exposed Java API
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
     try {
       timerNS = java.lang.System;
@@ -340,11 +345,19 @@
       }
     } catch(e) { }
 
-    // detect microsecond support:
+    // detect Chrome's microsecond timer:
     // enable benchmarking via the --enable-benchmarking flag
     // in at least Chrome 7 to use chrome.Interval
     try {
       if (timerNS = new (window.chrome || window.chromium).Interval) {
+        timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
+      }
+    } catch(e) { }
+
+    // detect Node's microtime module:
+    // npm install microtime
+    try {
+      if (timerNS = typeof require == 'function' && !window.require && require('microtime').now) {
         timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
       }
     } catch(e) { }
@@ -375,9 +388,12 @@
       });
     }
     else if (timer.unit == 'us') {
-      code = interpolate(code, {
+      code = interpolate(code, timerNS.stop ? {
         'start': 's$=n$.start()',
         'end': 'r$=n$.microseconds()/1e6'
+      } : {
+        'start': 's$=n$()',
+        'end': 'r$=(n$()-s$)/1e6'
       });
     }
     else {
