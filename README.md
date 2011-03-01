@@ -14,13 +14,13 @@ In a browser or Adobe AIR:
 
     <script src="benchmark.js"></script>
 
-Optionally, add the `nanoTime` Java applet to the `<body>`:
+Optionally, expose Java's nanosecond timer by adding the "nano" applet to the `<body>`:
 
     <applet code="nano" archive="nano.jar"></applet>
 
-Or enable Chrome's microsecond timer by using the flag:
+Or enable Chrome's microsecond timer by using the [command line switch](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking):
 
-    [--enable-benchmarking flag](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking)
+    --enable-benchmarking
 
 Via [npm](http://npmjs.org/):
 
@@ -45,7 +45,7 @@ In [Rhino](http://www.mozilla.org/rhino/):
 Usage example:
 
     var suite = new Benchmark.Suite;
-
+    
     // add tests
     suite.add('RegExp#test', function() {
       /o/.test('Hello World!');
@@ -62,7 +62,7 @@ Usage example:
     })
     // run async
     .run(true);
-
+    
     // logs:
     // > RegExp#test × 4,161,532 ±0.99% (59 cycles)
     // > String#indexOf × 6,139,623 ±1.00% (131 cycles)

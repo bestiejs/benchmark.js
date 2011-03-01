@@ -346,8 +346,8 @@
     } catch(e) { }
 
     // detect Chrome's microsecond timer:
-    // enable benchmarking via the --enable-benchmarking flag
-    // in at least Chrome 7 to use chrome.Interval
+    // enable benchmarking via the --enable-benchmarking command
+    // line switch in at least Chrome 7 to use chrome.Interval
     try {
       if (timerNS = new (window.chrome || window.chromium).Interval) {
         timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
