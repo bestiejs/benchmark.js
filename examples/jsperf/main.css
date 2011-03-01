@@ -271,6 +271,22 @@ li.current a {
   background: #90ee85;
 }
 
+#donate {
+  display: block;
+  background: #ffffdc;
+  border: 1px solid #faa700;
+  padding: 1em;
+}
+
+#donate h1 {
+  padding-top: 0;
+  font-size: 16px;
+}
+
+#paypal {
+  text-align: center;
+}
+
 footer {
   display: block;
   margin-top: 2em;
