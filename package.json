@@ -1,6 +1,6 @@
 {
   "name": "benchmark",
-  "version": "0.1.345",
+  "version": "0.1.346",
   "description": "A benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results.",
   "homepage": "http://benchmarkjs.com/",
   "main": "benchmark",
