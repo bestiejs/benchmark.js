@@ -592,7 +592,7 @@
    */
   function formatNumber(number) {
     var comma = ',',
-        string = String(max(0, abs(number).toFixed(0))),
+        string = max(0, number).toFixed(0),
         length = string.length,
         end = /^\d{4,}$/.test(string) ? length % 3 : 0;
 
