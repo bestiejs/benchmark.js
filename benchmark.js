@@ -591,7 +591,8 @@
    * @returns {String} The more readable string representation.
    */
   function formatNumber(number) {
-    return max(0, number).toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+    number = max(0, number);
+    return number < 2 ? number.toFixed(2) : number.toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
   }
 
   /**
