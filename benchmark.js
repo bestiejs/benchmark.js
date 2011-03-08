@@ -111,21 +111,38 @@
    *   // compiled/called after the test loop
    *   'teardown': teardown
    * });
+   *
+   * // or options only
+   * var bench = new Benchmark({
+   *
+   *   // benchmark name
+   *   'name': 'foo',
+   *
+   *   // benchmark test function
+   *   'fn': fn
+   * });
    */
   function Benchmark(name, fn, options) {
     // juggle arguments
     var me = this;
-    if (isClassOf(name, 'Function')) {
+    if (isClassOf(name, 'Object')) {
+      // 1 argument
+      options = name;
+    }
+    else if (isClassOf(name, 'Function')) {
+      // 2 arguments
       options = fn;
       fn = name;
-    } else {
+    }
+    else {
+      // 3 arguments
       me.name = name;
     }
     // initialize if not headless
     if (name != HEADLESS) {
-      me.fn = fn;
-      fn.uid || (fn.uid = ++cache.counter);
       setOptions(me, options);
+      fn = me.fn || (me.fn = fn);
+      fn.uid || (fn.uid = ++cache.counter);
 
       me.created = +new Date;
       me.stats = extend({ }, me.stats);
@@ -1844,7 +1861,10 @@
      * @type Function
      * @example
      *
-     * var bench = new Benchmark(function() { a += 1; }, {
+     * var bench = new Benchmark({
+     *   'fn': function() {
+     *     a += 1;
+     *   },
      *   'setup': function() {
      *     // reset local var `a` at the beginning of each test cycle
      *     a = 0;
