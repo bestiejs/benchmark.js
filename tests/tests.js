@@ -636,7 +636,7 @@ test("user agent detection", function() {
     },
 
     'Safari 4.0 on iPhone (iOS 3.1.3)': {
-      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1_3 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7E18 Safari/528.16'
+      'ua': 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_1_3 like Mac OS X; en-us) AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0 Mobile/7E18 Safari/528.16 Cydia/1.0.3201-71'
     },
 
     'Safari 4.0 on iPhone (iOS 4.1.1)': {
