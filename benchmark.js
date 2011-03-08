@@ -1839,6 +1839,36 @@
     'on': addListener,
 
     /**
+     * Compiled into the test and executed immediately **before** the test loop.
+     * @member Benchmark
+     * @type Function
+     * @example
+     *
+     * var bench = new Benchmark(function() { a += 1; }, {
+     *   'setup': function() {
+     *     // reset local var `a` at the beginning of each test cycle
+     *     a = 0;
+     *   }
+     * });
+     *
+     * // compiles into something like:
+     * var a = 0;
+     * var start = new Date;
+     * while (count--) {
+     *   a += 1;
+     * }
+     * var end = new Date - start;
+     */
+    'setup': noop,
+
+    /**
+     * Compiled into the test and executed immediately **after** the test loop.
+     * @member Benchmark
+     * @type Function
+     */
+    'teardown': noop,
+
+    /**
      * An object of stats including mean, margin or error, and standard deviation.
      * @member Benchmark
      * @type Object
@@ -1963,13 +1993,7 @@
     'reset': reset,
 
     // runs the benchmark
-    'run': run,
-
-    // used to perform operations immediately before the test loop
-    'setup': noop,
-
-    // used to perform operations immediately after the test loop
-    'teardown': noop
+    'run': run
   });
 
   /*--------------------------------------------------------------------------*/
