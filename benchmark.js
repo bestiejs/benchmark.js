@@ -255,10 +255,9 @@
         code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
 
     clock = function(me) {
-      var embedded,
-          result,
+      var result,
           fn = me.fn,
-          compilable = fn.compilable,
+          compiled = fn.compiled,
           count = me.count;
 
       if (applet) {
@@ -270,32 +269,32 @@
           timerNS = new applet.Packages.nano;
         }
       }
-      if (compilable == null || compilable) {
+      if (compiled == null || compiled) {
         try {
-          // insert test body into the while-loop
-          embedded = Function(args,
-            interpolate(code[0], { 'setup': getSource(me.setup) }) +
-            getSource(fn) +
-            interpolate(code[1], { 'teardown': getSource(me.teardown) })
-          );
+          if (compiled == null) {
+            // insert test body into the while-loop
+            compiled = createFunction(args,
+              interpolate(code[0], { 'setup': getSource(me.setup) }) +
+              getSource(fn) +
+              interpolate(code[1], { 'teardown': getSource(me.teardown) })
+            );
 
-          if (compilable == null) {
             // determine if compiled code is exited early, usually by a rogue
             // return statement, by checking for a return object with the uid
             me.count = 1;
-            compilable = fn.compilable = embedded(me, timerNS).uid == EMBEDDED_UID;
+            compiled = fn.compiled = compiled(me, timerNS).uid == EMBEDDED_UID && compiled;
             me.count = count;
           }
-          if (compilable) {
-            result = embedded(me, timerNS).time;
+          if (compiled) {
+            result = compiled(me, timerNS).time;
           }
         } catch(e) {
           me.count = count;
-          compilable = fn.compilable = false;
+          compiled = fn.compiled = false;
         }
       }
-      // fallback to simple while-loop when compilable is false
-      if (!compilable) {
+      // fallback to simple while-loop when compiled is false
+      if (!compiled) {
         result = fallback(me, timerNS).time;
       }
       return result;
@@ -424,7 +423,7 @@
     // embedded tests and create non-embedding fallback
     code = code.replace(/\$/g, EMBEDDED_UID).split('|');
     args = code.pop();
-    fallback = Function(args,
+    fallback = createFunction(args,
       interpolate(code[0], { 'setup': code.pop() }) +
       code.pop() +
       interpolate(code[1], { 'teardown': code.pop() })
@@ -433,6 +432,39 @@
     // resolve time to achieve a percent uncertainty of 1%
     proto.MIN_TIME || (proto.MIN_TIME = max(timer.res / 2 / 0.01, 0.05));
     return clock.apply(null, arguments);
+  }
+
+  /**
+   * Creates a function from the given arguments string and body.
+   * @private
+   * @param {String} args The comma separated function arguments.
+   * @param {String} body The function body
+   * @returns {Function} The new function.
+   */
+  function createFunction() {
+    var scripts,
+        prop = 'c' + EMBEDDED_UID;
+
+    createFunction = function(args, body) {
+      var parent = scripts[0].parentNode,
+          script = document.createElement('script');
+
+      script.appendChild(document.createTextNode('Benchmark.' + prop + '=function(' + args + '){' + body + '}'));
+      parent.insertBefore(script, parent.firstChild);
+      parent.removeChild(script);
+      return [Benchmark[prop], delete Benchmark[prop]][0];
+    };
+
+    // fix JaegerMonkey bug
+    // http://bugzil.la/639720
+    try {
+      scripts = document.getElementsByTagName('script');
+      createFunction = createFunction('', 'return ' + EMBEDDED_UID)() == EMBEDDED_UID && createFunction;
+    } catch (e) {
+      createFunction = false;
+    }
+    createFunction || (createFunction = Function);
+    return createFunction.apply(null, arguments);
   }
 
   /**
