@@ -271,14 +271,13 @@
       }
       if (compiled == null || compiled) {
         try {
-          if (compiled == null) {
+          if (!compiled) {
             // insert test body into the while-loop
             compiled = createFunction(args,
               interpolate(code[0], { 'setup': getSource(me.setup) }) +
               getSource(fn) +
               interpolate(code[1], { 'teardown': getSource(me.teardown) })
             );
-
             // determine if compiled code is exited early, usually by a rogue
             // return statement, by checking for a return object with the uid
             me.count = 1;
@@ -438,7 +437,7 @@
    * Creates a function from the given arguments string and body.
    * @private
    * @param {String} args The comma separated function arguments.
-   * @param {String} body The function body
+   * @param {String} body The function body.
    * @returns {Function} The new function.
    */
   function createFunction() {
@@ -450,8 +449,7 @@
           script = document.createElement('script');
 
       script.appendChild(document.createTextNode('Benchmark.' + prop + '=function(' + args + '){' + body + '}'));
-      parent.insertBefore(script, parent.firstChild);
-      parent.removeChild(script);
+      parent.removeChild(parent.insertBefore(script, scripts[0]));
       return [Benchmark[prop], delete Benchmark[prop]][0];
     };
 
@@ -640,8 +638,8 @@
    * @returns {String} The more readable string representation.
    */
   function formatNumber(number) {
-    number = max(0, number);
-    return number < 2 ? number.toFixed(2) : number.toFixed(0).replace(/(?=(?:\d{3})+$)(?!^)/g, ',');
+    number = String(number).split('.');
+    return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') + (number[1] ? '.' + number[1] : '');
   }
 
   /**
@@ -1305,16 +1303,18 @@
    */
   function toString() {
     var me = this,
-        cycles = me.cycles,
         error = me.error,
+        hz = me.hz,
+        stats = me.stats,
+        size = stats.size,
         pm = IN_JAVA ? '+/-' : '\xb1',
         result = me.name || me.id || ('<Test #' + me.fn.uid + '>');
 
     if (error) {
       result += ': ' + join(error);
     } else {
-      result += ' x ' + formatNumber(me.hz) + ' ' + pm +
-        me.stats.RME.toFixed(2) + '% (' + cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')';
+      result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ' + pm +
+        stats.RME.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
     }
     return result;
   }

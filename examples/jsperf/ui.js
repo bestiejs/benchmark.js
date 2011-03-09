@@ -323,8 +323,8 @@
         else if (bench.cycles) {
           cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
             bench.times.cycle.toFixed(3) + ' seconds.';
-          setHTML(cell, hz == Infinity ? hz :
-            formatNumber(hz) + ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
+          setHTML(cell, formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) +
+            ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
         }
         else {
           // status: pending
