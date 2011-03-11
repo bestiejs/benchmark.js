@@ -71,12 +71,16 @@ test("user agent detection", function() {
       'mode': 7
     },
 
-    'Android Browser 3.1.2 (like Chrome 1.x) on Android 1.6': {
-      'ua': 'Mozilla/5.0 (Linux; U; Android 1.6; en-us; HTC_TATTOO_A3288 Build/DRC79) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1'
-    },
-
     'Android Browser (like Chrome 2.x) on Android 2.1': {
       'ua': 'Mozilla/5.0 (Linux; U; Android 2.1-update1; en-us; Sprint APA9292KT Build/ERE27) AppleWebKit/530.17 (KHTML, like Gecko)'
+    },
+
+    'Android Browser 3.0.4 (like Chrome 1.x) on Xoom (Android 3.0)': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 3.0; xx-xx; Xoom Build/HRI39) AppleWebKit/525.10+ (KHTML, like Gecko) Version/3.0.4 Mobile Safari/523.12.2'
+    },
+
+    'Android Browser 3.1.2 (like Chrome 1.x) on Android 1.6': {
+      'ua': 'Mozilla/5.0 (Linux; U; Android 1.6; en-us; HTC_TATTOO_A3288 Build/DRC79) AppleWebKit/528.5+ (KHTML, like Gecko) Version/3.1.2 Mobile Safari/525.20.1'
     },
 
     'Android Browser 4.0 (like Chrome 5.x) on Android 2.2': {
