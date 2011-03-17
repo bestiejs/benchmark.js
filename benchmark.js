@@ -1313,7 +1313,7 @@
     if (error) {
       result += ': ' + join(error);
     } else {
-      result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ' + pm +
+      result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
         stats.RME.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
     }
     return result;
