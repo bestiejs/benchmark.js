@@ -194,6 +194,10 @@ test("user agent detection", function() {
       'ua': 'Mozilla/5.0 (X11; Linux x86_64; rv:2.0b9pre) Gecko/20110105 Firefox/4.0b9pre'
     },
 
+    'Firefox 4.0#{beta}11 on Mac OS X 10.6': {
+      'ua': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.6; rv:2.0b11pre) Gecko/20110126 Firefox/4.0b11pre'
+    },
+
     'Fennec 2.0#{beta}1 on Android': {
       'ua': 'Mozilla/5.0 (Android; Linux armv7l; rv:2.0b6pre) Gecko/20100907 Firefox/4.0b6pre Fennec/2.0b1pre'
     },
