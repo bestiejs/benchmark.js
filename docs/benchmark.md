@@ -72,7 +72,7 @@
 <!-- div -->
 ## `Benchmark.Suite`
 * [`Benchmark.Suite`](#Benchmark.Suite)
-* [`Benchmark.Suite.Suite.options`](#Benchmark.Suite.Suite.options)
+* [`Benchmark.Suite.options`](#Benchmark.Suite.options)
 <!-- /div -->
 <!-- div -->
 ## `Benchmark.Suite.prototype`
@@ -843,7 +843,7 @@ Suite constructor.
 <!-- /div -->
 
 <!-- div -->
-### <a id="Benchmark.Suite.Suite.options" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L2068" title="View in source">`Benchmark.Suite.Suite.options`</a>
+### <a id="Benchmark.Suite.options" href="https://github.com/mathiasbynens/benchmark.js/blob/master/benchmark.js#L2068" title="View in source">`Benchmark.Suite.options`</a>
 *(Object)*: The default options object copied by instances.
 [&#9650;][1]
 <!-- /div -->

@@ -77,7 +77,7 @@
         // parse #{call}
         preg_match("@\*/\s*(?:function ([^(]*)|(?:". $member ."\.)?([^:=,]*))@", $entry, $call);
         if ($call = array_pop($call)) {
-          $call = trim(trim($call), "'");
+          $call = trim(trim(array_pop(explode(".", $call))), "'");
         }
 
         // parse #{name}
