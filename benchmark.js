@@ -257,7 +257,7 @@
         timerNS = Date,
         msRes = getRes('ms'),
         timer = { 'ns': timerNS, 'res': max(0.0015, msRes), 'unit': 'ms' },
-        code = '#{setup}var r$,m$=this,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|n$';
+        code = 'var r$,s$,m$=this,i$=m$.count,f$=m$.fn;#{setup}#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|n$';
 
     clock = function(me) {
       var result,
