@@ -517,7 +517,8 @@
    * @param {Object} [options={}] Options object.
    */
   function setOptions(me, options) {
-    me.options = forIn(extend({ }, options), function(value, key) {
+    options = extend(extend({ }, me.constructor.options), options);
+    me.options = forIn(options, function(value, key) {
       // add event listeners
       if (/^on[A-Z]/.test(key)) {
         each(key.split(' '), function(key) {
@@ -1728,6 +1729,14 @@
      */
     'version': '0.1.348',
 
+    /**
+     * The default options object copied by instances.
+     * @static
+     * @member Benchmark
+     * @type Object
+     */
+    'options': { },
+
     // generic Array#forEach
     'each': each,
 
@@ -2047,6 +2056,16 @@
     // runs the benchmark
     'run': run
   });
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
+   * The default options object copied by instances.
+   * @static
+   * @member Benchmark.Suite
+   * @type Object
+   */
+  Suite.options = { };
 
   /*--------------------------------------------------------------------------*/
 
