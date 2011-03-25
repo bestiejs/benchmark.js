@@ -121,6 +121,11 @@
    *   // benchmark test function
    *   'fn': fn
    * });
+   *
+   * // a test's `this` binding is set to the benchmark instance
+   * var bench = new Benchmark('foo', function() {
+   *   'My name is '.concat(this.name); // My name is foo
+   * });
    */
   function Benchmark(name, fn, options) {
     // juggle arguments
@@ -252,7 +257,7 @@
         timerNS = Date,
         msRes = getRes('ms'),
         timer = { 'ns': timerNS, 'res': max(0.0015, msRes), 'unit': 'ms' },
-        code = '#{setup}var r$,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|m$,n$';
+        code = '#{setup}var r$,m$=this,i$=m$.count,f$=m$.fn,#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|n$';
 
     clock = function(me) {
       var result,
@@ -281,11 +286,11 @@
             // determine if compiled code is exited early, usually by a rogue
             // return statement, by checking for a return object with the uid
             me.count = 1;
-            compiled = fn.compiled = compiled(me, timerNS).uid == EMBEDDED_UID && compiled;
+            compiled = fn.compiled = compiled.call(me, timerNS).uid == EMBEDDED_UID && compiled;
             me.count = count;
           }
           if (compiled) {
-            result = compiled(me, timerNS).time;
+            result = compiled.call(me, timerNS).time;
           }
         } catch(e) {
           me.count = count;
@@ -294,7 +299,7 @@
       }
       // fallback to simple while-loop when compiled is false
       if (!compiled) {
-        result = fallback(me, timerNS).time;
+        result = fallback.call(me, timerNS).time;
       }
       return result;
     };
@@ -1336,7 +1341,7 @@
     function enqueue(count) {
       while (count--) {
         queue.push(me.clone({
-          'computing': true,
+          'computing': me,
           'events': { 'start': [update], 'cycle': [update] }
         }));
       }
@@ -1347,8 +1352,7 @@
       var clone = this;
       if (me.running) {
         if (clone.cycles) {
-          me.count = clone.count;
-          me.cycles += clone.cycles;
+          // the me.count and me.cycles props of the host are updated in cycle() below
           me.hz = clone.hz;
           me.times.period = clone.times.period;
           me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
@@ -1436,7 +1440,7 @@
     }
 
     // init sample/queue and begin
-    enqueue(sample.length ? 1 : me.MIN_SAMPLE_SIZE);
+    enqueue(me.MIN_SAMPLE_SIZE);
     invoke(queue, { 'name': 'run', 'args': async, 'queued': true, 'onCycle': evaluate });
   }
 
@@ -1455,13 +1459,17 @@
           minTime,
           period,
           count = me.count,
+          host = me.computing,
           times = me.times;
 
       // continue, if not aborted between cycles
       if (me.running) {
         me.cycles++;
+        host.cycles++;
+        host.count = count;
+
         try {
-          clocked = clock(me);
+          clocked = clock(host);
           minTime = me.MIN_TIME;
         } catch(e) {
           me.abort();
