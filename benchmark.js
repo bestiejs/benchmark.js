@@ -1735,7 +1735,7 @@
      * @member Benchmark
      * @type String
      */
-    'version': '0.1.348',
+    'version': '0.1.349',
 
     /**
      * The default options object copied by instances.
