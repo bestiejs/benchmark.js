@@ -15,7 +15,7 @@ button, input, textarea, a, .bs-rt {
 }
 
 html, input, textarea, button {
-  font: 1em/1.5 Helvetica, Arial, sans-serif;
+  font: 1em/1.5 sans-serif;
 }
 
 html {
@@ -50,7 +50,9 @@ table {
 thead th, button:hover, button:focus, .submit:hover, .submit:focus, a:hover, a:focus, #comments .meta a:hover, #comments .meta a:focus, li.current a:hover, li.current a:focus, form h3, #comments .owner .meta {
   background: #1a6ab9;
   background-image: -moz-linear-gradient(top, #6ca5dd, #1a6ab9);
+  background-image: -o-linear-gradient(top, #6ca5dd, #1a6ab9);
   background-image: -webkit-gradient(linear, left top, left bottom, from(#6ca5dd), to(#1a6ab9));
+  background-image: -webkit-linear-gradient(#6ca5dd, #1a6ab9);
   background-image: linear-gradient(top, #6ca5dd, #1a6ab9);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#6ca5dd', EndColorStr='#1a6ab9');
   color: #fff;
@@ -59,7 +61,9 @@ thead th, button:hover, button:focus, .submit:hover, .submit:focus, a:hover, a:f
 caption, #comments .meta {
   background: #bcbcbc;
   background-image: -moz-linear-gradient(top, #d0d0d0, #a7a7a7);
+  background-image: -o-linear-gradient(top, #d0d0d0, #a7a7a7);
   background-image: -webkit-gradient(linear, left top, left bottom, from(#d0d0d0), to(#a7a7a7));
+  background-image: -webkit-linear-gradient(#d0d0d0, #a7a7a7);
   background-image: linear-gradient(top, #d0d0d0, #a7a7a7);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#d0d0d0', EndColorStr='#a7a7a7');
   color: #555;
@@ -81,6 +85,7 @@ tbody th, td {
 
 tbody th {
   background: #dde4ea;
+  min-width: 100px;
 }
 
 tbody th div {
@@ -229,12 +234,11 @@ table #results-1 {
 }
 
 table pre {
-  width: 650px;
   *padding: 1.5em 0; /* IE < 8 */
   *overflow-y: hidden; /* IE < 8 */
 }
 
-table td.code {
+table pre, table td.code {
   width: 650px;
 }
 
@@ -407,9 +411,13 @@ footer {
   padding: .5em 1em;
 }
 
-#error-info, code, samp, var, textarea {
-  font-family: Monaco, 'Courier New', monospace;
+#error-info, code, samp, var, textarea, #slug {
+  font-family: Monaco, monospace;
   font-size: .9em;
+}
+
+#slug {
+  font-size: 1em;
 }
 
 #faq dt {
@@ -491,4 +499,44 @@ footer {
 
 .me1 {
   color: #606;
+}
+
+/* < 1051px */
+@media all and (max-width: 1050px) {
+  table pre, table td.code {
+    width: 550px;
+  }
+}
+
+/* < 1041px */
+@media all and (max-width: 1040px) {
+  body {
+    width: 100%;
+    margin: 0;
+    border: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+}
+
+/* < 801px */
+@media all and (max-width: 800px) {
+  table pre, table td.code {
+    width: 450px;
+  }
+}
+
+/* < 681px */
+@media all and (max-width: 680px) {
+  table pre, table td.code {
+    width: 350px;
+  }
+}
+
+/* < 651px */
+@media all and (max-width: 650px) {
+  table pre, table td.code {
+    width: 200px;
+  }
 }
