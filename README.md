@@ -73,6 +73,7 @@ Usage example:
 To clone this repository including all submodules, using git 1.6.5 or later:
 
     git clone --recursive https://github.com/mathiasbynens/Benchmark.js.git
+    cd Benchmark.js
 
 For older git versions, just use:
 
