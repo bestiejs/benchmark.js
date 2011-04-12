@@ -671,8 +671,7 @@
     }
     // for others (not as accurate)
     else {
-      result = key in object &&
-        !(key in parent && object[key] === parent[key]);
+      result = key in object && !(key in parent && object[key] === parent[key]);
     }
     return result;
   }
@@ -844,7 +843,7 @@
    * @static
    * @member Benchmark
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns true if value is an array, else false.
+   * @returns {Boolean} Returns `true` if value is an array, else `false`.
    */
   function isArray(value) {
     return isClassOf(value, 'Array');
@@ -856,7 +855,7 @@
    * @member Benchmark
    * @param {Object} object The object.
    * @param {String} name The name of the class.
-   * @returns {Boolean} Returns true if of the class, else false.
+   * @returns {Boolean} Returns `true` if of the class, else `false`.
    */
   function isClassOf(object, name) {
     return object != null && {}.toString.call(object).slice(8, -1) == name;
@@ -870,7 +869,7 @@
    * @member Benchmark
    * @param {Mixed} object The owner of the property.
    * @param {String} property The property to check.
-   * @returns {Boolean} Returns true if the property value is a non-primitive, else false.
+   * @returns {Boolean} Returns `true` if the property value is a non-primitive, else `false`.
    */
   function isHostType(object, property) {
     return !/^(?:boolean|number|string|undefined)$/
