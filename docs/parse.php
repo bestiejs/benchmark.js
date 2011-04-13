@@ -376,7 +376,7 @@
   /*--------------------------------------------------------------------------*/
 
   // cleanup requested filepath
-  $_GET["f"] = @$_GET["f"] ? $_GET["f"] : "benchmark";
+  $_GET["f"] = @$_GET["f"] ? $_GET["f"] : "README";
   $_GET["f"] = preg_replace("#(\.*[\/])+#", "", $_GET["f"]);
   $_GET["f"] = array_shift(preg_split("/\./", $_GET["f"]));
 
