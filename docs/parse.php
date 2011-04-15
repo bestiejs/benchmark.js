@@ -33,9 +33,9 @@
    */
   function parse($filepath) {
     $api = array();
-    $openTag = "<!-- div -->";
-    $closeTag = "<!-- /div -->";
-    $result = array("# Benchmark.js API documentation", "");
+    $openTag = "\n<!-- div -->\n";
+    $closeTag = "\n<!-- /div -->\n";
+    $result = array("# Benchmark.js API documentation");
 
     // load file and extract comment blocks
     $source = str_replace(PHP_EOL, "\n", file_get_contents($filepath));
@@ -290,7 +290,7 @@
         }
       }
     }
-    array_push($result, $closeTag, $closeTag, "", "");
+    array_push($result, $closeTag, $closeTag);
 
     /*------------------------------------------------------------------------*/
 
@@ -304,16 +304,14 @@
         if (count($entries)) {
           if ($type == "ctor") {
             if ($started) {
-              array_pop($result);
-              array_push($result, $closeTag, "", "");
+              array_push($result, $closeTag);
             }
             $started = true;
             array_push($result, $openTag, "## `" . $member . "`");
           }
           else if ($type == "plugin") {
             if ($started) {
-              array_pop($result);
-              array_push($result, $closeTag, "", "");
+              array_push($result, $closeTag);
             }
             $started = true;
             array_push($result, $openTag, "## `" . $member . ".prototype`");
@@ -360,13 +358,12 @@
           if ($entry["example"]) {
             array_push($result, "", "#### Example", $entry["example"]);
           }
-          array_push($result, $closeTag, "");
+          array_push($result, $closeTag);
         }
       }
     }
 
     // close tags add TOC link reference
-    array_pop($result);
     array_push($result, $closeTag, $closeTag, "", "  [1]: #readme \"Jump back to the TOC.\"");
 
     // cleanup whitespace
@@ -376,15 +373,20 @@
   /*--------------------------------------------------------------------------*/
 
   // cleanup requested filepath
-  $_GET["f"] = @$_GET["f"] ? $_GET["f"] : "README";
+  $_GET["f"] = @$_GET["f"] ? $_GET["f"] : "benchmark";
   $_GET["f"] = preg_replace("#(\.*[\/])+#", "", $_GET["f"]);
   $_GET["f"] = array_shift(preg_split("/\./", $_GET["f"]));
+
+  // output filename
+  if (!isset($_GET["o"])) {
+    $_GET["o"] = basename($_GET["f"]);
+  }
 
   // generate markdown
   $content = parse("../" . $_GET["f"] . ".js");
 
   // save it to a .md file
-  file_put_contents(basename($_GET["f"]) . ".md", $content);
+  file_put_contents($_GET["o"] . ".md", $content);
 
   // print
   echo $content . PHP_EOL;
