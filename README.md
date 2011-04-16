@@ -86,8 +86,11 @@ Feel free to fork if you see possible improvements!
 ## Authors
 
 * [Mathias Bynens](http://mathiasbynens.be/)
+  [![twitter/mathias](https://si0.twimg.com/profile_images/1255767431/kung-fu_bigger.jpg)](https://twitter.com/mathias "Follow @mathias on Twitter")
 * [John-David Dalton](http://allyoucanleet.com/)
+  [![twitter/jdalton](https://si1.twimg.com/profile_images/1282389003/me_badge_bigger.jpg)](https://twitter.com/jdalton "Follow @jdalton on Twitter")
 
 ## Contributors
 
 * [Kit Goncharov](http://kitgoncharov.github.com/)
+  [![twitter/kitgoncharov](https://si2.twimg.com/profile_images/1270193159/Me__Summer_2010_bigger.png)](https://twitter.com/kitgoncharov "Follow @kitgoncharov on Twitter")

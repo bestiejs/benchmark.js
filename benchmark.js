@@ -523,7 +523,7 @@
    */
   function setOptions(me, options) {
     options = extend(extend({ }, me.constructor.options), options);
-    me.options = forIn(options, function(value, key) {
+    me.options = each(options, function(value, key) {
       // add event listeners
       if (/^on[A-Z]/.test(key)) {
         each(key.split(' '), function(key) {
@@ -538,24 +538,32 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * A generic bare-bones `Array#forEach` solution.
+   * A bare-bones `Array#forEach`/`for-in` own property solution.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
    * @member Benchmark
-   * @param {Array} array The array to iterate over.
+   * @param {Array|Object} object The object to iterate over.
    * @param {Function} callback The function called per iteration.
-   * @returns {Array} The array iterated over.
+   * @returns {Array|Object} Returns the object iterated over.
    */
-  function each(array, callback) {
+  function each(object, callback) {
     var i = -1,
-        length = array.length;
+        length = object.length;
 
-    while (++i < length) {
-      if (i in array && callback(array[i], i, array) === false) {
-        break;
+    if (isClassOf(object, 'Array')) {
+      while (++i < length) {
+        if (i in object && callback(object[i], i, object) === false) {
+          break;
+        }
+      }
+    } else {
+      for (i in object) {
+        if (hasKey(object, i) && callback(object[i], i, object) === false) {
+          break;
+        }
       }
     }
-    return array;
+    return object;
   }
 
   /**
@@ -617,23 +625,6 @@
     return result || reduce(array, function(result, value, index) {
       return callback(value, index, array) ? result.push(value) && result : result;
     }, []);
-  }
-
-  /**
-   * A generic bare-bones for-in solution for an object's own properties.
-   * @static
-   * @member Benchmark
-   * @param {Object} object The object to iterate over.
-   * @param {Function} callback The function called per iteration.
-   * @returns {Object} The object iterated over.
-   */
-  function forIn(object, callback) {
-    for (var key in object) {
-      if (hasKey(object, key) && callback(object[key], key, object) === false) {
-        break;
-      }
-    }
-    return object;
   }
 
   /**
@@ -832,7 +823,7 @@
    */
   function interpolate(string, object) {
     string = string == null ? '' : string;
-    forIn(object || { }, function(value, key) {
+    each(object || { }, function(value, key) {
       string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
     });
     return string;
@@ -892,7 +883,7 @@
     }
     else {
       separator2 || (separator2 = ': ');
-      forIn(object, function(value, key) {
+      each(object, function(value, key) {
         pairs.push(key + separator2 + value);
       });
     }
@@ -1023,7 +1014,7 @@
     var me = this,
         result = new me.constructor(extend(extend({ }, me.options), options));
     // copy own properties
-    forIn(me, function(value, key) {
+    each(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = /^\d+$/.test(key) ? value.clone() : value;
       }
@@ -1230,7 +1221,7 @@
     var me = this,
         result = new me.constructor(me.fn, extend(extend({ }, me.options), options));
     // copy own properties
-    forIn(me, function(value, key) {
+    each(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value;
       }
@@ -1291,8 +1282,7 @@
     else {
       // check if properties have changed and reset them
       while (pairs.length) {
-        pair = pairs.pop();
-        (isArray(pair[0]) ? each : forIn)(pair[0], check);
+        each(pair = pairs.pop(), pair[0], check);
       }
       if (changed) {
         me.emit('reset');
@@ -1744,7 +1734,7 @@
      */
     'options': { },
 
-    // generic Array#forEach
+    // generic Array#forEach/for-in
     'each': each,
 
     // copy properties to another object
@@ -1752,9 +1742,6 @@
 
     // generic Array#filter
     'filter': filter,
-
-    // iterate over an object's direct properties
-    'forIn': forIn,
 
     // converts a number to a comma-separated string
     'formatNumber': formatNumber,

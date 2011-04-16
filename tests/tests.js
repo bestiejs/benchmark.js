@@ -375,6 +375,16 @@ test("user agent detection", function() {
       'mode': 9
     },
 
+    'IE 10.0 on Windows Server 2008 / Vista': {
+      'ua': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.0; Trident/6.0)',
+      'mode': 10
+    },
+
+    'IE 10.0 (running in IE 9 mode) on Windows Server 2008 R2 / 7': {
+      'ua': 'Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)',
+      'mode': 9
+    },
+
     'IE Mobile 7.0 on Samsung (Windows Phone OS 7.0)': {
       'ua': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows Phone OS 7.0; Trident/3.1; IEMobile/7.0; SAMSUNG; OMNIA7)'
     },
@@ -935,7 +945,7 @@ test("user agent detection", function() {
     }
   };
 
-  Benchmark.forIn(Tests, function(value, key) {
+  Benchmark.each(Tests, function(value, key) {
     var platform = getPlatform(value);
     key = Benchmark.interpolate(key, { 'alpha': '\u03b1', 'beta': '\u03b2' });
 
@@ -943,7 +953,7 @@ test("user agent detection", function() {
     equals(String(platform), key, key);
 
     // test null values
-    Benchmark.forIn(platform, function(value, key) {
+    Benchmark.each(platform, function(value, key) {
       if (!value) {
         strictEqual(value, null, 'Benchmark.platform.' + key);
       }
