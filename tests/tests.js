@@ -519,6 +519,10 @@ test("user agent detection", function() {
       }
     },
 
+    'PlayBook Browser 0.0.1 (like Safari 4+)': {
+      'ua': 'Mozilla/5.0 (PlayBook; U; RIM Tablet OS 1.0.0; en-US) AppleWebKit/534.8+ (KHTML, like Gecko) Version/0.0.1 Safari/534.8+'
+    },
+
     'Rhino': {
       'global': { },
       'environment': { }
