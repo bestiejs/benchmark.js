@@ -550,7 +550,7 @@
     var i = -1,
         length = object.length;
 
-    if (isClassOf(object, 'Array')) {
+    if (hasKey(object, 'length') && length > -1 && length < 4294967296) {
       while (++i < length) {
         if (i in object && callback(object[i], i, object) === false) {
           break;
