@@ -28,7 +28,9 @@ Or enable Chrome’s microsecond timer by using the [command line switch](http:/
 
 Via [npm](http://npmjs.org/):
 
-    npm install benchmark
+``` bash
+npm install benchmark
+```
 
 In [Node.js](http://nodejs.org/):
 
@@ -38,7 +40,9 @@ var Benchmark = require('benchmark');
 
 Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
 
-    npm install microtime
+``` bash
+npm install microtime
+```
 
 In [Narwhal](http://narwhaljs.org/) and [RingoJS](http://ringojs.org/):
 
@@ -75,8 +79,8 @@ suite.add('RegExp#test', function() {
 .run(true);
 
 // logs:
-// > RegExp#test × 4,161,532 ±0.99% (59 cycles)
-// > String#indexOf × 6,139,623 ±1.00% (131 cycles)
+// > RegExp#test x 4,161,532 +-0.99% (59 cycles)
+// > String#indexOf x 6,139,623 +-1.00% (131 cycles)
 // > Fastest is String#indexOf
 ```
 
