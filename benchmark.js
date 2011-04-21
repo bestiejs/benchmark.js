@@ -1282,7 +1282,7 @@
     else {
       // check if properties have changed and reset them
       while (pairs.length) {
-        each(pair = pairs.pop(), pair[0], check);
+        each((pair = pairs.pop(), pair[0]), check);
       }
       if (changed) {
         me.emit('reset');
