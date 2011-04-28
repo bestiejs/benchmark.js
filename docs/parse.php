@@ -117,7 +117,7 @@
         // parse @example
         preg_match("#@example([\s\S]*)?(?=\*\s\@[a-z]|\*/)#", $entry, $example);
         if ($example = array_pop($example)) {
-          $example = "    " . trim(preg_replace("/\n\s*\* ?/", "\n    ", $example));
+          $example = "~~~ js\n" . trim(preg_replace("/\n\s*\* ?/", "\n", $example)) . "\n~~~";
         }
 
         // parse @param

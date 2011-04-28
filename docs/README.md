@@ -136,57 +136,59 @@ Benchmark constructor.
 3. `[options={}]` *(Object)*: Options object.
 
 #### Example
-    // basic usage
-    var bench = new Benchmark(fn);
+~~~ js
+// basic usage
+var bench = new Benchmark(fn);
 
-    // or using a name first
-    var bench = new Benchmark('foo', fn);
+// or using a name first
+var bench = new Benchmark('foo', fn);
 
-    // or with options
-    var bench = new Benchmark('foo', fn, {
+// or with options
+var bench = new Benchmark('foo', fn, {
 
-      // displayed by Benchmark#toString if `name` is not available
-      'id': 'xyz',
+  // displayed by Benchmark#toString if `name` is not available
+  'id': 'xyz',
 
-      // called when the benchmark starts running
-      'onStart': onStart,
+  // called when the benchmark starts running
+  'onStart': onStart,
 
-      // called after each run cycle
-      'onCycle': onCycle,
+  // called after each run cycle
+  'onCycle': onCycle,
 
-      // called when aborted
-      'onAbort': onAbort,
+  // called when aborted
+  'onAbort': onAbort,
 
-      // called when a test errors
-      'onError': onError,
+  // called when a test errors
+  'onError': onError,
 
-      // called when reset
-      'onReset': onReset,
+  // called when reset
+  'onReset': onReset,
 
-      // called when the benchmark completes running
-      'onComplete': onComplete,
+  // called when the benchmark completes running
+  'onComplete': onComplete,
 
-      // compiled/called before the test loop
-      'setup': setup,
+  // compiled/called before the test loop
+  'setup': setup,
 
-      // compiled/called after the test loop
-      'teardown': teardown
-    });
+  // compiled/called after the test loop
+  'teardown': teardown
+});
 
-    // or options only
-    var bench = new Benchmark({
+// or options only
+var bench = new Benchmark({
 
-      // benchmark name
-      'name': 'foo',
+  // benchmark name
+  'name': 'foo',
 
-      // benchmark test function
-      'fn': fn
-    });
+  // benchmark test function
+  'fn': fn
+});
 
-    // a test's `this` binding is set to the benchmark instance
-    var bench = new Benchmark('foo', function() {
-      'My name is '.concat(this.name); // My name is foo
-    });
+// a test's `this` binding is set to the benchmark instance
+var bench = new Benchmark('foo', function() {
+  'My name is '.concat(this.name); // My name is foo
+});
+~~~
 
 <!-- /div -->
 
@@ -265,19 +267,21 @@ A generic bare-bones `Array#filter` solution.
 *(Array)*: A new array of values that passed callback filter.
 
 #### Example
-    // get odd numbers
-    Benchmark.filter([1, 2, 3, 4, 5], function(n) {
-      return n % 2;
-    }); // -> [1, 3, 5];
+~~~ js
+// get odd numbers
+Benchmark.filter([1, 2, 3, 4, 5], function(n) {
+  return n % 2;
+}); // -> [1, 3, 5];
 
-    // get fastest benchmarks
-    Benchmark.filter(benches, 'fastest');
+// get fastest benchmarks
+Benchmark.filter(benches, 'fastest');
 
-    // get slowest benchmarks
-    Benchmark.filter(benches, 'slowest');
+// get slowest benchmarks
+Benchmark.filter(benches, 'slowest');
 
-    // get benchmarks that completed without erroring
-    Benchmark.filter(benches, 'successful');
+// get benchmarks that completed without erroring
+Benchmark.filter(benches, 'successful');
+~~~
 
 <!-- /div -->
 
@@ -343,10 +347,12 @@ Modify a string by replacing named tokens with matching object property values.
 *(String)*: The modified string.
 
 #### Example
-    Benchmark.interpolate('#{greet} #{who}!', {
-      'greet': 'Hello',
-      'who': 'world'
-    }); // -> 'Hello world!'
+~~~ js
+Benchmark.interpolate('#{greet} #{who}!', {
+  'greet': 'Hello',
+  'who': 'world'
+}); // -> 'Hello world!'
+~~~
 
 <!-- /div -->
 
@@ -366,33 +372,35 @@ Invokes a method on all items in an array.
 *(Array)*: A new array of values returned from each method invoked.
 
 #### Example
-    // invoke `reset` on all benchmarks
-    Benchmark.invoke(benches, 'reset');
+~~~ js
+// invoke `reset` on all benchmarks
+Benchmark.invoke(benches, 'reset');
 
-    // invoke `emit` with arguments
-    Benchmark.invoke(benches, 'emit', 'complete', listener);
+// invoke `emit` with arguments
+Benchmark.invoke(benches, 'emit', 'complete', listener);
 
-    // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
-    Benchmark.invoke(benches, {
+// invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
+Benchmark.invoke(benches, {
 
-      // invoke the `run` method
-      'name': 'run',
+  // invoke the `run` method
+  'name': 'run',
 
-      // pass a single argument
-      'args': true,
+  // pass a single argument
+  'args': true,
 
-      // treat as queue, removing benchmarks from front of `benches` until empty
-      'queued': true,
+  // treat as queue, removing benchmarks from front of `benches` until empty
+  'queued': true,
 
-      // called before any benchmarks have been invoked.
-      'onStart': onStart,
+  // called before any benchmarks have been invoked.
+  'onStart': onStart,
 
-      // called between invoking benchmarks
-      'onCycle': onCycle,
+  // called between invoking benchmarks
+  'onCycle': onCycle,
 
-      // called after all benchmarks have been invoked.
-      'onComplete': onComplete
-    });
+  // called after all benchmarks have been invoked.
+  'onComplete': onComplete
+});
+~~~
 
 <!-- /div -->
 
@@ -686,11 +694,13 @@ Registers a single listener of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.addListener('cycle', listener);
+~~~ js
+// basic usage
+bench.addListener('cycle', listener);
 
-    // register a listener for multiple event types
-    bench.addListener('start cycle', listener);
+// register a listener for multiple event types
+bench.addListener('start cycle', listener);
+~~~
 
 <!-- /div -->
 
@@ -708,9 +718,11 @@ Creates a new benchmark using the same test and options.
 *(Object)*: The new benchmark instance.
 
 #### Example
-    var bizarro = bench.clone({
-      'name': 'doppelganger'
-    });
+~~~ js
+var bizarro = bench.clone({
+  'name': 'doppelganger'
+});
+~~~
 
 <!-- /div -->
 
@@ -764,11 +776,13 @@ Unregisters all listeners of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.removeAllListeners('cycle');
+~~~ js
+// basic usage
+bench.removeAllListeners('cycle');
 
-    // unregister all listeners for multiple event types
-    bench.removeListener('start cycle');
+// unregister all listeners for multiple event types
+bench.removeListener('start cycle');
+~~~
 
 <!-- /div -->
 
@@ -787,11 +801,13 @@ Unregisters a single listener of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.removeListener('cycle', listener);
+~~~ js
+// basic usage
+bench.removeListener('cycle', listener);
 
-    // unregister a listener for multiple event types
-    bench.removeListener('start cycle', listener);
+// unregister a listener for multiple event types
+bench.removeListener('start cycle', listener);
+~~~
 
 <!-- /div -->
 
@@ -830,23 +846,25 @@ Compiled into the test and executed immediately **before** the test loop.
 [&#9650;][1]
 
 #### Example
-    var bench = new Benchmark({
-      'fn': function() {
-        a += 1;
-      },
-      'setup': function() {
-        // reset local var `a` at the beginning of each test cycle
-        a = 0;
-      }
-    });
+~~~ js
+var bench = new Benchmark({
+  'fn': function() {
+    a += 1;
+  },
+  'setup': function() {
+    // reset local var `a` at the beginning of each test cycle
+    a = 0;
+  }
+});
 
-    // compiles into something like:
-    var a = 0;
-    var start = new Date;
-    while (count--) {
-      a += 1;
-    }
-    var end = new Date - start;
+// compiles into something like:
+var a = 0;
+var start = new Date;
+while (count--) {
+  a += 1;
+}
+var end = new Date - start;
+~~~
 
 <!-- /div -->
 
@@ -1016,33 +1034,35 @@ Suite constructor.
 2. `[options={}]` *(Object)*: Options object.
 
 #### Example
-    // basic usage
-    var suite = new Benchmark.Suite;
+~~~ js
+// basic usage
+var suite = new Benchmark.Suite;
 
-    // or using a name first
-    var suite = new Benchmark.Suite('foo');
+// or using a name first
+var suite = new Benchmark.Suite('foo');
 
-    // or with options
-    var suite = new Benchmark.Suite('foo', {
+// or with options
+var suite = new Benchmark.Suite('foo', {
 
-      // called when the suite starts running
-      'onStart': onStart,
+  // called when the suite starts running
+  'onStart': onStart,
 
-      // called between running benchmarks
-      'onCycle': onCycle,
+  // called between running benchmarks
+  'onCycle': onCycle,
 
-      // called when aborted
-      'onAbort': onAbort,
+  // called when aborted
+  'onAbort': onAbort,
 
-      // called when a test errors
-      'onError': onError,
+  // called when a test errors
+  'onError': onError,
 
-      // called when reset
-      'onReset': onReset,
+  // called when reset
+  'onReset': onReset,
 
-      // called when the suite completes running
-      'onComplete': onComplete
-    });
+  // called when the suite completes running
+  'onComplete': onComplete
+});
+~~~
 
 <!-- /div -->
 
@@ -1117,17 +1137,19 @@ Adds a test to the benchmark suite.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    suite.add(fn);
+~~~ js
+// basic usage
+suite.add(fn);
 
-    // or using a name first
-    suite.add('foo', fn);
+// or using a name first
+suite.add('foo', fn);
 
-    // or with options
-    suite.add('foo', fn, {
-      'onCycle': onCycle,
-      'onComplete': onComplete
-    });
+// or with options
+suite.add('foo', fn, {
+  'onCycle': onCycle,
+  'onComplete': onComplete
+});
+~~~
 
 <!-- /div -->
 
@@ -1146,11 +1168,13 @@ Registers a single listener of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.addListener('cycle', listener);
+~~~ js
+// basic usage
+bench.addListener('cycle', listener);
 
-    // register a listener for multiple event types
-    bench.addListener('start cycle', listener);
+// register a listener for multiple event types
+bench.addListener('start cycle', listener);
+~~~
 
 <!-- /div -->
 
@@ -1312,11 +1336,13 @@ Unregisters all listeners of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.removeAllListeners('cycle');
+~~~ js
+// basic usage
+bench.removeAllListeners('cycle');
 
-    // unregister all listeners for multiple event types
-    bench.removeListener('start cycle');
+// unregister all listeners for multiple event types
+bench.removeListener('start cycle');
+~~~
 
 <!-- /div -->
 
@@ -1335,11 +1361,13 @@ Unregisters a single listener of a specified event type.
 *(Object)*: The benchmark instance.
 
 #### Example
-    // basic usage
-    bench.removeListener('cycle', listener);
+~~~ js
+// basic usage
+bench.removeListener('cycle', listener);
 
-    // unregister a listener for multiple event types
-    bench.removeListener('start cycle', listener);
+// unregister a listener for multiple event types
+bench.removeListener('start cycle', listener);
+~~~
 
 <!-- /div -->
 
