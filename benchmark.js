@@ -2198,12 +2198,14 @@
   Benchmark.Suite = Suite;
 
   // expose Benchmark
-  if (typeof exports == 'object' && exports && typeof global == 'object' && global) {
-    window = global;
+  if (typeof exports == 'object' && exports) {
     if (typeof module == 'object' && module && module.exports == exports) {
       module.exports = Benchmark;
     } else {
       exports.Benchmark = Benchmark;
+    }
+    if (typeof global == 'object' && global) {
+      window = global;
     }
   } else {
     window.Benchmark = Benchmark;
