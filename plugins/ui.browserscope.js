@@ -278,7 +278,7 @@
 
       // perform inception :3
       idoc.write(interpolate(
-        '<html><body><script>' +
+        '#{doctype}<html><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
@@ -287,6 +287,7 @@
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
         '<\/body><\/html>',
         {
+          'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
           'key': key,
           'refresh': me.REFRESH_DELAY,
           'timeout': me.REQUEST_TIMEOUT
