@@ -463,7 +463,7 @@
     try {
       scripts = document.getElementsByTagName('script');
       createFunction = createFunction('', 'return ' + EMBEDDED_UID)() == EMBEDDED_UID && createFunction;
-    } catch (e) {
+    } catch(e) {
       createFunction = false;
     }
     createFunction || (createFunction = Function);

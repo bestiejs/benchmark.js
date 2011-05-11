@@ -43,19 +43,20 @@
    * @returns {Object|Null} Browserscope results object or null.
    */
   function createSnapshot() {
-    // remove unrun, errored, or Infinity hz
-    var benches = Benchmark.filter(ui.benchmarks, function(bench) {
-      return bench.cycles && isFinite(bench.hz);
-    });
-
     // clone benchmarks using the upper limit of the confidence interval to compute hz
-    benches = Benchmark.map(benches, function(bench) {
+    var benches = Benchmark.map(ui.benchmarks, function(bench, i) {
       var clone = bench.clone(),
           stats = bench.stats;
 
+      clone.cycles = bench.cycles;
       clone.hz = Math.round(1 / (stats.mean + stats.ME));
-      clone.id || (clone.id = Benchmark.indexOf(ui.benchmarks, bench) + 1);
+      clone.id || (clone.id = i + 1);
       return clone;
+    });
+
+    // remove unrun, errored, or Infinity hz
+    benches = Benchmark.filter(benches, function(bench) {
+      return bench.cycles && isFinite(bench.hz);
     });
 
     return Benchmark.reduce(benches, function(result, bench, key) {
