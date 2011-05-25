@@ -6,7 +6,7 @@ A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks
 
 The documentation for Benchmark.js can be viewed here: <http://benchmarkjs.com/docs>
 
-For a list of upcoming features, check out our [roadmap](https://github.com/mathiasbynens/benchmark.js/wiki/Roadmap).
+For a list of upcoming features, check out our [roadmap](https://github.com/bestiejs/Benchmark.js/wiki/Roadmap).
 
 ## Installation and usage
 
@@ -89,14 +89,14 @@ suite.add('RegExp#test', function() {
 To clone this repository including all submodules, using git 1.6.5 or later:
 
 ~~~ bash
-git clone --recursive https://github.com/mathiasbynens/Benchmark.js.git
+git clone --recursive https://github.com/bestiejs/Benchmark.js.git
 cd Benchmark.js
 ~~~
 
 For older git versions, just use:
 
 ~~~ bash
-git clone https://github.com/mathiasbynens/Benchmark.js.git
+git clone https://github.com/bestiejs/Benchmark.js.git
 cd Benchmark.js
 git submodule update --init
 ~~~
