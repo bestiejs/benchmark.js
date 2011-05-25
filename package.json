@@ -37,11 +37,11 @@
   ],
   "bugs": {
     "email": "bugs@benchmarkjs.com",
-    "url": "https://github.com/mathiasbynens/Benchmark.js/issues"
+    "url": "https://github.com/bestiejs/Benchmark.js/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mathiasbynens/Benchmark.js.git"
+    "url": "https://github.com/bestiejs/Benchmark.js.git"
   },
   "engines": [
     "node",
