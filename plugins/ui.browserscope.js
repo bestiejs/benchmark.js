@@ -172,7 +172,7 @@
   function interpolate(string, object) {
     string = string == null ? '' : string;
     Benchmark.each(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
     });
     return string;
   }

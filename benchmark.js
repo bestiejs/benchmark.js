@@ -562,7 +562,7 @@
   function interpolate(string, object) {
     string = string == null ? '' : string;
     each(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
     });
     return string;
   }
@@ -660,6 +660,8 @@
    */
   function each(object, callback) {
     var i = -1,
+        result = object,
+        object = Object(object),
         length = object.length;
 
     if ('length' in object && length > -1 && length < 4294967296) {
@@ -675,7 +677,7 @@
         }
       }
     }
-    return object;
+    return result;
   }
 
   /**
