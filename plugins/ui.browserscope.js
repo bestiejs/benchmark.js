@@ -6,9 +6,7 @@
     'lastAction': 'load',
     'timers': { 'cleanup': null, 'load': null, 'post': null },
     'trash': createElement('div')
-  },
-
-  interpolate = Benchmark.interpolate;
+  };
 
   /*--------------------------------------------------------------------------*/
 
@@ -28,45 +26,22 @@
   }
 
   /**
-   * Shortcut for document.createElement().
+   * Shortcut for `document.createElement()`.
    * @private
-   * @param {String} tag The tag name of the element to create.
-   * @returns {Object} A new of the given tag name element.
+   * @param {String} tagName The tag name of the element to create.
+   * @param {String} name A name to assign to the element.
+   * @returns {Object} Returns a new element.
    */
-  function createElement(tagName) {
-    return document.createElement(tagName);
-  }
-
-  /**
-   * Creates a Browserscope results object.
-   * @private
-   * @returns {Object|Null} Browserscope results object or null.
-   */
-  function createSnapshot() {
-    // clone benchmarks using the upper limit of the confidence interval to compute hz
-    var benches = Benchmark.map(ui.benchmarks, function(bench, i) {
-      var clone = bench.clone(),
-          stats = bench.stats;
-
-      clone.cycles = bench.cycles;
-      clone.hz = Math.round(1 / (stats.mean + stats.ME));
-      clone.id || (clone.id = i + 1);
-      return clone;
-    });
-
-    // remove unrun, errored, or Infinity hz
-    benches = Benchmark.filter(benches, function(bench) {
-      return bench.cycles && isFinite(bench.hz);
-    });
-
-    return Benchmark.reduce(benches, function(result, bench, key) {
-      key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
-      result || (result = { });
-
-      // duplicate and non alphanumeric benchmark names have their ids appended
-      result[key && !result[key] ? key : key + bench.id ] = bench.hz;
-      return result;
-    }, null);
+  function createElement(tagName, name) {
+    var result;
+    name || (name = '');
+    try {
+      // set name attribute for IE6/7
+      result = document.createElement('<' + tagName + ' name="' + name + '">');
+    } catch(e) {
+      (result = document.createElement(tagName)).name = name;
+    }
+    return result;
   }
 
   /**
@@ -85,15 +60,6 @@
   }
 
   /**
-   * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
-   * @private
-   * @returns {Number} Number of milliseconds.
-   */
-  function now() {
-    return +new Date;
-  }
-
-  /**
    * Queries the document for elements by id or tagName.
    * @private
    * @param {String} selector The css selector to match.
@@ -106,7 +72,7 @@
           ? [document.getElementById(selector.slice(1))]
           : document.getElementsByTagName(selector);
 
-    while (result[++i] = nodes[i]) { }
+    while (result[++i] = nodes[i]);
     return result.length-- && result;
   }
 
@@ -129,6 +95,7 @@
   function setMessage(text) {
     var me = ui.browserscope,
         cont = me.container;
+
     if (cont) {
       cont.className = 'bs-rt-message';
       cont.innerHTML = text;
@@ -141,24 +108,19 @@
    * Periodically executed callback that removes injected script and iframe elements.
    * @private
    */
-  function onCleanup() {
-    var expire,
-        name,
-        me = ui.browserscope,
-        delay = me.CLEANUP_INTERVAL * 1e3,
+  function cleanup() {
+    var me = ui.browserscope,
+        timings = me.timings,
         timers = cache.timers,
-        trash = cache.trash;
+        trash = cache.trash,
+        delay = timings.cleanup * 1e3;
 
     // remove injected scripts and old iframes
     if (timers.cleanup) {
+      // if expired, destroy the element to prevent pseudo memory leaks.
+      // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
       Benchmark.each(query('script').concat(query('iframe')), function(element) {
-        // check if element is expired
-        name = element.name;
-        expire = +(/^browserscope-\d+-(\d+)$/.exec(name) || 0)[1] +
-                 Math.max(delay, me.REQUEST_TIMEOUT * 1e3);
-
-        // destroy the element to prevent pseudo memory leaks.
-        // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
+        var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + Math.max(delay, timings.timeout * 1e3);
         if (now() > expire || /browserscope\.org/.test(element.src)) {
           trash.appendChild(element);
           trash.innerHTML = '';
@@ -166,43 +128,62 @@
       });
     }
     // schedule another round
-    timers.cleanup = setTimeout(onCleanup, delay);
+    timers.cleanup = setTimeout(cleanup, delay);
   }
 
   /**
-   * The window load event handler used to initialize the results table.
+   * Creates a Browserscope results object.
    * @private
+   * @returns {Object|Null} Browserscope results object or null.
    */
-  function onLoad() {
-    var cont,
-        me = ui.browserscope,
-        key = me.KEY,
-        placeholder = query(me.PLACEHOLDER_SELECTOR)[0];
+  function createSnapshot() {
+    // clone benchmarks using the upper limit of the confidence interval to compute hz
+    var benches = Benchmark.map(ui.benchmarks, function(bench, i) {
+      var clone = bench.clone(),
+          stats = bench.stats;
 
-    if (placeholder) {
-      // set html of placeholder using a template
-      setHTML(placeholder,
-        '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
-        '<span>Browserscope<\/span><\/a><\/h1>' +
-        '<div class=bs-rt><div id=bs-rt-usertest_#{key}><\/div><\/div>',
-        {
-          'key': key
-        }
-      );
+      clone.cycles = bench.cycles;
+      clone.hz = Math.round(1 / (stats.mean + stats.moe));
+      clone.id || (clone.id = i + 1);
+      return clone;
+    });
 
-      // resolve container
-      cont = me.container = query('#bs-rt-usertest_' + key)[0];
+    // remove unrun, errored, or Infinity hz
+    benches = Benchmark.filter(benches, function(bench) {
+      return bench.cycles && isFinite(bench.hz);
+    });
 
-      // load ua script
-      loadScript('//www.browserscope.org/ua?o=js', cont).id = 'bs-ua-script';
+    // duplicate and non alphanumeric benchmark names have their ids appended
+    return Benchmark.reduce(benches, function(result, bench, key) {
+      key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
+      result || (result = { });
+      result[key && !result[key] ? key : key + bench.id ] = bench.hz;
+      return result;
+    }, null);
+  }
 
-      // load google visualization script
-      // http://code.google.com/apis/loader/autoloader-wizard.html
-      loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
-    }
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   * @private
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   */
+  function interpolate(string, object) {
+    string = string == null ? '' : string;
+    Benchmark.each(object || { }, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
+    });
+    return string;
+  }
 
-    // init garbage collector
-    onCleanup();
+  /**
+   * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
+   * @private
+   * @returns {Number} Number of milliseconds.
+   */
+  function now() {
+    return +new Date;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -224,14 +205,14 @@
 
     cache.lastAction = 'load';
     clearTimeout(timers.load);
-    timers.load = setTimeout(onComplete, me.REQUEST_TIMEOUT * 1e3);
+    timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
 
     // request data
     if (cont) {
-      setMessage(me.LOADING_TEXT);
+      setMessage(me.texts.loading);
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?' +
-        'category=usertest_' + me.KEY + '&' +
+        'category=usertest_' + me.key + '&' +
         'ua=&' +
         'v=3&' +
         'o=gviz_data&' +
@@ -254,7 +235,8 @@
         iframe,
         body = document.body,
         me = ui.browserscope,
-        key = me.KEY,
+        key = me.key,
+        timings = me.timings,
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot();
 
@@ -263,19 +245,14 @@
 
     if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
-      try {
-        iframe = createElement('<iframe name=' + name + '>');
-      } catch(e) {
-        (iframe = createElement('iframe')).name = name;
-      }
-      // inject beacon
+      iframe = createElement('iframe', name);
       body.insertBefore(iframe, body.firstChild);
       idoc = frames[name].document;
       iframe.style.display = 'none';
 
       // expose results snapshot
       me.snapshot = snapshot;
-      setMessage(me.POST_TEXT);
+      setMessage(me.texts.post);
 
       // perform inception :3
       idoc.write(interpolate(
@@ -290,8 +267,8 @@
         {
           'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
           'key': key,
-          'refresh': me.REFRESH_DELAY,
-          'timeout': me.REQUEST_TIMEOUT
+          'refresh': timings.refresh,
+          'timeout': timings.timeout
         }
       ));
 
@@ -309,7 +286,7 @@
     var me = this,
         action = cache.lastAction,
         cont = me.container,
-        delay = me.RETRY_INTERVAL * 1e3,
+        delay = me.timings.retry * 1e3,
         timers = cache.timers;
 
     function retry() {
@@ -340,7 +317,7 @@
         }
       }
       else {
-        setMessage(me.ERROR_TEXT);
+        setMessage(me.texts.error);
         timers[action] = setTimeout(retry, delay);
       }
     }
@@ -352,31 +329,39 @@
   ui.browserscope = {
 
     /** Your Browserscope API key */
-    'KEY': '',
+    'key': '',
 
     /** Selector of the element used for displaying the cumulative results table */
-    'PLACEHOLDER_SELECTOR': '',
+    'selector': '',
 
-    /** The delay between removing abandoned script and iframe elements (secs) */
-    'CLEANUP_INTERVAL': 10,
+    /** Object containing various timings settings */
+    'timings': {
 
-    /** The delay before refreshing the cumulative results after posting (secs) */
-    'REFRESH_DELAY': 3,
+      /** The delay between removing abandoned script and iframe elements (secs) */
+      'cleanup': 10,
 
-    /** The time to wait for a request to finish (secs) */
-    'REQUEST_TIMEOUT': 10,
+      /** The delay before refreshing the cumulative results after posting (secs) */
+      'refresh': 3,
 
-    /** The delay between load attempts (secs) */
-    'RETRY_INTERVAL': 5,
+      /** The delay between load attempts (secs) */
+      'retry': 5,
 
-    /** Text shown when the cumulative results data cannot be retrieved */
-    'ERROR_TEXT': 'The get/post request has failed :(',
+      /** The time to wait for a request to finish (secs) */
+      'timeout': 10
+    },
 
-    /** Text shown while waiting for the cumulative results data to load */
-    'LOADING_TEXT': 'Loading cumulative results data&hellip;',
+    /** Object containing various text messages */
+    'texts': {
 
-    /** Text shown while posting the results snapshot to Browserscope */
-    'POST_TEXT': 'Posting results snapshot&hellip;',
+      /** Text shown when the cumulative results data cannot be retrieved */
+      'error': 'The get/post request has failed :(',
+
+      /** Text shown while waiting for the cumulative results data to load */
+      'loading': 'Loading cumulative results data&hellip;',
+
+      /** Text shown while posting the results snapshot to Browserscope */
+      'post': 'Posting results snapshot&hellip;'
+    },
 
     // loads cumulative results table
     'load': load,
@@ -388,7 +373,27 @@
     'render': render
   };
 
-  // create results table chrome
-  addListener(window, 'load', onLoad);
+  /*--------------------------------------------------------------------------*/
+
+  addListener(window, 'load', function() {
+    var me = ui.browserscope,
+        key = me.key,
+        placeholder = query(me.selector)[0];
+
+    // create results table
+    // http://code.google.com/apis/loader/autoloader-wizard.html
+    if (placeholder) {
+      setHTML(placeholder,
+        '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
+        '<span>Browserscope<\/span><\/a><\/h1>' +
+        '<div class=bs-rt><div id=bs-rt-usertest_#{key}><\/div><\/div>',
+        { 'key': key });
+      me.container = query('#bs-rt-usertest_' + key)[0];
+      loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
+      loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
+    }
+    // init garbage collector
+    cleanup();
+  });
 
 }(this, document));

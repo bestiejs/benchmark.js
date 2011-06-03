@@ -6,52 +6,59 @@
  */
 (function(window, document) {
 
-  /** CSS class name used for error styles */
-  var ERROR_CLASS = 'error',
+  /** Google Analytics account id */
+  var gaId = '',
 
-   /** CSS clasName used for `js enabled` styles */
-   JS_CLASS = 'js',
+  /** Benchmark results element id prefix (e.g. `results-1`) */
+  prefix = 'results-',
 
-   /** CSS class name used to make content visible */
-   SHOW_CLASS = 'show',
+  /** Object containing various css class names */
+  classNames ={
 
-   /** CSS class name used to reset result styles */
-   RESULTS_CLASS = 'results',
+    /** CSS class name used for error styles */
+    'error': 'error',
 
-   /** Google Analytics account id */
-   GA_ACCOUNT_ID = '',
+    /** CSS clasName used for `js enabled` styles */
+    'js': 'js',
 
-   /** Benchmark results element id prefix (e.g. `results-1`) */
-   RESULTS_PREFIX = 'results-',
+    /** CSS class name used to make content visible */
+    'show': 'show',
 
-   /** Inner text for the various run button states */
-   RUN_TEXT = {
-     'READY': 'Run tests',
-     'READY_AGAIN': 'Run again',
-     'RUNNING': 'Stop running'
-   },
+    /** CSS class name used to reset result styles */
+    'results': 'results'
+  },
 
-   /** Common status values */
-   STATUS_TEXT = {
-     'READY': 'Ready to run.',
-     'READY_AGAIN': 'Done. Ready to run again.'
-   },
+  /** Object containing various text messages */
+  texts = {
 
-   /** Cache of error messages */
-   cache = {
-     'errors': []
-   },
+    /** Inner text for the various run button states */
+    'run': {
+      'ready': 'Run tests',
+      'again': 'Run again',
+      'running': 'Stop running'
+    },
 
-   /** Namespace */
-   ui = new Benchmark.Suite,
+    /** Common status values */
+    'status': {
+      'ready': 'Ready to run.',
+      'again': 'Done. Ready to run again.'
+    }
+  },
 
-   each = Benchmark.each,
+  /** Cache of error messages */
+  errors = [],
 
-   filter = Benchmark.filter,
+  /** Namespace */
+  ui = new Benchmark.Suite,
 
-   formatNumber = Benchmark.formatNumber,
+  /** API Shortcuts */
+  each = Benchmark.each,
 
-   indexOf = Benchmark.indexOf;
+  filter = Benchmark.filter,
+
+  formatNumber = Benchmark.formatNumber,
+
+  indexOf = Benchmark.indexOf;
 
   /*--------------------------------------------------------------------------*/
 
@@ -153,12 +160,12 @@
     }
     if (text === false) {
       div.className = div.innerHTML = '';
-      cache.errors.length = 0;
+      errors.length = 0;
     }
     else {
-      if (indexOf(cache.errors, text) < 0) {
-        cache.errors.push(text);
-        addClass(div, SHOW_CLASS);
+      if (indexOf(errors, text) < 0) {
+        errors.push(text);
+        addClass(div, classNames.show);
         appendHTML(div, text);
       }
     }
@@ -237,19 +244,19 @@
    * @private
    */
   function onLoad() {
-    addClass('controls', SHOW_CLASS);
+    addClass('controls', classNames.show);
     addListener('run', 'click', onRun);
 
-    setHTML('run', RUN_TEXT.READY);
+    setHTML('run', texts.run.ready);
     setHTML('user-agent', Benchmark.platform);
-    setStatus(STATUS_TEXT.READY);
+    setStatus(texts.status.ready);
 
     // answer spammer question
     $('question').value = 'no';
 
     // show warning when Firebug is enabled
     if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
-      addClass('firebug', SHOW_CLASS);
+      addClass('firebug', classNames.show);
     }
     // evaluate hash values
     onHashChange();
@@ -261,7 +268,7 @@
    * @param {Object} e The event object.
    */
   function onRun(e) {
-    var run = $('run').innerHTML != RUN_TEXT.RUNNING;
+    var run = $('run').innerHTML != texts.run.running;
     ui.abort();
     if (run) {
       logError(false);
@@ -299,18 +306,18 @@
    */
   function render() {
     each(ui.benchmarks, function(bench, index) {
-      var cell = $(RESULTS_PREFIX + (index + 1)),
+      var cell = $(prefix + (index + 1)),
           error = bench.error,
           hz = bench.hz;
 
       // reset title and class
       cell.title = '';
-      cell.className = RESULTS_CLASS;
+      cell.className = classNames.results;
 
       // status: error
       if (error) {
         setHTML(cell, 'Error');
-        addClass(cell, ERROR_CLASS);
+        addClass(cell, classNames.error);
         logError('<p>' + error + '.<\/p><ul><li>' +
           Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
       }
@@ -324,7 +331,7 @@
           cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
             bench.times.cycle.toFixed(3) + ' seconds.';
           setHTML(cell, formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) +
-            ' <small>&plusmn;' + bench.stats.RME.toFixed(2) + '%<\/small>');
+            ' <small>&plusmn;' + bench.stats.rme.toFixed(2) + '%<\/small>');
         }
         else {
           // status: pending
@@ -360,7 +367,7 @@
   })
   .on('start cycle', function() {
     ui.render();
-    setHTML('run', RUN_TEXT.RUNNING);
+    setHTML('run', texts.run.running);
   })
   .on('complete', function() {
     var benches = filter(ui.benchmarks, 'successful'),
@@ -368,13 +375,13 @@
         slowest = filter(benches, 'slowest');
 
     ui.render();
-    setHTML('run', RUN_TEXT.READY_AGAIN);
-    setStatus(STATUS_TEXT.READY_AGAIN);
+    setHTML('run', texts.run.again);
+    setStatus(texts.status.again);
 
     each(benches, function(bench) {
       var percent,
           text = 'fastest',
-          cell = $(RESULTS_PREFIX + (indexOf(ui.benchmarks, bench) + 1)),
+          cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
           span = cell.getElementsByTagName('span')[0];
 
       if (indexOf(fastest, bench) > -1) {
@@ -403,26 +410,23 @@
 
   /*--------------------------------------------------------------------------*/
 
-  Benchmark.extend(ui, {
+  /**
+   * An array of benchmarks created from test cases.
+   * @member ui
+   */
+  ui.benchmarks = [];
 
-    /**
-     * An array of benchmarks created from test cases.
-     * @member ui
-     */
-    'benchmarks': [],
+  /**
+   * The parsed query parameters of the pages url hash.
+   * @member ui
+   */
+  ui.params = {};
 
-    /**
-     * The parsed query parameters of the pages url hash.
-     * @member ui
-     */
-    'params': {},
+  // parse query params into ui.params hash
+  ui.parseHash = parseHash;
 
-    // parse query params into ui.params hash
-    'parseHash': parseHash,
-
-    // (re)render the results of one or more benchmarks
-    'render': render
-  });
+  // (re)render the results of one or more benchmarks
+  ui.render = render;
 
   /*--------------------------------------------------------------------------*/
 
@@ -430,10 +434,10 @@
   window.ui = ui;
 
   // don't let users alert, confirm, prompt, or open new windows
-  window.alert = window.confirm = window.prompt = window.open = Benchmark.noop;
+  window.alert = window.confirm = window.prompt = window.open = function() { };
 
   // signal JavaScript detected
-  addClass(document.documentElement, JS_CLASS);
+  addClass(document.documentElement, classNames.js);
 
   // re-parse hash query params when it changes
   addListener(window, 'hashchange', onHashChange);
@@ -446,13 +450,13 @@
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
-  if (GA_ACCOUNT_ID) {
+  if (gaId) {
     (function() {
       var tag = 'script',
           script = createElement(tag),
           sibling = document.getElementsByTagName(tag)[0];
 
-      window._gaq = [['_setAccount', GA_ACCOUNT_ID], ['_trackPageview']];
+      window._gaq = [['_setAccount', gaId], ['_trackPageview']];
       script.async = 1;
       script.src = '//www.google-analytics.com/ga.js';
       sibling.parentNode.insertBefore(script, sibling);

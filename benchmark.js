@@ -7,23 +7,23 @@
  */
 (function(window) {
 
-  /** Detect DOM0 timeout API (performed at the bottom) */
-  var HAS_TIMEOUT_API,
+  /** Detect free variable `exports` */
+  var freeExports = typeof exports == 'object' && exports,
 
-  /** Detect Adobe AIR environment */
-  IN_AIR = isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
+  /** Detect free variable `require` */
+  freeRequire = typeof require == 'function' && require,
 
-  /** Detect Java environment */
-  IN_JAVA = isClassOf(window.java, 'JavaPackage'),
+  /** Detect free variable `global` */
+  freeGlobal = isHostType(this, 'global') && (freeExports ? (window = global) : global),
+
+  /** Used to assign each benchmark an incrimented id */
+  counter = 0,
 
   /** Used to integrity check compiled tests */
-  EMBEDDED_UID = +new Date,
-
-  /** Used to skip initialization of the Benchmark constructor */
-  HEADLESS = function() { },
+  uid = 'uid' + (+new Date),
 
   /** Used to avoid hz of Infinity */
-  CYCLE_DIVISORS = {
+  divisors = {
     '1': 4096,
     '2': 512,
     '3': 64,
@@ -35,22 +35,21 @@
    * T-Distribution two-tailed critical values for 95% confidence
    * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
    */
-  T_DISTRIBUTION = {
+  distribution = {
     '1':  12.706,'2':  4.303, '3':  3.182, '4':  2.776, '5':  2.571, '6':  2.447,
     '7':  2.365, '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
-    '13': 2.160, '14': 2.145, '15': 2.131, '16': 2.120, '17': 2.110, '18': 2.101,
-    '19': 2.093, '20': 2.086, '21': 2.080, '22': 2.074, '23': 2.069, '24': 2.064,
-    '25': 2.060, '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
-    'Infinity': 1.960
+    '13': 2.16,  '14': 2.145, '15': 2.131, '16': 2.12,  '17': 2.11,  '18': 2.101,
+    '19': 2.093, '20': 2.086, '21': 2.08,  '22': 2.074, '23': 2.069, '24': 2.064,
+    '25': 2.06,  '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
+    'infinity': 1.96
   },
 
-  /** Internal cached used by various methods */
-  cache = {
-    'counter': 0
+  /** Used to flag environments/features */
+  has = {
+    'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
+    'java': isClassOf(window.java, 'JavaPackage'),
+    'timeout': isHostType(window, 'setTimeout') && isHostType(window, 'clearTimeout')
   },
-
-  /** Used in Benchmark.hasKey() */
-  hasOwnProperty = cache.hasOwnProperty,
 
   /** Used to convert array-like objects to arrays */
   slice = [].slice,
@@ -143,13 +142,13 @@
       // 3 arguments
       me.name = name;
     }
-    // initialize if not headless
-    if (name != HEADLESS) {
+    // treat as a headless execution, skipping initialization, if the private
+    // function `call` is passed as the `name` argument
+    if (name != call) {
+      counter++;
       setOptions(me, options);
-      fn = me.fn || (me.fn = fn);
-      fn.uid || (fn.uid = ++cache.counter);
-
-      me.created = +new Date;
+      me.fn || (me.fn = fn);
+      me.id || (me.id = counter);
       me.stats = extend({ }, me.stats);
       me.times = extend({ }, me.times);
     }
@@ -231,11 +230,11 @@
    */
   function call(me, fn, async) {
     // only attempt asynchronous calls if supported
-    if (async && HAS_TIMEOUT_API) {
-      me.timerId = setTimeout(function() {
-        delete me.timerId;
+    if (async && has.timeout) {
+      me._timerId = setTimeout(function() {
+        delete me._timerId;
         fn();
-      }, me.CYCLE_DELAY * 1e3);
+      }, me.delay * 1e3);
     }
     else {
       fn();
@@ -252,7 +251,7 @@
     var applet,
         args,
         fallback,
-        proto = Benchmark.prototype,
+        options = Benchmark.options,
         timers = [],
         timerNS = Date,
         msRes = getRes('ms'),
@@ -264,6 +263,9 @@
           fn = me.fn,
           compiled = fn.compiled,
           count = me.count;
+
+      // init `minTime` if needed
+      me.minTime || (me.minTime = me.options.minTime = options.minTime);
 
       if (applet) {
         // repair nanosecond timer
@@ -286,7 +288,7 @@
             // determine if compiled code is exited early, usually by a rogue
             // return statement, by checking for a return object with the uid
             me.count = 1;
-            compiled = fn.compiled = compiled.call(me, timerNS).uid == EMBEDDED_UID && compiled;
+            compiled = fn.compiled = compiled.call(me, timerNS).uid == uid && compiled;
             me.count = count;
           }
           if (compiled) {
@@ -376,11 +378,9 @@
 
     // detect Node's microtime module:
     // npm install microtime
-    try {
-      if (timerNS = typeof require == 'function' && !window.require && require('microtime').now) {
-        timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
-      }
-    } catch(e) { }
+    if (timerNS = (req('microtime') || { 'now': 0 }).now) {
+      timers.push({ 'ns': timerNS, 'res': getRes('us'), 'unit': 'us' });
+    }
 
     // pick timer with highest resolution
     timerNS = (timer = reduce(timers, function(timer, other) {
@@ -425,7 +425,7 @@
 
     // inject uid into variable names to avoid collisions with
     // embedded tests and create non-embedding fallback
-    code = code.replace(/\$/g, EMBEDDED_UID).split('|');
+    code = code.replace(/\$/g, uid).split('|');
     args = code.pop();
     fallback = createFunction(args,
       interpolate(code[0], { 'setup': code.pop() }) +
@@ -434,7 +434,7 @@
     );
 
     // resolve time to achieve a percent uncertainty of 1%
-    proto.MIN_TIME || (proto.MIN_TIME = max(timer.res / 2 / 0.01, 0.05));
+    options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
     return clock.apply(null, arguments);
   }
 
@@ -446,23 +446,20 @@
    * @returns {Function} The new function.
    */
   function createFunction() {
-    var scripts,
-        prop = 'c' + EMBEDDED_UID;
-
     createFunction = function(args, body) {
-      var parent = scripts[0].parentNode,
+      var sibling = document.getElementsByTagName('script')[0],
+          parent = sibling.parentNode,
           script = document.createElement('script');
 
-      script.appendChild(document.createTextNode('Benchmark.' + prop + '=function(' + args + '){' + body + '}'));
-      parent.removeChild(parent.insertBefore(script, scripts[0]));
-      return [Benchmark[prop], delete Benchmark[prop]][0];
+      script.appendChild(document.createTextNode('Benchmark.' + uid + '=function(' + args + '){' + body + '}'));
+      parent.removeChild(parent.insertBefore(script, sibling));
+      return [Benchmark[uid], delete Benchmark[uid]][0];
     };
 
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
     try {
-      scripts = document.getElementsByTagName('script');
-      createFunction = createFunction('', 'return ' + EMBEDDED_UID)() == EMBEDDED_UID && createFunction;
+      createFunction = createFunction('', 'return"' + uid + '"')() == uid && createFunction;
     } catch(e) {
       createFunction = false;
     }
@@ -471,15 +468,18 @@
   }
 
   /**
-   * Wraps a function and passes `this` to the original function as the first argument.
+   * Copies own/inherited properties of a source object to the destination object.
    * @private
-   * @param {Function} fn The function to be wrapped.
-   * @returns {Function} The new function.
+   * @param {Object} destination The destination object.
+   * @param {Object} [source={}] The source object.
+   * @returns {Object} The destination object.
    */
-  function methodize(fn) {
-    return function() {
-      return fn.apply(this, [this].concat(slice.call(arguments)));
-    };
+  function extend(destination, source) {
+    source || (source = { });
+    for (var key in source) {
+      destination[key] = source[key];
+    }
+    return destination;
   }
 
   /**
@@ -489,7 +489,7 @@
    * @returns {Number} The critical value.
    */
   function getCriticalValue(df) {
-    return T_DISTRIBUTION[Math.round(df) || 1] || T_DISTRIBUTION.Infinity;
+    return distribution[Math.round(df) || 1] || distribution.infinity;
   }
 
   /**
@@ -511,8 +511,119 @@
    * @returns {String} The function's source code.
    */
   function getSource(fn) {
-    return trim((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
+    return ((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
+      .replace(/^\s+|\s+$/g, '')
       .replace(/([^\n])$/, '$1\n');
+  }
+
+  /**
+   * Checks if an object has the specified key as a direct property.
+   * @private
+   * @param {Object} object The object to check.
+   * @param {String} key The key to check for.
+   * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
+   */
+  function hasKey(object, key) {
+    var result,
+        o = { },
+        hasOwnProperty = o.hasOwnProperty,
+        parent = (object.constructor || Object).prototype;
+
+    // for modern browsers
+    object = Object(object);
+    if (isClassOf(hasOwnProperty, 'Function')) {
+      result = hasOwnProperty.call(object, key);
+    }
+    // for Safari 2
+    else if (o.__proto__ == Object.prototype) {
+      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
+    }
+    // for others (not as accurate)
+    else {
+      result = key in object && !(key in parent && object[key] === parent[key]);
+    }
+    return result;
+  }
+
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   * @private
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   * @example
+   *
+   * Benchmark.interpolate('#{greet} #{who}!', {
+   *   'greet': 'Hello',
+   *   'who': 'world'
+   * }); // -> 'Hello world!'
+   */
+  function interpolate(string, object) {
+    string = string == null ? '' : string;
+    each(object || { }, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
+    });
+    return string;
+  }
+
+  /**
+   * Checks if an object is of the specified class.
+   * @private
+   * @param {Object} object The object.
+   * @param {String} name The name of the class.
+   * @returns {Boolean} Returns `true` if of the class, else `false`.
+   */
+  function isClassOf(object, name) {
+    return object != null && {}.toString.call(object).slice(8, -1) == name;
+  }
+
+  /**
+   * Host objects can return type values that are different from their actual
+   * data type. The objects we are concerned with usually return non-primitive
+   * types of object, function, or unknown.
+   * @private
+   * @param {Mixed} object The owner of the property.
+   * @param {String} property The property to check.
+   * @returns {Boolean} Returns `true` if the property value is a non-primitive, else `false`.
+   */
+  function isHostType(object, property) {
+    var type = object != null ? typeof object[property] : 'number';
+    return !/^(?:boolean|number|string|undefined)$/.test(type) &&
+      (type == 'object' ? !!object[property] : true);
+  }
+
+  /**
+   * Wraps a function and passes `this` to the original function as the first argument.
+   * @private
+   * @param {Function} fn The function to be wrapped.
+   * @returns {Function} The new function.
+   */
+  function methodize(fn) {
+    return function() {
+      return fn.apply(this, [this].concat(slice.call(arguments)));
+    };
+  }
+
+  /**
+   * A no-operation function.
+   * @private
+   */
+  function noop() {
+    // no operation performed
+  }
+
+  /**
+   * A wrapper around require() to suppress `module missing` errors.
+   * @private
+   * @param {String} id The module id.
+   * @returns {Mix} The exported module.
+   */
+  function req(id) {
+    var result = null
+    try {
+      freeExports && freeRequire && (result = freeRequire(id));
+    } catch(e) { }
+    return result;
   }
 
   /**
@@ -550,7 +661,7 @@
     var i = -1,
         length = object.length;
 
-    if (hasKey(object, 'length') && length > -1 && length < 4294967296) {
+    if ('length' in object && length > -1 && length < 4294967296) {
       while (++i < length) {
         if (i in object && callback(object[i], i, object) === false) {
           break;
@@ -564,22 +675,6 @@
       }
     }
     return object;
-  }
-
-  /**
-   * Copies own/inherited properties of a source object to the destination object.
-   * @static
-   * @member Benchmark
-   * @param {Object} destination The destination object.
-   * @param {Object} [source={}] The source object.
-   * @returns {Object} The destination object.
-   */
-  function extend(destination, source) {
-    source || (source = { });
-    for (var key in source) {
-      destination[key] = source[key];
-    }
-    return destination;
   }
 
   /**
@@ -616,7 +711,7 @@
       result = filter(array, 'successful').sort(function(a, b) {
         a = a.stats;
         b = b.stats;
-        return (a.mean + a.ME > b.mean + b.ME ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
+        return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
       });
       result = filter(result, function(bench) {
         return !result[0].compare(bench);
@@ -637,34 +732,6 @@
   function formatNumber(number) {
     number = String(number).split('.');
     return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') + (number[1] ? '.' + number[1] : '');
-  }
-
-  /**
-   * Checks if an object has the specified key as a direct property.
-   * @static
-   * @member Benchmark
-   * @param {Object} object The object to check.
-   * @param {String} key The key to check for.
-   * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
-   */
-  function hasKey(object, key) {
-    var result,
-        parent = (object.constructor || Object).prototype;
-
-    // for modern browsers
-    object = Object(object);
-    if (isClassOf(hasOwnProperty, 'Function')) {
-      result = hasOwnProperty.call(object, key);
-    }
-    // for Safari 2
-    else if (cache.__proto__ == Object.prototype) {
-      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
-    }
-    // for others (not as accurate)
-    else {
-      result = key in object && !(key in parent && object[key] === parent[key]);
-    }
-    return result;
   }
 
   /**
@@ -786,13 +853,12 @@
     } else {
       options = extend(options, name);
       name = options.name;
-      args = isArray(args = 'args' in options ? options.args : []) ? args : [args];
+      args = isClassOf(args = 'args' in options ? options.args : [], 'Array') ? args : [args];
       queued = options.queued;
     }
     // async for use with Benchmark#run only
     if (name == 'run') {
-      async = (args[0] == null ? Benchmark.prototype.DEFAULT_ASYNC :
-        args[0]) && HAS_TIMEOUT_API;
+      async = (args[0] == null ? Benchmark.options.async : args[0]) && has.timeout;
     }
     // start iterating over the array
     if (bench = benches[0]) {
@@ -808,66 +874,6 @@
   }
 
   /**
-   * Modify a string by replacing named tokens with matching object property values.
-   * @static
-   * @member Benchmark
-   * @param {String} string The string to modify.
-   * @param {Object} object The template object.
-   * @returns {String} The modified string.
-   * @example
-   *
-   * Benchmark.interpolate('#{greet} #{who}!', {
-   *   'greet': 'Hello',
-   *   'who': 'world'
-   * }); // -> 'Hello world!'
-   */
-  function interpolate(string, object) {
-    string = string == null ? '' : string;
-    each(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), String(value));
-    });
-    return string;
-  }
-
-  /**
-   * Determines if the given value is an array.
-   * @static
-   * @member Benchmark
-   * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if value is an array, else `false`.
-   */
-  function isArray(value) {
-    return isClassOf(value, 'Array');
-  }
-
-  /**
-   * Checks if an object is of the specified class.
-   * @static
-   * @member Benchmark
-   * @param {Object} object The object.
-   * @param {String} name The name of the class.
-   * @returns {Boolean} Returns `true` if of the class, else `false`.
-   */
-  function isClassOf(object, name) {
-    return object != null && {}.toString.call(object).slice(8, -1) == name;
-  }
-
-  /**
-   * Host objects can return type values that are different from their actual
-   * data type. The objects we are concerned with usually return non-primitive
-   * types of object, function, or unknown.
-   * @static
-   * @member Benchmark
-   * @param {Mixed} object The owner of the property.
-   * @param {String} property The property to check.
-   * @returns {Boolean} Returns `true` if the property value is a non-primitive, else `false`.
-   */
-  function isHostType(object, property) {
-    return !/^(?:boolean|number|string|undefined)$/
-      .test(typeof object[property]) && !!object[property];
-  }
-
-  /**
    * Creates a string of joined array values or object key-value pairs.
    * @static
    * @member Benchmark
@@ -878,7 +884,7 @@
    */
   function join(object, separator1, separator2) {
     var pairs = [];
-    if (isArray(object)) {
+    if (isClassOf(object, 'Array')) {
       pairs = object;
     }
     else {
@@ -903,15 +909,6 @@
       result.push(callback(value, index, array));
       return result;
     }, []);
-  }
-
-  /**
-   * A no-operation function.
-   * @static
-   * @member Benchmark
-   */
-  function noop() {
-    // no operation performed
   }
 
   /**
@@ -942,17 +939,6 @@
       accumulator = callback(accumulator, value, index, array);
     });
     return accumulator;
-  }
-
-  /**
-   * A generic bare-bones `String#trim` solution.
-   * @static
-   * @member Benchmark
-   * @param {String} string The string to trim.
-   * @returns {String} The trimmed string.
-   */
-  function trim(string) {
-    return String(string).replace(/^\s+/, '').replace(/\s+$/, '');
   }
 
   /*--------------------------------------------------------------------------*/
@@ -995,7 +981,7 @@
    */
   function add(name, fn, options) {
     var me = this,
-        bench = new Benchmark(HEADLESS);
+        bench = new Benchmark(call);
 
     Benchmark.call(bench, name, fn, options);
     me.push(bench);
@@ -1192,9 +1178,9 @@
   function abort() {
     var me = this;
     if (me.running) {
-      if (me.timerId && HAS_TIMEOUT_API) {
-        clearTimeout(me.timerId);
-        delete me.timerId;
+      if (me._timerId && has.timeout) {
+        clearTimeout(me._timerId);
+        delete me._timerId;
       }
       // set running as NaN so reset() will detect it as falsey and *not* call abort(),
       // but *will* detect it as a change and fire the onReset() callback
@@ -1244,7 +1230,7 @@
         df = a.size + b.size - 2,
         pooled = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
         tstat = (a.mean - b.mean) / sqrt(pooled * (1 / a.size + 1 / b.size)),
-        near = abs(1 - a.mean / b.mean) < 0.055 && a.RME < 3 && b.RME < 3;
+        near = abs(1 - a.mean / b.mean) < 0.055 && a.rme < 3 && b.rme < 3;
 
     // check if the means aren't close and the t-statistic is significant
     return !near && abs(tstat) > getCriticalValue(df) ? (tstat > 0 ? -1 : 1) : 0;
@@ -1267,8 +1253,7 @@
       if (value && isClassOf(value, 'Object')) {
         pairs.push([value, other]);
       }
-      else if (!isClassOf(value, 'Function') &&
-          key != 'created' && value != other) {
+      else if (!isClassOf(value, 'Function') && value != other) {
         pair[1][key] = value;
         changed = true;
       }
@@ -1300,16 +1285,17 @@
     var me = this,
         error = me.error,
         hz = me.hz,
+        id = me.id,
         stats = me.stats,
         size = stats.size,
-        pm = IN_JAVA ? '+/-' : '\xb1',
-        result = me.name || me.id || ('<Test #' + me.fn.uid + '>');
+        pm = has.java ? '+/-' : '\xb1',
+        result = me.name || (typeof id == 'number' ? '<Test #' + id + '>' : id);
 
     if (error) {
       result += ': ' + join(error);
     } else {
       result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
-        stats.RME.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
+        stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
     }
     return result;
   }
@@ -1325,12 +1311,12 @@
   function compute(me, async) {
     var queue = [],
         sample = [],
-        runCount = me.INIT_RUN_COUNT;
+        runCount = me.runCount;
 
     function enqueue(count) {
       while (count--) {
         queue.push(me.clone({
-          'computing': me,
+          '_host': me,
           'events': { 'start': [update], 'cycle': [update] }
         }));
       }
@@ -1344,7 +1330,7 @@
           // the me.count and me.cycles props of the host are updated in cycle() below
           me.hz = clone.hz;
           me.times.period = clone.times.period;
-          me.INIT_RUN_COUNT = clone.INIT_RUN_COUNT;
+          me.runCount = clone.runCount;
           me.emit('cycle');
         }
         else if (clone.error) {
@@ -1354,7 +1340,7 @@
         }
         else {
           // on start
-          clone.count = me.INIT_RUN_COUNT;
+          clone.count = me.runCount;
         }
       } else if (me.aborted) {
         clone.abort();
@@ -1372,7 +1358,7 @@
           times = me.times,
           aborted = me.aborted,
           elapsed = (now - times.start) / 1e3,
-          maxedOut = elapsed > me.MAX_TIME_ELAPSED,
+          maxedOut = elapsed > me.maxTime,
           size = sample.push(clone.times.period),
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
@@ -1406,9 +1392,9 @@
             times.stop = now;
             times.elapsed = elapsed;
             extend(me.stats, {
-              'ME': moe,
-              'RME': rme,
-              'SEM': sem,
+              'moe': moe,
+              'rme': rme,
+              'sem': sem,
               'deviation': sd,
               'mean': mean,
               'size': size,
@@ -1421,7 +1407,7 @@
               me.hz = 1 / mean;
             }
           }
-          me.INIT_RUN_COUNT = runCount;
+          me.runCount = runCount;
           me.emit('complete');
         }
       }
@@ -1429,7 +1415,7 @@
     }
 
     // init sample/queue and begin
-    enqueue(me.MIN_SAMPLE_SIZE);
+    enqueue(me.minSamples);
     invoke(queue, { 'name': 'run', 'args': async, 'queued': true, 'onCycle': evaluate });
   }
 
@@ -1448,7 +1434,7 @@
           minTime,
           period,
           count = me.count,
-          host = me.computing,
+          host = me._host,
           times = me.times;
 
       // continue, if not aborted between cycles
@@ -1459,7 +1445,7 @@
 
         try {
           clocked = clock(host);
-          minTime = me.MIN_TIME;
+          minTime = me.minTime;
         } catch(e) {
           me.abort();
           me.error = e;
@@ -1477,15 +1463,15 @@
         // do we need to do another cycle?
         me.running = clocked < minTime;
         // avoid working our way up to this next time
-        me.INIT_RUN_COUNT = count;
+        me.runCount = count;
 
         if (me.running) {
-          // tests may clock at 0 when INIT_RUN_COUNT is a small number,
+          // tests may clock at 0 when `runCount` is a small number,
           // to avoid that we set its count to something a bit higher
-          if (!clocked && (divisor = CYCLE_DIVISORS[me.cycles]) != null) {
+          if (!clocked && (divisor = divisors[me.cycles]) != null) {
             count = Math.floor(4e6 / divisor);
           }
-          // calculate how many more iterations it will take to achive the MIN_TIME
+          // calculate how many more iterations it will take to achive the `minTime`
           if (count <= me.count) {
             count += Math.ceil((minTime - clocked) / period);
           }
@@ -1501,11 +1487,11 @@
         me.count = count;
         call(me, cycle, async);
       } else {
-        // fix TraceMonkey bug
+        // fix TraceMonkey bug associated with clock fallbacks
         // http://bugzil.la/509069
-        if (window.Benchmark == Benchmark) {
-          window.Benchmark = 1;
-          window.Benchmark = Benchmark;
+        if (window['Benchmark'] == Benchmark) {
+          window['Benchmark'] = 1;
+          window['Benchmark'] = Benchmark;
         }
         me.emit('complete');
       }
@@ -1516,203 +1502,19 @@
     me.reset();
     me.running = true;
 
-    me.count = me.INIT_RUN_COUNT;
+    me.count = me.runCount;
     me.times.start = +new Date;
     me.emit('start');
 
-    async = (async == null ? me.DEFAULT_ASYNC : async) && HAS_TIMEOUT_API;
-    if (me.computing) {
+    async = (async == null ? me.async : async) && has.timeout;
+
+    if (me._host) {
       cycle();
     } else {
       compute(me, async);
     }
     return me;
   }
-
-  /*--------------------------------------------------------------------------*/
-
-  /**
-   * Platform object containing browser name, version, and operating system.
-   * @static
-   * @member Benchmark
-   * @type Object
-   */
-  Benchmark.platform = (function() {
-    var me = this,
-        alpha = IN_JAVA ? 'a' : '\u03b1',
-        beta = IN_JAVA ? 'b' : '\u03b2',
-        description = [],
-        doc = window.document || {},
-        nav = window.navigator || {},
-        ua = nav.userAgent || 'unknown platform',
-        layout = /Gecko|Trident|WebKit/.exec(ua),
-        data = { '6.1': 'Server 2008 R2 / 7', '6.0': 'Server 2008 / Vista', '5.2': 'Server 2003 / XP x64', '5.1': 'XP', '5.0': '2000', '4.0': 'NT', '4.9': 'ME' },
-        name = 'Avant Browser,Camino,Epiphany,Fennec,Flock,Galeon,GreenBrowser,iCab,Iron,K-Meleon,Konqueror,Lunascape,Maxthon,Minefield,Nook Browser,RockMelt,SeaMonkey,Sleipnir,SlimBrowser,Sunrise,Swiftfox,Opera Mini,Opera,Chrome,Firefox,IE,Safari',
-        os = 'Android,Cygwin,SymbianOS,webOS[ /]\\d,Linux,Mac OS(?: X)?,Macintosh,Windows 98;,Windows ',
-        product = 'BlackBerry\\s?\\d+,iP[ao]d,iPhone,Kindle,Nokia,Nook,PlayBook,Samsung,Xoom',
-        version = isClassOf(window.opera, 'Opera') && opera.version();
-
-    function format(string) {
-      // trim and conditionally capitalize
-      return /^(?:webOS|i(?:OS|P))/.test(string = trim(string)) ? string :
-        string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    name = reduce(name.split(','), function(name, guess) {
-      return name || RegExp(guess + '\\b', 'i').exec(ua) && guess;
-    });
-
-    product = reduce(product.split(','), function(product, guess) {
-      if (!product && (product = RegExp(guess + '[^ ();-]*', 'i').exec(ua))) {
-        // correct character case and split by forward slash
-        if ((product = String(product).replace(RegExp(guess = /\w+/.exec(guess), 'i'), guess).split('/'))[1]) {
-          if (/[\d.]+/.test(product[0])) {
-            version = version || product[1];
-          } else {
-            product[0] += ' ' + product[1];
-          }
-        }
-        product = format(product[0].replace(/([a-z])(\d)/i, '$1 $2').split('-')[0]);
-      }
-      return product;
-    });
-
-    os = reduce(os.split(','), function(os, guess) {
-      if (!os && (os = RegExp(guess + '[^();/-]*').exec(ua))) {
-        // platform tokens defined at
-        // http://msdn.microsoft.com/en-us/library/ms537503(VS.85).aspx
-        if (/^win/i.test(os) && (data = data[0/*opera fix*/,/[456]\.\d/.exec(os)])) {
-          os = 'Windows ' + data;
-        }
-        // normalize iOS
-        else if (/^iP/.test(product)) {
-          name || (name = 'Safari');
-          os = 'iOS' + ((data = /\bOS ([\d_]+)/.exec(ua)) ? ' ' + data[1] : '');
-        }
-        // cleanup
-        os = String(os).replace(RegExp(guess = /\w+/.exec(guess), 'i'), guess)
-          .replace(/\/(\d)/, ' $1').replace(/_/g, '.').replace(/x86\.64/g, 'x86_64')
-          .replace('Macintosh', 'Mac OS').replace(/(OS X) Mach$/, '$1').split(' on ')[0];
-      }
-      return os;
-    });
-
-    // detect simulator
-    if (/Simulator/i.exec(ua)) {
-      product = (product ? product + ' ' : '') + 'Simulator';
-    }
-    // detect non Firefox Gecko/Safari WebKit based browsers
-    if (ua && (data = /^(?:Firefox|Safari|null)/.exec(name))) {
-      if (name && !product && /[/,]/.test(ua.slice(ua.indexOf(data + '/') + 8))) {
-        name = null;
-      }
-      if ((data = product || os) && !/^(?:iP|Lin|Mac|Win)/.test(data)) {
-        name = /[a-z]+/i.exec(/^And/.test(os) && os || data) + ' Browser';
-      }
-    }
-    // detect non Opera versions
-    if (!version) {
-      version = reduce(['version', name, 'AdobeAIR', 'Firefox', 'NetFront'], function(version, guess) {
-        return version || (RegExp(guess + '(?:-[\\d.]+/|[ /-])([^ ();/-]*)', 'i').exec(ua) || 0)[1] || null;
-      });
-    }
-    // detect server-side js
-    if (me && isHostType(me, 'global')) {
-      if (typeof exports == 'object' && exports) {
-        if (me == window && typeof system == 'object' && (data = system)) {
-          name = data.global == global ? 'Narwhal' : 'RingoJS';
-          os = data.os || null;
-        }
-        else if (typeof process == 'object' && (data = process)) {
-          name = 'Node.js';
-          version = /[\d.]+/.exec(data.version)[0];
-          os = data.platform;
-        }
-      } else if (isClassOf(me.environment, 'Environment')) {
-        name = 'Rhino';
-      }
-      if (IN_JAVA && !os) {
-        os = String(java.lang.System.getProperty('os.name'));
-      }
-    }
-    // detect Adobe AIR
-    else if (IN_AIR) {
-      name = 'Adobe AIR';
-      os = runtime.flash.system.Capabilities.os;
-    }
-    // detect PhantomJS
-    else if (isClassOf(data = window.phantom, 'RuntimeObject')) {
-      name = 'PhantomJS';
-      version = (data = data.version) && (data.major + '.' + data.minor + '.' + data.patch);
-    }
-    // detect IE compatibility mode
-    else if (typeof doc.documentMode == 'number' && (data = /Trident\/(\d+)/.exec(ua))) {
-      version = [version, doc.documentMode];
-      version[1] = (data = +data[1] + 4) != version[1] ? (layout = null, description.push('running in IE ' + version[1] + ' mode'), data) : version[1];
-      version = name == 'IE' ? String(version[1].toFixed(1)) : version[0];
-    }
-    // detect release phases
-    if (version && (data = /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) || /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + nav.appMinorVersion))) {
-      version = version.replace(RegExp(data + '\\+?$'), '') + (/^b/i.test(data) ? beta : alpha) + (/\d+\+?/.exec(data) || '');
-    }
-    // detect Maxthon's unreliable version info
-    if (/^Max/.test(name)) {
-      version = version && version.replace(/\.[.\d]*/, '.x');
-    }
-    // detect Firefox nightly
-    else if (/^Min/.test(name)) {
-      name = 'Firefox';
-      version = RegExp(alpha + '|' + beta + '|null').test(version) ? version : version + alpha;
-    }
-    // detect mobile
-    else if (name && (!product || name == 'IE') && !/Bro/.test(name) && /Mobi/.test(ua)) {
-      name += ' Mobile';
-    }
-    // detect unspecified Chrome/Safari versions
-    if (data = (/AppleWebKit\/(\d+(?:\.\d+)?)/.exec(ua) || 0)[1]) {
-      if (/^And/.exec(os)) {
-        data = data < 530 ? 1 : data < 532 ? 2 : data < 532.5 ? 3 : data < 533 ? 4 : data < 534.3 ? 5 : data < 534.7 ? 6 : data < 534.10 ? 7 : data < 534.13 ? 8 : data < 534.16 ? 9 : '10';
-        layout = 'like Chrome';
-      } else {
-        data = data < 400 ? 1 : data < 500 ? 2 : data < 526 ? 3 : data < 533 ? 4 : '4';
-        layout = 'like Safari';
-      }
-      layout += ' ' + (data += typeof data == 'number' ? '.x' : '+');
-      version = name == 'Safari' && (!version || parseInt(version) > 45) ? data : version;
-    }
-    // detect platform preview
-    if (RegExp(alpha + '|' + beta).test(version) && typeof external == 'object' && !external) {
-      layout = layout && !/like /.test(layout) ? 'rendered by ' + layout : layout;
-      description.unshift('platform preview');
-    }
-    // add layout engine
-    if (layout && /Ado|Bro|Lun|Max|Pha|Sle/.test(name)) {
-      description.push(layout);
-    }
-    // combine contextual information
-    if (description.length) {
-      description = ['(' + description.join('; ') + ')'];
-    }
-    // append product
-    if (product && String(name).indexOf(product) < 0) {
-      description.push('on ' + product);
-    }
-    // add browser/os architecture
-    if (/\b(?:WOW|x|IA)64\b/.test(ua)) {
-      os = os && os + (/64/.test(os) ? '' : ' x64');
-      if (name && (/WOW64/.test(ua) || /\w(?:86|32)$/.test(nav.cpuClass || nav.platform))) {
-        description.unshift('x86');
-      }
-    }
-    return {
-      'version': name && version && description.unshift(version) && version,
-      'name': name && description.unshift(name) && name,
-      'os': name && (os = os && format(os)) && description.push(product ? '(' + os + ')' : 'on ' + os) && os,
-      'product': product,
-      'description': description.length ? description.join(' ') : ua,
-      'toString': function() { return this.description; }
-    };
-  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -1732,13 +1534,120 @@
      * @member Benchmark
      * @type Object
      */
-    'options': { },
+    'options': {
+
+      /**
+       * A flag to indicate methods will run asynchronously by default.
+       * @static
+       * @member Benchmark.options
+       * @type Boolean
+       */
+      'async': false,
+
+      /**
+       * The delay between test cycles (secs).
+       * @static
+       * @member Benchmark.options
+       * @type Number
+       */
+      'delay': 0.005,
+
+      /**
+       * The maximum time a benchmark is allowed to run before finishing (secs).
+       * @static
+       * @member Benchmark.options
+       * @type Number
+       */
+      'maxTime': 5,
+
+      /**
+       * The minimum sample size required to perform statistical analysis.
+       * @static
+       * @member Benchmark.options
+       * @type Number
+       */
+      'minSamples': 5,
+
+      /**
+       * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+       * @static
+       * @member Benchmark.options
+       * @type Number
+       */
+      'minTime': 0,
+
+      /**
+       * The default number of times to execute a test on a benchmark's first cycle.
+       * @static
+       * @member Benchmark.options
+       * @type Number
+       */
+      'runCount': 5
+    },
+
+    /**
+     * Platform object containing browser name, version, and operating system.
+     * @static
+     * @member Benchmark
+     * @type Object
+     */
+    'platform': req('platform') || window.platform || {
+
+      /**
+       * The platform description.
+       * @member Benchmark.platform
+       * @type {String}
+       */
+      'description': window.navigator && navigator.userAgent || 'unknown platform',
+
+      /**
+       * The name of the browser layout engine.
+       * @member Benchmark.platform
+       * @type {String|Null}
+       */
+      'layout': null,
+
+      /**
+       * The name of the product hosting the browser.
+       * @member Benchmark.platform
+       * @type {String|Null}
+       */
+      'product': null,
+
+      /**
+       * The name of the browser/environment.
+       * @member Benchmark.platform
+       * @type {String|Null}
+       */
+      'name': null,
+
+      /**
+       * The name of the operating system.
+       * @member Benchmark.platform
+       * @type {String|Null}
+       */
+      'os': null,
+
+      /**
+       * The browser/environment version.
+       * @member Benchmark.platform
+       * @type {String|Null}
+       */
+      'version': null,
+
+      /**
+       * Return platform description when the platform object is coerced to a string.
+       * @member Benchmark.platform
+       * @type Function
+       * @returns {String} The platform description.
+       */
+      'toString': function() {
+        return this.description;
+      }
+    },
 
     // generic Array#forEach/for-in
     'each': each,
-
-    // copy properties to another object
-    'extend': extend,
 
     // generic Array#filter
     'filter': filter,
@@ -1746,26 +1655,11 @@
     // converts a number to a comma-separated string
     'formatNumber': formatNumber,
 
-    // xbrowser Object#hasOwnProperty
-    'hasKey': hasKey,
-
     // generic Array#indexOf
     'indexOf': indexOf,
 
     // invokes a method on each item in an array
     'invoke': invoke,
-
-    // modifies a string using a template object
-    'interpolate': interpolate,
-
-    // xbrowser Array.isArray
-    'isArray': isArray,
-
-    // checks internal [[Class]] of an object
-    'isClassOf': isClassOf,
-
-    // checks if an object's property is a non-primitive value
-    'isHostType': isHostType,
 
     // generic Array#join for arrays and objects
     'join': join,
@@ -1773,17 +1667,11 @@
     // generic Array#map
     'map': map,
 
-    // no operation
-    'noop': noop,
-
     // retrieves a property value from each item in an array
     'pluck': pluck,
 
     // generic Array#reduce
-    'reduce': reduce,
-
-    // generic String#trim
-    'trim': trim
+    'reduce': reduce
   });
 
   /*--------------------------------------------------------------------------*/
@@ -1794,60 +1682,11 @@
   extend(Benchmark.prototype, {
 
     /**
-     * The delay between test cycles (secs).
-     * @member Benchmark
-     * @type Number
-     */
-    'CYCLE_DELAY': 0.005,
-
-    /**
-     * A flag to indicate methods will run asynchronously by default.
-     * @member Benchmark
-     * @type Boolean
-     */
-    'DEFAULT_ASYNC': false,
-
-    /**
-     * The default number of times to execute a test on a benchmark's first cycle.
-     * @member Benchmark
-     * @type Number
-     */
-    'INIT_RUN_COUNT': 5,
-
-    /**
-     * The maximum time a benchmark is allowed to run before finishing (secs).
-     * @member Benchmark
-     * @type Number
-     */
-    'MAX_TIME_ELAPSED': 5,
-
-    /**
-     * The minimum sample size required to perform statistical analysis.
-     * @member Benchmark
-     * @type Number
-     */
-    'MIN_SAMPLE_SIZE': 5,
-
-    /**
-     * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-     * @member Benchmark
-     * @type Number
-     */
-    'MIN_TIME': 0,
-
-    /**
      * The number of times a test was executed.
      * @member Benchmark
      * @type Number
      */
     'count': 0,
-
-    /**
-     * A timestamp of when the benchmark was created.
-     * @member Benchmark
-     * @type Number
-     */
-    'created': 0,
 
     /**
      * The number of cycles performed while benchmarking.
@@ -1935,21 +1774,21 @@
        * @member Benchmark#stats
        * @type Number
        */
-      'ME': 0,
+      'moe': 0,
 
       /**
        * The relative margin of error (expressed as a percentage of the mean).
        * @member Benchmark#stats
        * @type Number
        */
-      'RME': 0,
+      'rme': 0,
 
       /**
        * The standard error of the mean.
        * @member Benchmark#stats
        * @type Number
        */
-      'SEM': 0,
+      'sem': 0,
 
       /**
        * The sample standard deviation.
@@ -1989,6 +1828,7 @@
 
       /**
        * The time taken to complete the last cycle (secs)
+       * @static
        * @member Benchmark#times
        * @type Number
        */
@@ -1996,6 +1836,7 @@
 
       /**
        * The time taken to complete the benchmark (secs).
+       * @static
        * @member Benchmark#times
        * @type Number
        */
@@ -2198,26 +2039,25 @@
   Benchmark.Suite = Suite;
 
   // expose Benchmark
-  if (typeof exports == 'object' && exports) {
-    if (typeof module == 'object' && module && module.exports == exports) {
+  if (freeExports) {
+    if (typeof module == 'object' && module && module.exports == freeExports) {
       module.exports = Benchmark;
     } else {
-      exports.Benchmark = Benchmark;
+      freeExports.Benchmark = Benchmark;
     }
-    if (typeof global == 'object' && global) {
-      window = global;
-    }
+  } else if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    define(['platform'], function(platform) {
+      Benchmark.platform = platform;
+      return Benchmark;
+    });
   } else {
-    window.Benchmark = Benchmark;
+    // use square bracket notation so Closure Compiler won't mung `Benchmark`
+    // http://code.google.com/closure/compiler/docs/api-tutorial3.html#export
+    window['Benchmark'] = Benchmark;
   }
 
   // trigger clock's lazy define early to avoid a security error
-  if (IN_AIR) {
+  if (has.air) {
     clock({ 'fn': noop, 'count': 1 });
   }
-
-  // feature detect
-  HAS_TIMEOUT_API = isHostType(window, 'setTimeout') &&
-    isHostType(window, 'clearTimeout');
-
 }(this));

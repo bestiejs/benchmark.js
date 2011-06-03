@@ -4,8 +4,19 @@
 		<title>Benchmark.js Test Suite</title>
 		<link rel="stylesheet" href="../vendor/qunit/qunit/qunit.css">
 		<script src="../vendor/qunit/qunit/qunit.js"></script>
+		<script>var Benchmark2;</script>
 		<script src="../benchmark.js"></script>
-		<script src="tests.js"></script>
+		<script src="../vendor/requirejs/require.js"></script>
+		<script>
+		require({
+			'baseUrl': '../vendor/requirejs/',
+			'paths': { 'platform': '../platform.js/platform', 'src': '../../' }
+		},
+		['src/benchmark'], function(Benchmark) {
+			Benchmark2 = Benchmark;
+			require(['tests.js']);
+		});
+		</script>
 	</head>
 	<body>
 		<h1 id="qunit-header">Benchmark.js Test Suite</h1>
