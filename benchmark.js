@@ -620,7 +620,7 @@
    * @returns {Mix} The exported module.
    */
   function req(id) {
-    var result = null
+    var result = null;
     try {
       freeExports && freeRequire && (result = freeRequire(id));
     } catch(e) { }
