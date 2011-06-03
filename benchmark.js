@@ -258,6 +258,7 @@
         timer = { 'ns': timerNS, 'res': max(0.0015, msRes), 'unit': 'ms' },
         code = 'var r$,s$,m$=this,i$=m$.count,f$=m$.fn;#{setup}#{start};while(i$--){|}#{end};#{teardown}return{time:r$,uid:"$"}|m$.teardown&&m$.teardown();|f$()|m$.setup&&m$.setup();|n$';
 
+    // lazy redefine
     clock = function(me) {
       var result,
           fn = me.fn,
@@ -1311,7 +1312,7 @@
   function compute(me, async) {
     var queue = [],
         sample = [],
-        runCount = me.runCount;
+        initCount = me.initCount;
 
     function enqueue(count) {
       while (count--) {
@@ -1330,7 +1331,7 @@
           // the me.count and me.cycles props of the host are updated in cycle() below
           me.hz = clone.hz;
           me.times.period = clone.times.period;
-          me.runCount = clone.runCount;
+          me.initCount = clone.initCount;
           me.emit('cycle');
         }
         else if (clone.error) {
@@ -1340,7 +1341,7 @@
         }
         else {
           // on start
-          clone.count = me.runCount;
+          clone.count = me.initCount;
         }
       } else if (me.aborted) {
         clone.abort();
@@ -1407,7 +1408,7 @@
               me.hz = 1 / mean;
             }
           }
-          me.runCount = runCount;
+          me.initCount = initCount;
           me.emit('complete');
         }
       }
@@ -1444,8 +1445,9 @@
         host.count = count;
 
         try {
+          // host `minTime` is set to `Benchmark.options.minTime` in `clock()`
           clocked = clock(host);
-          minTime = me.minTime;
+          minTime = me.minTime = host.minTime;
         } catch(e) {
           me.abort();
           me.error = e;
@@ -1463,10 +1465,10 @@
         // do we need to do another cycle?
         me.running = clocked < minTime;
         // avoid working our way up to this next time
-        me.runCount = count;
+        me.initCount = count;
 
         if (me.running) {
-          // tests may clock at 0 when `runCount` is a small number,
+          // tests may clock at `0` when `initCount` is a small number,
           // to avoid that we set its count to something a bit higher
           if (!clocked && (divisor = divisors[me.cycles]) != null) {
             count = Math.floor(4e6 / divisor);
@@ -1502,7 +1504,7 @@
     me.reset();
     me.running = true;
 
-    me.count = me.runCount;
+    me.count = me.initCount;
     me.times.start = +new Date;
     me.emit('start');
 
@@ -1538,7 +1540,6 @@
 
       /**
        * A flag to indicate methods will run asynchronously by default.
-       * @static
        * @member Benchmark.options
        * @type Boolean
        */
@@ -1546,15 +1547,20 @@
 
       /**
        * The delay between test cycles (secs).
-       * @static
        * @member Benchmark.options
        * @type Number
        */
       'delay': 0.005,
 
       /**
+       * The default number of times to execute a test on a benchmark's first cycle.
+       * @member Benchmark.options
+       * @type Number
+       */
+      'initCount': 5,
+
+      /**
        * The maximum time a benchmark is allowed to run before finishing (secs).
-       * @static
        * @member Benchmark.options
        * @type Number
        */
@@ -1562,7 +1568,6 @@
 
       /**
        * The minimum sample size required to perform statistical analysis.
-       * @static
        * @member Benchmark.options
        * @type Number
        */
@@ -1570,19 +1575,10 @@
 
       /**
        * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-       * @static
        * @member Benchmark.options
        * @type Number
        */
-      'minTime': 0,
-
-      /**
-       * The default number of times to execute a test on a benchmark's first cycle.
-       * @static
-       * @member Benchmark.options
-       * @type Number
-       */
-      'runCount': 5
+      'minTime': 0
     },
 
     /**
@@ -1828,7 +1824,6 @@
 
       /**
        * The time taken to complete the last cycle (secs)
-       * @static
        * @member Benchmark#times
        * @type Number
        */
@@ -1836,7 +1831,6 @@
 
       /**
        * The time taken to complete the benchmark (secs).
-       * @static
        * @member Benchmark#times
        * @type Number
        */

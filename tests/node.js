@@ -7,7 +7,7 @@
     var bench = new Benchmark(function() { arr.join(' '); }),
         counter = 0;
 
-    // chech Benchmark.platform
+    // check Benchmark.platform
     console.log('Benchmark.platform: expected at least "Node.js"; got "' + Benchmark.platform + '";');
 
     // check synchronous run
@@ -22,7 +22,7 @@
       });
 
       counter = 0;
-      //bench.run(true);
+      bench.run(true);
       counter++;
     });
 
