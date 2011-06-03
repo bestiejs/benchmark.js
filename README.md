@@ -62,6 +62,14 @@ In [RequireJS](http://requirejs.org/):
 require(['path/to/benchmark'], function(Benchmark) {
   console.log(Benchmark.version);
 });
+
+// auto-require platform.js
+require({
+  'paths': { 'platform': 'path/to/platform' }
+},
+['path/to/benchmark'], function(Benchmark) {
+  console.log(Benchmark.platform.name);
+});
 ~~~
 
 Usage example:
