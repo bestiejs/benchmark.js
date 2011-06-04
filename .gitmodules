@@ -9,4 +9,4 @@
 	url = git://github.com/jrburke/requirejs.git
 [submodule "vendor/platform.js"]
 	path = vendor/platform.js
-	url = git://github.com/bestiejs/Platform.js.git
+	url = git://github.com/bestiejs/platform.js.git
