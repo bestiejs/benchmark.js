@@ -425,6 +425,14 @@ footer {
   font-weight: bold;
 }
 
+#faq dt a {
+  display: none;
+}
+
+#faq dt:hover a {
+  display: inline;
+}
+
 #faq dt:target, #faq dt:target + dd {
   background: #90ee85;
   padding: .5em .8em 0 .8em;
@@ -502,14 +510,14 @@ footer {
 }
 
 /* < 1051px */
-@media all and (max-width: 1050px) {
+@media (max-width: 1050px) {
   table pre, table td.code {
     width: 550px;
   }
 }
 
 /* < 1041px */
-@media all and (max-width: 1040px) {
+@media (max-width: 1040px) {
   body {
     width: 100%;
     margin: 0;
@@ -521,21 +529,21 @@ footer {
 }
 
 /* < 801px */
-@media all and (max-width: 800px) {
+@media (max-width: 800px) {
   table pre, table td.code {
     width: 450px;
   }
 }
 
 /* < 681px */
-@media all and (max-width: 680px) {
+@media (max-width: 680px) {
   table pre, table td.code {
     width: 350px;
   }
 }
 
 /* < 651px */
-@media all and (max-width: 650px) {
+@media (max-width: 650px) {
   table pre, table td.code {
     width: 200px;
   }
