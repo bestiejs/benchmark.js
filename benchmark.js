@@ -320,20 +320,20 @@
           divisor = 1e6;
           if (timerNS.stop) {
             timerNS.start();
-            while(!(measured = timerNS.microseconds()));
+            while (!(measured = timerNS.microseconds())) { }
           } else {
             start = timerNS();
-            while(!(measured = timerNS() - start));
+            while (!(measured = timerNS() - start)) { }
           }
         }
         else if (unit == 'ns') {
           divisor = 1e9;
           start = timerNS.nanoTime();
-          while(!(measured = timerNS.nanoTime() - start));
+          while (!(measured = timerNS.nanoTime() - start)) { }
         }
         else {
           start = new timerNS;
-          while(!(measured = new timerNS - start));
+          while (!(measured = new timerNS - start)) { }
         }
         // check for broken timers (nanoTime may have issues)
         // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
@@ -870,7 +870,7 @@
         call(bench, execute, async);
       } else {
         result.length = 0;
-        while (execute());
+        while (execute()) { }
       }
     }
     return result;
