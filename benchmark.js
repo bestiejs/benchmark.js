@@ -664,9 +664,11 @@
         object = Object(object),
         length = object.length;
 
+    // in Opera < 10.5 `hasKey(object, 'length')` returns false for NodeLists
     if ('length' in object && length > -1 && length < 4294967296) {
       while (++i < length) {
-        if (i in object && callback(object[i], i, object) === false) {
+        // in Safari 2 `i in object` is always false for NodeLists
+        if ((i in object || 'item' in object) && callback(object[i], i, object) === false) {
           break;
         }
       }
