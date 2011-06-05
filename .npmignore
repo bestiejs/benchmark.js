@@ -1,7 +1,10 @@
-.git*
+.*
 nano.*
-examples
-plugins
-vendor
+examples/
+plugins/
+vendor/
 docs/*.php
+tests/*.air
 tests/*.html
+tests/*o.js
+tests/*s.js

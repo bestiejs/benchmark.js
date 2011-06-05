@@ -2056,6 +2056,6 @@
 
   // trigger clock's lazy define early to avoid a security error
   if (has.air) {
-    clock({ 'fn': noop, 'count': 1 });
+    clock({ 'fn': noop, 'count': 1, 'options': { } });
   }
 }(this));
