@@ -220,7 +220,7 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
   display: block;
 }
 
-.js .question, hgroup h2, p#firebug, #controls {
+.js .question, hgroup h2, #controls, #firebug, #java {
   display: none;
 }
 
@@ -401,7 +401,7 @@ footer {
   background: #dde4ea;
 }
 
-#error-info.show, .meta strong, #status strong, #firebug strong {
+#error-info.show, .meta strong, #firebug strong, #java strong, #status strong {
   background: pink;
   border: 1px solid #b00b00;
   padding: .4em;
@@ -414,6 +414,11 @@ footer {
 #error-info, code, samp, var, textarea, #slug {
   font-family: Monaco, monospace;
   font-size: .9em;
+}
+
+#java strong {
+  background: #ffffdc;
+  border: 1px solid #faa700;
 }
 
 #slug {
@@ -443,7 +448,7 @@ footer {
   padding-bottom: .5em;
 }
 
-#firebug, #status {
+#firebug, #java, #status {
   margin: 0 0 1em;
   padding: .3em 0;
 }
@@ -453,7 +458,7 @@ footer {
   overflow: auto;
 }
 
-#controls.show, #firebug.show {
+#controls.show, #firebug.show, #java.show {
   display: block;
 }
 

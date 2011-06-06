@@ -6,14 +6,17 @@
  */
 (function(window, document) {
 
+  /** Java applet archive path */
+  var archive = '../../nano.jar',
+
   /** Google Analytics account id */
-  var gaId = '',
+  gaId = '',
 
   /** Benchmark results element id prefix (e.g. `results-1`) */
   prefix = 'results-',
 
   /** Object containing various css class names */
-  classNames ={
+  classNames = {
 
     /** CSS class name used for error styles */
     'error': 'error',
@@ -48,6 +51,9 @@
   /** Cache of error messages */
   errors = [],
 
+  /** Cache of event handlers */
+  handlers = { },
+
   /** Namespace */
   ui = new Benchmark.Suite,
 
@@ -59,6 +65,112 @@
   formatNumber = Benchmark.formatNumber,
 
   indexOf = Benchmark.indexOf;
+
+  /*--------------------------------------------------------------------------*/
+
+  handlers.benchmark = {
+
+    /**
+     * The onCycle callback, used for onStart as well, assigned to new benchmarks.
+     * @private
+     */
+    'cycle': function() {
+      var bench = this,
+          cycles = bench.cycles;
+      if (!bench.aborted) {
+        setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
+          cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
+      }
+    }
+  };
+
+  handlers.button = {
+
+    /**
+     * The "run" button click event handler used to run or abort the benchmarks.
+     * @private
+     * @param {Object} e The event object.
+     */
+    'run': function(e) {
+      var run = $('run').innerHTML != texts.run.running;
+      ui.abort();
+      if (run) {
+        logError(false);
+        ui.length = 0;
+        ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
+        ui.run(true, true);
+      }
+    }
+  };
+
+
+  handlers.title = {
+
+    /**
+     * The title table cell click event handler used to run the corresponding benchmark.
+     * @private
+     * @param {Object} e The event object.
+     */
+    'click': function(e) {
+      e || (e = window.event);
+      var target = e.target || e.srcElement,
+          index = --(target.id || target.parentNode.id).split('-')[1];
+
+      ui.push(ui.benchmarks[index]);
+      if (!ui.running) {
+        ui.run(true, true);
+      }
+    },
+
+    /**
+     * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
+     * @private
+     * @param {Object} e The event object.
+     */
+    'keyup': function(e) {
+      if (13 == (e || window.event).keyCode) {
+        handlers.title.click.call(this);
+      }
+    }
+  };
+
+  handlers.window = {
+
+    /**
+     * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
+     * @private
+     */
+    'hashchange': function() {
+      ui.parseHash();
+      // call user provided init() function
+      (typeof window.init == 'function') && init();
+      // auto-run
+      ('run' in ui.params) && handlers.button.run();
+    },
+
+    /**
+     * The window load event handler used to initialize the UI.
+     * @private
+     */
+    'load': function() {
+      addClass('controls', classNames.show);
+      addListener('run', 'click', handlers.button.run);
+
+      setHTML('run', texts.run.ready);
+      setHTML('user-agent', Benchmark.platform);
+      setStatus(texts.status.ready);
+
+      // answer spammer question
+      $('question').value = 'no';
+
+      // show warning when Firebug is enabled
+      if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
+        addClass('firebug', classNames.show);
+      }
+      // evaluate hash values
+      handlers.window.hashchange();
+    }
+  };
 
   /*--------------------------------------------------------------------------*/
 
@@ -88,7 +200,7 @@
    * Registers an event listener on an element.
    * @private
    * @param {Object} element The element.
-   * @param {String} eventName The name of the event to listen to.
+   * @param {String} eventName The name of the event.
    * @param {Function} handler The event handler.
    */
   function addListener(element, eventName, handler) {
@@ -183,104 +295,6 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * The title table cell click event handler used to run the corresponding benchmark.
-   * @private
-   * @param {Object} e The event object.
-   */
-  function onClick(e) {
-    e || (e = window.event);
-    var target = e.target || e.srcElement,
-        index = --(target.id || target.parentNode.id).split('-')[1];
-
-    ui.push(ui.benchmarks[index]);
-    if (!ui.running) {
-      ui.run(true, true);
-    }
-  }
-
-  /**
-   * The onCycle callback, used for onStart as well, assigned to new benchmarks.
-   * @private
-   */
-  function onCycle() {
-    var bench = this,
-        cycles = bench.cycles;
-    if (!bench.aborted) {
-      setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
-        cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
-    }
-  }
-
-  /**
-   * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
-   * @private
-   */
-  function onHashChange() {
-    ui.parseHash();
-
-    // call user provided init() function
-    if (typeof window.init == 'function') {
-      init();
-    }
-    // auto-run
-    if ('run' in ui.params) {
-      onRun();
-    }
-  }
-
-  /**
-   * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
-   * @private
-   * @param {Object} e The event object.
-   */
-  function onKeyUp(e) {
-    if (13 == (e || window.event).keyCode) {
-      onClick.call(this);
-    }
-  }
-
-  /**
-   * The window load event handler used to initialize the UI.
-   * @private
-   */
-  function onLoad() {
-    addClass('controls', classNames.show);
-    addListener('run', 'click', onRun);
-
-    setHTML('run', texts.run.ready);
-    setHTML('user-agent', Benchmark.platform);
-    setStatus(texts.status.ready);
-
-    // answer spammer question
-    $('question').value = 'no';
-
-    // show warning when Firebug is enabled
-    if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
-      addClass('firebug', classNames.show);
-    }
-    // evaluate hash values
-    onHashChange();
-  }
-
-  /**
-   * The "run" button click event handler used to run or abort the benchmarks.
-   * @private
-   * @param {Object} e The event object.
-   */
-  function onRun(e) {
-    var run = $('run').innerHTML != texts.run.running;
-    ui.abort();
-    if (run) {
-      logError(false);
-      ui.length = 0;
-      ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
-      ui.run(true, true);
-    }
-  }
-
-  /*--------------------------------------------------------------------------*/
-
-  /**
    * Parses the window.location.hash value into an object assigned to `ui.params`.
    * @static
    * @member ui
@@ -357,9 +371,9 @@
     title.tabIndex = 0;
     title.title = 'Click to run this test again.';
 
-    addListener(title, 'click', onClick);
-    addListener(title, 'keyup', onKeyUp);
-    bench.on('start cycle', onCycle);
+    addListener(title, 'click', handlers.title.click);
+    addListener(title, 'keyup', handlers.title.keyup);
+    bench.on('start cycle', handlers.benchmark.cycle);
 
     delete ui[--ui.length];
     ui.benchmarks.push(bench);
@@ -439,26 +453,46 @@
   // signal JavaScript detected
   addClass(document.documentElement, classNames.js);
 
-  // re-parse hash query params when it changes
-  addListener(window, 'hashchange', onHashChange);
+  // parse hash query params when it changes
+  addListener(window, 'hashchange', handlers.window.hashchange);
 
   // bootstrap onload
-  addListener(window, 'load', onLoad);
+  addListener(window, 'load', handlers.window.load);
 
   // parse location hash string
   ui.parseHash();
+
+  // inject nano applet
+  (function() {
+    function attempt() {
+      var applet,
+          body = document.body;
+
+      try {
+        if (/[?&]nojava=true(?:&|$)/.test(location.search)) {
+          addClass('java', classNames.show);
+        } else {
+          applet = createElement('applet');
+          applet.code = 'nano';
+          applet.archive = archive;
+          body.insertBefore(applet, body.firstElementChild || body.firstChild);
+        }
+      } catch(e) {
+        setTimeout(attempt, 15);
+      }
+    }
+    attempt();
+  }());
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
   if (gaId) {
     (function() {
-      var tag = 'script',
-          script = createElement(tag),
-          sibling = document.getElementsByTagName(tag)[0];
+      var script = createElement('script'),
+          sibling = document.getElementsByTagName('script')[0];
 
       window._gaq = [['_setAccount', gaId], ['_trackPageview']];
-      script.async = 1;
-      script.src = '//www.google-analytics.com/ga.js';
+      script.async = script.src = '//www.google-analytics.com/ga.js';
       sibling.parentNode.insertBefore(script, sibling);
     }());
   }
