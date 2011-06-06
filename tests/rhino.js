@@ -26,6 +26,6 @@
 
     bench.run();
     counter++;
-  })();
+  }());
 
 }(this, arguments[0]));

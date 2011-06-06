@@ -17,4 +17,5 @@
       equals(typeof platform.name, 'string', 'auto required');
     });
   }
+
 }(this));
