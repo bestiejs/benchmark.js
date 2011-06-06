@@ -191,6 +191,18 @@ label em {
   font-style: normal;
 }
 
+.js #advanced {
+  display: none;
+}
+
+#show-advanced {
+  display: none;
+}
+
+.js #show-advanced {
+  display: block;
+}
+
 section {
   display: block;
   border-top: 1px solid #ccc;
