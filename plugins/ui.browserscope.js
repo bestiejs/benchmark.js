@@ -263,7 +263,7 @@
         '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
-        '<\/body><\/html>',
+        '</body></html>',
         {
           'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
           'key': key,
@@ -385,8 +385,8 @@
     if (placeholder) {
       setHTML(placeholder,
         '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
-        '<span>Browserscope<\/span><\/a><\/h1>' +
-        '<div class=bs-rt><div id=bs-rt-usertest_#{key}><\/div><\/div>',
+        '<span>Browserscope</span></a></h1>' +
+        '<div class=bs-rt><div id=bs-rt-usertest_#{key}></div></div>',
         { 'key': key });
       me.container = query('#bs-rt-usertest_' + key)[0];
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
