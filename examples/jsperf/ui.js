@@ -308,8 +308,8 @@
         params = me.params = { };
 
     each(hashes[0] && hashes, function(hash) {
-      var pair = hashes[length].split('=');
-      params[pair[0]] = pair[1];
+      hash = hash.split('=');
+      params[hash[0]] = hash[1];
     });
     return me;
   }
@@ -472,7 +472,7 @@
           body = document.body;
 
       try {
-        if (/[?&]nojava=true(?:&|$)/.test(location.search)) {
+        if ('nojava' in ui.params) {
           addClass('java', classNames.show);
         } else {
           applet = createElement('applet');
