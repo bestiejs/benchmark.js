@@ -1,5 +1,5 @@
 /*!
- * Benchmark.js <http://benchmarkjs.com>
+ * Benchmark.js <http://benchmarkjs.com/>
  * Copyright 2010-2011 Mathias Bynens <http://mths.be/>
  * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
  * Modified by John-David Dalton <http://allyoucanleet.com/>
@@ -1533,7 +1533,7 @@
      * @member Benchmark
      * @type String
      */
-    'version': '0.2.1',
+    'version': '0.2.2',
 
     /**
      * The default options object copied by instances.
