@@ -495,7 +495,7 @@
           sibling = document.getElementsByTagName('script')[0];
 
       window._gaq = [['_setAccount', gaId], ['_trackPageview']];
-      script.async = script.src = '//www.google-analytics.com/ga.js';
+      script.src = '//www.google-analytics.com/ga.js';
       sibling.parentNode.insertBefore(script, sibling);
     }());
   }
