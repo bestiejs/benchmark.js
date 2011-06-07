@@ -335,8 +335,8 @@
       if (error) {
         setHTML(cell, 'Error');
         addClass(cell, classNames.error);
-        logError('<p>' + error + '.<\/p><ul><li>' +
-          Benchmark.join(error, '<\/li><li>') + '<\/li><\/ul>');
+        logError('<p>' + error + '.</p><ul><li>' +
+          Benchmark.join(error, '</li><li>') + '</li></ul>');
       }
       else {
         // status: running
@@ -348,7 +348,7 @@
           cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
             bench.times.cycle.toFixed(3) + ' seconds.';
           setHTML(cell, formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) +
-            ' <small>&plusmn;' + bench.stats.rme.toFixed(2) + '%<\/small>');
+            ' <small>&plusmn;' + bench.stats.rme.toFixed(2) + '%</small>');
         }
         else {
           // status: pending
@@ -418,7 +418,7 @@
       if (span) {
         setHTML(span, text);
       } else {
-        appendHTML(cell, '<span>' + text + '<\/span>');
+        appendHTML(cell, '<span>' + text + '</span>');
       }
     });
 
