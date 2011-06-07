@@ -113,9 +113,14 @@
      */
     'click': function(e) {
       e || (e = window.event);
-      var target = e.target || e.srcElement,
-          index = --(target.id || target.parentNode.id).split('-')[1];
+      var id,
+          index,
+          target = e.target || e.srcElement;
 
+      while (target && !(id = target.id)) {
+        target = target.parentNode;
+      }
+      index = id && --id.split('-')[1] || 0;
       ui.push(ui.benchmarks[index]);
       if (!ui.running) {
         ui.run(true, true);
@@ -129,7 +134,7 @@
      */
     'keyup': function(e) {
       if (13 == (e || window.event).keyCode) {
-        handlers.title.click.call(this);
+        handlers.title.click(e);
       }
     }
   };
