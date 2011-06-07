@@ -89,9 +89,8 @@
     /**
      * The "run" button click event handler used to run or abort the benchmarks.
      * @private
-     * @param {Object} e The event object.
      */
-    'run': function(e) {
+    'run': function() {
       var run = $('run').innerHTML != texts.run.running;
       ui.abort();
       if (run) {
@@ -109,32 +108,30 @@
     /**
      * The title table cell click event handler used to run the corresponding benchmark.
      * @private
-     * @param {Object} e The event object.
+     * @param {Object} event The event object.
      */
-    'click': function(e) {
-      e || (e = window.event);
+    'click': function(event) {
+      event || (event = window.event);
       var id,
           index,
-          target = e.target || e.srcElement;
+          target = event.target || event.srcElement;
 
       while (target && !(id = target.id)) {
         target = target.parentNode;
       }
       index = id && --id.split('-')[1] || 0;
-      ui.push(ui.benchmarks[index]);
-      if (!ui.running) {
-        ui.run(true, true);
-      }
+      ui.push(ui.benchmarks[index].reset());
+      ui.running ? ui.render(index) : ui.run(true, true);
     },
 
     /**
      * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
      * @private
-     * @param {Object} e The event object.
+     * @param {Object} event The event object.
      */
-    'keyup': function(e) {
-      if (13 == (e || window.event).keyCode) {
-        handlers.title.click(e);
+    'keyup': function(event) {
+      if (13 == (event || window.event).keyCode) {
+        handlers.title.click(event);
       }
     }
   };
@@ -321,11 +318,12 @@
    * Renders the results table cell of the corresponding benchmark(s).
    * @static
    * @member ui
+   * @param {Number} [index] The index of the benchmark to render.
    * @returns {Object} The suite instance.
    */
-  function render() {
-    each(ui.benchmarks, function(bench, index) {
-      var cell = $(prefix + (index + 1)),
+  function render(index) {
+    each(index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]], function(bench) {
+      var cell = $(prefix + (++index)),
           error = bench.error,
           hz = bench.hz;
 
@@ -369,7 +367,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  ui.on('add', function(bench) {
+  ui.on('add', function(event, bench) {
     var id = ui.benchmarks.length + 1,
         title = $('title-' + id);
 

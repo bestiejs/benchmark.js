@@ -803,7 +803,7 @@
         queued,
         i = 0,
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-        result = slice.call(benches, 0);
+        result = slice.call(benches);
 
     function execute() {
       var listeners;
@@ -1104,18 +1104,19 @@
   /**
    * Executes all registered listeners of a specified event type.
    * @member Benchmark, Benchmark.Suite
-   * @param {String} type The event type.
+   * @param {String|Object} type The event type or object.
+   * @returns {Boolean} Returns `true` if all listeners were executed, else `false`.
    */
   function emit(type) {
     var me = this,
-        args = slice.call(arguments, 1),
+        event = typeof type == 'string' ? { 'type': type } : type,
+        args = (arguments[0] = event, slice.call(arguments)),
         events = me.events,
-        listeners = events && events[type] || [],
+        listeners = events && events[event.type] || [],
         successful = true;
 
-    each(listeners, function(listener) {
-      if (listener.apply(me, args) === false) {
-        successful = false;
+    each(listeners.slice(), function(listener) {
+      if (!(successful = listener.apply(me, args) !== false)) {
         return successful;
       }
     });
