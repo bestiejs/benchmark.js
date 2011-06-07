@@ -68,6 +68,7 @@ require(['path/to/benchmark'], function(Benchmark) {
 });
 
 // auto-require platform.js
+// https://github.com/bestiejs/platform.js
 require({
   'paths': { 'platform': 'path/to/platform' }
 },
