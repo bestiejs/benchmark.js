@@ -89,7 +89,7 @@ suite.add('RegExp#test', function() {
   'Hello World!'.indexOf('o') > -1;
 })
 // add listeners
-.on('cycle', function(bench) {
+.on('cycle', function(event, bench) {
   console.log(String(bench));
 })
 .on('complete', function() {
