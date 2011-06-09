@@ -174,8 +174,37 @@
   </section>
 
   <section id="comments">
-    <h2>0 Comments</h2>
-    <div class="question"><input type="text" name="question" id="question"></div>
+    <h1>0 comments</h1>
+    <div id="comments-wrapper">
+      <form action="/benchmark-js-test-page#comment-form" method="post" id="comment-form">
+        <fieldset>
+          <h2>Add a comment</h2>
+          <div>
+            <label for="author">Name <em title="This field is required">*</em></label>
+            <input type="text" name="author" id="author" required>
+          </div>
+          <div>
+            <label for="author-email">E-mail <em title="This field is required">*</em></label>
+            <label class="inline"><input type="email" name="author-email" id="author-email" required> (only used for Gravatar)</label>
+          </div>
+          <div>
+            <label for="author-url">URL </label>
+            <input type="url" name="author-url" id="author-url">
+          </div>
+          <div>
+            <label for="message">Message <em title="This field is required">*</em> <span>Markdown syntax is allowed</span></label>
+            <textarea name="message" id="message" required></textarea>
+          </div>
+          <div class="question">
+            <label for="question">Are you a spammer? <span>(just answer the question)</span> </label>
+            <input type="text" name="question" id="question">
+          </div>
+          <div class="buttons">
+            <input type="submit" class="submit" value="Add comment">
+          </div>
+        </fieldset>
+      </form>
+    </div>
   </section>
 </article>
 

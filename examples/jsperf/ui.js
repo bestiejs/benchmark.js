@@ -48,6 +48,15 @@
     }
   },
 
+  /** Used to flag environments/features */
+  has = {
+    'localStorage': !!function() {
+      try {
+        return !localStorage.getItem(+new Date);
+      } catch(e) { }
+    }()
+  },
+
   /** Cache of error messages */
   errors = [],
 
@@ -64,16 +73,7 @@
 
   formatNumber = Benchmark.formatNumber,
 
-  indexOf = Benchmark.indexOf,
-
-  // feature test for localStorage
-  isLocalStorageSupported = (function() {
-    try {
-      return !!localStorage.getItem;
-    } catch(e) {
-      return false;
-    }
-  }());
+  indexOf = Benchmark.indexOf;
 
   /*--------------------------------------------------------------------------*/
 
@@ -171,8 +171,11 @@
       setHTML('user-agent', Benchmark.platform);
       setStatus(texts.status.ready);
 
+      // answer spammer question
+      $('question').value = 'no';
+
       // prefill author details
-      if (isLocalStorageSupported) {
+      if (has.localStorage) {
         each([$('author'), $('author-email'), $('author-url')], function(element) {
           element.value = localStorage[element.id] || '';
           element.oninput = element.onkeydown = function(event) {
@@ -181,10 +184,6 @@
           };
         });
       }
-
-      // answer spammer question
-      $('question').value = 'no';
-
       // show warning when Firebug is enabled
       if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
         addClass('firebug', classNames.show);
