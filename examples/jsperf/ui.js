@@ -64,7 +64,16 @@
 
   formatNumber = Benchmark.formatNumber,
 
-  indexOf = Benchmark.indexOf;
+  indexOf = Benchmark.indexOf,
+
+  // feature test for localStorage
+  isLocalStorageSupported = (function() {
+    try {
+      return !!localStorage.getItem;
+    } catch(e) {
+      return false;
+    }
+  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -161,6 +170,17 @@
       setHTML('run', texts.run.ready);
       setHTML('user-agent', Benchmark.platform);
       setStatus(texts.status.ready);
+
+      // prefill author details
+      if (isLocalStorageSupported) {
+        each([$('author'), $('author-email'), $('author-url')], function(element) {
+          element.value = localStorage[element.id] || '';
+          element.oninput = element.onkeydown = function(event) {
+            event && event.type < 'k' && (element['on' + event.type] = null);
+            localStorage[element.id] = element.value;
+          };
+        });
+      }
 
       // answer spammer question
       $('question').value = 'no';
