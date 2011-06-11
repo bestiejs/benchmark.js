@@ -178,7 +178,7 @@
         each([$('author'), $('author-email'), $('author-url')], function(element) {
           element.value = localStorage[element.id] || '';
           element.oninput = element.onkeydown = function(event) {
-            event && event.type < 'k' && (element['on' + event.type] = null);
+            event && event.type < 'k' && (element.onkeydown = null);
             localStorage[element.id] = element.value;
           };
         });
