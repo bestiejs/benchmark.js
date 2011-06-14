@@ -85,10 +85,10 @@
      */
     'cycle': function() {
       var bench = this,
-          cycles = bench.cycles;
+          size = bench.stats.size;
       if (!bench.aborted) {
         setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
-          cycles + ' cycle' + (cycles == 1 ? '' : 's') + ')');
+          size + ' sample' + (size == 1 ? '' : 's') + ')');
       }
     }
   };
