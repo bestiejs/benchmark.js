@@ -170,11 +170,9 @@
    * @returns {String} The modified string.
    */
   function interpolate(string, object) {
-    string = string == null ? '' : string;
-    Benchmark.each(object || { }, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
-    });
-    return string;
+    return Benchmark.reduce(object || { }, function(string, value, key) {
+      return string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+    }, string);
   }
 
   /**
