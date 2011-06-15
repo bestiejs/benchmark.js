@@ -102,9 +102,10 @@
     'run': function() {
       var run = $('run').innerHTML != texts.run.running;
       ui.abort();
+      ui.length = 0;
+
       if (run) {
         logError(false);
-        ui.length = 0;
         ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
         ui.run(true, true);
       }

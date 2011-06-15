@@ -902,18 +902,18 @@
     var args,
         async,
         bench,
+        isRun,
         queued,
         i = 0,
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-        result = map(benches, function(bench) { return bench; }),
-        sync = true;
+        result = map(benches, function(bench) { return bench; });
 
     /**
      * Executes the method and if synchronous, fetches the next bench.
      */
     function execute() {
       var listeners,
-          sync = !(async || bench.defer);
+          sync = !(async || isRun && bench.defer);
 
       if (!sync) {
         // use `next` as a listener
@@ -934,7 +934,7 @@
       var last = bench;
       bench = false;
 
-      if (async || last.defer) {
+      if (async || isRun && last.defer) {
         last.removeListener('complete', next);
         last.emit('complete');
       }
@@ -949,10 +949,10 @@
         }
       }
       if (bench) {
-        if (async || bench.defer) {
+        if (async || isRun && bench.defer) {
           call(bench, execute, async);
         }
-        else if (last.defer) {
+        else if (isRun && last.defer) {
           // resume synchronous execution
           while (execute()) { }
         }
@@ -983,7 +983,7 @@
       queued = options.queued;
     }
     // undocumented async/deferred for use with Benchmark#run only
-    if (name == 'run') {
+    if (isRun = name == 'run') {
       async = (args[0] == null ? Benchmark.options.async : args[0]) && has.timeout;
     }
     // start iterating over the array
@@ -1479,7 +1479,7 @@
     }
 
     /**
-     * Determines if computing should continue or stats should be calculated.
+     * Determines if more clones should be queued or if cycling should stop.
      */
     function evaluate(clone) {
       var mean,
@@ -1490,18 +1490,18 @@
           variance,
           now = +new Date,
           times = bench.times,
-          aborted = bench.aborted,
+          done = bench.aborted,
           elapsed = (now - times.timeStamp) / 1e3,
           maxedOut = elapsed > bench.maxTime,
           size = sample.push(clone.times.period),
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
       // exit early for aborted or unclockable tests
-      if (aborted || clone.hz == Infinity) {
+      if (done || clone.hz == Infinity) {
         maxedOut = !(size = sample.length = queue.length = 0);
       }
       // set host values
-      if (!aborted) {
+      if (!done) {
         // sample mean (estimate of the population mean)
         mean = getMean(sample);
         // sample variance (estimate of the population variance)
@@ -1526,6 +1526,7 @@
         });
 
         if (maxedOut) {
+          done = true;
           bench.running = false;
           bench.initCount = initCount;
           times.elapsed = elapsed;
@@ -1536,24 +1537,27 @@
           bench.hz = 1 / mean;
         }
       }
-      // simulate onComplete and enqueue additional runs if needed
-      if (queue.length < 2) {
-        // if time permits, increase sample size to reduce the margin of error
-        if (!maxedOut) {
-          enqueue(1);
-        } else {
-          bench.emit('complete');
-        }
+      // if time permits, increase sample size to reduce the margin of error
+      if (queue.length < 2 && !maxedOut) {
+        enqueue(1);
       }
-      // if aborted exit early from invoke
-      return !aborted;
+      // stop the invoke cycle when done
+      return !done;
     }
 
     /*------------------------------------------------------------------------*/
 
-    // init sample/queue and begin
+    // init queue and begin
     enqueue(bench.minSamples);
-    invoke(queue, { 'name': 'run', 'args': async, 'queued': true, 'onCycle': evaluate });
+    invoke(queue, {
+      'name': 'run',
+      'args': async,
+      'queued': true,
+      'onCycle': evaluate,
+      'onComplete': function() {
+        bench.emit('complete');
+      }
+    });
   }
 
   /*--------------------------------------------------------------------------*/
