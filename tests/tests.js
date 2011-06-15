@@ -39,6 +39,33 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.map');
+
+  test('basic', function() {
+    var args,
+        slice = [].slice,
+        o = ['a', 'b', 'c'];
+
+    var result = Benchmark.map(o, function(value, index) {
+      args || (args = slice.call(arguments));
+      return index;
+    });
+
+    deepEqual(result, [0, 1, 2], 'basic');
+    deepEqual(args, ['a', 0, o], 'passed arguments to callback');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    var result = Benchmark.map(o, function(value, index) {
+      return index;
+    });
+
+    deepEqual(result, [1, 2], 'basic');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.reduce');
 
   test('basic', function() {
@@ -62,12 +89,8 @@
   });
 
   test('array-like-object', function() {
-    var args,
-        slice = [].slice,
-        o = { '1': 'b', '2': 'c', 'length': 3 };
-
+    var o = { '1': 'b', '2': 'c', 'length': 3 };
     var result = Benchmark.reduce(o, function(string, value, index) {
-      args || (args = slice.call(arguments));
       return string + value;
     });
 
