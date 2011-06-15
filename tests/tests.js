@@ -20,6 +20,22 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.indexOf');
+
+  test('basic', function() {
+    var o = ['a', 'b', 'c'];
+    equals(Benchmark.indexOf(o, 'b'), 1, 'basic');
+    equals(Benchmark.indexOf(o, new String('b')), -1, 'strict');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    equals(Benchmark.indexOf(o, 'c'), 2, 'basic');
+    equals(Benchmark.indexOf(o, 'a'), -1, 'not found');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.join');
 
   test('basic', function() {
@@ -69,10 +85,14 @@
   module('Benchmark.pluck');
 
   test('basic', function() {
-    var o = [document.documentElement, document.getElementsByTagName('head')[0]];
-    var result = Benchmark.pluck(o, 'nodeName');
+    var undef,
+        o = [document.documentElement, document.getElementsByTagName('head')[0]];
 
+    var result = Benchmark.pluck(o, 'nodeName');
     deepEqual(result, ['HTML', 'HEAD'], 'basic');
+
+    result = Benchmark.pluck(o, 'nonexistent');
+    deepEqual(result, [undef, undef], 'undefined property');
   });
 
   test('array-like-object', function() {
