@@ -66,6 +66,24 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.pluck');
+
+  test('basic', function() {
+    var o = [document.documentElement, document.getElementsByTagName('head')[0]];
+    var result = Benchmark.pluck(o, 'nodeName');
+
+    deepEqual(result, ['HTML', 'HEAD'], 'basic');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': document.getElementsByTagName('head')[0], '2': document.body, 'length': 3 };
+    var result = Benchmark.pluck(o, 'nodeName');
+
+    deepEqual(result, ['HEAD', 'BODY'], 'basic');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.reduce');
 
   test('basic', function() {
