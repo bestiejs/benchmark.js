@@ -513,7 +513,7 @@
 
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
-    createFunction = createFunction('', 'return"' + uid + '"')() == uid ? createFunction : Function;
+    createFunction = (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
     return createFunction.apply(null, arguments);
   }
 
@@ -1681,7 +1681,7 @@
     'version': '0.2.2',
 
     /**
-     * The default options object copied by instances.
+     * The default options copied by benchmark instances.
      * @static
      * @member Benchmark
      * @type Object
@@ -2060,12 +2060,20 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * The default options object copied by instances.
+   * The default options copied by suite instances.
    * @static
    * @member Benchmark.Suite
    * @type Object
    */
-  Suite.options = { };
+  Suite.options = {
+
+    /**
+     * The name of the suite.
+     * @member Benchmark.Suite.options
+     * @type {String|Null}
+     */
+    'name': null
+  };
 
   /*--------------------------------------------------------------------------*/
 
