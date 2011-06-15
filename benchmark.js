@@ -282,11 +282,11 @@
         args,
         fallback,
         options = Benchmark.options,
-        template = { 'begin': 's$=new n$', 'end': 'r$=(new n$-s$)/1e3' },
+        template = { 'begin': 's$=new n$', 'end': 'r$=(new n$-s$)/1e3', 'uid': uid },
         timer = { 'ns': Date },
         timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }],
         code = 'var r$,s$,m$=this,i$=m$.count,f$=m$.fn;#{setup}#{begin};while(i$--){|' +
-               '}#{end};#{teardown}return{time:r$,uid:"$"}|' +
+               '}#{end};#{teardown}return{time:r$,uid:"#{uid}"}|' +
                'm$.teardown&&m$.teardown();|' +
                'f$()|' +
                'm$.setup&&m$.setup();|' +
@@ -460,19 +460,19 @@
     }
     // use API of chosen timer
     if (timer.unit == 'ns') {
-      template = {
+      extend(template, {
         'begin': 's$=n$.nanoTime()',
         'end': 'r$=(n$.nanoTime()-s$)/1e9'
-      };
+      });
     }
     else if (timer.unit == 'us') {
-      template = timer.ns.stop ? {
+      extend(template, timer.ns.stop ? {
         'begin': 's$=n$.start()',
         'end': 'r$=n$.microseconds()/1e6'
       } : {
         'begin': 's$=n$()',
         'end': 'r$=(n$()-s$)/1e6'
-      };
+      });
     }
 
     // inject uid into variable names to avoid collisions with
