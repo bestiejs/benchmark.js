@@ -1060,7 +1060,7 @@
   function reduce(array, callback, accumulator) {
     var noaccum = arguments.length < 3;
     each(array, function(value, index) {
-      accumulator = callback(noaccum ? (noaccum = 0, value) : accumulator, value, index, array);
+      accumulator = noaccum ? (noaccum = 0, value) : callback(accumulator, value, index, array);
     });
     return accumulator;
   }

@@ -20,6 +20,43 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.reduce');
+
+  test('basic', function() {
+    var args,
+        slice = [].slice,
+        o = ['a', 'b', 'c'];
+
+    var result = Benchmark.reduce(o, function(string, value, index) {
+      args || (args = slice.call(arguments));
+      return string + value;
+    }, '');
+
+    equals(result, 'abc', 'accumulation correct');
+    deepEqual(args, ['', 'a', 0, o], 'passed arguments to callback');
+    args = null;
+
+    Benchmark.reduce(o, function() {
+      args || (args = slice.call(arguments));
+    });
+    deepEqual(args, ['a', 'b', 1, o], 'no initial value');
+  });
+
+  test('array-like-object', function() {
+    var args,
+        slice = [].slice,
+        o = { '1': 'b', '2': 'c', 'length': 3 };
+
+    var result = Benchmark.reduce(o, function(string, value, index) {
+      args || (args = slice.call(arguments));
+      return string + value;
+    });
+
+    equals(result, 'bc', 'accumulation correct');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark#emit');
 
   test('event object', function() {
