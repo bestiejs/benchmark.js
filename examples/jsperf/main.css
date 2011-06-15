@@ -175,7 +175,7 @@ label.inline {
   margin: 0;
 }
 
-label[for="visible"] {
+label[for="visible"], label[for$="][defer]"] {
   position: relative;
   top: -.37em;
 }
