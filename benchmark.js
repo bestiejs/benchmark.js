@@ -419,7 +419,7 @@
     // or the exposed Java API
     // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
     try {
-      timer.ns = java.lang.System;
+      timer.ns || (timer.ns = java.lang.System);
     } catch(e) { }
 
     // check type in case Safari returns an object instead of a number
