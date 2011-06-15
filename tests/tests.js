@@ -20,6 +20,25 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.join');
+
+  test('basic', function() {
+    var o = ['a', 'b', 'c'];
+    equals(Benchmark.join(o), 'a,b,c', 'default separator 1');
+    equals(Benchmark.join(o, '|', '@'), 'a|b|c', 'custom separator 1');
+
+    o = { 'a': 'apple', 'b': 'ball', 'c': 'cat' };
+    equals(Benchmark.join(o), 'a: apple,b: ball,c: cat', 'default separator 2');
+    equals(Benchmark.join(o, '|', '@'), 'a@apple|b@ball|c@cat', 'custom separator 2');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    equals(Benchmark.join(o), 'b,c', 'default separator 1');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.reduce');
 
   test('basic', function() {
