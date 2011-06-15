@@ -20,6 +20,44 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.each');
+
+  test('basic', function() {
+    var args,
+        values = [],
+        slice = [].slice,
+        o = ['a', 'b', 'c'];
+
+    var result = Benchmark.each(o, function(value, index) {
+      args || (args = slice.call(arguments));
+      values.push(value);
+    });
+
+    ok(o === result, 'object returned');
+    deepEqual(values, ['a', 'b', 'c'], 'values');
+    deepEqual(args, ['a', 0, o], 'passed arguments to callback');
+    values.length = 0;
+
+    Benchmark.each(o, function(value, index) {
+      return index == 2 ? false : values.push(value);
+    });
+
+    deepEqual(values, ['a', 'b'], 'exit early');
+  });
+
+  test('array-like-object', function() {
+    var values = [],
+        o = { '1': 'b', '2': 'c', 'length': 3 };
+
+    Benchmark.each(o, function(value) {
+      values.push(value);
+    });
+
+    deepEqual(values, ['b', 'c'], 'basic');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.indexOf');
 
   test('basic', function() {
