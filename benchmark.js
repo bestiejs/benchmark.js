@@ -140,8 +140,9 @@
    * });
    */
   function Benchmark(name, fn, options) {
-    // juggle arguments
     var me = this;
+
+    // juggle arguments
     if (isClassOf(name, 'Object')) {
       // 1 argument (options)
       options = name;
@@ -171,7 +172,7 @@
   /**
    * Deferred constructor.
    * @constructor
-   * @member Benchmark.Deferred
+   * @member Benchmark
    * @param {Object} bench The benchmark instance.
    */
   function Deferred(bench) {
@@ -217,11 +218,14 @@
    * });
    */
   function Suite(name, options) {
-    // juggle arguments
     var me = this;
+
+    // juggle arguments
     if (isClassOf(name, 'Object')) {
+      // 1 argument (options)
       options = name;
     } else {
+      // 2 arguments (name [, options])
       me.name = name;
     }
     setOptions(me, options);
@@ -291,7 +295,7 @@
                'n$';
 
     /**
-     * Lazy redefine clock/start/stop to take advantage of private variables.
+     * Lazy define clock/start/stop to take advantage of high resolution timers.
      */
     clock = function(bench) {
       var result,
@@ -350,7 +354,8 @@
     };
 
     start = function(deferred) {
-      deferred.timeStamp || (deferred.timeStamp = (timer.start(), timer.timeStamp || +new Date));
+      // high resolution timers may not return a traditional timestamp, so we fake it
+      deferred.timeStamp || (deferred.timeStamp = (timer.start(), +new Date));
     };
 
     stop = function(deferred) {
@@ -496,25 +501,19 @@
    * @returns {Function} The new function.
    */
   function createFunction() {
-    createFunction = function(args, body) {
-      var anchor = freeDefine ? define.amd : Benchmark,
-          sibling = document.getElementsByTagName('script')[0],
-          parent = sibling.parentNode,
-          script = document.createElement('script');
 
-      script.appendChild(document.createTextNode((freeDefine ? 'define.amd.' : 'Benchmark.') + uid + '=function(' + args + '){' + body + '}'));
-      parent.removeChild(parent.insertBefore(script, sibling));
+    /**
+     * Lazy define to fork based on supported features.
+     */
+    createFunction = function(args, body) {
+      var anchor = freeDefine ? define.amd : Benchmark;
+      runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + uid + '=function(' + args + '){' + body + '}');
       return [anchor[uid], delete anchor[uid]][0];
     };
 
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
-    try {
-      createFunction = createFunction('', 'return"' + uid + '"')() == uid && createFunction;
-    } catch(e) {
-      createFunction = false;
-    }
-    createFunction || (createFunction = Function);
+    createFunction = createFunction('', 'return"' + uid + '"')() == uid ? createFunction : Function;
     return createFunction.apply(null, arguments);
   }
 
@@ -678,7 +677,22 @@
   }
 
   /**
-   * Sets the options of a benchmark.
+   * Runs a snippet of JavaScript via script injection.
+   * @private
+   * @param {String} code The code to run.
+   */
+  function runScript(code) {
+    var sibling = document.getElementsByTagName('script')[0],
+        parent = sibling.parentNode,
+        script = document.createElement('script');
+    try {
+      script.appendChild(document.createTextNode(code));
+      parent.removeChild(parent.insertBefore(script, sibling));
+    } catch(e) { }
+  }
+
+  /**
+   * A helper function for setting options/event handlers.
    * @private
    * @param {Object} bench The benchmark instance.
    * @param {Object} [options={}] Options object.
@@ -686,13 +700,15 @@
   function setOptions(bench, options) {
     options = extend({ }, bench.constructor.options, options);
     bench.options = each(options, function(value, key) {
-      // add event listeners
-      if (/^on[A-Z]/.test(key)) {
-        each(key.split(' '), function(key) {
-          bench.on(key.slice(2).toLowerCase(), value);
-        });
-      } else {
-        bench[key] = value;
+      if (value != null) {
+        // add event listeners
+        if (/^on[A-Z]/.test(key)) {
+          each(key.split(' '), function(key) {
+            bench.on(key.slice(2).toLowerCase(), value);
+          });
+        } else {
+          bench[key] = value;
+        }
       }
     });
   }
@@ -957,8 +973,10 @@
 
     // juggle arguments
     if (isClassOf(name, 'String')) {
+      // 2 arguments (array, name)
       args = slice.call(arguments, 2);
     } else {
+      // 2 arguments (array, options)
       options = extend(options, name);
       name = options.name;
       args = isClassOf(args = 'args' in options ? options.args : [], 'Array') ? args : [args];
@@ -1367,7 +1385,7 @@
           if (value && isClassOf(value, 'Object')) {
             pairs.push([value, other]);
           }
-          else if (value != other && !isClassOf(value, 'Function') && !isClassOf(other, 'Function')) {
+          else if (value != other && !(value == null || isClassOf(value, 'Function'))) {
             pair[1][key] = value;
             changed = true;
           }
@@ -1610,10 +1628,8 @@
     } else {
       // fix TraceMonkey bug associated with clock fallbacks
       // http://bugzil.la/509069
-      if (window['Benchmark'] == Benchmark) {
-        window['Benchmark'] = 1;
-        window['Benchmark'] = Benchmark;
-      }
+      runScript('try{' + uid + '=1;delete ' + uid + '}catch(e){}');
+      // done
       bench.emit('complete');
     }
   }
@@ -1673,7 +1689,7 @@
     'options': {
 
       /**
-       * A flag to indicate methods will run asynchronously by default.
+       * A flag to indicate benchmark cycles will run asynchronously by default.
        * @member Benchmark.options
        * @type Boolean
        */
@@ -1692,6 +1708,13 @@
        * @type Number
        */
       'delay': 0.005,
+
+      /**
+       * Displayed by Benchmark#toString when a `name` is not available (auto-generated if `null`).
+       * @member Benchmark.options
+       * @type {String|Null}
+       */
+      'id': null,
 
       /**
        * The default number of times to execute a test on a benchmark's first cycle.
@@ -1719,7 +1742,14 @@
        * @member Benchmark.options
        * @type Number
        */
-      'minTime': 0
+      'minTime': 0,
+
+      /**
+       * The name of the benchmark.
+       * @member Benchmark.options
+       * @type {String|Null}
+       */
+      'name': null
     },
 
     /**
@@ -2171,6 +2201,13 @@
   /*--------------------------------------------------------------------------*/
 
   extend(Deferred.prototype, {
+
+    /**
+     * The deferred benchmark instance.
+     * @member Benchmark.Deferred
+     * @type Object
+     */
+    'benchmark': null,
 
     /**
      * The number of deferred cycles performed while benchmarking.
