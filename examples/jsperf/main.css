@@ -452,12 +452,20 @@ footer {
 
 #faq dt:target, #faq dt:target + dd {
   background: #90ee85;
-  padding: .5em .8em 0 .8em;
+  margin-left: -.8em;
+  margin-right: -.8em;
+  padding-left: .8em;
+  padding-right: .8em;
 }
 
 #faq dt:target + dd {
-  padding-top: 0;
   padding-bottom: .5em;
+  margin-bottom: -.5em;
+}
+
+#faq dt:target {
+  margin-top: .5em;
+  padding-top: .5em;
 }
 
 #firebug, #java, #status {
