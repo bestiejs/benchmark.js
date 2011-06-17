@@ -58,6 +58,51 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.filter');
+
+  test('basic', function() {
+    var args,
+        slice = [].slice,
+        o = ['a', 'b', 'c'];
+
+    var result = Benchmark.filter(o, function(value) {
+      args || (args = slice.call(arguments));
+      return value == 'b';
+    });
+
+    deepEqual(result, ['b'], 'basic');
+    deepEqual(args, ['a', 0, o], 'passed arguments to callback');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    var result = Benchmark.filter(o, function(value) {
+      return value != null;
+    });
+
+    deepEqual(result, ['b', 'c'], 'basic');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  module('Benchmark.formatNumber');
+
+  test('basic', function() {
+    var num = 1e6;
+    equals(Benchmark.formatNumber(num), '1,000,000', 'basic');
+
+    num = 23;
+    equals(Benchmark.formatNumber(num), '23', 'short');
+
+    num = 1234.56;
+    equals(Benchmark.formatNumber(num), '1,234.56', 'decimals');
+
+    num *= -1;
+    equals(Benchmark.formatNumber(num), '-1,234.56', 'negatives');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Benchmark.indexOf');
 
   test('basic', function() {
@@ -70,6 +115,43 @@
     var o = { '1': 'b', '2': 'c', 'length': 3 };
     equals(Benchmark.indexOf(o, 'c'), 2, 'basic');
     equals(Benchmark.indexOf(o, 'a'), -1, 'not found');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  module('Benchmark.invoke');
+
+  test('basic', function() {
+    var callbacks = [],
+        callback = function() { callbacks.push(slice.call(arguments)); },
+        slice = [].slice,
+        o = [new Array, new Array, new Array];
+
+    var result = Benchmark.invoke(o, 'push', 'b');
+    deepEqual(result, [1, 1, 1], 'return values');
+
+    result = Benchmark.pluck(o, '0');
+    deepEqual(result, ['b', 'b', 'b'], 'methods invoked');
+
+    result = Benchmark.invoke(o, {
+      'name': 'splice',
+      'args': [0, 0, 'a'],
+      'onStart': callback,
+      'onCycle': callback,
+      'onComplete': callback
+    });
+
+    ok(callbacks[0].length == 2 && callbacks[0][0].type && callbacks[0][1].push, 'passed arguments to callback');
+    equals(callbacks.shift()[0].type, 'start', 'onStart');
+    equals(callbacks.shift()[0].type, 'cycle', 'onCycle');
+    equals(callbacks.pop()[0].type, 'complete', 'onComplete');
+  });
+
+  test('array-like-object', function() {
+    var o = { '1': new Array, '2': new Array, 'length': 3 };
+    var result = Benchmark.invoke(o, 'push', 'a');
+
+    deepEqual(result, [1, 1], 'return values');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -180,7 +262,7 @@
   test('event object', function() {
     var args = [],
         bench = new Benchmark(function() { }),
-        event = { 'type': 'custom' },
+        event = new Benchmark.Event('custom'),
         listener2 = function(event) { event.listener2 = 1 };
 
     bench.on('custom', function(event) { event.touched = 1; });
@@ -215,6 +297,35 @@
     .emit('shallowclone');
     bench.events = { };
     ok(event.listener2, 'emit shallow cloned listeners');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  module('Async tests');
+
+  asyncTest('Benchmark.filter', function() {
+    var suite = new Benchmark.Suite,
+        options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    options.maxTime = .75;
+    suite.add('a', function() {
+      'x' == new String('x');
+    })
+    .add('b', function() {
+      document.body.cloneNode(true);
+    })
+    .add('c', function() {
+      throw new TypeError;
+    })
+    .on('complete', function() {
+      deepEqual(this.filter('fastest').pluck('name'), ['a'], 'by fastest');
+      deepEqual(this.filter('slowest').pluck('name'), ['b'], 'by slowest');
+      deepEqual(['a', 'b'], this.filter('successful').pluck('name'), 'by successful');
+      options.maxTime = maxTime;
+      QUnit.start();
+    })
+    .run(true);
   });
 
 }(this));

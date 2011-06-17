@@ -11,10 +11,7 @@
   var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define,
 
   /** Detect free variable `exports` */
-  freeExports = typeof exports == 'object' && exports,
-
-  /** Detect free variable `global` */
-  freeGlobal = isHostType(this, 'global') && (freeExports ? (window = global) : global),
+  freeExports = typeof exports == 'object' && exports && (isHostType(this, 'global') && (window = global), exports),
 
   /** Detect free variable `require` */
   freeRequire = typeof require == 'function' && require,
@@ -182,6 +179,17 @@
   }
 
   /**
+   * Event constructor.
+   * @constructor
+   * @member Benchmark
+   * @param {String|Object} type The event type.
+   */
+  function Event(type) {
+    return type instanceof Event ? type :
+      extend(this, typeof type == 'string' ? { 'type': type } : type);
+  }
+
+  /**
    * Suite constructor.
    * @constructor
    * @member Benchmark
@@ -252,11 +260,11 @@
   }
 
   /**
-   * Executes a function asynchronously or synchronously.
+   * Executes a function synchronously or asynchronously.
    * @private
    * @param {Object} bench The benchmark instance passed to `fn`.
    * @param {Function} fn Function to be executed.
-   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [async=false] Flag to call asynchronously.
    */
   function call(bench, fn, async) {
     // only attempt asynchronous calls if supported
@@ -265,8 +273,7 @@
         delete bench._timerId;
         fn();
       }, bench.delay * 1e3);
-    }
-    else {
+    } else {
       fn();
     }
   }
@@ -299,7 +306,7 @@
      */
     clock = function(bench) {
       var result,
-          deferred = bench.constructor == Deferred && [bench, bench = bench.benchmark][0],
+          deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
           fn = bench.fn,
           host = bench._host || bench,
           count = host.count = bench.count,
@@ -410,10 +417,8 @@
     /*------------------------------------------------------------------------*/
 
     // detect nanosecond support from a Java applet
-    each(window.document && document.applets || [], function(element) {
-      if (timer.ns = applet = 'nanoTime' in element && element) {
-        return false;
-      }
+    timer.ns = reduce(window.document && document.applets || [], function(ns, element) {
+      return (applet = ns || 'nanoTime' in element && element);
     });
 
     // or the exposed Java API
@@ -451,8 +456,7 @@
 
     // remove unused applet
     if (timer.unit != 'ns' && applet) {
-      applet.parentNode.removeChild(applet);
-      applet = null;
+      applet = applet.parentNode.removeChild(applet), null;
     }
     // error if there are no working timers
     if (timer.res == Infinity) {
@@ -682,10 +686,11 @@
    * @param {String} code The code to run.
    */
   function runScript(code) {
-    var sibling = document.getElementsByTagName('script')[0],
+    try {
+      var sibling = document.getElementsByTagName('script')[0],
         parent = sibling.parentNode,
         script = document.createElement('script');
-    try {
+
       script.appendChild(document.createTextNode(code));
       parent.removeChild(parent.insertBefore(script, sibling));
     } catch(e) { }
@@ -761,22 +766,22 @@
    * @returns {Array|Object} Returns the object iterated over.
    */
   function each(object, callback) {
-    var i = -1,
+    var index = -1,
         result = object,
         object = Object(object),
         length = object.length;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns false for NodeLists
     if ('length' in object && length > -1 && length < 4294967296) {
-      while (++i < length) {
-        // in Safari 2 `i in object` is always false for NodeLists
-        if ((i in object || 'item' in object) && callback(object[i], i, object) === false) {
+      while (++index < length) {
+        // in Safari 2 `index in object` is always false for NodeLists
+        if ((index in object || 'item' in object) && callback(object[index], index, object) === false) {
           break;
         }
       }
     } else {
-      for (i in object) {
-        if (hasKey(object, i) && callback(object[i], i, object) === false) {
+      for (index in object) {
+        if (hasKey(object, index) && callback(object[index], index, object) === false) {
           break;
         }
       }
@@ -851,9 +856,9 @@
    */
   function indexOf(array, value) {
     var result = -1;
-    each(array, function(v, i) {
-      if (v === value) {
-        result = i;
+    each(array, function(other, index) {
+      if (value === other) {
+        result = index;
         return false;
       }
     });
@@ -900,11 +905,9 @@
    */
   function invoke(benches, name) {
     var args,
-        async,
         bench,
-        isRun,
         queued,
-        i = 0,
+        index = 0,
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = map(benches, function(bench) { return bench; });
 
@@ -913,7 +916,7 @@
      */
     function execute() {
       var listeners,
-          sync = !(async || isRun && bench.defer);
+          sync = isSync(bench);
 
       if (!sync) {
         // use `next` as a listener
@@ -922,37 +925,62 @@
         listeners.splice(0, 0, listeners.pop());
       }
       // execute method
-      result[i] = bench[name].apply(bench, args);
+      result[index] = bench[name].apply(bench, args);
       // if synchronous return true until finished
       return sync && next();
+    }
+
+    /**
+     * Checks if invoking `run` with asynchronous cycles.
+     */
+    function isAsync(object) {
+      return isRun(object) && (args[0] == null ? object.options.async : args[0]) && has.timeout;
+    }
+
+    /**
+     * Checks if the benchmark clock is deferred.
+     */
+    function isDeferred(object) {
+      return isRun(object) && object.defer;
+    }
+
+    /**
+     * Checks if invoking `run` on a benchmark instance.
+     */
+    function isRun(object) {
+      // avoid using `instanceof` here because of IE memory leak issues with host objects
+      return object.constructor == Benchmark && name == 'run';
+    }
+
+    /**
+     * Checks if invoking `run` with synchronous cycles.
+     */
+    function isSync(object) {
+      return !(isAsync(object) || isDeferred(object));
     }
 
     /**
      * Fetches the next bench or executes `onComplete` callback.
      */
     function next() {
-      var last = bench;
-      bench = false;
+      var last = bench,
+          sync = isSync(last);
 
-      if (async || isRun && last.defer) {
+      bench = false;
+      if (!sync) {
         last.removeListener('complete', next);
         last.emit('complete');
       }
       // choose next benchmark if not exiting early
-      if (options.onCycle.call(benches, last) !== false) {
-        if (queued) {
-          // use generic shift
-          shift.call(benches);
-          bench = benches[0];
-        } else {
-          bench = benches[++i];
-        }
+      if (options.onCycle.call(benches, new Event('cycle'), last) !== false) {
+        queued && shift.call(benches);
+        bench = result[++index] || queued && benches[0];
       }
       if (bench) {
-        if (async || isRun && bench.defer) {
-          call(bench, execute, async);
+        if (!isSync(bench)) {
+          call(bench, execute, isAsync(bench));
         }
-        else if (isRun && last.defer) {
+        else if (!sync) {
           // resume synchronous execution
           while (execute()) { }
         }
@@ -961,7 +989,7 @@
           return true;
         }
       } else {
-        options.onComplete.call(benches, last);
+        options.onComplete.call(benches, new Event('complete'), last);
       }
       // when async the `return false` will cancel the rest of the "complete"
       // listeners because they were called above and when synchronous it will
@@ -982,15 +1010,11 @@
       args = isClassOf(args = 'args' in options ? options.args : [], 'Array') ? args : [args];
       queued = options.queued;
     }
-    // undocumented async/deferred for use with Benchmark#run only
-    if (isRun = name == 'run') {
-      async = (args[0] == null ? Benchmark.options.async : args[0]) && has.timeout;
-    }
     // start iterating over the array
-    if (bench = benches[0]) {
-      options.onStart.call(benches, bench);
-      if (async) {
-        call(bench, execute, async);
+    if (bench = result[0]) {
+      options.onStart.call(benches, new Event('start'), bench);
+      if (isAsync(bench)) {
+        call(bench, execute, true);
       } else {
         while (execute()) { }
       }
@@ -1164,7 +1188,7 @@
    * Runs the suite.
    * @name run
    * @member Benchmark.Suite
-   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [async=false] Flag to cycle asynchronously.
    * @param {Boolean} [queued=false] Flag to treat benchmarks as a queue.
    * @returns {Object} The suite instance.
    */
@@ -1176,16 +1200,16 @@
       'name': 'run',
       'args': async,
       'queued': queued,
-      'onStart': function(bench) {
+      'onStart': function(event, bench) {
         me.emit('start', bench);
       },
-      'onCycle': function(bench) {
+      'onCycle': function(event, bench) {
         if (bench.error) {
           me.emit('error', bench);
         }
         return !me.aborted && me.emit('cycle', bench);
       },
-      'onComplete': function(bench) {
+      'onComplete': function(event, bench) {
         me.running = false;
         me.emit('complete', bench);
       }
@@ -1227,7 +1251,7 @@
    */
   function emit(type) {
     var me = this,
-        event = typeof type == 'string' ? { 'type': type } : type,
+        event = new Event(type),
         args = (arguments[0] = event, slice.call(arguments)),
         events = me.events,
         listeners = events && events[event.type] || [],
@@ -1428,7 +1452,7 @@
    * Computes stats on benchmark results.
    * @private
    * @param {Object} bench The benchmark instance.
-   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [async=false] Flag to cycle asynchronously.
    */
   function compute(bench, async) {
     var queue = [],
@@ -1448,7 +1472,7 @@
     }
 
     /**
-     * Updates the clone/host benchmarks to keep them in sync.
+     * Updates the clone/host benchmarks to keep their data in sync.
      */
     function update() {
       // port changes from clone to host
@@ -1481,7 +1505,7 @@
     /**
      * Determines if more clones should be queued or if cycling should stop.
      */
-    function evaluate(clone) {
+    function evaluate(event, clone) {
       var mean,
           moe,
           rme,
@@ -1566,7 +1590,7 @@
    * Cycles a benchmark until a run `count` can be established.
    * @private
    * @param {Object} bench The benchmark instance.
-   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [async=false] Flag to cycle asynchronously.
    * @param {Object} deferred The deferred instance.
    */
   function cycle(bench, async, deferred) {
@@ -1643,7 +1667,7 @@
   /**
    * Runs the benchmark.
    * @member Benchmark
-   * @param {Boolean} [async=false] Flag to run asynchronously.
+   * @param {Boolean} [async=false] Flag to cycle asynchronously.
    * @returns {Object} The benchmark instance.
    */
   function run(async) {
@@ -1693,7 +1717,7 @@
     'options': {
 
       /**
-       * A flag to indicate benchmark cycles will run asynchronously by default.
+       * A flag to indicate that benchmark cycles will execute asynchronously by default.
        * @member Benchmark.options
        * @type Boolean
        */
@@ -2248,11 +2272,21 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // expose Deferred
-  Benchmark.Deferred = Deferred;
+  /**
+   * The event type.
+   * @member Benchmark.Event
+   * @type String
+   */
+  Event.prototype.type = '';
 
-  // expose Suite
-  Benchmark.Suite = Suite;
+  /*--------------------------------------------------------------------------*/
+
+  // expose Deferred, Event and Suite
+  extend(Benchmark, {
+    'Deferred': Deferred,
+    'Event': Event,
+    'Suite': Suite
+  });
 
   // expose Benchmark
   if (freeExports) {

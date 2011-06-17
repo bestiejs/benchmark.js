@@ -15,6 +15,7 @@
 		else {
 			require({
 				'baseUrl': '../vendor/requirejs/',
+				'urlArgs': 't=' + (+new Date),
 				'paths': { 'platform': '../platform.js/platform', 'src': '../../' }
 			},
 			['src/benchmark'], function(Benchmark) {
