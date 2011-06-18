@@ -267,15 +267,17 @@
    * @param {Boolean} [async=false] Flag to call asynchronously.
    */
   function call(bench, fn, async) {
-    // only attempt asynchronous calls if supported
-    if (async && has.timeout) {
-      bench._timerId = setTimeout(function() {
-        delete bench._timerId;
+    (!async && fn || function() {
+      var ids = bench._timerIds || (bench._timerIds = []),
+          index = ids.length;
+
+      // under normal use there should only be one id at any time per benchmark
+      ids.push(setTimeout(function() {
+        ids.splice(index, 1);
+        ids.length || delete bench._timerIds;
         fn();
-      }, bench.delay * 1e3);
-    } else {
-      fn();
-    }
+      }, bench.delay * 1e3));
+    })();
   }
 
   /**
@@ -1326,9 +1328,9 @@
   function abort() {
     var me = this;
     if (me.running) {
-      if (me._timerId && has.timeout) {
-        clearTimeout(me._timerId);
-        delete me._timerId;
+      if (has.timeout) {
+        each(me._timerIds || [], clearTimeout);
+        delete me._timerIds;
       }
       // set running as NaN so reset() will detect it as falsey and *not* call abort(),
       // but *will* detect it as a change and fire the onReset() callback

@@ -123,6 +123,7 @@
 
   test('basic', function() {
     var callbacks = [],
+        lengths = [],
         callback = function() { callbacks.push(slice.call(arguments)); },
         slice = [].slice,
         o = [new Array, new Array, new Array];
@@ -133,7 +134,7 @@
     result = Benchmark.pluck(o, '0');
     deepEqual(result, ['b', 'b', 'b'], 'methods invoked');
 
-    result = Benchmark.invoke(o, {
+    Benchmark.invoke(o, {
       'name': 'splice',
       'args': [0, 0, 'a'],
       'onStart': callback,
@@ -145,6 +146,23 @@
     equals(callbacks.shift()[0].type, 'start', 'onStart');
     equals(callbacks.shift()[0].type, 'cycle', 'onCycle');
     equals(callbacks.pop()[0].type, 'complete', 'onComplete');
+  });
+
+  test('queued', function() {
+    var lengths = [],
+        o = [new Array, new Array, new Array];
+
+    var result = Benchmark.invoke(o, {
+      'name': 'push',
+      'queued': true,
+      'args': 'a',
+      'onCycle': function() {
+        lengths.push(o.length);
+      }
+    });
+
+    deepEqual(lengths, [3, 2, 1], 'removed queued items');
+    deepEqual(result, [1, 1, 1], 'return values');
   });
 
   test('array-like-object', function() {
