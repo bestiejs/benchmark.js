@@ -326,12 +326,12 @@
         options = Benchmark.options,
         maxTime = options.maxTime;
 
-    options.maxTime = .75;
+    options.maxTime = 1;
     suite.add('a', function() {
-      'x' == new String('x');
+      // empty
     })
     .add('b', function() {
-      document.body.cloneNode(true);
+      for (var i = 0; i < 1e5; i++) { }
     })
     .add('c', function() {
       throw new TypeError;
