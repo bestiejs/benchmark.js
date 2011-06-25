@@ -137,7 +137,9 @@ button, .submit {
   border: 1px solid #999;
   background: #dadada;
   background-image: -moz-linear-gradient(top, #ebebeb, #b8b8b8);
+  background-image: -o-linear-gradient(top, #ebebeb, #b8b8b8);
   background-image: -webkit-gradient(linear, left top, left bottom, from(#ebebeb), to(#b8b8b8));
+  background-image: -webkit-linear-gradient(top, #ebebeb, #b8b8b8);
   background-image: linear-gradient(top, #ebebeb, #b8b8b8);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#ebebeb', EndColorStr='#b8b8b8');
 }
@@ -372,7 +374,7 @@ footer {
   padding: 0;
 }
 
-#comments .meta, #comments .meta img {
+#comments .meta img {
   position: absolute;
   left: 0;
   top: 0;
@@ -386,7 +388,7 @@ footer {
 
 #comments .meta {
   padding-left: 35px;
-  top: 0;
+  margin-top: 0;
   width: 923px;
   line-height: 30px;
 }
@@ -397,8 +399,7 @@ footer {
 }
 
 #comments article div {
-  margin-top: 30px;
-  padding: .2em 1em 0;
+  padding: 0 1em 0;
 }
 
 #comments article {
@@ -542,13 +543,17 @@ footer {
 /* < 1041px */
 @media (max-width: 1040px) {
   body {
-    width: 100%;
     margin: 0;
     border: 0;
+  }
+
+  body, #comments .meta {
+    width: 100%;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
   }
+
 }
 
 /* < 801px */
