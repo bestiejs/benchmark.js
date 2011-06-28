@@ -72,7 +72,7 @@
           ? [document.getElementById(selector.slice(1))]
           : document.getElementsByTagName(selector);
 
-    while (result[++i] = nodes[i]);
+    while (result[++i] = nodes[i]) { }
     return result.length-- && result;
   }
 
@@ -376,7 +376,7 @@
   addListener(window, 'load', function() {
     var me = ui.browserscope,
         key = me.key,
-        placeholder = query(me.selector)[0];
+        placeholder = key && query(me.selector)[0];
 
     // create results table
     // http://code.google.com/apis/loader/autoloader-wizard.html
