@@ -1405,6 +1405,7 @@
     }
     else {
       // a non-recursive solution to check if properties have changed
+      // http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4
       while (pairs.length) {
         each((pair = pairs.pop(), pair[0]), function(value, key) {
           var other = pair[1][key];
