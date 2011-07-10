@@ -307,7 +307,8 @@
      * Lazy define clock/start/stop to take advantage of high resolution timers.
      */
     clock = function(bench) {
-      var result,
+      var error,
+          result,
           deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
           fn = bench.fn,
           host = bench._host || bench,
@@ -351,13 +352,18 @@
             result = compiled.call(host, ns).time;
           }
         } catch(e) {
+          error = e;
           host.count = count;
           compiled = fn.compiled = false;
         }
       }
       // fallback to simple while-loop when compiled is false
       if (!deferred && !compiled) {
-        result = fallback.call(host, ns).time;
+        try {
+          result = fallback.call(host, ns).time;
+        } catch(e) {
+          throw error || e;
+        }
       }
       return result;
     };
@@ -2293,17 +2299,24 @@
 
   // expose Benchmark
   if (freeExports) {
+    // in Node.js
     if (typeof module == 'object' && module && module.exports == freeExports) {
       module.exports = Benchmark;
-    } else {
+    }
+    // in Narwhal or Ringo
+    else {
       freeExports.Benchmark = Benchmark;
     }
-  } else if (freeDefine) {
+  }
+  // via curl.js or RequireJS
+  else if (freeDefine) {
     freeDefine(['platform'], function(platform) {
       Benchmark.platform = platform;
       return Benchmark;
     });
-  } else {
+  }
+  // in a browser or Rhino
+  else {
     // use square bracket notation so Closure Compiler won't mung `Benchmark`
     // http://code.google.com/closure/compiler/docs/api-tutorial3.html#export
     window['Benchmark'] = Benchmark;
