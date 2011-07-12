@@ -162,8 +162,8 @@
     setOptions(me, options);
     me.fn || (me.fn = fn);
     me.id || (me.id = counter);
-    me.stats = extend({ }, me.stats);
-    me.times = extend({ }, me.times);
+    me.stats = extend({}, me.stats);
+    me.times = extend({}, me.times);
   }
 
   /**
@@ -251,7 +251,7 @@
     return function() {
       var me = this,
           result = fn.apply(me, arguments);
-      // fixes IE<9/IE8 compatibility mode bugs
+      // fixes IE < 9 and IE 8 compatibility mode bugs
       if (!me.length) {
         delete me[0];
       }
@@ -281,231 +281,6 @@
   }
 
   /**
-   * Clocks the time taken to execute a test per cycle (secs).
-   * @private
-   * @param {Object} bench The benchmark instance.
-   * @returns {Number} The time taken.
-   */
-  function clock() {
-    var applet,
-        args,
-        fallback,
-        options = Benchmark.options,
-        template = { 'begin': 's$=new n$', 'end': 'r$=(new n$-s$)/1e3', 'uid': uid },
-        timer = { 'ns': Date },
-        timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }],
-        code = 'var r$,s$,m$=this,i$=m$.count,f$=m$.fn;#{setup}#{begin};while(i$--){|' +
-               '}#{end};#{teardown}return{time:r$,uid:"#{uid}"}|' +
-               'm$.teardown&&m$.teardown();|' +
-               'f$()|' +
-               'm$.setup&&m$.setup();|' +
-               'var m$=this,n$=m$.ns,s$=m$.timeStamp,#{end};m$.elapsed=r$|' +
-               'var m$=this,n$=m$.ns,#{begin};m$.timeStamp=s$|' +
-               'n$';
-
-    /**
-     * Lazy define clock/start/stop to take advantage of high resolution timers.
-     */
-    clock = function(bench) {
-      var error,
-          result,
-          deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
-          fn = bench.fn,
-          host = bench._host || bench,
-          count = host.count = bench.count,
-          compiled = fn.compiled,
-          ns = timer.ns;
-
-      // init `minTime` if needed
-      bench.minTime = host.minTime || (host.minTime = host.options.minTime = options.minTime);
-
-      // repair nanosecond timer
-      if (applet) {
-        try {
-          ns.nanoTime();
-        } catch(e) {
-          // use non-element to avoid issues with libs that augment them
-          ns = timer.ns = new applet.Packages.nano;
-        }
-      }
-
-      if (deferred) {
-        start(deferred);
-        host.fn(deferred);
-      }
-      else if (compiled == null || compiled) {
-        try {
-          if (!compiled) {
-            // insert test body into the while-loop
-            compiled = createFunction(args,
-              interpolate(code[0], { 'setup': getSource(host.setup) }) +
-              getSource(fn) +
-              interpolate(code[1], { 'teardown': getSource(host.teardown) })
-            );
-            // determine if compiled code is exited early, usually by a rogue
-            // return statement, by checking for a return object with the uid
-            host.count = 1;
-            compiled = fn.compiled = compiled.call(host, ns).uid == uid && compiled;
-            host.count = count;
-          }
-          if (compiled) {
-            result = compiled.call(host, ns).time;
-          }
-        } catch(e) {
-          error = e;
-          host.count = count;
-          compiled = fn.compiled = false;
-        }
-      }
-      // fallback to simple while-loop when compiled is false
-      if (!deferred && !compiled) {
-        try {
-          result = fallback.call(host, ns).time;
-        } catch(e) {
-          throw error || e;
-        }
-      }
-      return result;
-    };
-
-    start = function(deferred) {
-      // high resolution timers may not return a traditional timestamp, so we fake it
-      deferred.timeStamp || (deferred.timeStamp = (timer.start(), +new Date));
-    };
-
-    stop = function(deferred) {
-      deferred.timeStamp && (deferred.elapsed = (timer.stop(), timer.elapsed));
-    };
-
-    /**
-     * Gets the current timer's minimum resolution (secs).
-     */
-    function getRes(unit) {
-      var measured,
-          begin,
-          count = 30,
-          divisor = 1e3,
-          ns = timer.ns,
-          sample = [];
-
-      // get average smallest measurable time
-      while (count--) {
-        if (unit == 'us') {
-          divisor = 1e6;
-          if (ns.stop) {
-            ns.start();
-            while (!(measured = ns.microseconds())) { }
-          } else {
-            begin = timer.ns();
-            while (!(measured = ns() - begin)) { }
-          }
-        }
-        else if (unit == 'ns') {
-          divisor = 1e9;
-          begin = ns.nanoTime();
-          while (!(measured = ns.nanoTime() - begin)) { }
-        }
-        else {
-          begin = new ns;
-          while (!(measured = new ns - begin)) { }
-        }
-        // check for broken timers (nanoTime may have issues)
-        // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
-        if (measured > 0) {
-          sample.push(measured);
-        } else {
-          sample.push(Infinity);
-          break;
-        }
-      }
-      // convert to seconds
-      return getMean(sample) / divisor;
-    }
-
-    /*------------------------------------------------------------------------*/
-
-    // detect nanosecond support from a Java applet
-    timer.ns = reduce(window.document && document.applets || [], function(ns, element) {
-      return (applet = ns || 'nanoTime' in element && element);
-    });
-
-    // or the exposed Java API
-    // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
-    try {
-      timer.ns || (timer.ns = java.lang.System);
-    } catch(e) { }
-
-    // check type in case Safari returns an object instead of a number
-    try {
-      if (typeof timer.ns.nanoTime() == 'number') {
-        timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
-      }
-    } catch(e) { }
-
-    // detect Chrome's microsecond timer:
-    // enable benchmarking via the --enable-benchmarking command
-    // line switch in at least Chrome 7 to use chrome.Interval
-    try {
-      if (timer.ns = new (window.chrome || window.chromium).Interval) {
-        timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
-      }
-    } catch(e) { }
-
-    // detect Node's microtime module:
-    // npm install microtime
-    if (timer.ns = (req('microtime') || { 'now': 0 }).now) {
-      timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
-    }
-
-    // pick timer with highest resolution
-    timer = reduce(timers, function(timer, other) {
-      return other.res < timer.res ? other : timer;
-    });
-
-    // remove unused applet
-    if (timer.unit != 'ns' && applet) {
-      applet = applet.parentNode.removeChild(applet), null;
-    }
-    // error if there are no working timers
-    if (timer.res == Infinity) {
-      throw new Error('Benchmark.js was unable to find a working timer.');
-    }
-    // use API of chosen timer
-    if (timer.unit == 'ns') {
-      extend(template, {
-        'begin': 's$=n$.nanoTime()',
-        'end': 'r$=(n$.nanoTime()-s$)/1e9'
-      });
-    }
-    else if (timer.unit == 'us') {
-      extend(template, timer.ns.stop ? {
-        'begin': 's$=n$.start()',
-        'end': 'r$=n$.microseconds()/1e6'
-      } : {
-        'begin': 's$=n$()',
-        'end': 'r$=(n$()-s$)/1e6'
-      });
-    }
-
-    // inject uid into variable names to avoid collisions with
-    // embedded tests and create non-embedding fallback
-    code = interpolate(code, template).replace(/\$/g, /\d+/.exec(uid)).split('|');
-    args = code.pop();
-
-    timer.start = createFunction('', code.pop());
-    timer.stop = createFunction('', code.pop());
-    fallback = createFunction(args,
-      interpolate(code[0], { 'setup': code.pop() }) +
-      code.pop() +
-      interpolate(code[1], { 'teardown': code.pop() })
-    );
-
-    // resolve time span required to achieve a percent uncertainty of 1%
-    options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
-    return clock.apply(null, arguments);
-  }
-
-  /**
    * Creates a function from the given arguments string and body.
    * @private
    * @param {String} args The comma separated function arguments.
@@ -513,16 +288,12 @@
    * @returns {Function} The new function.
    */
   function createFunction() {
-
-    /**
-     * Lazy define to fork based on supported features.
-     */
+    // lazy defined to fork based on supported features.
     createFunction = function(args, body) {
       var anchor = freeDefine ? define.amd : Benchmark;
       runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + uid + '=function(' + args + '){' + body + '}');
       return [anchor[uid], delete anchor[uid]][0];
     };
-
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
     createFunction = (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
@@ -538,7 +309,7 @@
    */
   function extend(destination, source) {
     each(slice.call(arguments, 1), function(source) {
-      source || (source = { });
+      source || (source = {});
       for (var key in source) {
         destination[key] = source[key];
       }
@@ -589,7 +360,7 @@
    */
   function hasKey(object, key) {
     var result,
-        o = { },
+        o = {},
         hasOwnProperty = o.hasOwnProperty,
         parent = (object.constructor || Object).prototype;
 
@@ -615,15 +386,9 @@
    * @param {String} string The string to modify.
    * @param {Object} object The template object.
    * @returns {String} The modified string.
-   * @example
-   *
-   * Benchmark.interpolate('#{greet} #{who}!', {
-   *   'greet': 'Hello',
-   *   'who': 'world'
-   * }); // -> 'Hello world!'
    */
   function interpolate(string, object) {
-    return reduce(object || { }, function(string, value, key) {
+    return reduce(object || {}, function(string, value, key) {
       return string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
     }, string);
   }
@@ -711,7 +476,7 @@
    * @param {Object} [options={}] Options object.
    */
   function setOptions(bench, options) {
-    options = extend({ }, bench.constructor.options, options);
+    options = extend({}, bench.constructor.options, options);
     bench.options = each(options, function(value, key) {
       if (value != null) {
         // add event listeners
@@ -732,6 +497,7 @@
    * @param {Object} deferred The deferred instance.
    */
   function start(deferred) {
+    // redefined on clock()'s first call
     deferred.timeStamp || (deferred.timeStamp = +new Date);
   }
 
@@ -741,6 +507,7 @@
    * @param {Object} deferred The deferred instance.
    */
   function stop(deferred) {
+    // redefined on clock()'s first call
     deferred.timeStamp && (deferred.elapsed = (+new Date - deferred.timeStamp) / 1e3);
   }
 
@@ -775,8 +542,7 @@
    */
   function each(object, callback) {
     var index = -1,
-        result = object,
-        object = Object(object),
+        result = [object, object = Object(object)][0],
         length = object.length;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns false for NodeLists
@@ -1005,8 +771,6 @@
       return false;
     }
 
-    /*------------------------------------------------------------------------*/
-
     // juggle arguments
     if (isClassOf(name, 'String')) {
       // 2 arguments (array, name)
@@ -1153,7 +917,7 @@
    */
   function cloneSuite(options) {
     var me = this,
-        result = new me.constructor(extend({ }, me.options, options));
+        result = new me.constructor(extend({}, me.options, options));
     // copy own properties
     each(me, function(value, key) {
       if (!hasKey(result, key)) {
@@ -1243,7 +1007,7 @@
    */
   function addListener(type, listener) {
     var me = this,
-        events = me.events || (me.events = { });
+        events = me.events || (me.events = {});
 
     each(type.split(' '), function(type) {
       (events[type] || (events[type] = [])).push(listener);
@@ -1361,7 +1125,7 @@
    */
   function clone(options) {
     var me = this,
-        result = new me.constructor(me.fn, extend({ }, me.options, options));
+        result = new me.constructor(me.fn, extend({}, me.options, options));
     // copy own properties
     each(me, function(value, key) {
       if (!hasKey(result, key)) {
@@ -1401,7 +1165,7 @@
     var changed,
         pair,
         me = this,
-        source = extend({ }, me.constructor.prototype, me.options),
+        source = extend({}, me.constructor.prototype, me.options),
         pairs = [[source, me]];
 
     if (me.running) {
@@ -1456,6 +1220,231 @@
   }
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Clocks the time taken to execute a test per cycle (secs).
+   * @private
+   * @param {Object} bench The benchmark instance.
+   * @returns {Number} The time taken.
+   */
+  function clock() {
+    var applet,
+        args,
+        fallback,
+        options = Benchmark.options,
+        template = { 'begin': 's$=new n$', 'end': 'r$=(new n$-s$)/1e3', 'uid': uid },
+        timer = { 'ns': Date },
+        timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }],
+        code = 'var r$,s$,m$=this,i$=m$.count,f$=m$.fn;#{setup}#{begin};while(i$--){|' +
+               '}#{end};#{teardown}return{time:r$,uid:"#{uid}"}|' +
+               'm$.teardown&&m$.teardown();|' +
+               'f$()|' +
+               'm$.setup&&m$.setup();|' +
+               'var m$=this,n$=m$.ns,s$=m$.timeStamp,#{end};m$.elapsed=r$|' +
+               'var m$=this,n$=m$.ns,#{begin};m$.timeStamp=s$|' +
+               'n$';
+
+    // lazy defined for hi-res timers
+    clock = function(bench) {
+      var error,
+          result,
+          deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
+          fn = bench.fn,
+          host = bench._host || bench,
+          count = host.count = bench.count,
+          compiled = fn.compiled,
+          ns = timer.ns;
+
+      // init `minTime` if needed
+      bench.minTime = host.minTime || (host.minTime = host.options.minTime = options.minTime);
+
+      // repair nanosecond timer
+      if (applet) {
+        try {
+          ns.nanoTime();
+        } catch(e) {
+          // use non-element to avoid issues with libs that augment them
+          ns = timer.ns = new applet.Packages.nano;
+        }
+      }
+
+      if (deferred) {
+        start(deferred);
+        host.fn(deferred);
+      }
+      else if (compiled == null || compiled) {
+        try {
+          if (!compiled) {
+            // insert test body into the while-loop
+            compiled = createFunction(args,
+              interpolate(code[0], { 'setup': getSource(host.setup) }) +
+              getSource(fn) +
+              interpolate(code[1], { 'teardown': getSource(host.teardown) })
+            );
+            // determine if compiled code is exited early, usually by a rogue
+            // return statement, by checking for a return object with the uid
+            host.count = 1;
+            compiled = fn.compiled = compiled.call(host, ns).uid == uid && compiled;
+            host.count = count;
+          }
+          if (compiled) {
+            result = compiled.call(host, ns).time;
+          }
+        } catch(e) {
+          error = e;
+          host.count = count;
+          compiled = fn.compiled = false;
+        }
+      }
+      // fallback to simple while-loop when compiled is false
+      if (!deferred && !compiled) {
+        try {
+          result = fallback.call(host, ns).time;
+        } catch(e) {
+          throw error || e;
+        }
+      }
+      return result;
+    };
+
+    // redefine for hi-res timers
+    start = function(deferred) {
+      // high resolution timers may not return a traditional timestamp, so we fake it
+      deferred.timeStamp || (deferred.timeStamp = (timer.start(), +new Date));
+    };
+
+    // redefine for hi-res timers
+    stop = function(deferred) {
+      deferred.timeStamp && (deferred.elapsed = (timer.stop(), timer.elapsed));
+    };
+
+    /*------------------------------------------------------------------------*/
+
+    /**
+     * Gets the current timer's minimum resolution (secs).
+     */
+    function getRes(unit) {
+      var measured,
+          begin,
+          count = 30,
+          divisor = 1e3,
+          ns = timer.ns,
+          sample = [];
+
+      // get average smallest measurable time
+      while (count--) {
+        if (unit == 'us') {
+          divisor = 1e6;
+          if (ns.stop) {
+            ns.start();
+            while (!(measured = ns.microseconds())) { }
+          } else {
+            begin = timer.ns();
+            while (!(measured = ns() - begin)) { }
+          }
+        }
+        else if (unit == 'ns') {
+          divisor = 1e9;
+          begin = ns.nanoTime();
+          while (!(measured = ns.nanoTime() - begin)) { }
+        }
+        else {
+          begin = new ns;
+          while (!(measured = new ns - begin)) { }
+        }
+        // check for broken timers (nanoTime may have issues)
+        // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
+        if (measured > 0) {
+          sample.push(measured);
+        } else {
+          sample.push(Infinity);
+          break;
+        }
+      }
+      // convert to seconds
+      return getMean(sample) / divisor;
+    }
+
+    // detect nanosecond support from a Java applet
+    timer.ns = reduce(window.document && document.applets || [], function(ns, element) {
+      return (applet = ns || 'nanoTime' in element && element);
+    });
+
+    // or the exposed Java API
+    // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
+    try {
+      timer.ns || (timer.ns = java.lang.System);
+    } catch(e) { }
+
+    // check type in case Safari returns an object instead of a number
+    try {
+      if (typeof timer.ns.nanoTime() == 'number') {
+        timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
+      }
+    } catch(e) { }
+
+    // detect Chrome's microsecond timer:
+    // enable benchmarking via the --enable-benchmarking command
+    // line switch in at least Chrome 7 to use chrome.Interval
+    try {
+      if (timer.ns = new (window.chrome || window.chromium).Interval) {
+        timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
+      }
+    } catch(e) { }
+
+    // detect Node's microtime module:
+    // npm install microtime
+    if (timer.ns = (req('microtime') || { 'now': 0 }).now) {
+      timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
+    }
+
+    // pick timer with highest resolution
+    timer = reduce(timers, function(timer, other) {
+      return other.res < timer.res ? other : timer;
+    });
+
+    // remove unused applet
+    if (timer.unit != 'ns' && applet) {
+      applet = applet.parentNode.removeChild(applet), null;
+    }
+    // error if there are no working timers
+    if (timer.res == Infinity) {
+      throw new Error('Benchmark.js was unable to find a working timer.');
+    }
+    // use API of chosen timer
+    if (timer.unit == 'ns') {
+      extend(template, {
+        'begin': 's$=n$.nanoTime()',
+        'end': 'r$=(n$.nanoTime()-s$)/1e9'
+      });
+    }
+    else if (timer.unit == 'us') {
+      extend(template, timer.ns.stop ? {
+        'begin': 's$=n$.start()',
+        'end': 'r$=n$.microseconds()/1e6'
+      } : {
+        'begin': 's$=n$()',
+        'end': 'r$=(n$()-s$)/1e6'
+      });
+    }
+
+    // inject uid into variable names to avoid collisions with
+    // embedded tests and create non-embedding fallback
+    code = interpolate(code, template).replace(/\$/g, /\d+/.exec(uid)).split('|');
+    args = code.pop();
+
+    timer.start = createFunction('', code.pop());
+    timer.stop = createFunction('', code.pop());
+    fallback = createFunction(args,
+      interpolate(code[0], { 'setup': code.pop() }) +
+      code.pop() +
+      interpolate(code[1], { 'teardown': code.pop() })
+    );
+
+    // resolve time span required to achieve a percent uncertainty of 1%
+    options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
+    return clock.apply(null, arguments);
+  }
 
   /**
    * Computes stats on benchmark results.
@@ -1538,7 +1527,7 @@
         // sample mean (estimate of the population mean)
         mean = getMean(sample);
         // sample variance (estimate of the population variance)
-        variance = reduce(sample, varOf, 0) / (size - 1);
+        variance = reduce(sample, varOf, 0) / (size - 1) || 0;
         // sample standard deviation (estimate of the population standard deviation)
         sd = sqrt(variance);
         // standard error of the mean (aka the standard deviation of the sampling distribution of the sample mean)
@@ -1558,6 +1547,9 @@
           'variance': variance
         });
 
+        // to prevent massive wait times if the elapsed time exceeds the max
+        // time allowed per benchmark then exit even if the min sample size has
+        // not been reached
         if (maxedOut) {
           done = true;
           bench.running = false;
@@ -1578,8 +1570,6 @@
       return !done;
     }
 
-    /*------------------------------------------------------------------------*/
-
     // init queue and begin
     enqueue(bench.minSamples);
     invoke(queue, {
@@ -1592,8 +1582,6 @@
       }
     });
   }
-
-  /*--------------------------------------------------------------------------*/
 
   /**
    * Cycles a benchmark until a run `count` can be established.
@@ -1670,8 +1658,6 @@
       bench.emit('complete');
     }
   }
-
-  /*--------------------------------------------------------------------------*/
 
   /**
    * Runs the benchmark.
@@ -2317,13 +2303,13 @@
   }
   // in a browser or Rhino
   else {
-    // use square bracket notation so Closure Compiler won't mung `Benchmark`
+    // use square bracket notation so Closure Compiler won't munge `Benchmark`
     // http://code.google.com/closure/compiler/docs/api-tutorial3.html#export
     window['Benchmark'] = Benchmark;
   }
 
   // trigger clock's lazy define early to avoid a security error
   if (has.air) {
-    clock({ 'fn': noop, 'count': 1, 'options': { } });
+    clock({ 'fn': noop, 'count': 1, 'options': {} });
   }
 }(this));
