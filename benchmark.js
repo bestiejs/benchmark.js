@@ -277,7 +277,7 @@
         ids.length || delete bench._timerIds;
         fn();
       }, bench.delay * 1e3));
-    })();
+    }());
   }
 
   /**
@@ -443,7 +443,7 @@
    * A wrapper around require() to suppress `module missing` errors.
    * @private
    * @param {String} id The module id.
-   * @returns {Mix} The exported module.
+   * @returns {Mixed} The exported module.
    */
   function req(id) {
     var result = null;
@@ -461,8 +461,8 @@
   function runScript(code) {
     try {
       var sibling = document.getElementsByTagName('script')[0],
-        parent = sibling.parentNode,
-        script = document.createElement('script');
+          parent = sibling.parentNode,
+          script = document.createElement('script');
 
       script.appendChild(document.createTextNode(code));
       parent.removeChild(parent.insertBefore(script, sibling));
@@ -588,6 +588,7 @@
    */
   function filter(array, callback) {
     var result;
+
     if (callback == 'successful') {
       // callback to exclude errored or unrun benchmarks
       callback = function(bench) { return bench.cycles; };
@@ -918,6 +919,7 @@
   function cloneSuite(options) {
     var me = this,
         result = new me.constructor(extend({}, me.options, options));
+
     // copy own properties
     each(me, function(value, key) {
       if (!hasKey(result, key)) {
@@ -968,6 +970,7 @@
     var me = this;
     me.reset();
     me.running = true;
+
     invoke(me, {
       'name': 'run',
       'args': async,
@@ -1097,6 +1100,7 @@
    */
   function abort() {
     var me = this;
+
     if (me.running) {
       if (has.timeout) {
         each(me._timerIds || [], clearTimeout);
@@ -1126,6 +1130,7 @@
   function clone(options) {
     var me = this,
         result = new me.constructor(me.fn, extend({}, me.options, options));
+
     // copy own properties
     each(me, function(value, key) {
       if (!hasKey(result, key)) {
@@ -1453,7 +1458,8 @@
    * @param {Boolean} [async=false] Flag to cycle asynchronously.
    */
   function compute(bench, async) {
-    var queue = [],
+    var elapsed = 0,
+        queue = [],
         sample = [],
         initCount = bench.initCount;
 
@@ -1473,16 +1479,19 @@
      * Updates the clone/host benchmarks to keep their data in sync.
      */
     function update() {
-      // port changes from clone to host
-      var clone = this;
+      var clone = this,
+          cycles = clone.cycles;
+
       if (bench.running) {
         // reached in clone's onCycle
-        if (clone.cycles) {
-          // Note: bench.count prop of the host is updated in clock().
-          bench.cycles = clone.cycles;
+        if (cycles) {
+          // Note: the host's bench.count prop is updated in clock()
           bench.hz = clone.hz;
           bench.initCount = clone.initCount;
           bench.times.period = clone.times.period;
+          if (cycles > bench.cycles) {
+            bench.cycles = cycles;
+          }
           bench.emit('cycle');
         }
         else if (clone.error) {
@@ -1492,7 +1501,7 @@
         }
         else {
           // reached in clone's onStart
-          // Note: clone.minTime prop is inited in clock().
+          // Note: clone.minTime prop is inited in clock()
           clone.count = bench.initCount;
         }
       } else if (bench.aborted) {
@@ -1513,8 +1522,7 @@
           now = +new Date,
           times = bench.times,
           done = bench.aborted,
-          elapsed = (now - times.timeStamp) / 1e3,
-          maxedOut = elapsed > bench.maxTime,
+          maxedOut = (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
           size = sample.push(clone.times.period),
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
@@ -1547,14 +1555,17 @@
           'variance': variance
         });
 
-        // to prevent massive wait times if the elapsed time exceeds the max
-        // time allowed per benchmark then exit even if the min sample size has
-        // not been reached
+        // We exit early when the elapsed time exceeds the maximum time allowed
+        // per benchmark. To prevent massive wait times, we do this even if the
+        // minimum sample size has not been reached. We don't count cycle delays
+        // toward the max time because delays may be increased by browsers that
+        // clamp timeouts in inactive tabs.
+        // https://developer.mozilla.org/en/window.setTimeout#Inactive_tabs
         if (maxedOut) {
           done = true;
           bench.running = false;
           bench.initCount = initCount;
-          times.elapsed = elapsed;
+          times.elapsed = (now - times.timeStamp) / 1e3;
         }
         if (bench.hz != Infinity) {
           times.period = mean;
@@ -1667,6 +1678,7 @@
    */
   function run(async) {
     var me = this;
+    async = (async == null ? me.async : async) && has.timeout;
 
     // set running to false so reset() won't call abort()
     me.running = false;
@@ -1676,8 +1688,6 @@
     me.count = me.initCount;
     me.times.timeStamp = +new Date;
     me.emit('start');
-
-    async = (async == null ? me.async : async) && has.timeout;
 
     if (me._host) {
       if (me.defer) {
@@ -1748,6 +1758,7 @@
 
       /**
        * The maximum time a benchmark is allowed to run before finishing (secs).
+       * Note: Cycle delays aren't counted toward the maximum time.
        * @member Benchmark.options
        * @type Number
        */
