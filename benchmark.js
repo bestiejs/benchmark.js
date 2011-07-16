@@ -1446,7 +1446,7 @@
       interpolate(code[1], { 'teardown': code.pop() })
     );
 
-    // resolve time span required to achieve a percent uncertainty of 1%
+    // resolve time span required to achieve a percent uncertainty of at most 1%
     options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
     return clock.apply(null, arguments);
   }
@@ -1470,7 +1470,7 @@
       while (count--) {
         queue.push(bench.clone({
           '_host': bench,
-          'events': { 'start': [update], 'cycle': [update] }
+          'events': { 'start': [update], 'cycle': [update], 'error': [update] }
         }));
       }
     }
@@ -1478,13 +1478,13 @@
     /**
      * Updates the clone/host benchmarks to keep their data in sync.
      */
-    function update() {
+    function update(event) {
       var clone = this,
-          cycles = clone.cycles;
+          cycles = clone.cycles,
+          type = event.type;
 
       if (bench.running) {
-        // reached in clone's onCycle
-        if (cycles) {
+        if (type == 'cycle') {
           // Note: the host's bench.count prop is updated in clock()
           bench.hz = clone.hz;
           bench.initCount = clone.initCount;
@@ -1492,12 +1492,12 @@
           if (cycles > bench.cycles) {
             bench.cycles = cycles;
           }
-          bench.emit('cycle');
+          bench.emit(type);
         }
-        else if (clone.error) {
+        else if (type == 'error') {
           bench.abort();
           bench.error = clone.error;
-          bench.emit('error');
+          bench.emit(type);
         }
         else {
           // reached in clone's onStart
@@ -1619,7 +1619,7 @@
         minTime = bench.minTime;
       } catch(e) {
         bench.abort();
-        bench.error = e;
+        bench.error = e || new Error(String(e));
         bench.emit('error');
       }
     }
