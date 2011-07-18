@@ -319,6 +319,75 @@
 
   /*--------------------------------------------------------------------------*/
 
+  module('Benchmark.Suite');
+
+  test('Benchmark.Suite#add', function() {
+    var args,
+        pair,
+        thisBinding,
+        slice = [].slice,
+        callbacks = [],
+        callback = function() { callbacks.push([arguments, this]); };
+
+    var suite = new Benchmark.Suite('foo', {
+      'onAdd': callback,
+      'onAbort': callback,
+      'onClone': callback,
+      'onError': callback,
+      'onStart': callback,
+      'onCycle': callback,
+      'onComplete': callback,
+      'onReset': callback
+    })
+    .add('bar', function() {
+      throw null;
+    }, {
+      'onAbort': callback,
+      'onClone': callback,
+      'onError': callback,
+      'onStart': callback,
+      'onCycle': callback,
+      'onComplete': callback,
+      'onReset': callback
+    })
+    .run();
+
+    pair = callbacks.shift();
+    args = pair[0];
+    ok(args.length == 2 && args[0].type == 'add' && args[1].name == 'bar', 'passed arguments to Suite#onAdd');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    thisBinding = pair[1];
+    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo', 'passed arguments to Suite#onReset');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    ok(args.length == 2 && args[0].type == 'start' && args[1].name == 'bar', 'passed arguments to Suite#onStart');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    thisBinding = pair[1];
+    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onStart');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    thisBinding = pair[1];
+    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onComplete');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    ok(args.length == 2 && args[0].type == 'cycle' && args[1].name == 'bar', 'passed arguments to Suite#onCycle');
+
+    pair = callbacks.shift();
+    args = pair[0];
+    ok(args.length == 2 && args[0].type == 'complete' && args[1].name == 'bar', 'passed arguments to Suite#onComplete');
+
+    ok(callbacks.length == 0, 'callbacks executed in order');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   module('Async tests');
 
   asyncTest('Benchmark.filter', function() {
