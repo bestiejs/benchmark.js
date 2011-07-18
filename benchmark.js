@@ -1470,7 +1470,7 @@
       while (count--) {
         queue.push(bench.clone({
           '_host': bench,
-          'events': { 'start': [update], 'cycle': [update], 'error': [update] }
+          'events': { 'start': [update], 'cycle': [update] }
         }));
       }
     }
@@ -1485,18 +1485,20 @@
 
       if (bench.running) {
         if (type == 'cycle') {
-          // Note: the host's bench.count prop is updated in clock()
-          bench.hz = clone.hz;
-          bench.initCount = clone.initCount;
-          bench.times.period = clone.times.period;
-          if (cycles > bench.cycles) {
-            bench.cycles = cycles;
+          if (clone.error) {
+            bench.abort();
+            bench.error = clone.error;
+            bench.emit('error');
           }
-          bench.emit(type);
-        }
-        else if (type == 'error') {
-          bench.abort();
-          bench.error = clone.error;
+          else {
+            // Note: the host's bench.count prop is updated in clock()
+            bench.hz = clone.hz;
+            bench.initCount = clone.initCount;
+            bench.times.period = clone.times.period;
+            if (cycles > bench.cycles) {
+              bench.cycles = cycles;
+            }
+          }
           bench.emit(type);
         }
         else {
