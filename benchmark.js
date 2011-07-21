@@ -5,7 +5,7 @@
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
  */
-(function(window) {
+;(function(window) {
 
   /** Detect free variable `define` */
   var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define,
@@ -277,7 +277,7 @@
         ids.length || delete bench._timerIds;
         fn();
       }, bench.delay * 1e3));
-    }());
+    })();
   }
 
   /**
