@@ -1,7 +1,7 @@
 (function(global, path) {
 
-  path || (path = '../benchmark.js');
-  load(path + '/benchmark.js');
+  path || (path = '../');
+  load(path + 'benchmark.js');
   global.arr = new Array(100);
 
   var bench = new Benchmark(function() { arr.join(' '); }),
