@@ -290,9 +290,11 @@
   function createFunction() {
     // lazy defined to fork based on supported features.
     createFunction = function(args, body) {
-      var anchor = freeDefine ? define.amd : Benchmark;
-      runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + uid + '=function(' + args + '){' + body + '}');
-      return [anchor[uid], delete anchor[uid]][0];
+      var anchor = freeDefine ? define.amd : Benchmark,
+          prop = uid + 'createFunction';
+
+      runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '=function(' + args + '){' + body + '}');
+      return [anchor[prop], delete anchor[prop]][0];
     };
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
@@ -459,14 +461,28 @@
    * @param {String} code The code to run.
    */
   function runScript(code) {
-    try {
-      var sibling = document.getElementsByTagName('script')[0],
-          parent = sibling.parentNode,
-          script = document.createElement('script');
+    var parent,
+        script,
+        sibling,
+        anchor = freeDefine ? define.amd : Benchmark,
+        prop = uid + 'runScript',
+        prefix = (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '();';
 
-      script.appendChild(document.createTextNode(code));
-      parent.removeChild(parent.insertBefore(script, sibling));
+    try {
+      // Non-browser environments will bail here
+      sibling = document.getElementsByTagName('script')[0];
+      parent = sibling.parentNode;
+      script = document.createElement('script');
+      anchor[prop] = function() { parent.removeChild(script); };
+      // IE < 9 will error here and that's OK.
+      // Script injection is only used to avoid the previously commented JaegerMonkey bug.
+      // We remove the inserted script *before* running the code to avoid differences
+      // in the expected script element count/order of the document.
+      script.appendChild(document.createTextNode(prefix + code));
+      parent.insertBefore(script, sibling);
     } catch(e) { }
+
+    delete anchor[prop];
   }
 
   /**
