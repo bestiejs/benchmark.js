@@ -1763,7 +1763,7 @@
       /**
        * Displayed by Benchmark#toString when a `name` is not available (auto-generated if `null`).
        * @member Benchmark.options
-       * @type {String|Null}
+       * @type String|Null
        */
       'id': null,
 
@@ -1799,7 +1799,7 @@
       /**
        * The name of the benchmark.
        * @member Benchmark.options
-       * @type {String|Null}
+       * @type String|Null
        */
       'name': null
     },
@@ -1815,42 +1815,42 @@
       /**
        * The platform description.
        * @member Benchmark.platform
-       * @type {String}
+       * @type String
        */
       'description': window.navigator && navigator.userAgent || 'unknown platform',
 
       /**
        * The name of the browser layout engine.
        * @member Benchmark.platform
-       * @type {String|Null}
+       * @type String|Null
        */
       'layout': null,
 
       /**
        * The name of the product hosting the browser.
        * @member Benchmark.platform
-       * @type {String|Null}
+       * @type String|Null
        */
       'product': null,
 
       /**
        * The name of the browser/environment.
        * @member Benchmark.platform
-       * @type {String|Null}
+       * @type String|Null
        */
       'name': null,
 
       /**
        * The name of the operating system.
        * @member Benchmark.platform
-       * @type {String|Null}
+       * @type String|Null
        */
       'os': null,
 
       /**
        * The browser/environment version.
        * @member Benchmark.platform
-       * @type {String|Null}
+       * @type String|Null
        */
       'version': null,
 
@@ -2122,7 +2122,7 @@
     /**
      * The name of the suite.
      * @member Benchmark.Suite.options
-     * @type {String|Null}
+     * @type String|Null
      */
     'name': null
   };
