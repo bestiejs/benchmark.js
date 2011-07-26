@@ -10,3 +10,6 @@
 [submodule "vendor/platform.js"]
 	path = vendor/platform.js
 	url = git://github.com/bestiejs/platform.js.git
+[submodule "vendor/qunit-clib"]
+	path = vendor/qunit-clib
+	url = git://github.com/jdalton/qunit-clib.git

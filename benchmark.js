@@ -11,7 +11,8 @@
   var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define,
 
   /** Detect free variable `exports` */
-  freeExports = typeof exports == 'object' && exports && (isHostType(this, 'global') && (window = global), exports),
+  freeExports = typeof exports == 'object' && exports &&
+    (typeof global == 'object' && global && global == global.global && (window = global), exports),
 
   /** Detect free variable `require` */
   freeRequire = typeof require == 'function' && require,
@@ -445,7 +446,7 @@
    * A wrapper around require() to suppress `module missing` errors.
    * @private
    * @param {String} id The module id.
-   * @returns {Mixed} The exported module.
+   * @returns {Mixed} The exported module or `null`.
    */
   function req(id) {
     var result = null;
@@ -468,16 +469,15 @@
         prop = uid + 'runScript',
         prefix = (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '();';
 
+    // Non-browser environments and IE < 9 will error here and that's OK.
+    // Script injection is only used to avoid the previously commented JaegerMonkey bug.
+    // We remove the inserted script *before* running the code to avoid differences
+    // in the expected script element count/order of the document.
     try {
-      // Non-browser environments will bail here
       sibling = document.getElementsByTagName('script')[0];
       parent = sibling.parentNode;
       script = document.createElement('script');
       anchor[prop] = function() { parent.removeChild(script); };
-      // IE < 9 will error here and that's OK.
-      // Script injection is only used to avoid the previously commented JaegerMonkey bug.
-      // We remove the inserted script *before* running the code to avoid differences
-      // in the expected script element count/order of the document.
       script.appendChild(document.createTextNode(prefix + code));
       parent.insertBefore(script, sibling);
     } catch(e) { }
@@ -800,7 +800,7 @@
       queued = options.queued;
     }
     // start iterating over the array
-    if (bench = result[0]) {
+    if ((bench = result[0])) {
       options.onStart.call(benches, new Event('start'), bench);
       if (isAsync(bench)) {
         call(bench, execute, true);
@@ -1408,14 +1408,14 @@
     // enable benchmarking via the --enable-benchmarking command
     // line switch in at least Chrome 7 to use chrome.Interval
     try {
-      if (timer.ns = new (window.chrome || window.chromium).Interval) {
+      if ((timer.ns = new (window.chrome || window.chromium).Interval)) {
         timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
       }
     } catch(e) { }
 
     // detect Node's microtime module:
     // npm install microtime
-    if (timer.ns = (req('microtime') || { 'now': 0 }).now) {
+    if ((timer.ns = (req('microtime') || { 'now': 0 }).now)) {
       timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
     }
 

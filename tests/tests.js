@@ -1,26 +1,48 @@
 (function(window) {
 
-  module('Benchmark');
+  /** Use a single load function */
+  var load = typeof require == 'function' ? require : window.load;
 
-  test('Benchmark.platform', function() {
-    equals(navigator.userAgent, String(Benchmark.platform), 'default value');
-  });
+  /** The unit testing framework */
+  var QUnit =
+    window.QUnit ||
+    (window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit) &&
+    (load('../vendor/qunit-clib/qunit-clib.js'), window.QUnit);
 
-  if (window.require != null) {
-    test('require("benchmark")', function() {
-      equals((Benchmark2 || { }).version, Benchmark2.version, 'require("benchmark")');
+  /** The `Benchmark` constructor to test */
+  var Benchmark =
+    window.Benchmark ||
+    (Benchmark = load('../benchmark.js') || window.Benchmark) &&
+    (Benchmark.Benchmark || Benchmark);
+
+  /*--------------------------------------------------------------------------*/
+
+  // in-browser tests
+  if (window.document) {
+    // must explicitly use `QUnit.module` instead of `module()`
+    // in case we are in a CLI environment
+    QUnit.module('Benchmark');
+
+    test('Benchmark.platform', function() {
+      equals(navigator.userAgent, String(Benchmark.platform), 'default value');
     });
 
-    test('require("platform")', function() {
-      var bench = Benchmark2 || { },
-          platform = bench.platform || { };
-      equals(typeof platform.name, 'string', 'auto required');
-    });
+    if (window.require) {
+      test('require("benchmark")', function() {
+        equals((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
+      });
+
+      test('require("platform")', function() {
+        var bench = Benchmark2 || {},
+            platform = bench.platform || {};
+        equals(typeof platform.name, 'string', 'auto required');
+      });
+    }
   }
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.each');
+  QUnit.module('Benchmark.each');
 
   test('basic', function() {
     var args,
@@ -58,7 +80,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.filter');
+  QUnit.module('Benchmark.filter');
 
   test('basic', function() {
     var args,
@@ -85,7 +107,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.formatNumber');
+  QUnit.module('Benchmark.formatNumber');
 
   test('basic', function() {
     var num = 1e6;
@@ -103,7 +125,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.indexOf');
+  QUnit.module('Benchmark.indexOf');
 
   test('basic', function() {
     var o = ['a', 'b', 'c'];
@@ -119,7 +141,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.invoke');
+  QUnit.module('Benchmark.invoke');
 
   test('basic', function() {
     var callbacks = [],
@@ -174,7 +196,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.join');
+  QUnit.module('Benchmark.join');
 
   test('basic', function() {
     var o = ['a', 'b', 'c'];
@@ -193,7 +215,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.map');
+  QUnit.module('Benchmark.map');
 
   test('basic', function() {
     var args,
@@ -220,29 +242,29 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.pluck');
+  QUnit.module('Benchmark.pluck');
 
   test('basic', function() {
     var undef,
-        o = [document.documentElement, document.getElementsByTagName('head')[0]];
+        o = [{ 'name': 'a' }, { 'name': 'b' }];
 
-    var result = Benchmark.pluck(o, 'nodeName');
-    deepEqual(result, ['HTML', 'HEAD'], 'basic');
+    var result = Benchmark.pluck(o, 'name');
+    deepEqual(result, ['a', 'b'], 'basic');
 
     result = Benchmark.pluck(o, 'nonexistent');
     deepEqual(result, [undef, undef], 'undefined property');
   });
 
   test('array-like-object', function() {
-    var o = { '1': document.getElementsByTagName('head')[0], '2': document.body, 'length': 3 };
-    var result = Benchmark.pluck(o, 'nodeName');
+    var o = { '1': { 'name': 'b' }, '2': { 'name': 'c' }, 'length': 3 };
+    var result = Benchmark.pluck(o, 'name');
 
-    deepEqual(result, ['HEAD', 'BODY'], 'basic');
+    deepEqual(result, ['b', 'c'], 'basic');
   });
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.reduce');
+  QUnit.module('Benchmark.reduce');
 
   test('basic', function() {
     var args,
@@ -275,27 +297,27 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark#emit');
+  QUnit.module('Benchmark#emit');
 
   test('event object', function() {
     var args = [],
-        bench = new Benchmark(function() { }),
+        bench = new Benchmark(function() {}),
         event = new Benchmark.Event('custom'),
         listener2 = function(event) { event.listener2 = 1 };
 
     bench.on('custom', function(event) { event.touched = 1; });
     bench.emit(event);
-    bench.events = { };
+    bench.events = {};
     ok(event.touched, 'emit custom event object');
 
     bench.on('type', function(eventObj) { event = eventObj; });
     bench.emit('type');
-    bench.events = { };
+    bench.events = {};
     equals(event.type, 'type', 'emit event.type');
 
     bench.on('args', function() { args = args.slice.call(arguments, 1); });
     bench.emit('args', 'a', 'b', 'c');
-    bench.events = { };
+    bench.events = {};
     deepEqual(args, ['a', 'b', 'c'], 'emit curried arguments');
 
     ok(bench.emit('empty'), 'emit empty successful');
@@ -305,7 +327,7 @@
 
     bench.on('success', function() { return false; });
     ok(!bench.emit('success'), 'emit unsuccessful');
-    bench.events = { };
+    bench.events = {};
 
     bench.on('shallowclone', function(eventObject) {
       event = eventObject;
@@ -313,13 +335,13 @@
     })
     .on('shallowclone', listener2)
     .emit('shallowclone');
-    bench.events = { };
+    bench.events = {};
     ok(event.listener2, 'emit shallow cloned listeners');
   });
 
   /*--------------------------------------------------------------------------*/
 
-  module('Benchmark.Suite');
+  QUnit.module('Benchmark.Suite');
 
   test('Benchmark.Suite#add', function() {
     var args,
@@ -429,7 +451,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  module('Async tests');
+  QUnit.module('Async tests');
 
   asyncTest('Benchmark.filter', function() {
     var suite = new Benchmark.Suite,
@@ -441,7 +463,7 @@
       // empty
     })
     .add('b', function() {
-      for (var i = 0; i < 1e5; i++) { }
+      for (var i = 0; i < 1e5; i++) {}
     })
     .add('c', function() {
       throw new TypeError;
@@ -456,4 +478,10 @@
     .run(true);
   });
 
-}(this));
+  /*--------------------------------------------------------------------------*/
+
+  // explicitly call `QUnit.start()` in a CLI environment
+  if (!window.document) {
+    QUnit.start();
+  }
+}(typeof global == 'object' && global || this));
