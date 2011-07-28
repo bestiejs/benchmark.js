@@ -1,4 +1,4 @@
-(function(window) {
+(function(window, undefined) {
 
   /** Use a single load function */
   var load = typeof require == 'function' ? require : window.load;
@@ -24,18 +24,18 @@
     QUnit.module('Benchmark');
 
     test('Benchmark.platform', function() {
-      equals(navigator.userAgent, String(Benchmark.platform), 'default value');
+      equal(navigator.userAgent, String(Benchmark.platform), 'default value');
     });
 
     if (window.require) {
       test('require("benchmark")', function() {
-        equals((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
+        equal((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
       });
 
       test('require("platform")', function() {
         var bench = Benchmark2 || {},
             platform = bench.platform || {};
-        equals(typeof platform.name, 'string', 'auto required');
+        equal(typeof platform.name, 'string', 'auto required');
       });
     }
   }
@@ -46,12 +46,11 @@
 
   test('basic', function() {
     var args,
-        values = [],
-        slice = [].slice,
-        o = ['a', 'b', 'c'];
+        o = ['a', 'b', 'c'],
+        values = [];
 
     var result = Benchmark.each(o, function(value, index) {
-      args || (args = slice.call(arguments));
+      args || (args = [].slice.call(arguments));
       values.push(value);
     });
 
@@ -68,14 +67,14 @@
   });
 
   test('array-like-object', function() {
-    var values = [],
-        o = { '1': 'b', '2': 'c', 'length': 3 };
+    var o = { '0': 'a', '2': 'c', 'length': 3 },
+        values = [];
 
     Benchmark.each(o, function(value) {
       values.push(value);
     });
 
-    deepEqual(values, ['b', 'c'], 'basic');
+    deepEqual(values, ['a', 'c'], 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -84,11 +83,10 @@
 
   test('basic', function() {
     var args,
-        slice = [].slice,
         o = ['a', 'b', 'c'];
 
     var result = Benchmark.filter(o, function(value) {
-      args || (args = slice.call(arguments));
+      args || (args = [].slice.call(arguments));
       return value == 'b';
     });
 
@@ -97,12 +95,16 @@
   });
 
   test('array-like-object', function() {
-    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    var count = 0,
+        o = { '0': 'a', '2': 'c', 'length': 3 };
+
     var result = Benchmark.filter(o, function(value) {
+      count++;
       return value != null;
     });
 
-    deepEqual(result, ['b', 'c'], 'basic');
+    deepEqual(result, ['a', 'c'], 'basic');
+    equal(count, 2, 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -111,16 +113,16 @@
 
   test('basic', function() {
     var num = 1e6;
-    equals(Benchmark.formatNumber(num), '1,000,000', 'basic');
+    equal(Benchmark.formatNumber(num), '1,000,000', 'basic');
 
     num = 23;
-    equals(Benchmark.formatNumber(num), '23', 'short');
+    equal(Benchmark.formatNumber(num), '23', 'short');
 
     num = 1234.56;
-    equals(Benchmark.formatNumber(num), '1,234.56', 'decimals');
+    equal(Benchmark.formatNumber(num), '1,234.56', 'decimals');
 
     num *= -1;
-    equals(Benchmark.formatNumber(num), '-1,234.56', 'negatives');
+    equal(Benchmark.formatNumber(num), '-1,234.56', 'negatives');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -129,14 +131,15 @@
 
   test('basic', function() {
     var o = ['a', 'b', 'c'];
-    equals(Benchmark.indexOf(o, 'b'), 1, 'basic');
-    equals(Benchmark.indexOf(o, new String('b')), -1, 'strict');
+    equal(Benchmark.indexOf(o, 'b'), 1, 'basic');
+    equal(Benchmark.indexOf(o, new String('b')), -1, 'strict');
   });
 
   test('array-like-object', function() {
-    var o = { '1': 'b', '2': 'c', 'length': 3 };
-    equals(Benchmark.indexOf(o, 'c'), 2, 'basic');
-    equals(Benchmark.indexOf(o, 'a'), -1, 'not found');
+    var o = { '0': 'a', '2': 'c', 'length': 3 };
+    equal(Benchmark.indexOf(o, 'c'), 2, 'basic');
+    equal(Benchmark.indexOf(o, 'b'), -1, 'not found');
+    equal(Benchmark.indexOf(o, undefined), -1, 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -165,14 +168,18 @@
     });
 
     ok(callbacks[0].length == 2 && callbacks[0][0].type && callbacks[0][1].push, 'passed arguments to callback');
-    equals(callbacks.shift()[0].type, 'start', 'onStart');
-    equals(callbacks.shift()[0].type, 'cycle', 'onCycle');
-    equals(callbacks.pop()[0].type, 'complete', 'onComplete');
+    equal(callbacks.shift()[0].type, 'start', 'onStart');
+    equal(callbacks.shift()[0].type, 'cycle', 'onCycle');
+    equal(callbacks.pop()[0].type, 'complete', 'onComplete');
   });
 
   test('queued', function() {
     var lengths = [],
-        o = [new Array, new Array, new Array];
+        expected = [1, 1],
+        o = [new Array, new Array];
+
+    o[3] = new Array;
+    expected[3] = 1;
 
     var result = Benchmark.invoke(o, {
       'name': 'push',
@@ -183,15 +190,17 @@
       }
     });
 
-    deepEqual(lengths, [3, 2, 1], 'removed queued items');
-    deepEqual(result, [1, 1, 1], 'return values');
+    deepEqual(lengths, [4, 3, 1], 'removed queued items');
+    deepEqual(result, expected, 'return values');
   });
 
   test('array-like-object', function() {
-    var o = { '1': new Array, '2': new Array, 'length': 3 };
-    var result = Benchmark.invoke(o, 'push', 'a');
+    var expected = [1],
+        o = { '0': new Array, '2': new Array, 'length': 3 },
+        result = Benchmark.invoke(o, 'push', 'a');
 
-    deepEqual(result, [1, 1], 'return values');
+    expected[2] = 1;
+    deepEqual(result, expected, 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -200,17 +209,17 @@
 
   test('basic', function() {
     var o = ['a', 'b', 'c'];
-    equals(Benchmark.join(o), 'a,b,c', 'default separator 1');
-    equals(Benchmark.join(o, '|', '@'), 'a|b|c', 'custom separator 1');
+    equal(Benchmark.join(o), 'a,b,c', 'default separator 1');
+    equal(Benchmark.join(o, '+', '@'), 'a+b+c', 'custom separator 1');
 
     o = { 'a': 'apple', 'b': 'ball', 'c': 'cat' };
-    equals(Benchmark.join(o), 'a: apple,b: ball,c: cat', 'default separator 2');
-    equals(Benchmark.join(o, '|', '@'), 'a@apple|b@ball|c@cat', 'custom separator 2');
+    equal(Benchmark.join(o), 'a: apple,b: ball,c: cat', 'default separator 2');
+    equal(Benchmark.join(o, '; ', ' -> '), 'a -> apple; b -> ball; c -> cat', 'custom separator 2');
   });
 
   test('array-like-object', function() {
-    var o = { '1': 'b', '2': 'c', 'length': 3 };
-    equals(Benchmark.join(o), 'b,c', 'default separator 1');
+    var o = { '0': 'a', '2': 'c', 'length': 3 };
+    equal(Benchmark.join(o), 'a,c', 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -219,11 +228,10 @@
 
   test('basic', function() {
     var args,
-        slice = [].slice,
         o = ['a', 'b', 'c'];
 
     var result = Benchmark.map(o, function(value, index) {
-      args || (args = slice.call(arguments));
+      args || (args = [].slice.call(arguments));
       return index;
     });
 
@@ -232,12 +240,12 @@
   });
 
   test('array-like-object', function() {
-    var o = { '1': 'b', '2': 'c', 'length': 3 };
-    var result = Benchmark.map(o, function(value, index) {
-      return index;
-    });
+    var expected = [0],
+        o = { '0': 'a', '2': 'c', 'length': 3 },
+        result = Benchmark.map(o, function(value, index) { return index; });
 
-    deepEqual(result, [1, 2], 'basic');
+    expected[2] = 2;
+    deepEqual(result, expected, 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -256,10 +264,12 @@
   });
 
   test('array-like-object', function() {
-    var o = { '1': { 'name': 'b' }, '2': { 'name': 'c' }, 'length': 3 };
-    var result = Benchmark.pluck(o, 'name');
+    var expected = ['a'],
+        o = { '0': { 'name': 'a' }, '2': { 'name': 'c' }, 'length': 3 },
+        result = Benchmark.pluck(o, 'name');
 
-    deepEqual(result, ['b', 'c'], 'basic');
+    expected[2] = 'c';
+    deepEqual(result, expected, 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -276,7 +286,7 @@
       return string + value;
     }, '');
 
-    equals(result, 'abc', 'accumulation correct');
+    equal(result, 'abc', 'accumulation correct');
     deepEqual(args, ['', 'a', 0, o], 'passed arguments to callback');
     args = null;
 
@@ -287,12 +297,12 @@
   });
 
   test('array-like-object', function() {
-    var o = { '1': 'b', '2': 'c', 'length': 3 };
+    var o = { '0': 'a', '2': 'c', 'length': 3 };
     var result = Benchmark.reduce(o, function(string, value, index) {
       return string + value;
     });
 
-    equals(result, 'bc', 'accumulation correct');
+    equal(result, 'ac', 'sparse check');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -313,7 +323,7 @@
     bench.on('type', function(eventObj) { event = eventObj; });
     bench.emit('type');
     bench.events = {};
-    equals(event.type, 'type', 'emit event.type');
+    equal(event.type, 'type', 'emit event.type');
 
     bench.on('args', function() { args = args.slice.call(arguments, 1); });
     bench.emit('args', 'a', 'b', 'c');
@@ -454,16 +464,19 @@
   QUnit.module('Async tests');
 
   asyncTest('Benchmark.filter', function() {
-    var suite = new Benchmark.Suite,
+    var count = 0,
         options = Benchmark.options,
-        maxTime = options.maxTime;
+        maxTime = options.maxTime,
+        suite = new Benchmark.Suite;
 
     options.maxTime = 1;
     suite.add('a', function() {
       // empty
     })
     .add('b', function() {
-      for (var i = 0; i < 1e5; i++) {}
+      for (var i = 0; i < 1e5; i++) {
+        count++;
+      }
     })
     .add('c', function() {
       throw new TypeError;

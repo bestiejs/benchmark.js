@@ -55,9 +55,6 @@
   /** Used to convert array-like objects to arrays */
   slice = [].slice,
 
-  /** Used generically when invoking over queued arrays */
-  shift = aloClean([].shift),
-
   /** Math shortcuts */
   abs  = Math.abs,
   max  = Math.max,
@@ -251,9 +248,10 @@
   function aloClean(fn) {
     return function() {
       var me = this,
+          remove = !(0 in me),
           result = fn.apply(me, arguments);
       // fixes IE < 9 and IE 8 compatibility mode bugs
-      if (!me.length) {
+      if (remove || !me.length) {
         delete me[0];
       }
       return result;
@@ -508,6 +506,27 @@
   }
 
   /**
+   * Removes the first element of the array and returns it.
+   * @private
+   * @returns {Mixed} The first element of the array.
+   */
+  function shift(array) {
+    var index = 0,
+        result = array[0],
+        length = array.length;
+
+    while (++index < length) {
+      if (index in array) {
+        array[index - 1] = array[index];
+      } else {
+        delete array[index - 1];
+      }
+    }
+    array.length--;
+    return result;
+  }
+
+  /**
    * Starts the deferred timer.
    * @private
    * @param {Object} deferred The deferred instance.
@@ -698,28 +717,9 @@
     var args,
         bench,
         queued,
-        index = 0,
+        index = -1,
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = map(benches, function(bench) { return bench; });
-
-    /**
-     * Executes the method and if synchronous, fetches the next bench.
-     */
-    function execute() {
-      var listeners,
-          sync = isSync(bench);
-
-      if (!sync) {
-        // use `next` as a listener
-        bench.on('complete', next);
-        listeners = bench.events['complete'];
-        listeners.splice(0, 0, listeners.pop());
-      }
-      // execute method
-      result[index] = bench[name].apply(bench, args);
-      // if synchronous return true until finished
-      return sync && next();
-    }
 
     /**
      * Checks if invoking `run` with asynchronous cycles.
@@ -751,23 +751,38 @@
     }
 
     /**
+     * Executes the method and if synchronous, fetches the next bench.
+     */
+    function execute() {
+      var listeners,
+          sync = isSync(bench);
+
+      if (!sync) {
+        // use `getNext` as a listener
+        bench.on('complete', getNext);
+        listeners = bench.events['complete'];
+        listeners.splice(0, 0, listeners.pop());
+      }
+      // execute method
+      result[index] = bench[name].apply(bench, args);
+      // if synchronous return true until finished
+      return sync && getNext();
+    }
+
+    /**
      * Fetches the next bench or executes `onComplete` callback.
      */
-    function next() {
+    function getNext() {
       var last = bench,
           sync = isSync(last);
 
-      bench = false;
       if (!sync) {
-        last.removeListener('complete', next);
+        last.removeListener('complete', getNext);
         last.emit('complete');
       }
       // choose next benchmark if not exiting early
-      if (options.onCycle.call(benches, new Event('cycle'), last) !== false) {
-        queued && shift.call(benches);
-        bench = result[++index] || queued && benches[0];
-      }
-      if (bench) {
+      if (options.onCycle.call(benches, new Event('cycle'), last) !== false && raiseIndex() !== false) {
+        bench = queued ? benches[0] : result[index];
         if (!isSync(bench)) {
           call(bench, execute, isAsync(bench));
         }
@@ -784,8 +799,31 @@
       }
       // when async the `return false` will cancel the rest of the "complete"
       // listeners because they were called above and when synchronous it will
-      // end the while-loop
+      // exit the while-loop
       return false;
+    }
+
+    /**
+     * Raises `index` to the next defined index or returns `false`.
+     */
+    function raiseIndex() {
+      var length = result.length;
+      // if queued then remove the previous bench and subsequent skipped non-entries
+      if (queued) {
+        do {
+          var l = benches.length;
+          ++index > 0 && shift(benches);
+        } while ((length = benches.length) && !(0 in benches));
+      }
+      else {
+        while (++index < length) {
+          if (index in result) {
+            break;
+          }
+        }
+      }
+      // if we reached the last index then return `false`
+      return (queued ? length : index < length) ? index : (index = false);
     }
 
     // juggle arguments
@@ -800,7 +838,8 @@
       queued = options.queued;
     }
     // start iterating over the array
-    if ((bench = result[0])) {
+    if (raiseIndex() !== false) {
+      bench = result[index];
       options.onStart.call(benches, new Event('start'), bench);
       if (isAsync(bench)) {
         call(bench, execute, true);
@@ -842,7 +881,7 @@
    */
   function map(array, callback) {
     return reduce(array, function(result, value, index) {
-      result.push(callback(value, index, array));
+      result[index] = callback(value, index, array);
       return result;
     }, []);
   }
