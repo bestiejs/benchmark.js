@@ -5,7 +5,7 @@
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
  */
-;(function(window) {
+;(function(window, undefined) {
 
   /** Detect free variable `define` */
   var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define,
@@ -51,9 +51,6 @@
     'java': isClassOf(window.java, 'JavaPackage'),
     'timeout': isHostType(window, 'setTimeout') && isHostType(window, 'clearTimeout')
   },
-
-  /** Used to convert array-like objects to arrays */
-  slice = [].slice,
 
   /** Math shortcuts */
   abs  = Math.abs,
@@ -240,23 +237,212 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Wraps an array function to ensure array-like-objects (ALO) are empty when their length is `0`.
+   * Creates an array containing the elements of the host array followed by the
+   * elements of each argument in order.
+   * (avoids Rhino bug with sparse arrays)
    * @private
-   * @param {Function} fn The array function to be wrapped.
-   * @returns {Function} The new function.
+   * @returns {Array} The new array.
    */
-  function aloClean(fn) {
-    return function() {
-      var me = this,
-          remove = !(0 in me),
-          result = fn.apply(me, arguments);
-      // fixes IE < 9 and IE 8 compatibility mode bugs
-      if (remove || !me.length) {
-        delete me[0];
+  function concat() {
+    var result = slice.call(this),
+        index = result.length;
+
+    each(arguments, function(value) {
+      if (isClassOf(value, 'Array')) {
+        for (var j = 0, l = value.length; j < l; j++, index++) {
+          if (j in value) {
+            result[index] = value[j];
+          }
+        }
+      } else {
+        result[index] = value;
       }
-      return result;
-    };
+    });
+    return result;
   }
+
+  /**
+   * Utility function used by `shift()`, `splice()`, and `unshift()`.
+   * @private
+   * @param {Number} start The index to start inserting elements.
+   * @param {Number} deleteCount The number of elements to delete from the insert point.
+   * @param {Array} elements The elements to insert.
+   * @returns {Array} An array of deleted elements.
+   */
+  function insert(start, deleteCount, elements) {
+    var deleteEnd = start + deleteCount,
+        elementCount = elements ? elements.length : 0,
+        index = start - 1,
+        length = start + elementCount,
+        object = this,
+        result = [],
+        tail = slice.call(object, deleteEnd);
+
+    // delete elements from the array
+    while (++index < deleteEnd) {
+      if (index in object) {
+        result[index - start] = object[index];
+        delete object[index];
+      }
+    }
+    // insert elements
+    index = start - 1;
+    while (++index < length) {
+      object[index] = elements[index - start];
+    }
+    // append tail elements
+    start = index--;
+    length = (object.length >>> 0)  - deleteCount + elementCount;
+    while (++index < length) {
+      if ((index - start) in tail) {
+        object[index] = tail[index - start];
+      } else {
+        delete object[index];
+      }
+    }
+    // delete excess elements
+    deleteCount = deleteCount > elementCount ? deleteCount - elementCount : 0;
+    while (deleteCount--) {
+      delete object[length + deleteCount];
+    }
+    object.length = length;
+    return result;
+  }
+
+  /**
+   * Removes the last element of the host array and returns it.
+   * (avoids IE bug with ALOs)
+   * @private
+   * @returns {Mixed} The last value of the array.
+   */
+  function pop() {
+    var result,
+        object = Object(this),
+        length = object.length >>> 0,
+        lastIndex = length - 1;
+
+    if (length > 0) {
+      result = object[lastIndex];
+      delete object[lastIndex];
+      object.length = lastIndex;
+    }
+    return result;
+  }
+
+  /**
+   * Rearrange the host array's elements in reverse order.
+   * (avoids Rhino bug with sparse arrays)
+   * @private
+   * @returns {Array} The reversed array.
+   */
+  function reverse() {
+    var upperIndex,
+        value,
+        index = -1,
+        object = Object(this),
+        length = object.length >>> 0,
+        middle = Math.floor(length / 2);
+
+    if (length > 1) {
+      while (++index < middle) {
+        upperIndex = length - index - 1;
+        value = upperIndex in object ? object[upperIndex] : uid;
+        if (index in object) {
+          object[upperIndex] = object[index];
+        } else {
+          delete object[upperIndex];
+        }
+        if (value != uid) {
+          object[index] = value;
+        } else {
+          delete object[index];
+        }
+      }
+    }
+    return object;
+  }
+
+  /**
+   * Removes the first element of the host array and returns it.
+   * (avoids IE bug with ALOs and Rhino bug with sparse arrays)
+   * @private
+   * @returns {Mixed} The first element of the array.
+   */
+  function shift() {
+    var object = Object(this),
+        result = object[0];
+
+    insert.call(object, 0, 1);
+    return result;
+  }
+
+  /**
+   * Creates an array of the host array's elements from the start index up to,
+   * but not including, the end index.
+   * (avoids Rhino bug with sparse arrays)
+   * @private
+   * @returns {Array} The new array.
+   */
+  function slice(start, end) {
+    var index = -1,
+        object = Object(this),
+        length = object.length >>> 0,
+        result = [];
+
+    start = toInteger(start);
+    start = start < 0 ? max(length + start, 0) : min(start, length);
+    start--;
+    end = end == null ? length : toInteger(end);
+    end = end < 0 ? max(length + end, 0) : min(end, length);
+
+    while ((++index, ++start) < end) {
+      if (start in object) {
+        result[index] = object[start];
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Allows removing a range of elements and/or inserting elements into the host array.
+   * (avoids IE bug with ALOs and Rhino bug with sparse arrays)
+   * @private
+   * @returns {Array} An array of removed elements.
+   */
+  function splice(start, deleteCount) {
+    var object = Object(this),
+        length = object.length >>> 0;
+
+    start = toInteger(start);
+    start = start < 0 ? max(length + start, 0) : min(start, length);
+    deleteCount = min(max(toInteger(deleteCount), 0), length - start);
+    return insert.call(object, start, deleteCount, slice.call(arguments, 2));
+  }
+
+  /**
+   * Converts the specified `value` to an integer.
+   * @private
+   * @param {Mixed} value The value to convert.
+   * @returns {Number} The resulting integer.
+   */
+  function toInteger(value) {
+    value = +value;
+    return value === 0 || !isFinite(value) ? value || 0 : value - (value % 1);
+  }
+
+  /**
+   * Appends arguments to the host array.
+   * (avoids Rhino bug with sparse arrays)
+   * @private
+   * @returns {Number} The new length.
+   */
+  function unshift() {
+    var object = Object(this);
+    insert.call(object, 0, 0, arguments);
+    return object.length;
+  }
+
+  /*--------------------------------------------------------------------------*/
 
   /**
    * Executes a function synchronously or asynchronously.
@@ -506,27 +692,6 @@
   }
 
   /**
-   * Removes the first element of the array and returns it.
-   * @private
-   * @returns {Mixed} The first element of the array.
-   */
-  function shift(array) {
-    var index = 0,
-        result = array[0],
-        length = array.length;
-
-    while (++index < length) {
-      if (index in array) {
-        array[index - 1] = array[index];
-      } else {
-        delete array[index - 1];
-      }
-    }
-    array.length--;
-    return result;
-  }
-
-  /**
    * Starts the deferred timer.
    * @private
    * @param {Object} deferred The deferred instance.
@@ -740,7 +905,7 @@
      */
     function isRun(object) {
       // avoid using `instanceof` here because of IE memory leak issues with host objects
-      return object.constructor == Benchmark && name == 'run';
+      return Object(object).constructor == Benchmark && name == 'run';
     }
 
     /**
@@ -760,11 +925,11 @@
       if (!sync) {
         // use `getNext` as a listener
         bench.on('complete', getNext);
-        listeners = bench.events['complete'];
+        listeners = bench.events.complete;
         listeners.splice(0, 0, listeners.pop());
       }
       // execute method
-      result[index] = bench[name].apply(bench, args);
+      result[index] = isClassOf(bench && bench[name], 'Function') ? bench[name].apply(bench, args) : undefined;
       // if synchronous return true until finished
       return sync && getNext();
     }
@@ -812,7 +977,7 @@
       if (queued) {
         do {
           var l = benches.length;
-          ++index > 0 && shift(benches);
+          ++index > 0 && shift.call(benches);
         } while ((length = benches.length) && !(0 in benches));
       }
       else {
@@ -896,7 +1061,7 @@
    */
   function pluck(array, property) {
     return map(array, function(object) {
-      return object[property];
+      return object == null ? undefined : object[property];
     });
   }
 
@@ -2276,15 +2441,15 @@
     'run': runSuite,
 
     // array methods
-    'concat': [].concat,
+    'concat': concat,
 
     'join': [].join,
 
-    'pop': aloClean([].pop),
+    'pop': pop,
 
     'push': [].push,
 
-    'reverse': [].reverse,
+    'reverse': reverse,
 
     'shift': shift,
 
@@ -2292,9 +2457,9 @@
 
     'sort': [].sort,
 
-    'splice': aloClean([].splice),
+    'splice': splice,
 
-    'unshift': [].unshift
+    'unshift': unshift
   });
 
   /*--------------------------------------------------------------------------*/

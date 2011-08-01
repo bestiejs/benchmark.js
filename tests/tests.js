@@ -151,13 +151,13 @@
         lengths = [],
         callback = function() { callbacks.push(slice.call(arguments)); },
         slice = [].slice,
-        o = [new Array, new Array, new Array];
+        o = [new Array, null, new Array, new Array];
 
     var result = Benchmark.invoke(o, 'push', 'b');
-    deepEqual(result, [1, 1, 1], 'return values');
+    deepEqual(result, [1, undefined, 1, 1], 'return values');
 
     result = Benchmark.pluck(o, '0');
-    deepEqual(result, ['b', 'b', 'b'], 'methods invoked');
+    deepEqual(result, ['b', undefined, 'b', 'b'], 'methods invoked');
 
     Benchmark.invoke(o, {
       'name': 'splice',
@@ -253,14 +253,13 @@
   QUnit.module('Benchmark.pluck');
 
   test('basic', function() {
-    var undef,
-        o = [{ 'name': 'a' }, { 'name': 'b' }];
+    var o = [{ 'name': 'a' }, null, { 'name': 'c' }],
+        result = Benchmark.pluck(o, 'name');
 
-    var result = Benchmark.pluck(o, 'name');
-    deepEqual(result, ['a', 'b'], 'basic');
+    deepEqual(result, ['a', undefined, 'c'], 'basic');
 
     result = Benchmark.pluck(o, 'nonexistent');
-    deepEqual(result, [undef, undef], 'undefined property');
+    deepEqual(result, [undefined, undefined, undefined], 'undefined property');
   });
 
   test('array-like-object', function() {
