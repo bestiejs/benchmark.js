@@ -238,6 +238,22 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Note: Some array methods have been implemented in plain JavaScript to avoid
+   * bugs in IE and Rhino.
+   *
+   * IE compatibility mode and IE < 9 have buggy Array `shift()` and `splice()`
+   * functions that fail to remove the last element of array-like-objects (ALOs)
+   * even though the `length` property is set to `0`. Normally only `splice()`
+   * is buggy. In compatibility mode, however, `shift()` is also buggy.
+   *
+   * Rhino and environments it powers, like Narwhal and Ringo, may have
+   * buggy Array `concat()`, `reverse()`, `shift()`, `slice()`, `splice()` and
+   * `unshift()` functions that make sparse arrays non-sparse by assigning the
+   * undefined indexes a value of undefined. For more info see:
+   * https://github.com/mozilla/rhino/commit/702abfed3f8ca043b2636efd31c14ba7552603dd
+   */
+
+  /**
    * Creates an array containing the elements of the host array followed by the
    * elements of each argument in order.
    * (avoids Rhino bug with sparse arrays)
@@ -307,26 +323,6 @@
       delete object[length + deleteCount];
     }
     object.length = length;
-    return result;
-  }
-
-  /**
-   * Removes the last element of the host array and returns it.
-   * (avoids IE bug with ALOs)
-   * @private
-   * @returns {Mixed} The last value of the array.
-   */
-  function pop() {
-    var result,
-        object = Object(this),
-        length = object.length >>> 0,
-        lastIndex = length - 1;
-
-    if (length > 0) {
-      result = object[lastIndex];
-      delete object[lastIndex];
-      object.length = lastIndex;
-    }
     return result;
   }
 
@@ -2446,7 +2442,7 @@
 
     'join': [].join,
 
-    'pop': pop,
+    'pop': [].pop,
 
     'push': [].push,
 
