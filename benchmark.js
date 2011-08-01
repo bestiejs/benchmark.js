@@ -242,9 +242,10 @@
    * bugs in IE and Rhino.
    *
    * IE compatibility mode and IE < 9 have buggy Array `shift()` and `splice()`
-   * functions that fail to remove the last element of array-like-objects (ALOs)
-   * even though the `length` property is set to `0`. Normally only `splice()`
-   * is buggy. In compatibility mode, however, `shift()` is also buggy.
+   * functions that fail to remove the last element, `object[0]`, of
+   * array-like-objects (ALOs) even though the `length` property is set to `0`.
+   * Normally only `splice()` is buggy. In compatibility mode, however, `shift()`
+   * is also buggy.
    *
    * Rhino and environments it powers, like Narwhal and Ringo, may have
    * buggy Array `concat()`, `reverse()`, `shift()`, `slice()`, `splice()` and
@@ -309,7 +310,7 @@
     }
     // append tail elements
     start = index--;
-    length = (object.length >>> 0)  - deleteCount + elementCount;
+    length = (object.length >>> 0) - deleteCount + elementCount;
     while (++index < length) {
       if ((index - start) in tail) {
         object[index] = tail[index - start];
@@ -366,11 +367,7 @@
    * @returns {Mixed} The first element of the array.
    */
   function shift() {
-    var object = Object(this),
-        result = object[0];
-
-    insert.call(object, 0, 1);
-    return result;
+    return insert.call(this, 0, 1)[0];
   }
 
   /**
