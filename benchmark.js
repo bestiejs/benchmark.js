@@ -53,11 +53,12 @@
   },
 
   /** Math shortcuts */
-  abs  = Math.abs,
-  max  = Math.max,
-  min  = Math.min,
-  pow  = Math.pow,
-  sqrt = Math.sqrt;
+  abs   = Math.abs,
+  floor = Math.floor,
+  max   = Math.max,
+  min   = Math.min,
+  pow   = Math.pow,
+  sqrt  = Math.sqrt;
 
   /*--------------------------------------------------------------------------*/
 
@@ -341,7 +342,7 @@
         index = -1,
         object = Object(this),
         length = object.length >>> 0,
-        middle = Math.floor(length / 2);
+        middle = floor(length / 2);
 
     if (length > 1) {
       while (++index < middle) {
@@ -1862,7 +1863,7 @@
         // tests may clock at `0` when `initCount` is a small number,
         // to avoid that we set its count to something a bit higher
         if (!clocked && (divisor = divisors[bench.cycles]) != null) {
-          count = Math.floor(4e6 / divisor);
+          count = floor(4e6 / divisor);
         }
         // calculate how many more iterations it will take to achive the `minTime`
         if (count <= bench.count) {
