@@ -165,7 +165,7 @@
   /**
    * Deferred constructor.
    * @constructor
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Object} bench The benchmark instance.
    */
   function Deferred(bench) {
@@ -177,7 +177,7 @@
   /**
    * Event constructor.
    * @constructor
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {String|Object} type The event type.
    */
   function Event(type) {
@@ -188,7 +188,7 @@
   /**
    * Suite constructor.
    * @constructor
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {String} name A name to identify the suite.
    * @param {Object} [options={}] Options object.
    * @example
@@ -257,25 +257,28 @@
   /**
    * Creates an array containing the elements of the host array followed by the
    * elements of each argument in order.
-   * (avoids Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Array} The new array.
    */
   function concat() {
-    var result = slice.call(this),
+    var value,
+        j = -1,
+        length = arguments.length,
+        result = slice.call(this),
         index = result.length;
 
-    each(arguments, function(value) {
+    while (++j < length) {
+      value = arguments[j];
       if (isClassOf(value, 'Array')) {
-        for (var j = 0, l = value.length; j < l; j++, index++) {
-          if (j in value) {
-            result[index] = value[j];
+        for (var k = 0, l = value.length; k < l; k++, index++) {
+          if (k in value) {
+            result[index] = value[k];
           }
         }
       } else {
         result[index] = value;
       }
-    });
+    }
     return result;
   }
 
@@ -329,8 +332,7 @@
 
   /**
    * Rearrange the host array's elements in reverse order.
-   * (avoids Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Array} The reversed array.
    */
   function reverse() {
@@ -362,8 +364,7 @@
 
   /**
    * Removes the first element of the host array and returns it.
-   * (avoids IE bug with ALOs and Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Mixed} The first element of the array.
    */
   function shift() {
@@ -373,8 +374,7 @@
   /**
    * Creates an array of the host array's elements from the start index up to,
    * but not including, the end index.
-   * (avoids Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Array} The new array.
    */
   function slice(start, end) {
@@ -399,8 +399,7 @@
 
   /**
    * Allows removing a range of elements and/or inserting elements into the host array.
-   * (avoids IE bug with ALOs and Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Array} An array of removed elements.
    */
   function splice(start, deleteCount) {
@@ -426,8 +425,7 @@
 
   /**
    * Appends arguments to the host array.
-   * (avoids Rhino bug with sparse arrays)
-   * @private
+   * @memberOf Benchmark.Suite
    * @returns {Number} The new length.
    */
   function unshift() {
@@ -709,7 +707,7 @@
 
   /**
    * Handles cycling/completing the deferred benchmark.
-   * @member Benchmark.Deferred
+   * @memberOf Benchmark.Deferred
    */
   function resolve() {
     var me = this,
@@ -726,30 +724,31 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * A bare-bones `Array#forEach`/`for-in` own property solution.
+   * A `Array#forEach`/`for-in` own property utility function.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array|Object} object The object to iterate over.
    * @param {Function} callback The function called per iteration.
+   * @param {Object} thisArg The `this` binding for the callback function.
    * @returns {Array|Object} Returns the object iterated over.
    */
-  function each(object, callback) {
+  function each(object, callback, thisArg) {
     var index = -1,
         result = [object, object = Object(object)][0],
         length = object.length;
 
-    // in Opera < 10.5 `hasKey(object, 'length')` returns false for NodeLists
-    if ('length' in object && length > -1 && length < 4294967296) {
+    // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
+    if ('length' in object && length == (length = length >>> 0)) {
       while (++index < length) {
-        // in Safari 2 `index in object` is always false for NodeLists
-        if ((index in object || 'item' in object) && callback(object[index], index, object) === false) {
+        // in Safari 2 `index in object` is always `false` for NodeLists
+        if ((index in object || 'item' in object) && callback.call(thisArg, object[index], index, object) === false) {
           break;
         }
       }
     } else {
       for (index in object) {
-        if (hasKey(object, index) && callback(object[index], index, object) === false) {
+        if (hasKey(object, index) && callback.call(thisArg, object[index], index, object) === false) {
           break;
         }
       }
@@ -758,11 +757,12 @@
   }
 
   /**
-   * A generic bare-bones `Array#filter` solution.
+   * A generic `Array#filter` utility function.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function|String} callback The function/alias called per iteration.
+   * @param {Object} thisArg The `this` binding for the callback function.
    * @returns {Array} A new array of values that passed callback filter.
    * @example
    *
@@ -780,18 +780,17 @@
    * // get benchmarks that completed without erroring
    * Benchmark.filter(benches, 'successful');
    */
-  function filter(array, callback) {
+  function filter(array, callback, thisArg) {
     var result;
 
     if (callback == 'successful') {
       // callback to exclude errored or unrun benchmarks
       callback = function(bench) { return bench.cycles; };
     }
-    else if (/^(?:fast|slow)est$/.test(callback)) {
+    else if (callback == 'fastest' || callback == 'slowest') {
       // get successful, sort by period + margin of error, and filter fastest/slowest
       result = filter(array, 'successful').sort(function(a, b) {
-        a = a.stats;
-        b = b.stats;
+        a = a.stats; b = b.stats;
         return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
       });
       result = filter(result, function(bench) {
@@ -799,14 +798,14 @@
       });
     }
     return result || reduce(array, function(result, value, index) {
-      return callback(value, index, array) ? (result.push(value), result) : result;
+      return callback.call(thisArg, value, index, array) ? (result.push(value), result) : result;
     }, []);
   }
 
   /**
    * Converts a number to a more readable comma-separated string representation.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Number} number The number to convert.
    * @returns {String} The more readable string representation.
    */
@@ -816,9 +815,9 @@
   }
 
   /**
-   * A generic bare-bones `Array#indexOf` solution.
+   * A generic `Array#indexOf` utility function.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Mixed} value The value to search for.
    * @returns {Number} The index of the matched value or `-1`.
@@ -837,7 +836,7 @@
   /**
    * Invokes a method on all items in an array.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
    * @param {String|Object} name The name of the method to invoke OR options object.
    * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
@@ -1012,7 +1011,7 @@
   /**
    * Creates a string of joined array values or object key-value pairs.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array|Object} object The object to operate on.
    * @param {String} [separator1=','] The separator used between key-value pairs.
    * @param {String} [separator2=': '] The separator used between keys and values.
@@ -1021,7 +1020,7 @@
   function join(object, separator1, separator2) {
     var result = [],
         length = object.length,
-        arrayLike = 'length' in object && length > -1 && length < 4294967296;
+        arrayLike = 'length' in object && length == length >>> 0;
 
     separator2 || (separator2 = ': ');
     each(object, function(value, key) {
@@ -1031,16 +1030,17 @@
   }
 
   /**
-   * A generic bare-bones `Array#map` solution.
+   * A generic `Array#map` utility function.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
+   * @param {Object} thisArg The `this` binding for the callback function.
    * @returns {Array} A new array of values returned by the callback.
    */
-  function map(array, callback) {
+  function map(array, callback, thisArg) {
     return reduce(array, function(result, value, index) {
-      result[index] = callback(value, index, array);
+      result[index] = callback.call(thisArg, value, index, array);
       return result;
     }, []);
   }
@@ -1048,7 +1048,7 @@
   /**
    * Retrieves the value of a specified property from all items in an array.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {String} property The property to pluck.
    * @returns {Array} A new array of property values.
@@ -1060,9 +1060,9 @@
   }
 
   /**
-   * A generic bare-bones `Array#reduce` solution.
+   * A generic `Array#reduce` utility function.
    * @static
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
    * @param {Mixed} accumulator Initial value of the accumulator.
@@ -1081,7 +1081,7 @@
   /**
    * Aborts all benchmarks in the suite.
    * @name abort
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @returns {Object} The suite instance.
    */
   function abortSuite() {
@@ -1095,7 +1095,7 @@
 
   /**
    * Adds a test to the benchmark suite.
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @param {String} name A name to identify the benchmark.
    * @param {Function} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
@@ -1126,7 +1126,7 @@
   /**
    * Creates a new suite with cloned benchmarks.
    * @name clone
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @param {Object} options Options object to overwrite cloned options.
    * @returns {Object} The new suite instance.
    */
@@ -1144,9 +1144,9 @@
   }
 
   /**
-   * A bare-bones `Array#filter` solution.
+   * A `Array#filter` utility function.
    * @name filter
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @param {Function|String} callback The function/alias called per iteration.
    * @returns {Object} A new suite of benchmarks that passed callback filter.
    */
@@ -1161,7 +1161,7 @@
   /**
    * Resets all benchmarks in the suite.
    * @name reset
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @returns {Object} The suite instance.
    */
   function resetSuite() {
@@ -1175,7 +1175,7 @@
   /**
    * Runs the suite.
    * @name run
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @param {Boolean} [async=false] Flag to cycle asynchronously.
    * @param {Boolean} [queued=false] Flag to treat benchmarks as a queue.
    * @returns {Object} The suite instance.
@@ -1210,7 +1210,7 @@
 
   /**
    * Registers a single listener of a specified event type.
-   * @member Benchmark, Benchmark.Suite
+   * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function called when the event occurs.
    * @returns {Object} The benchmark instance.
@@ -1234,7 +1234,7 @@
 
   /**
    * Executes all registered listeners of a specified event type.
-   * @member Benchmark, Benchmark.Suite
+   * @memberOf Benchmark, Benchmark.Suite
    * @param {String|Object} type The event type or object.
    * @returns {Boolean} Returns `true` if all listeners were executed, else `false`.
    */
@@ -1256,7 +1256,7 @@
 
   /**
    * Unregisters a single listener of a specified event type.
-   * @member Benchmark, Benchmark.Suite
+   * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function to unregister.
    * @returns {Object} The benchmark instance.
@@ -1284,7 +1284,7 @@
 
   /**
    * Unregisters all listeners of a specified event type.
-   * @member Benchmark, Benchmark.Suite
+   * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @returns {Object} The benchmark instance.
    * @example
@@ -1309,7 +1309,7 @@
 
   /**
    * Aborts the benchmark without recording times.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @returns {Object} The benchmark instance.
    */
   function abort() {
@@ -1332,7 +1332,7 @@
 
   /**
    * Creates a new benchmark using the same test and options.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Object} options Options object to overwrite cloned options.
    * @returns {Object} The new benchmark instance.
    * @example
@@ -1356,7 +1356,7 @@
 
   /**
    * Determines if the benchmark's period is smaller than another.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Object} other The benchmark to compare.
    * @returns {Number} Returns `1` if smaller, `-1` if larger, and `0` if indeterminate.
    */
@@ -1377,7 +1377,7 @@
 
   /**
    * Reset properties and abort if running.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @returns {Object} The benchmark instance.
    */
   function reset() {
@@ -1416,7 +1416,7 @@
 
   /**
    * Displays relevant benchmark information when coerced to a string.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @returns {String} A string representation of the benchmark instance.
    */
   function toString() {
@@ -1888,7 +1888,7 @@
 
   /**
    * Runs the benchmark.
-   * @member Benchmark
+   * @memberOf Benchmark
    * @param {Boolean} [async=false] Flag to cycle asynchronously.
    * @returns {Object} The benchmark instance.
    */
@@ -1924,7 +1924,7 @@
     /**
      * The version number.
      * @static
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type String
      */
     'version': '0.2.2',
@@ -1932,42 +1932,42 @@
     /**
      * The default options copied by benchmark instances.
      * @static
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Object
      */
     'options': {
 
       /**
        * A flag to indicate that benchmark cycles will execute asynchronously by default.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Boolean
        */
       'async': false,
 
       /**
        * A flag to indicate that the benchmark clock is deferred.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Boolean
        */
       'defer': false,
 
       /**
        * The delay between test cycles (secs).
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Number
        */
       'delay': 0.005,
 
       /**
        * Displayed by Benchmark#toString when a `name` is not available (auto-generated if `null`).
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type String|Null
        */
       'id': null,
 
       /**
        * The default number of times to execute a test on a benchmark's first cycle.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Number
        */
       'initCount': 1,
@@ -1975,28 +1975,28 @@
       /**
        * The maximum time a benchmark is allowed to run before finishing (secs).
        * Note: Cycle delays aren't counted toward the maximum time.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Number
        */
       'maxTime': 5,
 
       /**
        * The minimum sample size required to perform statistical analysis.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Number
        */
       'minSamples': 5,
 
       /**
        * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type Number
        */
       'minTime': 0,
 
       /**
        * The name of the benchmark.
-       * @member Benchmark.options
+       * @memberOf Benchmark.options
        * @type String|Null
        */
       'name': null
@@ -2005,56 +2005,56 @@
     /**
      * Platform object containing browser name, version, and operating system.
      * @static
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Object
      */
     'platform': req('platform') || window.platform || {
 
       /**
        * The platform description.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String
        */
       'description': window.navigator && navigator.userAgent || 'unknown platform',
 
       /**
        * The name of the browser layout engine.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String|Null
        */
       'layout': null,
 
       /**
        * The name of the product hosting the browser.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String|Null
        */
       'product': null,
 
       /**
        * The name of the browser/environment.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String|Null
        */
       'name': null,
 
       /**
        * The name of the operating system.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String|Null
        */
       'os': null,
 
       /**
        * The browser/environment version.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type String|Null
        */
       'version': null,
 
       /**
        * Return platform description when the platform object is coerced to a string.
-       * @member Benchmark.platform
+       * @memberOf Benchmark.platform
        * @type Function
        * @returns {String} The platform description.
        */
@@ -2100,62 +2100,62 @@
 
     /**
      * The number of times a test was executed.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Number
      */
     'count': 0,
 
     /**
      * The number of cycles performed while benchmarking.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Number
      */
     'cycles': 0,
 
     /**
      * The error object if the test failed.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Object|Null
      */
     'error': null,
 
     /**
      * The number of executions per second.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Number
      */
     'hz': 0,
 
     /**
      * The test to benchmark.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Function
      */
     'fn': null,
 
     /**
      * A flag to indicate if the benchmark is aborted.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Boolean
      */
     'aborted': false,
 
     /**
      * A flag to indicate if the benchmark is running.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Boolean
      */
     'running': false,
 
     /**
      * Alias of [`Benchmark#addListener`](#Benchmark:addListener).
-     * @member Benchmark, Benchmark.Suite
+     * @memberOf Benchmark, Benchmark.Suite
      */
     'on': addListener,
 
     /**
      * Compiled into the test and executed immediately **before** the test loop.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Function
      * @example
      *
@@ -2181,63 +2181,63 @@
 
     /**
      * Compiled into the test and executed immediately **after** the test loop.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Function
      */
     'teardown': noop,
 
     /**
      * An object of stats including mean, margin or error, and standard deviation.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Object
      */
     'stats': {
 
       /**
        * The margin of error.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'moe': 0,
 
       /**
        * The relative margin of error (expressed as a percentage of the mean).
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'rme': 0,
 
       /**
        * The standard error of the mean.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'sem': 0,
 
       /**
        * The sample standard deviation.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'deviation': 0,
 
       /**
        * The sample arithmetic mean.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'mean': 0,
 
       /**
        * The sample size.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'size': 0,
 
       /**
        * The sample variance.
-       * @member Benchmark#stats
+       * @memberOf Benchmark#stats
        * @type Number
        */
       'variance': 0
@@ -2245,35 +2245,35 @@
 
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
-     * @member Benchmark
+     * @memberOf Benchmark
      * @type Object
      */
     'times': {
 
       /**
        * The time taken to complete the last cycle (secs).
-       * @member Benchmark#times
+       * @memberOf Benchmark#times
        * @type Number
        */
       'cycle': 0,
 
       /**
        * The time taken to complete the benchmark (secs).
-       * @member Benchmark#times
+       * @memberOf Benchmark#times
        * @type Number
        */
       'elapsed': 0,
 
       /**
        * The time taken to execute the test once (secs).
-       * @member Benchmark#times
+       * @memberOf Benchmark#times
        * @type Number
        */
       'period': 0,
 
       /**
        * A timestamp of when the benchmark started (ms).
-       * @member Benchmark#times
+       * @memberOf Benchmark#times
        * @type Number
        */
       'timeStamp': 0
@@ -2312,14 +2312,14 @@
   /**
    * The default options copied by suite instances.
    * @static
-   * @member Benchmark.Suite
+   * @memberOf Benchmark.Suite
    * @type Object
    */
   Suite.options = {
 
     /**
      * The name of the suite.
-     * @member Benchmark.Suite.options
+     * @memberOf Benchmark.Suite.options
      * @type String|Null
      */
     'name': null
@@ -2331,37 +2331,37 @@
 
     /**
      * The number of benchmarks in the suite.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @type Number
      */
     'length': 0,
 
     /**
      * A flag to indicate if the suite is aborted.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @type Boolean
      */
     'aborted': false,
 
     /**
      * A flag to indicate if the suite is running.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @type Boolean
      */
     'running': false,
 
     /**
-     * A bare-bones `Array#forEach` solution.
+     * A `Array#forEach` utility function.
      * Callbacks may terminate the loop by explicitly returning `false`.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @returns {Object} The suite iterated over.
      */
     'each': methodize(each),
 
     /**
-     * A bare-bones `Array#indexOf` solution.
-     * @member Benchmark.Suite
+     * A `Array#indexOf` utility function.
+     * @memberOf Benchmark.Suite
      * @param {Mixed} value The value to search for.
      * @returns {Number} The index of the matched value or `-1`.
      */
@@ -2369,7 +2369,7 @@
 
     /**
      * Invokes a method on all benchmarks in the suite.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @param {String|Object} name The name of the method to invoke OR options object.
      * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
      * @returns {Array} A new array of values returned from each method invoked.
@@ -2377,8 +2377,16 @@
     'invoke': methodize(invoke),
 
     /**
-     * A bare-bones `Array#map` solution.
-     * @member Benchmark.Suite
+     * Converts the array to a string.
+     * @memberOf Benchmark.Suite
+     * @param {String} [separator=','] A string to separate each element of the array.
+     * @returns {String} The removed element.
+     */
+    'join': [].join,
+
+    /**
+     * A `Array#map` utility function.
+     * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @returns {Array} A new array of values returned by the callback.
      */
@@ -2386,15 +2394,37 @@
 
     /**
      * Retrieves the value of a specified property from all benchmarks in the suite.
-     * @member Benchmark.Suite
+     * @memberOf Benchmark.Suite
      * @param {String} property The property to pluck.
      * @returns {Array} A new array of property values.
      */
     'pluck': methodize(pluck),
 
     /**
-     * A bare-bones `Array#reduce` solution.
-     * @member Benchmark.Suite
+     * Removes the last element of the host array and returns it.
+     * @memberOf Benchmark.Suite
+     * @returns {Mixed} The removed element.
+     */
+    'pop': [].pop,
+
+    /**
+     * Appends arguments to the end of the array.
+     * @memberOf Benchmark.Suite
+     * @returns {Number} The array length.
+     */
+    'push': [].push,
+
+    /**
+     * Sorts the elements of the host array.
+     * @memberOf Benchmark.Suite
+     * @param {Function} [compareFn=null] A function that defines the sort order.
+     * @returns {Array} The sorted host array.
+     */
+    'sort': [].sort,
+
+    /**
+     * A `Array#reduce` utility function.
+     * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @param {Mixed} accumulator Initial value of the accumulator.
      * @returns {Mixed} The accumulator.
@@ -2437,19 +2467,11 @@
     // array methods
     'concat': concat,
 
-    'join': [].join,
-
-    'pop': [].pop,
-
-    'push': [].push,
-
     'reverse': reverse,
 
     'shift': shift,
 
     'slice': slice,
-
-    'sort': [].sort,
 
     'splice': splice,
 
@@ -2462,28 +2484,28 @@
 
     /**
      * The deferred benchmark instance.
-     * @member Benchmark.Deferred
+     * @memberOf Benchmark.Deferred
      * @type Object
      */
     'benchmark': null,
 
     /**
      * The number of deferred cycles performed while benchmarking.
-     * @member Benchmark.Deferred
+     * @memberOf Benchmark.Deferred
      * @type Number
      */
     'cycles': 0,
 
     /**
      * The time taken to complete the deferred benchmark (secs).
-     * @member Benchmark.Deferred
+     * @memberOf Benchmark.Deferred
      * @type Number
      */
     'elapsed': 0,
 
     /**
      * A timestamp of when the deferred benchmark started (ms).
-     * @member Benchmark.Deferred
+     * @memberOf Benchmark.Deferred
      * @type Number
      */
     'timeStamp': 0,
@@ -2496,7 +2518,7 @@
 
   /**
    * The event type.
-   * @member Benchmark.Event
+   * @memberOf Benchmark.Event
    * @type String
    */
   Event.prototype.type = '';

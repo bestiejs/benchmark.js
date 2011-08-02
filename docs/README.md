@@ -174,13 +174,22 @@
 * [`Benchmark.Suite#filter`](#Benchmark.Suite:filter)
 * [`Benchmark.Suite#indexOf`](#Benchmark.Suite:indexOf)
 * [`Benchmark.Suite#invoke`](#Benchmark.Suite:invoke)
+* [`Benchmark.Suite#join`](#Benchmark.Suite:join)
 * [`Benchmark.Suite#map`](#Benchmark.Suite:map)
 * [`Benchmark.Suite#pluck`](#Benchmark.Suite:pluck)
+* [`Benchmark.Suite#pop`](#Benchmark.Suite:pop)
+* [`Benchmark.Suite#push`](#Benchmark.Suite:push)
 * [`Benchmark.Suite#reduce`](#Benchmark.Suite:reduce)
 * [`Benchmark.Suite#removeAllListeners`](#Benchmark:removeAllListeners)
 * [`Benchmark.Suite#removeListener`](#Benchmark:removeListener)
 * [`Benchmark.Suite#reset`](#Benchmark.Suite:reset)
+* [`Benchmark.Suite#reverse`](#Benchmark.Suite:reverse)
 * [`Benchmark.Suite#run`](#Benchmark.Suite:run)
+* [`Benchmark.Suite#shift`](#Benchmark.Suite:shift)
+* [`Benchmark.Suite#slice`](#Benchmark.Suite:slice)
+* [`Benchmark.Suite#sort`](#Benchmark.Suite:sort)
+* [`Benchmark.Suite#splice`](#Benchmark.Suite:splice)
+* [`Benchmark.Suite#unshift`](#Benchmark.Suite:unshift)
 
 <!-- /div -->
 
@@ -301,13 +310,14 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L737" title="View in source">`Benchmark.each(object, callback)`</a>
-A bare-bones `Array#forEach`/`for-in` own property solution.
+### <a id="Benchmark.each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L736" title="View in source">`Benchmark.each(object, callback, thisArg)`</a>
+A `Array#forEach`/`for-in` own property utility function.
 [&#9650;][1]
 
 #### Arguments
 1. `object` *(Array|Object)*: The object to iterate over.
 2. `callback` *(Function)*: The function called per iteration.
+3. `thisArg` *(Object)*: The `this` binding for the callback function.
 
 #### Returns
 *(Array, Object)*: Returns the object iterated over.
@@ -317,13 +327,14 @@ A bare-bones `Array#forEach`/`for-in` own property solution.
 
 <!-- div -->
 
-### <a id="Benchmark.filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L783" title="View in source">`Benchmark.filter(array, callback)`</a>
-A generic bare-bones `Array#filter` solution.
+### <a id="Benchmark.filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L783" title="View in source">`Benchmark.filter(array, callback, thisArg)`</a>
+A generic `Array#filter` utility function.
 [&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
 2. `callback` *(Function|String)*: The function/alias called per iteration.
+3. `thisArg` *(Object)*: The `this` binding for the callback function.
 
 #### Returns
 *(Array)*: A new array of values that passed callback filter.
@@ -350,7 +361,7 @@ Benchmark.filter(benches, 'successful');
 
 <!-- div -->
 
-### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L813" title="View in source">`Benchmark.formatNumber(number)`</a>
+### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L812" title="View in source">`Benchmark.formatNumber(number)`</a>
 Converts a number to a more readable comma-separated string representation.
 [&#9650;][1]
 
@@ -365,8 +376,8 @@ Converts a number to a more readable comma-separated string representation.
 
 <!-- div -->
 
-### <a id="Benchmark.indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L826" title="View in source">`Benchmark.indexOf(array, value)`</a>
-A generic bare-bones `Array#indexOf` solution.
+### <a id="Benchmark.indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L825" title="View in source">`Benchmark.indexOf(array, value)`</a>
+A generic `Array#indexOf` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -381,7 +392,7 @@ A generic bare-bones `Array#indexOf` solution.
 
 <!-- div -->
 
-### <a id="Benchmark.invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L875" title="View in source">`Benchmark.invoke(benches, name [, arg1, arg2, ...])`</a>
+### <a id="Benchmark.invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L874" title="View in source">`Benchmark.invoke(benches, name [, arg1, arg2, ...])`</a>
 Invokes a method on all items in an array.
 [&#9650;][1]
 
@@ -429,7 +440,7 @@ Benchmark.invoke(benches, {
 
 <!-- div -->
 
-### <a id="Benchmark.join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1021" title="View in source">`Benchmark.join(object [, separator1=',', separator2=': '])`</a>
+### <a id="Benchmark.join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1020" title="View in source">`Benchmark.join(object [, separator1=',', separator2=': '])`</a>
 Creates a string of joined array values or object key-value pairs.
 [&#9650;][1]
 
@@ -446,13 +457,14 @@ Creates a string of joined array values or object key-value pairs.
 
 <!-- div -->
 
-### <a id="Benchmark.map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1041" title="View in source">`Benchmark.map(array, callback)`</a>
-A generic bare-bones `Array#map` solution.
+### <a id="Benchmark.map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1041" title="View in source">`Benchmark.map(array, callback, thisArg)`</a>
+A generic `Array#map` utility function.
 [&#9650;][1]
 
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
 2. `callback` *(Function)*: The function called per iteration.
+3. `thisArg` *(Object)*: The `this` binding for the callback function.
 
 #### Returns
 *(Array)*: A new array of values returned by the callback.
@@ -479,7 +491,7 @@ Retrieves the value of a specified property from all items in an array.
 <!-- div -->
 
 ### <a id="Benchmark.reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1071" title="View in source">`Benchmark.reduce(array, callback, accumulator)`</a>
-A generic bare-bones `Array#reduce` solution.
+A generic `Array#reduce` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1132,7 +1144,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2475" title="View in source">`Benchmark.Deferred#cycles`</a>
+### <a id="Benchmark.Deferred:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2497" title="View in source">`Benchmark.Deferred#cycles`</a>
 *(Number)*: The number of deferred cycles performed while benchmarking.
 [&#9650;][1]
 
@@ -1141,7 +1153,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2482" title="View in source">`Benchmark.Deferred#elapsed`</a>
+### <a id="Benchmark.Deferred:elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2504" title="View in source">`Benchmark.Deferred#elapsed`</a>
 *(Number)*: The time taken to complete the deferred benchmark *(secs)*.
 [&#9650;][1]
 
@@ -1150,7 +1162,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L714" title="View in source">`Benchmark.Deferred#resolve`</a>
+### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L712" title="View in source">`Benchmark.Deferred#resolve`</a>
 *(Unknown)*: Handles cycling/completing the deferred benchmark.
 [&#9650;][1]
 
@@ -1159,7 +1171,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2489" title="View in source">`Benchmark.Deferred#timeStamp`</a>
+### <a id="Benchmark.Deferred:timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2511" title="View in source">`Benchmark.Deferred#timeStamp`</a>
 *(Number)*: A timestamp of when the deferred benchmark started *(ms)*.
 [&#9650;][1]
 
@@ -1175,7 +1187,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:benchmark" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2468" title="View in source">`benchmark`</a>
+### <a id="Benchmark.Deferred:benchmark" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2490" title="View in source">`benchmark`</a>
 *(Object)*: The deferred benchmark instance.
 [&#9650;][1]
 
@@ -1213,7 +1225,7 @@ Event constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Event:type" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2502" title="View in source">`Benchmark.Event#type`</a>
+### <a id="Benchmark.Event:type" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2524" title="View in source">`Benchmark.Event#type`</a>
 *(String)*: The event type.
 [&#9650;][1]
 
@@ -1404,7 +1416,7 @@ Creates a new suite with cloned benchmarks.
 <!-- div -->
 
 ### <a id="Benchmark.Suite:each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2360" title="View in source">`Benchmark.Suite#each(callback)`</a>
-A bare-bones `Array#forEach` solution.
+A `Array#forEach` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1434,7 +1446,7 @@ Executes all registered listeners of a specified event type.
 <!-- div -->
 
 ### <a id="Benchmark.Suite:filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1153" title="View in source">`Benchmark.Suite#filterSuite(callback)`</a>
-A bare-bones `Array#filter` solution.
+A `Array#filter` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1449,7 +1461,7 @@ A bare-bones `Array#filter` solution.
 <!-- div -->
 
 ### <a id="Benchmark.Suite:indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2368" title="View in source">`Benchmark.Suite#indexOf(value)`</a>
-A bare-bones `Array#indexOf` solution.
+A `Array#indexOf` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1479,8 +1491,23 @@ Invokes a method on all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2385" title="View in source">`Benchmark.Suite#map(callback)`</a>
-A bare-bones `Array#map` solution.
+### <a id="Benchmark.Suite:join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2385" title="View in source">`Benchmark.Suite#join([separator=','])`</a>
+Converts the array to a string.
+[&#9650;][1]
+
+#### Arguments
+1. `[separator=',']` *(String)*: A string to separate each element of the array.
+
+#### Returns
+*(String)*: The removed element.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2393" title="View in source">`Benchmark.Suite#map(callback)`</a>
+A `Array#map` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1494,7 +1521,7 @@ A bare-bones `Array#map` solution.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2393" title="View in source">`Benchmark.Suite#pluck(property)`</a>
+### <a id="Benchmark.Suite:pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2401" title="View in source">`Benchmark.Suite#pluck(property)`</a>
 Retrieves the value of a specified property from all benchmarks in the suite.
 [&#9650;][1]
 
@@ -1509,8 +1536,32 @@ Retrieves the value of a specified property from all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2402" title="View in source">`Benchmark.Suite#reduce(callback, accumulator)`</a>
-A bare-bones `Array#reduce` solution.
+### <a id="Benchmark.Suite:pop" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2408" title="View in source">`Benchmark.Suite#pop`</a>
+Removes the last element of the host array and returns it.
+[&#9650;][1]
+
+#### Returns
+*(Mixed)*: The removed element.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:push" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2415" title="View in source">`Benchmark.Suite#push`</a>
+Appends arguments to the end of the array.
+[&#9650;][1]
+
+#### Returns
+*(Number)*: The array length.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2432" title="View in source">`Benchmark.Suite#reduce(callback, accumulator)`</a>
+A `Array#reduce` utility function.
 [&#9650;][1]
 
 #### Arguments
@@ -1586,6 +1637,18 @@ Resets all benchmarks in the suite.
 
 <!-- div -->
 
+### <a id="Benchmark.Suite:reverse" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L338" title="View in source">`Benchmark.Suite#reverse`</a>
+Rearrange the host array's elements in reverse order.
+[&#9650;][1]
+
+#### Returns
+*(Array)*: The reversed array.
+
+<!-- /div -->
+
+
+<!-- div -->
+
 ### <a id="Benchmark.Suite:run" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1183" title="View in source">`Benchmark.Suite#runSuite([async=false, queued=false])`</a>
 Runs the suite.
 [&#9650;][1]
@@ -1596,6 +1659,69 @@ Runs the suite.
 
 #### Returns
 *(Object)*: The suite instance.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:shift" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L370" title="View in source">`Benchmark.Suite#shift`</a>
+Removes the first element of the host array and returns it.
+[&#9650;][1]
+
+#### Returns
+*(Mixed)*: The first element of the array.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:slice" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L380" title="View in source">`Benchmark.Suite#slice`</a>
+Creates an array of the host array's elements from the start index up to,
+[&#9650;][1]
+
+#### Returns
+*(Array)*: The new array.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:sort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2423" title="View in source">`Benchmark.Suite#sort([compareFn=null])`</a>
+Sorts the elements of the host array.
+[&#9650;][1]
+
+#### Arguments
+1. `[compareFn=null]` *(Function)*: A function that defines the sort order.
+
+#### Returns
+*(Array)*: The sorted host array.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:splice" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L405" title="View in source">`Benchmark.Suite#splice`</a>
+Allows removing a range of elements and/or inserting elements into the host array.
+[&#9650;][1]
+
+#### Returns
+*(Array)*: An array of removed elements.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.Suite:unshift" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L431" title="View in source">`Benchmark.Suite#unshift`</a>
+Appends arguments to the host array.
+[&#9650;][1]
+
+#### Returns
+*(Number)*: The new length.
 
 <!-- /div -->
 
