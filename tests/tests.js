@@ -77,6 +77,19 @@
     deepEqual(values, ['a', 'c'], 'sparse check');
   });
 
+  if (window.document && document.evaluate) {
+    test('xpath snapshot', function() {
+      var o = document.evaluate('//html', document, null, 7, null),
+          values = [];
+
+      Benchmark.each(o, function(value) {
+        values.push(value);
+      });
+
+      deepEqual(values, [document.documentElement], 'basic');
+    });
+  }
+
   /*--------------------------------------------------------------------------*/
 
   QUnit.module('Benchmark.filter');
@@ -468,7 +481,8 @@
         maxTime = options.maxTime,
         suite = new Benchmark.Suite;
 
-    options.maxTime = 1;
+    options.minTime && (options.maxTime = options.minTime * 4);
+
     suite.add('a', function() {
       // empty
     })

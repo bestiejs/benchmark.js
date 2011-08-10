@@ -724,7 +724,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * A `Array#forEach`/`for-in` own property utility function.
+   * A generic `Array#forEach` / `for...in` own property utility function.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
    * @memberOf Benchmark
@@ -736,19 +736,23 @@
   function each(object, callback, thisArg) {
     var index = -1,
         result = [object, object = Object(object)][0],
-        length = object.length;
+        isSnapshot = 'snapshotLength' in object && 'snapshotItem' in object,
+        skipCheck = isSnapshot || 'item' in object,
+        length = isSnapshot ? object.snapshotLength : object.length;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
-    if ('length' in object && length == (length = length >>> 0)) {
+    if (length == length >>> 0) {
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
-        if ((index in object || 'item' in object) && callback.call(thisArg, object[index], index, object) === false) {
+        if ((skipCheck || index in object) &&
+            callback.call(thisArg, isSnapshot ? object.snapshotItem(index) : object[index], index, object) === false) {
           break;
         }
       }
     } else {
       for (index in object) {
-        if (hasKey(object, index) && callback.call(thisArg, object[index], index, object) === false) {
+        if (hasKey(object, index) &&
+            callback.call(thisArg, object[index], index, object) === false) {
           break;
         }
       }
@@ -2063,7 +2067,7 @@
       }
     },
 
-    // generic Array#forEach/for-in
+    // generic Array#forEach / for...in
     'each': each,
 
     // generic Array#filter
@@ -2351,7 +2355,7 @@
     'running': false,
 
     /**
-     * A `Array#forEach` utility function.
+     * An `Array#forEach` utility function.
      * Callbacks may terminate the loop by explicitly returning `false`.
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
@@ -2360,7 +2364,7 @@
     'each': methodize(each),
 
     /**
-     * A `Array#indexOf` utility function.
+     * An `Array#indexOf` utility function.
      * @memberOf Benchmark.Suite
      * @param {Mixed} value The value to search for.
      * @returns {Number} The index of the matched value or `-1`.
@@ -2385,7 +2389,7 @@
     'join': [].join,
 
     /**
-     * A `Array#map` utility function.
+     * An `Array#map` utility function.
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @returns {Array} A new array of values returned by the callback.
@@ -2423,7 +2427,7 @@
     'sort': [].sort,
 
     /**
-     * A `Array#reduce` utility function.
+     * An `Array#reduce` utility function.
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @param {Mixed} accumulator Initial value of the accumulator.
