@@ -342,7 +342,8 @@
    */
   function render(index) {
     each(index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]], function(bench) {
-      var cell = $(prefix + (++index)),
+      var parsed,
+          cell = $(prefix + (++index)),
           error = bench.error,
           hz = bench.hz;
 
@@ -354,8 +355,8 @@
       if (error) {
         setHTML(cell, 'Error');
         addClass(cell, classNames.error);
-        logError('<p>' + error + '.</p><ul><li>' +
-          Benchmark.join(error, '</li><li>') + '</li></ul>');
+        parsed = Benchmark.join(error, '</li><li>');
+        logError('<p>' + error + '.</p>' + (parsed ? '<ul><li>' + parsed + '</li></ul>' : ''));
       }
       else {
         // status: running
