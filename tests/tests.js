@@ -254,11 +254,13 @@
 
   test('array-like-object', function() {
     var expected = [0],
-        o = { '0': 'a', '2': 'c', 'length': 3 },
+        o = { '0': 'a', '2': 'c', 'length': 4 },
         result = Benchmark.map(o, function(value, index) { return index; });
 
     expected[2] = 2;
-    deepEqual(result, expected, 'sparse check');
+    expected.length = 4;
+    deepEqual(result, expected, 'sparse value check');
+    deepEqual(result.length, 4, 'sparse length check');
   });
 
   /*--------------------------------------------------------------------------*/

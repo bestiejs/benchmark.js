@@ -1046,7 +1046,7 @@
     return reduce(array, function(result, value, index) {
       result[index] = callback.call(thisArg, value, index, array);
       return result;
-    }, []);
+    }, Array(Object(array).length >>> 0));
   }
 
   /**
