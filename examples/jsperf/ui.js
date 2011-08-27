@@ -279,7 +279,7 @@
   /**
    * Appends to or clears the error log.
    * @private
-   * @param {String|Boolean} text The the text to append or false to clear.
+   * @param {String|Boolean} text The text to append or `false` to clear.
    */
   function logError(text) {
     var table,
@@ -307,7 +307,7 @@
   /**
    * Sets the status text.
    * @private
-   * @param {String} text The text write to the status.
+   * @param {String} text The text to write to the status.
    */
   function setStatus(text) {
     setHTML('status', text);
