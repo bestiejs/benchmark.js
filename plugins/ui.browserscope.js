@@ -416,11 +416,14 @@
             // remove "test run count" title/row
             titles.pop();
             // compute chart height
-            height = titles.length * 100;
+            height = rows.length * titles.length * 22;
             // adjust captions and chart width
-            if (type == 'Column' || type == 'Line') {
+            if (type == 'Column' || type == 'Line' || type == 'Pie') {
               vTitle = [hTitle, hTitle = vTitle][0];
-              width = rows.length * 150;
+              height = titles.length * 100;
+              if (type != 'Pie') {
+                width = rows.length * 200;
+              }
             }
             // modify row data
             each(rows, function(row) {
@@ -450,10 +453,21 @@
           }
           new google.visualization[type](cont).draw(data, {
             'is3D': true,
+            'fontSize': 13,
             'height': height,
             'width': width,
-            'hAxis': { 'title': hTitle },
-            'vAxis': { 'title': vTitle }
+            'chartArea': {
+              'height': '65%',
+              'left': 150,
+              'top': 25
+            },
+            'hAxis': {
+              'title': hTitle,
+              'viewWindowMode': 'maximized'
+            },
+            'vAxis': {
+              'title': vTitle
+            }
           });
         }
       }
