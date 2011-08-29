@@ -53,7 +53,7 @@
     'localStorage': !!function() {
       try {
         return !localStorage.getItem(+new Date);
-      } catch(e) { }
+      } catch(e) {}
     }()
   },
 
@@ -61,7 +61,7 @@
   errors = [],
 
   /** Cache of event handlers */
-  handlers = { },
+  handlers = {},
 
   /** Namespace */
   ui = new Benchmark.Suite,

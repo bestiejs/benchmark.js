@@ -4,9 +4,21 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
+    'lastResponse': null,
+    'lastType': 'table',
     'timers': { 'cleanup': null, 'load': null, 'post': null },
     'trash': createElement('div')
-  };
+  },
+
+  /** Used to resolve a value's internal [[Class]] */
+  toString = {}.toString,
+
+  /** Utility shortcuts */
+  each = Benchmark.each,
+  filter = Benchmark.filter,
+  forIn = Benchmark.forIn,
+  map = Benchmark.map,
+  reduce = Benchmark.reduce;
 
   /*--------------------------------------------------------------------------*/
 
@@ -72,7 +84,7 @@
           ? [document.getElementById(selector.slice(1))]
           : document.getElementsByTagName(selector);
 
-    while (result[++i] = nodes[i]) { }
+    while ((result[++i] = nodes[i])) { }
     return result.length-- && result;
   }
 
@@ -119,7 +131,7 @@
     if (timers.cleanup) {
       // if expired, destroy the element to prevent pseudo memory leaks.
       // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
-      Benchmark.each(query('script').concat(query('iframe')), function(element) {
+      each(query('script').concat(query('iframe')), function(element) {
         var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + Math.max(delay, timings.timeout * 1e3);
         if (now() > expire || /browserscope\.org/.test(element.src)) {
           trash.appendChild(element);
@@ -131,6 +143,33 @@
     timers.cleanup = setTimeout(cleanup, delay);
   }
 
+ /**
+   * A simple object clone utility function.
+   * @private
+   * @param {Object} object The object to clone.
+   * @returns {Object} A new cloned object.
+   */
+  function clone(object) {
+    var ctor = object.constructor,
+        result = ctor ? (noop.prototype = ctor.prototype, new noop) : {};
+
+    forIn(object, function(value, key) {
+      if (isArray(value)) {
+        result[key] = [];
+        each(value, function(value, index) {
+          result[key][index] = clone(value);
+        });
+      }
+      else if (value && typeof value == 'object') {
+        result[key] = clone(value);
+      }
+      else {
+        result[key] = value;
+      }
+    });
+    return result;
+  }
+
   /**
    * Creates a Browserscope results object.
    * @private
@@ -138,28 +177,37 @@
    */
   function createSnapshot() {
     // clone benchmarks using the upper limit of the confidence interval to compute hz
-    var benches = Benchmark.map(ui.benchmarks, function(bench, i) {
+    var benches = map(ui.benchmarks, function(bench) {
       var clone = bench.clone(),
           stats = bench.stats;
 
       clone.cycles = bench.cycles;
       clone.hz = Math.round(1 / (stats.mean + stats.moe));
-      clone.id || (clone.id = i + 1);
       return clone;
     });
 
     // remove unrun, errored, or Infinity hz
-    benches = Benchmark.filter(benches, function(bench) {
+    benches = filter(benches, function(bench) {
       return bench.cycles && isFinite(bench.hz);
     });
 
     // duplicate and non alphanumeric benchmark names have their ids appended
-    return Benchmark.reduce(benches, function(result, bench, key) {
+    return reduce(benches, function(result, bench, key) {
       key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
-      result || (result = { });
+      result || (result = {});
       result[key && !result[key] ? key : key + bench.id ] = bench.hz;
       return result;
     }, null);
+  }
+
+  /**
+   * Checks if a value has an internal [[Class]] of Array.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if the value has an internal [[Class]] of Array, else `false`.
+   */
+  function isArray(value) {
+    return toString.call(value) == '[object Array]';
   }
 
   /**
@@ -170,9 +218,17 @@
    * @returns {String} The modified string.
    */
   function interpolate(string, object) {
-    return Benchmark.reduce(object || { }, function(string, value, key) {
+    return reduce(object || {}, function(string, value, key) {
       return string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
     }, string);
+  }
+
+  /**
+   * A no-operation function.
+   * @private
+   */
+  function noop() {
+    // no operation performed
   }
 
   /**
@@ -198,7 +254,7 @@
 
     function onComplete(response) {
       clearTimeout(timers.load);
-      me.render(response);
+      me.render({ 'response': response });
     }
 
     cache.lastAction = 'load';
@@ -258,7 +314,7 @@
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
-        '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
+        '_bT=setTimeout(function(){_bC=function(){};render({"response":null})},#{timeout}*1e3)' +
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
         '</body></html>',
@@ -278,27 +334,60 @@
    * Renders the cumulative results table.
    * @static
    * @member ui.browserscope
-   * @param {Object} response The data object.
+   * @param {Object} options The options object.
    */
-  function render(response) {
-    var me = this,
+  function render(options) {
+    var data,
+        titles,
+        visualization,
+        me = this,
         action = cache.lastAction,
         cont = me.container,
         delay = me.timings.retry * 1e3,
+        height = 'auto',
+        response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
+        type = cache.lastType = 'type' in options ? options.type : cache.lastType,
         timers = cache.timers;
+
+    function getCells(object) {
+      // resolve cells by duck typing
+      var result;
+      forIn(object, function(value) {
+        return !(isArray(value) && (result = value));
+      });
+      return result;
+    }
+
+    function getRows(object) {
+      // resolve rows by duck typing
+      var result;
+      forIn(object, function(value) {
+        return !(isArray(value) && 0 in value && !('type' in value[0]) && (result = value));
+      });
+      return result;
+    }
+
+    function getTitles(object) {
+      // resolve titles by duck typing
+      var result;
+      forIn(object, function(value) {
+        return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
+      });
+      return result;
+    }
 
     function retry() {
       if (ui.running) {
         timers[action] = setTimeout(retry, delay);
       } else if (action == 'render') {
-        me[action](response);
+        me[action](options);
       } else {
         me[action]();
       }
     }
 
-    // visualization table options
-    // http://code.google.com/apis/visualization/documentation/gallery/table.html
+    // visualization chart gallary
+    // http://code.google.com/apis/chart/interactive/docs/gallery.html
     if (cont) {
       if (response && !response.isError()) {
         if (ui.running) {
@@ -307,10 +396,37 @@
         }
         else {
           cont.className = '';
-          (new google.visualization.Table(cont)).draw(response.getDataTable(), {
+          data = clone(response.getDataTable());
+          titles = getTitles(data);
+
+          if (type == 'table') {
+            visualization = new google.visualization.Table(cont);
+          }
+          else if (type == 'bar' || type == 'pie') {
+            visualization = new google.visualization[(type == 'bar' ? 'Bar' : 'Pie') + 'Chart'](cont);
+            // remove test count title
+            titles.pop();
+            // compute chart height
+            height = titles.length * 100;
+            // modify row data
+            each(getRows(data), function(row) {
+              each(getCells(row), function(cell, index, cells) {
+                // assign ops/sec
+                if (/^[\d.,]+$/.test(cell.f)) {
+                  cell.v = +cell.f.replace(/,/g, '');
+                  cell.f += ' ops/sec';
+                }
+                // add test run count to browser name
+                else {
+                  cell.f += ' (' + cells[cells.length - 1].v + ')';
+                }
+              });
+            });
+          }
+          visualization.draw(data, {
             'width': 'auto',
-            'height': 'auto',
-            'alternatingRowStyle': false
+            'height': height,
+            'hAxis': { 'title': 'operations per second' }
           });
         }
       }
@@ -388,7 +504,7 @@
         { 'key': key });
       me.container = query('#bs-rt-usertest_' + key)[0];
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
-      loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
+      loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22corechart%22%2C%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
     }
     // init garbage collector
     cleanup();
