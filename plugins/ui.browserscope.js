@@ -10,6 +10,14 @@
     'trash': createElement('div')
   },
 
+  /** Used to separate charts from others render types */
+  chart = {
+    'Bar': 1,
+    'Column': 1,
+    'Line': 1,
+    'Pie': 1
+  },
+
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
 
@@ -339,12 +347,13 @@
   function render(options) {
     var data,
         titles,
-        visualization,
         me = this,
         action = cache.lastAction,
         cont = me.container,
         delay = me.timings.retry * 1e3,
         height = 'auto',
+        hTitle = 'operations per second',
+        vTitle = 'browsers',
         response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
         timers = cache.timers;
@@ -398,17 +407,19 @@
           cont.className = '';
           data = clone(response.getDataTable());
           titles = getTitles(data);
+          type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
-          if (type == 'table') {
-            visualization = new google.visualization.Table(cont);
-          }
-          else if (type == 'bar' || type == 'pie') {
-            visualization = new google.visualization[(type == 'bar' ? 'Bar' : 'Pie') + 'Chart'](cont);
-            // remove test count title
+          if (chart[type]) {
+            // remove "test run count" title/row
             titles.pop();
             // compute chart height
             height = titles.length * 100;
+            // adjust captions
+            if (type == 'Line' || type == 'Column') {
+              vTitle = [hTitle, hTitle = vTitle][0];
+            }
             // modify row data
+            type += 'Chart';
             each(getRows(data), function(row) {
               each(getCells(row), function(cell, index, cells) {
                 // assign ops/sec
@@ -417,16 +428,18 @@
                   cell.f += ' ops/sec';
                 }
                 // add test run count to browser name
-                else {
+                else if (cell.f) {
                   cell.f += ' (' + cells[cells.length - 1].v + ')';
                 }
               });
             });
           }
-          visualization.draw(data, {
-            'width': 'auto',
+          new google.visualization[type](cont).draw(data, {
+            'is3D': true,
             'height': height,
-            'hAxis': { 'title': 'operations per second' }
+            'width': 'auto',
+            'hAxis': { 'title': hTitle },
+            'vAxis': { 'title': vTitle }
           });
         }
       }
