@@ -10,7 +10,7 @@
     'trash': createElement('div')
   },
 
-  /** Used to separate charts from others render types */
+  /** Used to separate charts from other render types */
   chart = {
     'Bar': 1,
     'Column': 1,
@@ -421,20 +421,20 @@
             // remove "test run count" title/row
             titles.pop();
             // compute chart height
-            height = rows.length * titles.length * 30;
+            height = Math.max(cont.offsetHeight, (rows.length * 100) + (titles.length * 70));
             // adjust captions and chart dimensions
             if (type == 'Column' || type == 'Line' || type == 'Pie') {
-              // slide between 70 and 96 percent
-              areaWidth = 70 + Math.min(26, Math.floor(0.26 * (rows.length * 4))) + '%';
+              // slide between 60 and 96 percent
+              areaWidth = 60 + Math.min(36, Math.floor(0.36 * (rows.length * 6))) + '%';
               height = 500;
               vTitle = [hTitle, hTitle = vTitle][0];
 
               if (type != 'Pie') {
-                width = rows.length * titles.length * 40;
+                width = Math.max(cont.offsetWidth, (rows.length * 100) + (titles.length * 100));
               }
             } else if (type == 'Bar') {
-              // slide between 70 and 98 percent with more weight than width
-              areaHeight = 70 + Math.min(28, Math.floor(0.28 * (rows.length * 8))) + '%';
+              // slide between 80 and 98 percent with more weight than width
+              areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 9))) + '%';
             }
             // modify row data
             each(rows, function(row) {
