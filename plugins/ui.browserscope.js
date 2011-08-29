@@ -350,6 +350,8 @@
         titles,
         me = this,
         action = cache.lastAction,
+        areaHeight = '80%',
+        areaWidth = '100%',
         cont = me.container,
         delay = me.timings.retry * 1e3,
         height = 'auto',
@@ -412,18 +414,27 @@
           titles = getTitles(data);
           type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
+          /**
+           * Tweak the dimensions and styles to best fit your environment.
+           */
           if (chart[type]) {
             // remove "test run count" title/row
             titles.pop();
             // compute chart height
-            height = rows.length * titles.length * 22;
-            // adjust captions and chart width
+            height = rows.length * titles.length * 30;
+            // adjust captions and chart dimensions
             if (type == 'Column' || type == 'Line' || type == 'Pie') {
+              // slide between 70 and 96 percent
+              areaWidth = 70 + Math.min(26, Math.floor(0.26 * (rows.length * 4))) + '%';
+              height = 500;
               vTitle = [hTitle, hTitle = vTitle][0];
-              height = titles.length * 100;
+
               if (type != 'Pie') {
-                width = rows.length * 200;
+                width = rows.length * titles.length * 40;
               }
+            } else if (type == 'Bar') {
+              // slide between 70 and 98 percent with more weight than width
+              areaHeight = 70 + Math.min(28, Math.floor(0.28 * (rows.length * 8))) + '%';
             }
             // modify row data
             each(rows, function(row) {
@@ -457,13 +468,13 @@
             'height': height,
             'width': width,
             'chartArea': {
-              'height': '65%',
+              'height': areaHeight,
+              'width': areaWidth,
               'left': 150,
               'top': 25
             },
             'hAxis': {
-              'title': hTitle,
-              'viewWindowMode': 'maximized'
+              'title': hTitle
             },
             'vAxis': {
               'title': vTitle
