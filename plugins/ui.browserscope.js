@@ -419,9 +419,9 @@
               vTitle = [hTitle, hTitle = vTitle][0];
             }
             // modify row data
-            type += 'Chart';
             each(getRows(data), function(row) {
               each(getCells(row), function(cell, index, cells) {
+                var lastIndex = cells.length - 1;
                 // assign ops/sec
                 if (/^[\d.,]+$/.test(cell.f)) {
                   cell.v = +cell.f.replace(/,/g, '');
@@ -429,10 +429,20 @@
                 }
                 // add test run count to browser name
                 else if (cell.f) {
-                  cell.f += ' (' + cells[cells.length - 1].v + ')';
+                  cell.f += type == 'Pie' ? '' : ' (' + cells[lastIndex].v + ')';
+                }
+                // compute sum of all ops/sec for pie charts
+                if (type == 'Pie') {
+                  if (index == lastIndex) {
+                    cells[1].f = Benchmark.formatNumber(cells[1].v) + ' total ops/sec';
+                  } else if (index > 1 && typeof cell.v == 'number') {
+                    cells[1].v += cell.v;
+                  }
                 }
               });
             });
+            // make type recognizable
+            type += 'Chart';
           }
           new google.visualization[type](cont).draw(data, {
             'is3D': true,
