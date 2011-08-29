@@ -346,12 +346,14 @@
    */
   function render(options) {
     var data,
+        rows,
         titles,
         me = this,
         action = cache.lastAction,
         cont = me.container,
         delay = me.timings.retry * 1e3,
         height = 'auto',
+        width = height,
         hTitle = 'operations per second',
         vTitle = 'browsers',
         response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
@@ -406,6 +408,7 @@
         else {
           cont.className = '';
           data = clone(response.getDataTable());
+          rows = getRows(data);
           titles = getTitles(data);
           type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
@@ -414,12 +417,13 @@
             titles.pop();
             // compute chart height
             height = titles.length * 100;
-            // adjust captions
-            if (type == 'Line' || type == 'Column') {
+            // adjust captions and chart width
+            if (type == 'Column' || type == 'Line') {
               vTitle = [hTitle, hTitle = vTitle][0];
+              width = rows.length * 150;
             }
             // modify row data
-            each(getRows(data), function(row) {
+            each(rows, function(row) {
               each(getCells(row), function(cell, index, cells) {
                 var lastIndex = cells.length - 1;
                 // assign ops/sec
@@ -447,7 +451,7 @@
           new google.visualization[type](cont).draw(data, {
             'is3D': true,
             'height': height,
-            'width': 'auto',
+            'width': width,
             'hAxis': { 'title': hTitle },
             'vAxis': { 'title': vTitle }
           });

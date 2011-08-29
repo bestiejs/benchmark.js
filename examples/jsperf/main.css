@@ -344,6 +344,10 @@ footer {
   background: #ddd;
 }
 
+#bs-results .bs-rt div {
+  overflow: auto;
+}
+
 #bs-results td {
   border: 1px solid #ddd;
   padding: .4em;
