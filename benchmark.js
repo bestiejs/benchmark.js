@@ -154,10 +154,9 @@
       // 3 arguments (name, fn [, options])
       me.name = name;
     }
-    counter++;
     setOptions(me, options);
     me.fn || (me.fn = fn);
-    me.id || (me.id = counter);
+    me.id || (me.id = ++counter);
     me.stats = extend({}, me.stats);
     me.times = extend({}, me.times);
   }
@@ -750,12 +749,7 @@
         }
       }
     } else {
-      for (index in object) {
-        if (hasKey(object, index) &&
-            callback.call(thisArg, object[index], index, object) === false) {
-          break;
-        }
-      }
+      forIn(object, callback, thisArg);
     }
     return result;
   }
@@ -804,6 +798,27 @@
     return result || reduce(array, function(result, value, index) {
       return callback.call(thisArg, value, index, array) ? (result.push(value), result) : result;
     }, []);
+  }
+
+  /**
+   * Iterates over an object's own properties, executing the `callback` for each.
+   * @static
+   * @memberOf Benchmark
+   * @param {Object} object The object to iterate over.
+   * @param {Function} callback The function executed per own property.
+   * @param {Object} thisArg The `this` binding for the callback function.
+   * @returns {Object} Returns the object iterated over.
+   */
+  function forIn(object, callback, thisArg){
+    var result = object;
+    object = Object(object);
+    for(var key in object){
+      if(hasKey(object, key) &&
+        callback.call(thisArg, object[key], key, object) === false){
+        break;
+      }
+    }
+    return result;
   }
 
   /**
@@ -1136,10 +1151,10 @@
    */
   function cloneSuite(options) {
     var me = this,
-        result = new me.constructor(extend({}, me.options, options));
+        result = new me.constructor(extend({ 'id': me.id }, me.options, options));
 
     // copy own properties
-    each(me, function(value, key) {
+    forIn(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : value;
       }
@@ -1350,7 +1365,7 @@
         result = new me.constructor(me.fn, extend({}, me.options, options));
 
     // copy own properties
-    each(me, function(value, key) {
+    forIn(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value;
       }
@@ -2067,11 +2082,14 @@
       }
     },
 
-    // generic Array#forEach / for...in
+    // generic Array#forEach / for...in utility
     'each': each,
 
     // generic Array#filter
     'filter': filter,
+
+    // generic for...in utility
+    'forIn': forIn,
 
     // converts a number to a comma-separated string
     'formatNumber': formatNumber,
