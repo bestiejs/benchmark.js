@@ -352,8 +352,13 @@
         me = this,
         action = cache.lastAction,
         areaHeight = '80%',
+        areaWidth = 'auto',
         cont = me.container,
         delay = me.timings.retry * 1e3,
+        left = 150,
+        top = 50,
+        minHeight = 533,
+        minWidth = cont.offsetWidth || 948,
         height = 'auto',
         width = height,
         hTitle = 'operations per second (higher is better)',
@@ -424,19 +429,20 @@
             titles.pop();
             // adjust captions and chart dimensions
             if (type == 'Bar') {
-              // slide between 80 and 98 percent
+              // compute `areaHeight` on a slide between 80 and 98 percent
               areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 6))) + '%';
-              height = Math.max(cont.offsetHeight, (rows.length * 100) + (titles.length * 70));
+              height = Math.max(minHeight, (rows.length * 100) + (titles.length * 70));
             }
             else {
               // swap captions
               vTitle = [hTitle, hTitle = vTitle][0];
-              height = 500;
+              height = minHeight;
               if (type == 'Pie') {
                 legend = 'right';
                 title = 'Total Operations Per Second By Browser';
               } else {
-                width = Math.max(cont.offsetWidth, (rows.length * 100) + (titles.length * 100));
+                width = Math.max(minWidth, (rows.length * 100) + (titles.length * 100));
+                areaWidth = width == minWidth ? minHeight - top : '100%';
               }
             }
             // modify row data
@@ -476,9 +482,9 @@
               'title': title,
               'chartArea': {
                 'height': areaHeight,
-                'width': '100%',
-                'left': 150,
-                'top': 50
+                'width': areaWidth,
+                'left': left,
+                'top': top
               },
               'hAxis': {
                 'title': hTitle
