@@ -1151,7 +1151,7 @@
    */
   function cloneSuite(options) {
     var me = this,
-        result = new me.constructor(extend({ 'id': me.id }, me.options, options));
+        result = new me.constructor(extend({}, me.options, options));
 
     // copy own properties
     forIn(me, function(value, key) {
@@ -1362,7 +1362,7 @@
    */
   function clone(options) {
     var me = this,
-        result = new me.constructor(me.fn, extend({}, me.options, options));
+        result = new me.constructor(me.fn, extend({}, me.options, { 'id': me.id }, options));
 
     // copy own properties
     forIn(me, function(value, key) {
