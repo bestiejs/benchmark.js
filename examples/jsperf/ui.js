@@ -73,7 +73,9 @@
 
   formatNumber = Benchmark.formatNumber,
 
-  indexOf = Benchmark.indexOf;
+  indexOf = Benchmark.indexOf,
+
+  results = $('results');
 
   /*--------------------------------------------------------------------------*/
 
@@ -206,7 +208,7 @@
   }
 
   /**
-   * Adds a css class name to an element's className property.
+   * Adds a CSS class name to an element's className property.
    * @private
    * @param {Object} element The element.
    * @param {String} className The class name.
@@ -507,6 +509,16 @@
     attempt();
   }());
 
+  // provide a simple UI for toggling between chart types
+  results.innerHTML += ' (<a href=#>bar</a>, <a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, <a href=#>table</a>)';
+  results.onclick = function(event) {
+    var target = event.target;
+    if (target.href) {
+      ui.browserscope.render({ 'type': target.innerHTML });
+    }
+    return false;
+  };
+
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
   if (gaId) {
@@ -519,4 +531,5 @@
       sibling.parentNode.insertBefore(script, sibling);
     }());
   }
+
 }(this, document));
