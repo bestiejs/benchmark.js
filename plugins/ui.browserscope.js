@@ -353,7 +353,7 @@
         titles,
         me = this,
         action = cache.lastAction,
-        areaHeight = '80%',
+        areaHeight = '70%',
         areaWidth = 'auto',
         cont = me.container,
         delay = me.timings.retry * 1e3,
@@ -372,7 +372,7 @@
         title = '';
 
     function getCells(object) {
-      // resolve cells by duck typing
+      // resolve cells by duck typing because of munged property names
       var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && (result = value));
@@ -381,7 +381,7 @@
     }
 
     function getRows(object) {
-      // resolve rows by duck typing
+      // resolve rows by duck typing because of munged property names
       var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && !('type' in value[0]) && (result = value));
@@ -390,7 +390,7 @@
     }
 
     function getTitles(object) {
-      // resolve titles by duck typing
+      // resolve titles by duck typing because of munged property names
       var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
@@ -426,17 +426,17 @@
           titles = getTitles(data);
           type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
-          // stack bars when there are more than 3 per browser
-          barCount = titles.length;
-          isStacked = barCount > 3 && !!(barCount = 1);
-
           if (chart[type]) {
             // remove "test run count" title/row
             titles.pop();
+            // ignore titles[0] in the bar count because it's the "UserAgent" title
+            barCount = titles.length - 1;
+            // stack bars when there are more than 3 tests per browser
+            isStacked = barCount > 3 && !!(barCount = 1);
             // adjust captions and chart dimensions
             if (type == 'Bar') {
-              // compute `areaHeight` on a slide between 80 and 98 percent
-              areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 6))) + '%';
+              // compute `areaHeight` on a slide between 70 and 98 percent
+              areaHeight = 70 + Math.min(28, Math.floor(0.28 * (rows.length * 6))) + '%';
               height = Math.max(minHeight, (rows.length * 100) + (barCount * 70));
             }
             else {
@@ -477,6 +477,7 @@
             // make type recognizable
             type += 'Chart';
           }
+
           // load chart/table if data available
           if (rows.length) {
             new google.visualization[type](cont).draw(data, {
