@@ -25,6 +25,7 @@
   each = Benchmark.each,
   filter = Benchmark.filter,
   forIn = Benchmark.forIn,
+  hasKey = Benchmark.hasKey,
   map = Benchmark.map,
   reduce = Benchmark.reduce;
 
@@ -203,7 +204,7 @@
     return reduce(benches, function(result, bench, key) {
       key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
       result || (result = {});
-      result[key && !result[key] ? key : key + bench.id ] = bench.hz;
+      result[key && !hasKey(result, 'key') ? key : key + bench.id ] = bench.hz;
       return result;
     }, null);
   }

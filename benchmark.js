@@ -530,35 +530,6 @@
   }
 
   /**
-   * Checks if an object has the specified key as a direct property.
-   * @private
-   * @param {Object} object The object to check.
-   * @param {String} key The key to check for.
-   * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
-   */
-  function hasKey(object, key) {
-    var result,
-        o = {},
-        hasOwnProperty = o.hasOwnProperty,
-        parent = (object.constructor || Object).prototype;
-
-    // for modern browsers
-    object = Object(object);
-    if (isClassOf(hasOwnProperty, 'Function')) {
-      result = hasOwnProperty.call(object, key);
-    }
-    // for Safari 2
-    else if (o.__proto__ == Object.prototype) {
-      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
-    }
-    // for others (not as accurate)
-    else {
-      result = key in object && !(key in parent && object[key] === parent[key]);
-    }
-    return result;
-  }
-
-  /**
    * Modify a string by replacing named tokens with matching object property values.
    * @private
    * @param {String} string The string to modify.
@@ -831,6 +802,36 @@
   function formatNumber(number) {
     number = String(number).split('.');
     return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') + (number[1] ? '.' + number[1] : '');
+  }
+
+  /**
+   * Checks if an object has the specified key as a direct property.
+   * @static
+   * @memberOf Benchmark
+   * @param {Object} object The object to check.
+   * @param {String} key The key to check for.
+   * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
+   */
+  function hasKey(object, key) {
+    var result,
+        o = {},
+        hasOwnProperty = o.hasOwnProperty,
+        parent = (object.constructor || Object).prototype;
+
+    // for modern browsers
+    object = Object(object);
+    if (isClassOf(hasOwnProperty, 'Function')) {
+      result = hasOwnProperty.call(object, key);
+    }
+    // for Safari 2
+    else if (o.__proto__ == Object.prototype) {
+      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
+    }
+    // for others (not as accurate)
+    else {
+      result = key in object && !(key in parent && object[key] === parent[key]);
+    }
+    return result;
   }
 
   /**
@@ -2093,6 +2094,9 @@
 
     // converts a number to a comma-separated string
     'formatNumber': formatNumber,
+
+    // generic Object#hasOwnProperty
+    'hasKey': hasKey,
 
     // generic Array#indexOf
     'indexOf': indexOf,
