@@ -351,17 +351,17 @@
         me = this,
         action = cache.lastAction,
         areaHeight = '80%',
-        areaWidth = '100%',
         cont = me.container,
         delay = me.timings.retry * 1e3,
         height = 'auto',
         width = height,
-        hTitle = 'operations per second',
+        hTitle = 'operations per second (higher is better)',
         vTitle = 'browsers',
         legend = 'top',
         response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
-        timers = cache.timers;
+        timers = cache.timers,
+        title = '';
 
     function getCells(object) {
       // resolve cells by duck typing
@@ -423,17 +423,17 @@
             titles.pop();
             // adjust captions and chart dimensions
             if (type == 'Bar') {
-              // slide between 80 and 96 percent with more weight than width
-              areaHeight = 80 + Math.min(16, Math.floor(0.16 * (rows.length * 6))) + '%';
+              // slide between 80 and 98 percent
+              areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 6))) + '%';
               height = Math.max(cont.offsetHeight, (rows.length * 100) + (titles.length * 70));
             }
             else {
-              // slide between 60 and 96 percent
-              height = 500;
+              // swap captions
               vTitle = [hTitle, hTitle = vTitle][0];
-
+              height = 500;
               if (type == 'Pie') {
                 legend = 'right';
+                title = 'Total Operations Per Second By Browser';
               } else {
                 width = Math.max(cont.offsetWidth, (rows.length * 100) + (titles.length * 100));
               }
@@ -472,6 +472,7 @@
               'legend': legend,
               'height': height,
               'width': width,
+              'title': title,
               'chartArea': {
                 'height': areaHeight,
                 'width': '100%',
