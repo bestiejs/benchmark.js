@@ -357,7 +357,7 @@
         areaWidth = 'auto',
         cont = me.container,
         delay = me.timings.retry * 1e3,
-        left = 150,
+        left = 85,
         top = 50,
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
@@ -435,9 +435,10 @@
             isStacked = barCount > 3 && !!(barCount = 1);
             // adjust captions and chart dimensions
             if (type == 'Bar') {
-              // compute `areaHeight` on a slide between 70 and 98 percent
-              areaHeight = 70 + Math.min(28, Math.floor(0.28 * (rows.length * 6))) + '%';
+              // compute `areaHeight` on a slide between 70 and 94 percent
+              areaHeight = 70 + Math.min(24, Math.floor(0.24 * (rows.length * 6))) + '%';
               height = Math.max(minHeight, (rows.length * 100) + (barCount * 70));
+              left = 190;
             }
             else {
               // swap captions
