@@ -21,9 +21,6 @@
     /** CSS class name used for error styles */
     'error': 'error',
 
-    /** CSS clasName used for `js enabled` styles */
-    'js': 'js',
-
     /** CSS class name used to make content visible */
     'show': 'show',
 
@@ -474,9 +471,6 @@
 
   // don't let users alert, confirm, prompt, or open new windows
   window.alert = window.confirm = window.prompt = window.open = function() { };
-
-  // signal JavaScript detected
-  addClass(document.documentElement, classNames.js);
 
   // parse hash query params when it changes
   addListener(window, 'hashchange', handlers.window.hashchange);
