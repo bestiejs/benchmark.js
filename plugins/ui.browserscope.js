@@ -346,7 +346,9 @@
    * @param {Object} options The options object.
    */
   function render(options) {
-    var data,
+    var barCount,
+        data,
+        isStacked,
         rows,
         titles,
         me = this,
@@ -357,7 +359,7 @@
         delay = me.timings.retry * 1e3,
         left = 150,
         top = 50,
-        minHeight = 533,
+        minHeight = 480,
         minWidth = cont.offsetWidth || 948,
         height = 'auto',
         width = height,
@@ -414,6 +416,9 @@
           action = cache.lastAction = 'render';
           timers[action] = setTimeout(retry, delay);
         }
+        /**
+         * Tweak the dimensions and styles to best fit your environment.
+         */
         else {
           cont.className = '';
           data = clone(response.getDataTable());
@@ -421,9 +426,10 @@
           titles = getTitles(data);
           type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
-          /**
-           * Tweak the dimensions and styles to best fit your environment.
-           */
+          // stack bars when there are more than 3 per browser
+          barCount = titles.length;
+          isStacked = barCount > 3 && !!(barCount = 1);
+
           if (chart[type]) {
             // remove "test run count" title/row
             titles.pop();
@@ -431,7 +437,7 @@
             if (type == 'Bar') {
               // compute `areaHeight` on a slide between 80 and 98 percent
               areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 6))) + '%';
-              height = Math.max(minHeight, (rows.length * 100) + (titles.length * 70));
+              height = Math.max(minHeight, (rows.length * 100) + (barCount * 70));
             }
             else {
               // swap captions
@@ -441,7 +447,7 @@
                 legend = 'right';
                 title = 'Total Operations Per Second By Browser';
               } else {
-                width = Math.max(minWidth, (rows.length * 100) + (titles.length * 100));
+                width = Math.max(minWidth, (rows.length * 100) + (barCount * 100));
                 areaWidth = width == minWidth ? minHeight - top : '100%';
               }
             }
@@ -476,6 +482,7 @@
             new google.visualization[type](cont).draw(data, {
               'fontSize': 13,
               'is3D': true,
+              'isStacked': isStacked,
               'legend': legend,
               'height': height,
               'width': width,
