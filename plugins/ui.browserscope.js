@@ -5,7 +5,7 @@
     'counter': 0,
     'lastAction': 'load',
     'lastResponse': null,
-    'lastType': 'table',
+    'lastType': 'bar',
     'timers': { 'cleanup': null, 'load': null, 'post': null },
     'trash': createElement('div')
   },
