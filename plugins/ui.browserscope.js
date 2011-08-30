@@ -358,13 +358,14 @@
         width = height,
         hTitle = 'operations per second',
         vTitle = 'browsers',
+        legend = 'top',
         response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
         timers = cache.timers;
 
     function getCells(object) {
       // resolve cells by duck typing
-      var result;
+      var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && (result = value));
       });
@@ -373,7 +374,7 @@
 
     function getRows(object) {
       // resolve rows by duck typing
-      var result;
+      var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && !('type' in value[0]) && (result = value));
       });
@@ -382,7 +383,7 @@
 
     function getTitles(object) {
       // resolve titles by duck typing
-      var result;
+      var result = [];
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
       });
@@ -420,21 +421,22 @@
           if (chart[type]) {
             // remove "test run count" title/row
             titles.pop();
-            // compute chart height
-            height = Math.max(cont.offsetHeight, (rows.length * 100) + (titles.length * 70));
             // adjust captions and chart dimensions
-            if (type == 'Column' || type == 'Line' || type == 'Pie') {
+            if (type == 'Bar') {
+              // slide between 80 and 96 percent with more weight than width
+              areaHeight = 80 + Math.min(16, Math.floor(0.16 * (rows.length * 6))) + '%';
+              height = Math.max(cont.offsetHeight, (rows.length * 100) + (titles.length * 70));
+            }
+            else {
               // slide between 60 and 96 percent
-              areaWidth = 60 + Math.min(36, Math.floor(0.36 * (rows.length * 6))) + '%';
               height = 500;
               vTitle = [hTitle, hTitle = vTitle][0];
 
-              if (type != 'Pie') {
+              if (type == 'Pie') {
+                legend = 'right';
+              } else {
                 width = Math.max(cont.offsetWidth, (rows.length * 100) + (titles.length * 100));
               }
-            } else if (type == 'Bar') {
-              // slide between 80 and 98 percent with more weight than width
-              areaHeight = 80 + Math.min(18, Math.floor(0.18 * (rows.length * 9))) + '%';
             }
             // modify row data
             each(rows, function(row) {
@@ -447,7 +449,7 @@
                 }
                 // add test run count to browser name
                 else if (cell.f) {
-                  cell.f += type == 'Pie' ? '' : ' (' + cells[lastIndex].v + ')';
+                  cell.f += type == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
                 }
                 // compute sum of all ops/sec for pie charts
                 if (type == 'Pie') {
@@ -462,24 +464,30 @@
             // make type recognizable
             type += 'Chart';
           }
-          new google.visualization[type](cont).draw(data, {
-            'is3D': true,
-            'fontSize': 13,
-            'height': height,
-            'width': width,
-            'chartArea': {
-              'height': areaHeight,
-              'width': areaWidth,
-              'left': 150,
-              'top': 25
-            },
-            'hAxis': {
-              'title': hTitle
-            },
-            'vAxis': {
-              'title': vTitle
-            }
-          });
+          // load chart/table if data available
+          if (rows.length) {
+            new google.visualization[type](cont).draw(data, {
+              'fontSize': 13,
+              'is3D': true,
+              'legend': legend,
+              'height': height,
+              'width': width,
+              'chartArea': {
+                'height': areaHeight,
+                'width': '100%',
+                'left': 150,
+                'top': 50
+              },
+              'hAxis': {
+                'title': hTitle
+              },
+              'vAxis': {
+                'title': vTitle
+              }
+            });
+          } else {
+            setMessage(me.texts.empty);
+          }
         }
       }
       else {
@@ -518,6 +526,9 @@
 
     /** Object containing various text messages */
     'texts': {
+
+      /** Text shown when their is no recorded data available to report */
+      'empty': 'No data available',
 
       /** Text shown when the cumulative results data cannot be retrieved */
       'error': 'The get/post request has failed :(',
