@@ -4,6 +4,7 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
+    'lastFilterBy': 'popular',
     'lastResponse': null,
     'lastType': 'bar',
     'timers': { 'cleanup': null, 'load': null, 'post': null },
@@ -11,11 +12,25 @@
   },
 
   /** Used to separate charts from other render types */
-  chart = {
+  chartMap = {
     'Bar': 1,
     'Column': 1,
     'Line': 1,
     'Pie': 1
+  },
+
+  /**
+   * Used to filter Browserscope results by browser category.
+   * @see http://www.browserscope.org/user/tests/howto#urlparams
+   */
+  filterMap = {
+    'all': 3,
+    'desktop': 'top-d',
+    'major': 1,
+    'minor': 2,
+    'mobile': 'top-m',
+    'niche': 'top-d-e',
+    'popular': 'top'
   },
 
   /** Used to resolve a value's internal [[Class]] */
@@ -255,10 +270,14 @@
    * Loads Browserscope's cumulative results table.
    * @static
    * @member ui.browserscope
+   * @param {Object} options The options object.
    */
-  function load() {
+  function load(options) {
+    options || (options = {});
+
     var me = ui.browserscope,
         cont = me.container,
+        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy,
         timers = cache.timers;
 
     function onComplete(response) {
@@ -276,13 +295,13 @@
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?' +
         'category=usertest_' + me.key + '&' +
-        'ua=&' +
-        'v=3&' +
-        'o=gviz_data&' +
         'highlight=&' +
+        'o=gviz_data&' +
+        'rid=' + now() + '&' +
         'score=&' +
         'tqx=reqId:0&' +
-        'rid=' + now(),
+        'ua=&' +
+        'v=' + filterMap[filterBy],
         {'sendMethod': 'scriptInjection'}))
         .send(onComplete);
     }
@@ -341,21 +360,23 @@
 
   /**
    * Renders the cumulative results table.
+   * (tweak the dimensions and styles to best fit your environment)
    * @static
    * @member ui.browserscope
    * @param {Object} options The options object.
    */
   function render(options) {
+    options || (options = {});
+
     var data,
         rows,
-        titles,
         me = this,
         action = cache.lastAction,
         areaHeight = '68%',
         areaWidth = '100%',
         cont = me.container,
         delay = me.timings.retry * 1e3,
-        left = 110,
+        left = 130,
         top = 50,
         height = 'auto',
         width = height,
@@ -379,11 +400,19 @@
     }
 
     function getRows(object) {
+      var name,
+          result = [];
       // resolve rows by duck typing because of munged property names
-      var result = [];
-      forIn(object, function(value) {
-        return !(isArray(value) && 0 in value && !('type' in value[0]) && (result = value));
+      forIn(object, function(value, key) {
+        return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
       });
+      // remove empty rows
+      if (result.length) {
+        result = object[name] = filter(result, function(value) {
+          var cell = getCells(value)[1];
+          return cell && (!('f' in cell) || cell.f);
+        });
+      }
       return result;
     }
 
@@ -393,7 +422,6 @@
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
       });
-      // Note: Ignore results[0] because it's the "UserAgent" title.
       return result;
     }
 
@@ -407,6 +435,10 @@
       }
     }
 
+    // exit early if changing data filter
+    if ('filterBy' in options) {
+      return load(options);
+    }
     // visualization chart gallary
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
     if (cont) {
@@ -415,19 +447,15 @@
           action = cache.lastAction = 'render';
           timers[action] = setTimeout(retry, delay);
         }
-        /**
-         * Tweak the dimensions and styles to best fit your environment.
-         */
         else {
           cont.className = '';
           data = clone(response.getDataTable());
           rows = getRows(data);
-          titles = getTitles(data);
           type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
-          if (chart[type]) {
+          if (chartMap[type]) {
             // remove "test run count" title/row
-            titles.pop();
+            getTitles(data).pop();
             // adjust captions and chart dimensions
             if (type == 'Bar') {
               // compute `areaHeight` on a slide between 68 and 90 percent
