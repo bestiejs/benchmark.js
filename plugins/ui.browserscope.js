@@ -346,26 +346,24 @@
    * @param {Object} options The options object.
    */
   function render(options) {
-    var barCount,
-        data,
-        isStacked,
+    var data,
         rows,
         titles,
         me = this,
         action = cache.lastAction,
-        areaHeight = '70%',
-        areaWidth = 'auto',
+        areaHeight = '68%',
+        areaWidth = '100%',
         cont = me.container,
         delay = me.timings.retry * 1e3,
-        left = 85,
+        left = 110,
         top = 50,
-        minHeight = 480,
-        minWidth = cont.offsetWidth || 948,
         height = 'auto',
         width = height,
         hTitle = 'operations per second (higher is better)',
-        vTitle = 'browsers',
+        vTitle = '',
         legend = 'top',
+        minHeight = 480,
+        minWidth = cont.offsetWidth || 948,
         response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
         timers = cache.timers,
@@ -395,6 +393,7 @@
       forIn(object, function(value) {
         return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
       });
+      // Note: Ignore results[0] because it's the "UserAgent" title.
       return result;
     }
 
@@ -429,27 +428,27 @@
           if (chart[type]) {
             // remove "test run count" title/row
             titles.pop();
-            // ignore titles[0] in the bar count because it's the "UserAgent" title
-            barCount = titles.length - 1;
-            // stack bars when there are more than 3 tests per browser
-            isStacked = barCount > 3 && !!(barCount = 1);
             // adjust captions and chart dimensions
             if (type == 'Bar') {
-              // compute `areaHeight` on a slide between 70 and 94 percent
-              areaHeight = 70 + Math.min(24, Math.floor(0.24 * (rows.length * 6))) + '%';
-              height = Math.max(minHeight, (rows.length * 100) + (barCount * 70));
-              left = 190;
+              // compute `areaHeight` on a slide between 68 and 90 percent
+              areaHeight = 68 + Math.min(22, Math.floor(0.22 * (rows.length * 6))) + '%';
+              height = Math.max(minHeight, rows.length * 50 + 70);
+              left = 150;
             }
             else {
-              // swap captions
+              // swap captions (the browser list caption is blank to conserve space)
               vTitle = [hTitle, hTitle = vTitle][0];
               height = minHeight;
               if (type == 'Pie') {
                 legend = 'right';
                 title = 'Total Operations Per Second By Browser';
               } else {
-                width = Math.max(minWidth, (rows.length * 100) + (barCount * 100));
-                areaWidth = width == minWidth ? minHeight - top : '100%';
+                width = Math.max(minWidth, rows.length * 50 + 100);
+                // adjust when there is no horizontal scroll
+                if (width == minWidth) {
+                  areaHeight = '80%';
+                  areaWidth = 400;
+                }
               }
             }
             // modify row data
@@ -484,7 +483,7 @@
             new google.visualization[type](cont).draw(data, {
               'fontSize': 13,
               'is3D': true,
-              'isStacked': isStacked,
+              'isStacked': true,
               'legend': legend,
               'height': height,
               'width': width,
