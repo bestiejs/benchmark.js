@@ -475,7 +475,6 @@
                 // adjust when there is no horizontal scroll
                 if (width == minWidth) {
                   areaHeight = '80%';
-                  areaWidth = 400;
                 }
               }
             }
@@ -511,7 +510,6 @@
             new google.visualization[type](cont).draw(data, {
               'fontSize': 13,
               'is3D': true,
-              'isStacked': true,
               'legend': legend,
               'height': height,
               'width': width,
