@@ -410,7 +410,7 @@
       if (result.length) {
         result = object[name] = filter(result, function(value) {
           var cell = getCells(value)[1];
-          return cell && (!('f' in cell) || cell.f);
+          return cell && (cell.f || cell.v);
         });
       }
       return result;
@@ -607,12 +607,14 @@
         '<span>Browserscope</span></a></h1>' +
         '<div class=bs-rt><div id=bs-rt-usertest_#{key}></div></div>',
         { 'key': key });
+
       me.container = query('#bs-rt-usertest_' + key)[0];
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
       loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22corechart%22%2C%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
+
+      // init garbage collector
+      cleanup();
     }
-    // init garbage collector
-    cleanup();
   });
 
 }(this, document));
