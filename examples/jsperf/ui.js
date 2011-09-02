@@ -72,7 +72,9 @@
 
   indexOf = Benchmark.indexOf,
 
-  results = $('results');
+  results = $('bs-results'),
+
+  p = createElement('p');
 
   /*--------------------------------------------------------------------------*/
 
@@ -503,12 +505,17 @@
     attempt();
   }());
 
-  // provide a simple UI for toggling between chart types
-  results.innerHTML += ' (<a href=#>bar</a>, <a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, <a href=#>table</a>)';
-  results.onclick = function(event) {
+  // provide a simple UI for toggling between chart types and filtering results
+  p.innerHTML = '<span id=chart-types><strong>Chart type:</strong> <a href=#>bar</a>, <a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, <a href=#>table</a></span><br><span id=filters><strong>Filter:</strong> <a href=#>popular</a>, <a href=#>all</a>, <a href=#>desktop</a>, <a href=#>major</a>, <a href=#>minor</a>, <a href=#>mobile</a>, <a href=#>niche</a></span>';
+  results.parentNode.insertBefore(p, results);
+  $('chart-types').onclick = $('filters').onclick = function(event) {
     var target = event.target;
     if (target.href) {
-      ui.browserscope.render({ 'type': target.innerHTML });
+      ui.browserscope.render(
+        target.parentNode.id == 'filters'
+          ? { 'filterBy': target.innerHTML }
+          : { 'type': target.innerHTML }
+      );
     }
     return false;
   };
