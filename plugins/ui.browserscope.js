@@ -7,7 +7,7 @@
     'lastFilterBy': 'popular',
     'lastResponse': null,
     'lastType': 'bar',
-    'timers': { 'cleanup': null, 'load': null, 'post': null },
+    'timers': { 'cleanup': null, 'load': null, 'post': null, 'render': null },
     'trash': createElement('div')
   },
 
@@ -56,7 +56,7 @@
   function addListener(element, eventName, handler) {
     if (typeof element.addEventListener != 'undefined') {
       element.addEventListener(eventName, handler, false);
-    } else if (element.attachEvent != 'undefined') {
+    } else if (typeof element.attachEvent != 'undefined') {
       element.attachEvent('on' + eventName, handler);
     }
   }
@@ -151,8 +151,8 @@
         trash = cache.trash,
         delay = timings.cleanup * 1e3;
 
-    // remove injected scripts and old iframes
-    if (timers.cleanup) {
+    // remove injected scripts and old iframes when benchmarks aren't running
+    if (!ui.running && timers.cleanup) {
       // if expired, destroy the element to prevent pseudo memory leaks.
       // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
       each(query('script').concat(query('iframe')), function(element) {
@@ -225,6 +225,59 @@
   }
 
   /**
+   * Retrieves the "cells" array from a given Google visualization data row object.
+   * @private
+   * @param {Object} object The data row object.
+   * @returns {Array} An array of cell objects.
+   */
+  function getDataCells(object) {
+    // resolve cells by duck typing because of munged property names
+    var result = [];
+    forIn(object, function(value) {
+      return !(isArray(value) && (result = value));
+    });
+    return result;
+  }
+
+  /**
+   * Retrieves the "rows" array from a given Google visualization data table object.
+   * @private
+   * @param {Object} object The data table object.
+   * @returns {Array} An array of row objects.
+   */
+  function getDataRows(object) {
+    var name,
+        result = [];
+    // resolve rows by duck typing because of munged property names
+    forIn(object, function(value, key) {
+      return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
+    });
+    // remove empty rows
+    if (result.length) {
+      result = object[name] = filter(result, function(value) {
+        var cell = getDataCells(value)[1];
+        return cell && (cell.f || cell.v);
+      });
+    }
+    return result;
+  }
+
+  /**
+   * Retrieves the "labels" array from a given Google visualization data table object.
+   * @private
+   * @param {Object} object The data table object.
+   * @returns {Array} An array of label objects.
+   */
+  function getDataLabels(object) {
+    // resolve titles by duck typing because of munged property names
+    var result = [];
+    forIn(object, function(value) {
+      return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
+    });
+    return result;
+  }
+
+  /**
    * Checks if a value has an internal [[Class]] of Array.
    * @private
    * @param {Mixed} value The value to check.
@@ -264,6 +317,16 @@
     return +new Date;
   }
 
+  /**
+   * Cleans up the last action and sets the current action.
+   * @private
+   * @param {String} action The current action.
+   */
+  function setAction(action) {
+    clearTimeout(cache.timers[cache.lastAction]);
+    cache.lastAction = action;
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -275,23 +338,25 @@
   function load(options) {
     options || (options = {});
 
-    var me = ui.browserscope,
-        cont = me.container,
-        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy,
-        timers = cache.timers;
+    var retried,
+        me = ui.browserscope,
+        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy;
 
     function onComplete(response) {
-      clearTimeout(timers.load);
-      me.render({ 'response': response });
+      // set a flag to avoid Google's own timeout
+      retried || (retried = true, me.render({ 'response': response }));
     }
 
-    cache.lastAction = 'load';
-    clearTimeout(timers.load);
-    timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
+    if (me.container) {
+      // set last action in case Browserscope fails to return data and a retry is needed
+      setAction('load');
 
-    // request data
-    if (cont) {
+      // set our own load timeout to display an error message and retry loading
+      cache.timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
+
+      // set "loading" message and attempt to load Browserscope data
       setMessage(me.texts.loading);
+
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?' +
         'category=usertest_' + me.key + '&' +
@@ -302,8 +367,9 @@
         'tqx=reqId:0&' +
         'ua=&' +
         'v=' + filterMap[filterBy],
-        {'sendMethod': 'scriptInjection'}))
-        .send(onComplete);
+        { 'sendMethod': 'scriptInjection' }
+      ))
+      .send(onComplete);
     }
   }
 
@@ -322,10 +388,10 @@
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot();
 
-    cache.lastAction = 'post';
-    clearTimeout(cache.timers.post);
-
     if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
+      // set last action in case the Browserscope post fails and a retry is needed
+      setAction('post');
+
       // create new beacon
       iframe = createElement('iframe', name);
       body.insertBefore(iframe, body.firstChild);
@@ -334,15 +400,17 @@
 
       // expose results snapshot
       me.snapshot = snapshot;
+
+      // set "posting" message and attempt to post the results snapshot
       setMessage(me.texts.post);
 
-      // perform inception :3
       idoc.write(interpolate(
+        // the doctype is required so Browserscope detects the correct IE compat mode
         '#{doctype}<html><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
-        '_bT=setTimeout(function(){_bC=function(){};render({"response":null})},#{timeout}*1e3)' +
+        '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
         '</body></html>',
@@ -353,7 +421,8 @@
           'timeout': timings.timeout
         }
       ));
-
+      // avoid the IE spinner of doom
+      // http://www.google.com/search?q=IE+throbber+of+doom
       idoc.close();
     }
   }
@@ -369,13 +438,12 @@
     options || (options = {});
 
     var data,
+        labels,
         rows,
         me = this,
-        action = cache.lastAction,
         areaHeight = '68%',
         areaWidth = '100%',
         cont = me.container,
-        delay = me.timings.retry * 1e3,
         left = 130,
         top = 50,
         height = 'auto',
@@ -385,156 +453,108 @@
         legend = 'top',
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
-        response = cache.lastResponse = 'response' in options ? options.response : cache.lastResponse,
+        response = cache.lastResponse = 'response' in options ? (response = options.response) && !response.isError() && response : cache.lastResponse,
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
-        timers = cache.timers,
         title = '';
 
-    function getCells(object) {
-      // resolve cells by duck typing because of munged property names
-      var result = [];
-      forIn(object, function(value) {
-        return !(isArray(value) && (result = value));
-      });
-      return result;
-    }
-
-    function getRows(object) {
-      var name,
-          result = [];
-      // resolve rows by duck typing because of munged property names
-      forIn(object, function(value, key) {
-        return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
-      });
-      // remove empty rows
-      if (result.length) {
-        result = object[name] = filter(result, function(value) {
-          var cell = getCells(value)[1];
-          return cell && (cell.f || cell.v);
-        });
-      }
-      return result;
-    }
-
-    function getTitles(object) {
-      // resolve titles by duck typing because of munged property names
-      var result = [];
-      forIn(object, function(value) {
-        return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
-      });
-      return result;
-    }
-
-    function retry() {
-      if (ui.running) {
-        timers[action] = setTimeout(retry, delay);
-      } else if (action == 'render') {
-        me[action](options);
+    function retry(force) {
+      var action = cache.lastAction;
+      if (force || ui.running) {
+        cache.timers[action] = setTimeout(retry, me.timings.retry * 1e3);
       } else {
-        me[action]();
+        me[action].apply(me, action == 'render' ? [options] : []);
       }
     }
 
-    // exit early if changing data filter
-    if ('filterBy' in options) {
-      return load(options);
+    // set action to clear any timeouts and prep for retries
+    setAction(response ? 'render' : cache.lastAction);
+
+    // retry if response data is empty/errored or benchmarks are running
+    if (cont && (!response || ui.running)) {
+      // set error message for empty/errored response
+      !response && setMessage(me.texts.error);
+      retry(true);
+    }
+    // exit early if there is no container element or the data filter has changed
+    else if (!cont || 'filterBy' in options) {
+      cont && load(options);
     }
     // visualization chart gallary
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
-    if (cont) {
-      if (response && !response.isError()) {
-        if (ui.running) {
-          action = cache.lastAction = 'render';
-          timers[action] = setTimeout(retry, delay);
+    else {
+      cont.className = '';
+      data = clone(response.getDataTable());
+      labels = getDataLabels(data);
+      rows = getDataRows(data);
+      type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+
+      // adjust data for non-tabular displays
+      if (chartMap[type]) {
+        // remove "test run count" label (without the label the row will be ignored)
+        labels.pop();
+        // adjust captions and chart dimensions
+        if (type == 'Bar') {
+          // compute `areaHeight` on a slide between 68 and 90 percent
+          areaHeight = 68 + Math.min(22, Math.floor(0.22 * (rows.length * 6))) + '%';
+          height = Math.max(minHeight, rows.length * 50 + 70);
+          left = 150;
         }
         else {
-          cont.className = '';
-          data = clone(response.getDataTable());
-          rows = getRows(data);
-          type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-
-          if (chartMap[type]) {
-            // remove "test run count" title/row
-            getTitles(data).pop();
-            // adjust captions and chart dimensions
-            if (type == 'Bar') {
-              // compute `areaHeight` on a slide between 68 and 90 percent
-              areaHeight = 68 + Math.min(22, Math.floor(0.22 * (rows.length * 6))) + '%';
-              height = Math.max(minHeight, rows.length * 50 + 70);
-              left = 150;
-            }
-            else {
-              // swap captions (the browser list caption is blank to conserve space)
-              vTitle = [hTitle, hTitle = vTitle][0];
-              height = minHeight;
-              if (type == 'Pie') {
-                legend = 'right';
-                title = 'Total Operations Per Second By Browser';
-              } else {
-                width = Math.max(minWidth, rows.length * 50 + 100);
-                // adjust when there is no horizontal scroll
-                if (width == minWidth) {
-                  areaHeight = '80%';
-                }
-              }
-            }
-            // modify row data
-            each(rows, function(row) {
-              each(getCells(row), function(cell, index, cells) {
-                var lastIndex = cells.length - 1;
-                // assign ops/sec
-                if (/^[\d.,]+$/.test(cell.f)) {
-                  cell.v = +cell.f.replace(/,/g, '');
-                  cell.f += ' ops/sec';
-                }
-                // add test run count to browser name
-                else if (cell.f) {
-                  cell.f += type == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
-                }
-                // compute sum of all ops/sec for pie charts
-                if (type == 'Pie') {
-                  if (index == lastIndex) {
-                    cells[1].f = Benchmark.formatNumber(cells[1].v) + ' total ops/sec';
-                  } else if (index > 1 && typeof cell.v == 'number') {
-                    cells[1].v += cell.v;
-                  }
-                }
-              });
-            });
-            // make type recognizable
-            type += 'Chart';
-          }
-
-          // load chart/table if data available
-          if (rows.length) {
-            new google.visualization[type](cont).draw(data, {
-              'fontSize': 13,
-              'is3D': true,
-              'legend': legend,
-              'height': height,
-              'width': width,
-              'title': title,
-              'chartArea': {
-                'height': areaHeight,
-                'width': areaWidth,
-                'left': left,
-                'top': top
-              },
-              'hAxis': {
-                'title': hTitle
-              },
-              'vAxis': {
-                'title': vTitle
-              }
-            });
+          // swap captions (the browser list caption is blank to conserve space)
+          vTitle = [hTitle, hTitle = vTitle][0];
+          height = minHeight;
+          if (type == 'Pie') {
+            legend = 'right';
+            title = 'Total Operations Per Second By Browser';
           } else {
-            setMessage(me.texts.empty);
+            width = Math.max(minWidth, rows.length * 50 + 100);
+            // adjust when there is no horizontal scroll
+            if (width == minWidth && labels.length < 8) {
+              areaHeight = '80%';
+            }
           }
         }
+        // modify row data
+        each(rows, function(row) {
+          each(getDataCells(row), function(cell, index, cells) {
+            var lastIndex = cells.length - 1;
+            // assign ops/sec
+            if (/^[\d.,]+$/.test(cell.f)) {
+              cell.v = +cell.f.replace(/,/g, '');
+              cell.f += ' ops/sec';
+            }
+            // add test run count to browser name
+            else if (cell.f) {
+              cell.f += type == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
+            }
+            // compute sum of all ops/sec for pie charts
+            if (type == 'Pie') {
+              if (index == lastIndex) {
+                cells[1].f = Benchmark.formatNumber(cells[1].v) + ' total ops/sec';
+              } else if (index > 1 && typeof cell.v == 'number') {
+                cells[1].v += cell.v;
+              }
+            }
+          });
+        });
+        // make type recognizable
+        type += 'Chart';
       }
-      else {
-        setMessage(me.texts.error);
-        timers[action] = setTimeout(retry, delay);
+
+      if (rows.length) {
+        new google.visualization[type](cont).draw(data, {
+          'fontSize': 13,
+          'is3D': true,
+          'legend': legend,
+          'height': height,
+          'title': title,
+          'width': width,
+          'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': areaWidth },
+          'hAxis': { 'title': hTitle },
+          'vAxis': { 'title': vTitle }
+        });
+      } else {
+        setMessage(me.texts.empty);
       }
     }
   }
@@ -599,7 +619,7 @@
         key = me.key,
         placeholder = key && query(me.selector)[0];
 
-    // create results table
+    // create results html
     // http://code.google.com/apis/loader/autoloader-wizard.html
     if (placeholder) {
       setHTML(placeholder,
