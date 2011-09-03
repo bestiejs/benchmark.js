@@ -513,7 +513,7 @@
           applet = createElement('applet');
           applet.code = 'nano';
           applet.archive = archive;
-          body.insertBefore(applet, body.firstElementChild || body.firstChild);
+          body.insertBefore(applet, body.firstChild);
         }
       } catch(e) {
         setTimeout(attempt, 15);
