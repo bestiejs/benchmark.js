@@ -60,12 +60,16 @@
   /** Cache of event handlers */
   handlers = {},
 
+  /** A flag to indicate that the page has loaded */
+  loaded = false,
+
   /** Namespace */
   ui = new Benchmark.Suite,
 
   /** API Shortcuts */
   each = Benchmark.each,
   filter = Benchmark.filter,
+  forIn = Benchmark.forIn,
   formatNumber = Benchmark.formatNumber,
   indexOf = Benchmark.indexOf;
 
@@ -146,11 +150,22 @@
      * @private
      */
     'hashchange': function() {
+      var params = ui.params,
+          render = ui.browserscope.render;
+
+      // populate ui.params
       ui.parseHash();
-      // call user provided init() function
-      (typeof window.init == 'function') && init();
-      // auto-run
-      ('run' in ui.params) && handlers.button.run();
+
+      if (loaded) {
+        // call user provided init() function
+        (typeof window.init == 'function') && init();
+        // auto-run
+        ('run' in params) && handlers.button.run();
+        // set chart type
+        params.chart && render({ 'chart': params.chart });
+        // set Browserscope filter
+        params.filterBy && render({ 'filterBy': params.filterBy });
+      }
     },
 
     /**
@@ -158,6 +173,7 @@
      * @private
      */
     'load': function() {
+      // init the ui
       addClass('controls', classNames.show);
       addListener('run', 'click', handlers.button.run);
 
@@ -183,7 +199,11 @@
         addClass('firebug', classNames.show);
       }
       // evaluate hash values
-      handlers.window.hashchange();
+      // (delay in an attempt to ensure this is executed after all other window load handlers)
+      setTimeout(function() {
+        loaded = true;
+        handlers.window.hashchange();
+      }, 1);
     }
   };
 
@@ -318,11 +338,17 @@
   function parseHash() {
     var me = this,
         hashes = location.hash.slice(1).split('&'),
-        params = me.params = { };
+        params = me.params || (me.params = {});
 
-    each(hashes[0] && hashes, function(hash) {
-      hash = hash.split('=');
-      params[hash[0]] = hash[1];
+    // remove old params
+    forIn(params, function(value, key) {
+      delete params[key];
+    });
+
+    // add new params
+    each(hashes[0] && hashes, function(value) {
+      value = value.split('=');
+      params[value[0]] = value[1];
     });
     return me;
   }
@@ -473,9 +499,6 @@
   // bootstrap onload
   addListener(window, 'load', handlers.window.load);
 
-  // parse location hash string
-  ui.parseHash();
-
   // inject nano applet
   (function() {
     function attempt() {
@@ -504,7 +527,7 @@
         p = createElement('p');
 
     p.innerHTML =
-      '<span id=chart-types><strong>Chart type:</strong> <a href=#>bar</a>, ' +
+      '<span id=charts><strong>Chart type:</strong> <a href=#>bar</a>, ' +
       '<a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, ' +
       '<a href=#>table</a></span><br>' +
       '<span id=filters><strong>Filter:</strong> <a href=#>popular</a>, ' +
@@ -513,14 +536,14 @@
 
     sibling.parentNode.insertBefore(p, sibling);
 
-    $('chart-types').onclick =
+    $('charts').onclick =
     $('filters').onclick = function(event) {
       var target = event.target;
       if (target.href) {
         ui.browserscope.render(
-          target.parentNode.id == 'filters'
-            ? { 'filterBy': target.innerHTML }
-            : { 'type': target.innerHTML }
+          target.parentNode.id == 'charts'
+            ? { 'chart': target.innerHTML }
+            : { 'filterBy': target.innerHTML }
         );
       }
       return false;

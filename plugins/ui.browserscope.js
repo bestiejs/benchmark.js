@@ -4,19 +4,11 @@
   var cache = {
     'counter': 0,
     'lastAction': 'load',
+    'lastChart': 'bar',
     'lastFilterBy': 'popular',
-    'lastType': 'bar',
     'responses': { /* 'all': null, 'desktop': null, 'major': null, ... */ },
     'timers': { /* 'cleanup': null, 'load': null, 'post': null, ... */ },
     'trash': createElement('div')
-  },
-
-  /** Used to separate charts from other render types */
-  chartMap = {
-    'Bar': 1,
-    'Column': 1,
-    'Line': 1,
-    'Pie': 1
   },
 
   /**
@@ -460,11 +452,10 @@
         data,
         rowCount,
         rows,
-        me = this,
+        me = ui.browserscope,
         cellWidth = 110,
         cellHeight = 80,
         cont = me.container,
-        filterBy = cache.lastFilterBy,
         fontSize = 13,
         left = 130,
         top = 50,
@@ -474,12 +465,14 @@
         hTitle = 'operations per second (higher is better)',
         vTitle = '',
         legend = 'top',
+        title = '',
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
+        filterBy = cache.lastFilterBy,
         needsMoreSpace = /^(?:a|ma|mi)/.test(filterBy),
+        chart = cache.lastChart = 'chart' in options ? options.chart : cache.lastChart,
         response = cache.responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : cache.responses[filterBy],
-        type = cache.lastType = 'type' in options ? options.type : cache.lastType,
-        title = '';
+        visualization = window.google && google.visualization;
 
     function retry(force) {
       var action = cache.lastAction;
@@ -510,15 +503,15 @@
       data = clone(response.getDataTable());
       rows = getDataRows(data);
       rowCount = rows.length;
-      type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+      chart = chart.charAt(0).toUpperCase() + chart.slice(1).toLowerCase();
 
       // adjust data for non-tabular displays
-      if (chartMap[type]) {
+      if (chart != 'Table') {
         // remove "test run count" label (without the label the row will be ignored)
         getDataLabels(data).pop();
 
         // adjust captions and chart dimensions
-        if (type == 'Bar') {
+        if (chart == 'Bar') {
           height = max(minHeight, top + (rowCount * cellHeight));
           // filters "all", "major" and "minor" need extra space for longer names
           if (needsMoreSpace) {
@@ -530,7 +523,7 @@
           vTitle = [hTitle, hTitle = vTitle][0];
           height = minHeight;
 
-          if (type == 'Pie') {
+          if (chart == 'Pie') {
             legend = 'right';
             title = 'Total Operations Per Second By Browser';
           }
@@ -556,10 +549,10 @@
             }
             // add test run count to browser name
             else if (cell.f) {
-              cell.f += type == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
+              cell.f += chart == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
             }
             // compute sum of all ops/sec for pie charts
-            if (type == 'Pie') {
+            if (chart == 'Pie') {
               if (index == lastIndex) {
                 cells[1].f = Benchmark.formatNumber(cells[1].v) + ' total ops/sec';
               } else if (index > 1 && typeof cell.v == 'number') {
@@ -568,12 +561,12 @@
             }
           });
         });
-        // make type recognizable
-        type += 'Chart';
+        // make chart type recognizable
+        chart += 'Chart';
       }
 
-      if (rowCount) {
-        new google.visualization[type](cont).draw(data, {
+      if (rowCount && visualization[chart]) {
+         new visualization[chart](cont).draw(data, {
           'fontSize': fontSize,
           'is3D': true,
           'legend': legend,
