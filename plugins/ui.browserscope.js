@@ -352,14 +352,14 @@
       fired || (fired = true, me.render({ 'response': response }));
     }
 
+    // set last action in case Browserscope fails to return data and a retry is needed
+    setAction('load');
+
     // exit early if there is no container element or the response is cached
     if (!cont || response) {
       cont && onComplete(response);
     }
     else {
-      // set last action in case Browserscope fails to return data and a retry is needed
-      setAction('load');
-
       // set our own load timeout to display an error message and retry loading
       cache.timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
 
