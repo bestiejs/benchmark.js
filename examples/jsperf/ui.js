@@ -160,8 +160,9 @@
         (typeof window.init == 'function') && init();
         // auto-run
         ('run' in params) && handlers.button.run();
-        // configure displayed results
+        // scroll down to the results when configuring them
         if (chart || filterBy) {
+          document.body.scrollTop = $('results').offsetTop;
           ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
         }
       }
