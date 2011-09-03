@@ -540,7 +540,7 @@
 
           if (chart == 'Pie') {
             legend = 'right';
-            title = 'Total Operations Per Second By Browser';
+            title = 'Total operations per second by browser (higher is better)';
           }
           else {
             needsMoreSpace && (cellWidth = 150);
