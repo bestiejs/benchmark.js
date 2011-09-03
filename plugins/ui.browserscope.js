@@ -460,6 +460,7 @@
 
     // coordinates, dimensions, and sizes are in px
     var areaHeight,
+        areaWidth,
         data,
         rowCount,
         rows,
@@ -484,7 +485,7 @@
         title = '',
         top = 50,
         vTitle = '',
-        width = 'auto';
+        width = minWidth;
 
     function retry(force) {
       var action = cache.lastAction;
@@ -526,13 +527,15 @@
         if (chart == 'Bar') {
           height = max(minHeight, top + (rowCount * cellHeight));
           // filters "all", "major" and "minor" need extra space for longer names
-          if (needsMoreSpace) {
-            left = 160;
-          }
+          needsMoreSpace && (left = 160);
+          // get percentage of width left after subtracting the chart's left
+          // coordinate and room for the ops/sec number
+          areaWidth = (100 - (((left + 50) / width) * 100)) + '%';
         }
         else {
           // swap captions (the browser list caption is blank to conserve space)
           vTitle = [hTitle, hTitle = vTitle][0];
+          areaWidth = '100%';
           height = minHeight;
 
           if (chart == 'Pie') {
@@ -540,15 +543,13 @@
             title = 'Total Operations Per Second By Browser';
           }
           else {
-            if (needsMoreSpace) {
-              cellWidth = 150;
-            }
+            needsMoreSpace && (cellWidth = 150);
             width = max(minWidth, left + (rowCount * cellWidth));
           }
         }
         // get percentage of height left after subtracting the title's height,
         // text size and chart's top coordinate
-        areaHeight = (100 - (((hTitleHeight + top + fontSize + 8) / height) * 100)) + '%';
+        areaHeight = (100 - (((hTitleHeight + fontSize + top + 8) / height) * 100)) + '%';
 
         // modify row data
         each(rows, function(row) {
@@ -585,7 +586,7 @@
           'height': height,
           'title': title,
           'width': width,
-          'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': '100%' },
+          'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': areaWidth },
           'hAxis': { 'title': hTitle },
           'vAxis': { 'title': vTitle }
         });
