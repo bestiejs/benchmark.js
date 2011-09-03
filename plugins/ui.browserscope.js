@@ -5,9 +5,9 @@
     'counter': 0,
     'lastAction': 'load',
     'lastFilterBy': 'popular',
-    'lastResponse': null,
     'lastType': 'bar',
-    'timers': { 'cleanup': null, 'load': null, 'post': null, 'render': null },
+    'responses': { /* 'all': null, 'desktop': null, 'major': null, ... */ },
+    'timers': { /* 'cleanup': null, 'load': null, 'post': null, ... */ },
     'trash': createElement('div')
   },
 
@@ -29,9 +29,12 @@
     'major': 1,
     'minor': 2,
     'mobile': 'top-m',
-    'niche': 'top-d-e',
-    'popular': 'top'
+    'popular': 'top',
+    'prerelease': 'top-d-e'
   },
+
+  /** Math shortcut */
+  max = Math.max,
 
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
@@ -152,11 +155,11 @@
         delay = timings.cleanup * 1e3;
 
     // remove injected scripts and old iframes when benchmarks aren't running
-    if (!ui.running && timers.cleanup) {
+    if (timers.cleanup && !ui.running) {
       // if expired, destroy the element to prevent pseudo memory leaks.
       // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
       each(query('script').concat(query('iframe')), function(element) {
-        var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + Math.max(delay, timings.timeout * 1e3);
+        var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + max(delay, timings.timeout * 1e3);
         if (now() > expire || /browserscope\.org/.test(element.src)) {
           trash.appendChild(element);
           trash.innerHTML = '';
@@ -240,6 +243,21 @@
   }
 
   /**
+   * Retrieves the "labels" array from a given Google visualization data table object.
+   * @private
+   * @param {Object} object The data table object.
+   * @returns {Array} An array of label objects.
+   */
+  function getDataLabels(object) {
+    // resolve titles by duck typing because of munged property names
+    var result = [];
+    forIn(object, function(value) {
+      return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
+    });
+    return result;
+  }
+
+  /**
    * Retrieves the "rows" array from a given Google visualization data table object.
    * @private
    * @param {Object} object The data table object.
@@ -259,21 +277,6 @@
         return cell && (cell.f || cell.v);
       });
     }
-    return result;
-  }
-
-  /**
-   * Retrieves the "labels" array from a given Google visualization data table object.
-   * @private
-   * @param {Object} object The data table object.
-   * @returns {Array} An array of label objects.
-   */
-  function getDataLabels(object) {
-    // resolve titles by duck typing because of munged property names
-    var result = [];
-    forIn(object, function(value) {
-      return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
-    });
     return result;
   }
 
@@ -338,16 +341,22 @@
   function load(options) {
     options || (options = {});
 
-    var retried,
+    var fired,
         me = ui.browserscope,
-        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy;
+        cont = me.container,
+        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy,
+        response = cached = cache.responses[filterBy];
 
     function onComplete(response) {
       // set a flag to avoid Google's own timeout
-      retried || (retried = true, me.render({ 'response': response }));
+      fired || (fired = true, me.render({ 'response': response }));
     }
 
-    if (me.container) {
+    // exit early if there is no container element or the response is cached
+    if (!cont || response) {
+      cont && onComplete(response);
+    }
+    else {
       // set last action in case Browserscope fails to return data and a retry is needed
       setAction('load');
 
@@ -409,7 +418,7 @@
         '#{doctype}<html><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
-        '_bC=function(){clearTimeout(_bT);parent.setTimeout(load,#{refresh}*1e3)},' +
+        '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},#{refresh}*1e3)},' +
         '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
@@ -428,6 +437,15 @@
   }
 
   /**
+   * Purges the Browserscope response cache.
+   * @static
+   * @member ui.browserscope
+   */
+  function purge() {
+    cache.responses = {};
+  }
+
+  /**
    * Renders the cumulative results table.
    * (tweak the dimensions and styles to best fit your environment)
    * @static
@@ -437,23 +455,29 @@
   function render(options) {
     options || (options = {});
 
-    var data,
-        labels,
+    // coordinates, dimensions, and sizes are in px
+    var areaHeight,
+        data,
+        rowCount,
         rows,
         me = this,
-        areaHeight = '68%',
-        areaWidth = '100%',
+        cellWidth = 110,
+        cellHeight = 80,
         cont = me.container,
+        filterBy = cache.lastFilterBy,
+        fontSize = 13,
         left = 130,
         top = 50,
         height = 'auto',
-        width = height,
+        width = 'auto',
+        hTitleHeight = 38,
         hTitle = 'operations per second (higher is better)',
         vTitle = '',
         legend = 'top',
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
-        response = cache.lastResponse = 'response' in options ? (response = options.response) && !response.isError() && response : cache.lastResponse,
+        needsMoreSpace = /^(?:a|ma|mi)/.test(filterBy),
+        response = cache.responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : cache.responses[filterBy],
         type = cache.lastType = 'type' in options ? options.type : cache.lastType,
         title = '';
 
@@ -484,36 +508,43 @@
     else {
       cont.className = '';
       data = clone(response.getDataTable());
-      labels = getDataLabels(data);
       rows = getDataRows(data);
+      rowCount = rows.length;
       type = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
       // adjust data for non-tabular displays
       if (chartMap[type]) {
         // remove "test run count" label (without the label the row will be ignored)
-        labels.pop();
+        getDataLabels(data).pop();
+
         // adjust captions and chart dimensions
         if (type == 'Bar') {
-          // compute `areaHeight` on a slide between 68 and 90 percent
-          areaHeight = 68 + Math.min(22, Math.floor(0.22 * (rows.length * 6))) + '%';
-          height = Math.max(minHeight, rows.length * 50 + 70);
-          left = 150;
+          height = max(minHeight, top + (rowCount * cellHeight));
+          // filters "all", "major" and "minor" need extra space for longer names
+          if (needsMoreSpace) {
+            left = 160;
+          }
         }
         else {
           // swap captions (the browser list caption is blank to conserve space)
           vTitle = [hTitle, hTitle = vTitle][0];
           height = minHeight;
+
           if (type == 'Pie') {
             legend = 'right';
             title = 'Total Operations Per Second By Browser';
-          } else {
-            width = Math.max(minWidth, rows.length * 50 + 100);
-            // adjust when there is no horizontal scroll
-            if (width == minWidth && labels.length < 8) {
-              areaHeight = '80%';
+          }
+          else {
+            if (needsMoreSpace) {
+              cellWidth = 150;
             }
+            width = max(minWidth, left + (rowCount * cellWidth));
           }
         }
+        // get percentage of height left after subtracting the title's height,
+        // text size and chart's top coordinate
+        areaHeight = (100 - (((hTitleHeight + top + fontSize + 8) / height) * 100)) + '%';
+
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
@@ -541,15 +572,15 @@
         type += 'Chart';
       }
 
-      if (rows.length) {
+      if (rowCount) {
         new google.visualization[type](cont).draw(data, {
-          'fontSize': 13,
+          'fontSize': fontSize,
           'is3D': true,
           'legend': legend,
           'height': height,
           'title': title,
           'width': width,
-          'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': areaWidth },
+          'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': '100%' },
           'hAxis': { 'title': hTitle },
           'vAxis': { 'title': vTitle }
         });
@@ -607,6 +638,9 @@
 
     // posts benchmark snapshot to Browserscope
     'post': post,
+
+    // purges the Browsercope response cache
+    'purge': purge,
 
     // renders cumulative results table
     'render': render
