@@ -506,7 +506,7 @@
       retry(true);
     }
     // exit early if there is no container element or the data filter has changed
-    else if (!cont || 'filterBy' in options) {
+    else if (!cont || options.filterBy) {
       cont && load(options);
     }
     // visualization chart gallary

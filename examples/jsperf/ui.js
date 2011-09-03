@@ -152,17 +152,18 @@
     'hashchange': function() {
       ui.parseHash();
       var params = ui.params,
-          render = ui.browserscope.render;
+          chart = params.chart,
+          filterBy = params.filterby;
 
       if (loaded) {
         // call user provided init() function
         (typeof window.init == 'function') && init();
         // auto-run
         ('run' in params) && handlers.button.run();
-        // set chart type
-        params.chart && render({ 'chart': params.chart });
-        // set Browserscope filter
-        params.filterby && render({ 'filterBy': params.filterby });
+        // configure displayed results
+        if (chart || filterBy) {
+          ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
+        }
       }
     },
 
