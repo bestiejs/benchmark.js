@@ -499,15 +499,15 @@
     // set action to clear any timeouts and prep for retries
     setAction(response ? 'render' : cache.lastAction);
 
-    // retry if response data is empty/errored or benchmarks are running
-    if (cont && (!response || ui.running)) {
-      // set error message for empty/errored response
-      !response && setMessage(me.texts.error);
-      retry(true);
-    }
     // exit early if there is no container element or the data filter has changed
-    else if (!cont || options.filterBy) {
+    if (!cont || (options.filterBy && visualization && !ui.running)) {
       cont && load(options);
+    }
+    // retry if response data is empty/errored or benchmarks are running
+    else if (!response || !visualization || ui.running) {
+      // set error message for empty/errored response
+      !response && visualization && setMessage(me.texts.error);
+      retry(true);
     }
     // visualization chart gallary
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
