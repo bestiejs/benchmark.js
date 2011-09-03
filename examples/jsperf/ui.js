@@ -164,7 +164,7 @@
         // set chart type
         params.chart && render({ 'chart': params.chart });
         // set Browserscope filter
-        params.filterBy && render({ 'filterBy': params.filterBy });
+        params.filterby && render({ 'filterBy': params.filterby });
       }
     },
 
@@ -348,7 +348,7 @@
     // add new params
     each(hashes[0] && hashes, function(value) {
       value = value.split('=');
-      params[value[0]] = value[1];
+      params[value[0].toLowerCase()] = (value[1] || '').toLowerCase();
     });
     return me;
   }
