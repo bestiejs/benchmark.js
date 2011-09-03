@@ -336,15 +336,24 @@
     var fired,
         me = ui.browserscope,
         cont = me.container,
-        filterBy = cache.lastFilterBy = 'filterBy' in options ? options.filterBy : cache.lastFilterBy,
-        response = cached = cache.responses[filterBy];
+        filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
+        responses = cache.responses,
+        response = cache.responses[filterBy];
 
     function onComplete(response) {
       // set a flag to avoid Google's own timeout
-      fired || (fired = true, me.render({ 'response': response }));
+      if (!fired) {
+        fired = true;
+        // render if the filter is still the same, else cache the result
+        if (filterBy == cache.lastFilterBy) {
+          me.render({ 'response': response });
+        } else if(!responses[filterBy] && response && !response.isError()) {
+          responses[filterBy] = response;
+        }
+      }
     }
 
-    // set last action in case Browserscope fails to return data and a retry is needed
+    // set last action in case the load fails and a retry is needed
     setAction('load');
 
     // exit early if there is no container element or the response is cached
@@ -389,10 +398,10 @@
         name = 'browserscope-' + (cache.counter++) + '-' + now(),
         snapshot = createSnapshot();
 
-    if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
-      // set last action in case the Browserscope post fails and a retry is needed
-      setAction('post');
+    // set last action in case the post fails and a retry is needed
+    setAction('post');
 
+    if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
       iframe = createElement('iframe', name);
       body.insertBefore(iframe, body.firstChild);
@@ -434,7 +443,9 @@
    * @member ui.browserscope
    */
   function purge() {
-    cache.responses = {};
+    forIn(cache.responses, function(value, key, responses) {
+      delete responses[key];
+    });
   }
 
   /**
@@ -453,26 +464,27 @@
         rowCount,
         rows,
         me = ui.browserscope,
-        cellWidth = 110,
-        cellHeight = 80,
+        chart = cache.lastChart = options.chart || cache.lastChart,
         cont = me.container,
-        fontSize = 13,
-        left = 130,
-        top = 50,
-        height = 'auto',
-        width = 'auto',
-        hTitleHeight = 38,
-        hTitle = 'operations per second (higher is better)',
-        vTitle = '',
-        legend = 'top',
-        title = '',
-        minHeight = 480,
-        minWidth = cont.offsetWidth || 948,
         filterBy = cache.lastFilterBy,
         needsMoreSpace = /^(?:a|ma|mi)/.test(filterBy),
-        chart = cache.lastChart = 'chart' in options ? options.chart : cache.lastChart,
-        response = cache.responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : cache.responses[filterBy],
-        visualization = window.google && google.visualization;
+        responses = cache.responses,
+        response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : responses[filterBy],
+        visualization = window.google && google.visualization,
+        cellWidth = 110,
+        cellHeight = 80,
+        fontSize = 13,
+        height = 'auto',
+        hTitle = 'operations per second (higher is better)',
+        hTitleHeight = 38,
+        left = 130,
+        legend = 'top',
+        minHeight = 480,
+        minWidth = cont.offsetWidth || 948,
+        title = '',
+        top = 50,
+        vTitle = '',
+        width = 'auto';
 
     function retry(force) {
       var action = cache.lastAction;

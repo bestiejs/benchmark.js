@@ -150,11 +150,9 @@
      * @private
      */
     'hashchange': function() {
+      ui.parseHash();
       var params = ui.params,
           render = ui.browserscope.render;
-
-      // populate ui.params
-      ui.parseHash();
 
       if (loaded) {
         // call user provided init() function
@@ -498,6 +496,9 @@
 
   // bootstrap onload
   addListener(window, 'load', handlers.window.load);
+
+  // parse location hash string
+  ui.parseHash();
 
   // inject nano applet
   (function() {
