@@ -467,7 +467,7 @@
         me = ui.browserscope,
         chart = cache.lastChart = options.chart || cache.lastChart,
         cont = me.container,
-        filterBy = cache.lastFilterBy,
+        filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
         needsMoreSpace = /^(?:a|ma|mi)/.test(filterBy),
         responses = cache.responses,
         response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : responses[filterBy],
