@@ -479,7 +479,7 @@
         height = 'auto',
         hTitle = 'operations per second (higher is better)',
         hTitleHeight = 48,
-        left = 25,
+        left = 240,
         legend = 'top',
         maxOps = 0,
         minHeight = 480,
@@ -534,6 +534,7 @@
             if (/^[\d.,]+$/.test(cell.f)) {
               cell.v = +cell.f.replace(/,/g, '');
               cell.f += ' ops/sec';
+              // capture the highest ops value to use later when computing the left coordinate
               maxOps = max(maxOps, cell.v);
             }
             // or add test run count to browser name
@@ -543,7 +544,7 @@
             // compute sum of all ops/sec for pie charts
             if (chart == 'Pie') {
               if (index == lastIndex) {
-                cells[1].f = Benchmark.formatNumber(cells[1].v) + ' total ops/sec';
+                cells[1].f = formatNumber(cells[1].v) + ' total ops/sec';
               } else if (index > 1 && typeof cell.v == 'number') {
                 cells[1].v += cell.v;
               }
@@ -571,16 +572,15 @@
             title = 'Total operations per second by browser (higher is better)';
           }
           else {
+            hTitleHeight = 28;
             // compute left by getting the sum of the horizontal space wanted
             // for the vAxis title's width, the approximate vAxis text width, and
             // the 13px gap between the chart and the right side of the vAxis text
             left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 2)) + 13;
             // filters "all", "major" and "minor" need extra space for longer names
             cellWidth = needsMoreSpace ? 150 : cellWidth;
-            // use minWidth to avoid charts that are too thin
+            // use minWidth to avoid clipping the key
             width = max(minWidth, left + (rowCount * cellWidth));
-            // use "auto" when width is minWidth to reduce horizontal stretching
-            areaWidth = width == minWidth ? 'auto' : areaWidth;
           }
         }
         // get percentage of height left after subtracting the vertical space wanted
