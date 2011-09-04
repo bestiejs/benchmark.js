@@ -63,6 +63,9 @@
   /** A flag to indicate that the page has loaded */
   loaded = false,
 
+  /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
+  scrollEl = document.body,
+
   /** Namespace */
   ui = new Benchmark.Suite,
 
@@ -162,7 +165,7 @@
         ('run' in params) && handlers.button.run();
         // scroll down to the results when configuring them
         if (chart || filterBy) {
-          document.body.scrollTop = $('results').offsetTop;
+          scrollEl.scrollTop = $('results').offsetTop;
           ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
         }
       }
@@ -501,6 +504,31 @@
 
   // parse location hash string
   ui.parseHash();
+
+  // detect the scroll element
+  (function() {
+    var div = document.createElement('div'),
+        body = document.body,
+        bodyStyle = body.style,
+        bodyHeight = bodyStyle.height,
+        html = document.documentElement,
+        htmlStyle = html.style,
+        htmlHeight = htmlStyle.height,
+        scrollTop = html.scrollTop;
+
+    bodyStyle.height  = htmlStyle.height = 'auto';
+    div.style.cssText = 'display:block;height:8500px;';
+    body.insertBefore(div, body.firstChild);
+
+    // set `scrollEl` that's used in `handlers.window.hashchange()`
+    if (html.clientWidth !== 0 && ++html.scrollTop && html.scrollTop == scrollTop + 1) {
+      scrollEl = html;
+    }
+    body.removeChild(div);
+    bodyStyle.height = bodyHeight;
+    htmlStyle.height = htmlHeight;
+    html.scrollTop = scrollTop;
+  }());
 
   // inject nano applet
   // (assumes ui.js just before </body>)
