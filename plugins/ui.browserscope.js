@@ -35,6 +35,7 @@
   each = Benchmark.each,
   filter = Benchmark.filter,
   forIn = Benchmark.forIn,
+  formatNumber = Benchmark.formatNumber,
   hasKey = Benchmark.hasKey,
   map = Benchmark.map,
   reduce = Benchmark.reduce;
@@ -460,7 +461,6 @@
 
     // coordinates, dimensions, and sizes are in px
     var areaHeight,
-        areaWidth,
         data,
         rowCount,
         rows,
@@ -472,19 +472,22 @@
         responses = cache.responses,
         response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : responses[filterBy],
         visualization = window.google && google.visualization,
+        areaWidth = '100%',
         cellWidth = 110,
         cellHeight = 80,
         fontSize = 13,
         height = 'auto',
         hTitle = 'operations per second (higher is better)',
-        hTitleHeight = 38,
-        left = 130,
+        hTitleHeight = 48,
+        left = 25,
         legend = 'top',
+        maxOps = 0,
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
         title = '',
         top = 50,
         vTitle = '',
+        vTitleWidth = 48,
         width = minWidth;
 
     function retry(force) {
@@ -523,34 +526,6 @@
         // remove "test run count" label (without the label the row will be ignored)
         getDataLabels(data).pop();
 
-        // adjust captions and chart dimensions
-        if (chart == 'Bar') {
-          height = max(minHeight, top + (rowCount * cellHeight));
-          // filters "all", "major" and "minor" need extra space for longer names
-          needsMoreSpace && (left = 160);
-          // get percentage of width left after subtracting the chart's left
-          // coordinate and room for the ops/sec number
-          areaWidth = (100 - (((left + 50) / width) * 100)) + '%';
-        }
-        else {
-          // swap captions (the browser list caption is blank to conserve space)
-          vTitle = [hTitle, hTitle = vTitle][0];
-          areaWidth = '100%';
-          height = minHeight;
-
-          if (chart == 'Pie') {
-            legend = 'right';
-            title = 'Total operations per second by browser (higher is better)';
-          }
-          else {
-            needsMoreSpace && (cellWidth = 150);
-            width = max(minWidth, left + (rowCount * cellWidth));
-          }
-        }
-        // get percentage of height left after subtracting the title's height,
-        // text size and chart's top coordinate
-        areaHeight = (100 - (((hTitleHeight + fontSize + top + 8) / height) * 100)) + '%';
-
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
@@ -559,8 +534,9 @@
             if (/^[\d.,]+$/.test(cell.f)) {
               cell.v = +cell.f.replace(/,/g, '');
               cell.f += ' ops/sec';
+              maxOps = max(maxOps, cell.v);
             }
-            // add test run count to browser name
+            // or add test run count to browser name
             else if (cell.f) {
               cell.f += chart == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
             }
@@ -574,6 +550,44 @@
             }
           });
         });
+
+        // adjust captions and chart dimensions
+        if (chart == 'Bar') {
+          // use minHeight to avoid sizing issues when there is only 1 bar
+          height = max(minHeight, top + (rowCount * cellHeight));
+          // filters "all", "major" and "minor" need extra space for longer names
+          left = needsMoreSpace ? 160 : 130;
+          // get percentage of width left after subtracting the chart's left
+          // coordinate and room for the ops/sec number
+          areaWidth = (100 - (((left + 50) / width) * 100)) + '%';
+        }
+        else {
+          // swap captions (the browser list caption is blank to conserve space)
+          vTitle = [hTitle, hTitle = vTitle][0];
+          height = minHeight;
+
+          if (chart == 'Pie') {
+            legend = 'right';
+            title = 'Total operations per second by browser (higher is better)';
+          }
+          else {
+            // compute left by getting the sum of the horizontal space wanted
+            // for the vAxis title's width, the approximate vAxis text width, and
+            // the 13px gap between the chart and the right side of the vAxis text
+            left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 2)) + 13;
+            // filters "all", "major" and "minor" need extra space for longer names
+            cellWidth = needsMoreSpace ? 150 : cellWidth;
+            // use minWidth to avoid charts that are too thin
+            width = max(minWidth, left + (rowCount * cellWidth));
+            // use "auto" when width is minWidth to reduce horizontal stretching
+            areaWidth = width == minWidth ? 'auto' : areaWidth;
+          }
+        }
+        // get percentage of height left after subtracting the vertical space wanted
+        // for the hAxis title's height, text size, the chart's top coordinate,
+        // and the 8px gap between the chart and the top of the hAxis text
+        areaHeight = (100 - (((hTitleHeight + fontSize + top + 8) / height) * 100)) + '%';
+
         // make chart type recognizable
         chart += 'Chart';
       }
