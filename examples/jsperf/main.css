@@ -316,6 +316,10 @@ footer {
   margin-right: .3em;
 }
 
+#bs-chart {
+  overflow: auto;
+}
+
 #bs-logo {
   margin: 0;
 }
@@ -342,10 +346,6 @@ footer {
   font-size: 10pt;
   padding: .5em;
   background: #ddd;
-}
-
-#bs-results .bs-rt div {
-  overflow: auto;
 }
 
 #bs-results td {

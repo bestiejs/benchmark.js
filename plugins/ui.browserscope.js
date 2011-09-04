@@ -671,10 +671,10 @@
       setHTML(placeholder,
         '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
         '<span>Browserscope</span></a></h1>' +
-        '<div class=bs-rt><div id=bs-rt-usertest_#{key}></div></div>',
+        '<div class=bs-rt><div id=bs-chart></div></div>',
         { 'key': key });
 
-      me.container = query('#bs-rt-usertest_' + key)[0];
+      me.container = query('#bs-chart')[0];
 
       // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';

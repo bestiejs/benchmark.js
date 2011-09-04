@@ -503,28 +503,23 @@
   ui.parseHash();
 
   // inject nano applet
+  // (assumes ui.js just before </body>)
   (function() {
-    function attempt() {
-      var applet,
-          body = document.body;
+    var applet,
+        body = document.body;
 
-      try {
-        if ('nojava' in ui.params) {
-          addClass('java', classNames.show);
-        } else {
-          applet = createElement('applet');
-          applet.code = 'nano';
-          applet.archive = archive;
-          body.insertBefore(applet, body.firstChild);
-        }
-      } catch(e) {
-        setTimeout(attempt, 15);
-      }
+    if ('nojava' in ui.params) {
+      addClass('java', classNames.show);
+    } else {
+      applet = createElement('applet');
+      applet.code = 'nano';
+      applet.archive = archive;
+      body.insertBefore(applet, body.firstChild);
     }
-    attempt();
   }());
 
   // provide a simple UI for toggling between chart types and filtering results
+  // (assumes ui.js is just before </body>)
   (function() {
     var sibling = $('bs-results'),
         p = createElement('p');
@@ -539,10 +534,12 @@
 
     sibling.parentNode.insertBefore(p, sibling);
 
+    // use DOM0 attributes to simplify canceling the default action
     $('charts').onclick =
     $('filters').onclick = function(event) {
-      var target = event.target;
-      if (target.href) {
+      event || (event = window.event);
+      var target = event.target || event.srcElement;
+      if (target.href || (target = target.parentNode).href) {
         ui.browserscope.render(
           target.parentNode.id == 'charts'
             ? { 'chart': target.innerHTML }
@@ -565,5 +562,4 @@
       sibling.parentNode.insertBefore(script, sibling);
     }());
   }
-
 }(this, document));
