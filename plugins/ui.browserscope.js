@@ -153,7 +153,7 @@
       // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
       each(query('script').concat(query('iframe')), function(element) {
         var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + max(delay, timings.timeout * 1e3);
-        if (now() > expire || /browserscope\.org/.test(element.src)) {
+        if (now() > expire || /browserscope\.org|google\.com/.test(element.src)) {
           trash.appendChild(element);
           trash.innerHTML = '';
         }
@@ -368,16 +368,9 @@
       // set "loading" message and attempt to load Browserscope data
       setMessage(me.texts.loading);
 
+      // request Browserscope pass chart data to `google.visualization.Query.setResponse()`
       (new google.visualization.Query(
-        '//www.browserscope.org/gviz_table_data?' +
-        'category=usertest_' + me.key + '&' +
-        'highlight=&' +
-        'o=gviz_data&' +
-        'rid=' + now() + '&' +
-        'score=&' +
-        'tqx=reqId:0&' +
-        'ua=&' +
-        'v=' + filterMap[filterBy],
+        '//www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
         { 'sendMethod': 'scriptInjection' }
       ))
       .send(onComplete);
@@ -674,7 +667,6 @@
         placeholder = key && query(me.selector)[0];
 
     // create results html
-    // http://code.google.com/apis/loader/autoloader-wizard.html
     if (placeholder) {
       setHTML(placeholder,
         '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
@@ -683,8 +675,20 @@
         { 'key': key });
 
       me.container = query('#bs-rt-usertest_' + key)[0];
+
+      // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
-      loadScript('//www.google.com/jsapi?autoload=%7B%22modules%22%3A%5B%7B%22name%22%3A%22visualization%22%2C%22version%22%3A%221%22%2C%22packages%22%3A%5B%22corechart%22%2C%22table%22%5D%2C%22callback%22%3Aui.browserscope.load%7D%5D%7D');
+
+      // the "autoload" string can be created with
+      // http://code.google.com/apis/loader/autoloader-wizard.html
+      loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
+        'modules:[{' +
+          'name:"visualization",' +
+          'version:1,' +
+          'packages:["corechart","table"],' +
+          'callback:ui.browserscope.load' +
+        '}]' +
+      '}'));
 
       // init garbage collector
       cleanup();
