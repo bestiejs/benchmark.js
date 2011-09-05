@@ -25,11 +25,12 @@
     'prerelease': 'top-d-e'
   },
 
-  /** Math shortcut */
-  max = Math.max,
-
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
+
+  /** Math shortcuts */
+  max = Math.max,
+  min = Math.min,
 
   /** Utility shortcuts */
   each = Benchmark.each,
@@ -500,6 +501,7 @@
         left = 240,
         legend = 'top',
         maxChars = 0,
+        maxCharsLimit = 24,
         maxOps = 0,
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
@@ -566,7 +568,11 @@
               // add test run count to browser name
               cell.f += chart == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
               // capture longest char count to use when computing left coordinate/cell width
-              maxChars = max(maxChars, cell.f.length);
+              maxChars = min(maxCharsLimit, max(maxChars, cell.f.length));
+              // add asterisks if Browserscope indicates that it's the user's browser
+              if (cell.p.className) {
+                cell.f = '** ' + cell.f + ' **';
+              }
             }
             // compute sum of all ops/sec for pie charts
             if (chart == 'Pie') {
@@ -688,7 +694,7 @@
     // posts benchmark snapshot to Browserscope
     'post': post,
 
-    // purges the Browsercope response cache
+    // purges the Browserscope response cache
     'purge': purge,
 
     // renders cumulative results table
