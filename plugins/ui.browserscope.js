@@ -481,6 +481,7 @@
     var areaHeight,
         cellWidth,
         data,
+        labels,
         rowCount,
         rows,
         me = ui.browserscope,
@@ -535,6 +536,7 @@
     else {
       cont.className = '';
       data = clone(response.getDataTable());
+      labels = getDataLabels(data);
       rows = getDataRows(data);
       rowCount = rows.length;
       chart = chart.charAt(0).toUpperCase() + chart.slice(1).toLowerCase();
@@ -542,7 +544,7 @@
       // adjust data for non-tabular displays
       if (chart != 'Table') {
         // remove "# Tests" run label (without the label data the row will be ignored)
-        getDataLabels(data).pop();
+        labels.pop();
 
         // modify row data
         each(rows, function(row) {
