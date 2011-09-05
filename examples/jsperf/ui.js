@@ -562,7 +562,7 @@
 
     sibling.parentNode.insertBefore(p, sibling);
 
-    // use DOM0 attributes to simplify canceling the default action
+    // use DOM0 event handler to simplify canceling the default action
     $('charts').onclick =
     $('filters').onclick = function(event) {
       event || (event = window.event);
@@ -574,6 +574,7 @@
             : { 'filterBy': target.innerHTML }
         );
       }
+      // cancel the default action
       return false;
     };
   }());

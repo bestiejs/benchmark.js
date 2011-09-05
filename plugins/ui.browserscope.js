@@ -211,8 +211,9 @@
       return bench.cycles && isFinite(bench.hz);
     });
 
-    // duplicate and non alphanumeric benchmark names have their ids appended
+    // duplicate and non-alphanumeric benchmark names have their ids appended
     return reduce(benches, function(result, bench, key) {
+      // Browserscope's labels can only contain alphanumeric characters and spaces
       key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
       result || (result = {});
       result[key && !hasKey(result, 'key') ? key : key + bench.id ] = bench.hz;
@@ -242,12 +243,34 @@
    * @returns {Array} An array of label objects.
    */
   function getDataLabels(object) {
+    var table = query('#test-table')[0],
+        titles = [],
+        result = [];
+
     // resolve titles by duck typing because of munged property names
-    var result = [];
     forIn(object, function(value) {
       return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
-    return result;
+
+    // collect test titles from the jsPerf test table
+    each(table && table.getElementsByTagName('th'), function(node) {
+      /^title-\d+$/.test(node.id) && titles.push(node.textContent || node.innerText);
+    });
+
+    // sort titles to match Browserscope's order
+    titles.sort();
+
+    // replace Browserscope's basic label with the real jsPerf test title
+    return each(result, function(cell) {
+      var label = cell.label;
+      each(titles, function(title, index) {
+        if (label.indexOf((title.match(/[a-z0-9]+/ig) || []).join(' ')) == 0) {
+          cell.label = title;
+          titles.splice(index, 1);
+          return false;
+        }
+      });
+    });
   }
 
   /**
@@ -259,10 +282,12 @@
   function getDataRows(object) {
     var name,
         result = [];
+
     // resolve rows by duck typing because of munged property names
     forIn(object, function(value, key) {
       return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
+
     // remove empty rows
     if (result.length) {
       result = object[name] = filter(result, function(value) {
@@ -454,6 +479,7 @@
 
     // coordinates, dimensions, and sizes are in px
     var areaHeight,
+        cellWidth,
         data,
         rowCount,
         rows,
@@ -461,12 +487,10 @@
         chart = cache.lastChart = options.chart || cache.lastChart,
         cont = me.container,
         filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
-        needsMoreSpace = /^(?:a|ma|mi)/.test(filterBy),
         responses = cache.responses,
         response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : responses[filterBy],
         visualization = window.google && google.visualization,
         areaWidth = '100%',
-        cellWidth = 110,
         cellHeight = 80,
         fontSize = 13,
         height = 'auto',
@@ -474,6 +498,7 @@
         hTitleHeight = 48,
         left = 240,
         legend = 'top',
+        maxChars = 0,
         maxOps = 0,
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
@@ -516,23 +541,30 @@
 
       // adjust data for non-tabular displays
       if (chart != 'Table') {
-        // remove "test run count" label (without the label the row will be ignored)
+        // remove "# Tests" run label (without the label data the row will be ignored)
         getDataLabels(data).pop();
 
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
+            // cells[lastIndex] is the "# Tests" run cell and has no `f` prop
             var lastIndex = cells.length - 1;
-            // assign ops/sec
+
+            // cells[1] through cells[lastIndex - 1] are ops/sec cells
             if (/^[\d.,]+$/.test(cell.f)) {
+              // assign ops/sec as cell value
               cell.v = +cell.f.replace(/,/g, '');
+              // add context to the numbers
               cell.f += ' ops/sec';
-              // capture the highest ops value to use later when computing the left coordinate
+              // capture highest ops value to use when computing the left coordinate
               maxOps = max(maxOps, cell.v);
             }
-            // or add test run count to browser name
+            // cells[0] is the browser name cell
             else if (cell.f) {
+              // add test run count to browser name
               cell.f += chart == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
+              // capture longest char count to use when computing left coordinate/cell width
+              maxChars = max(maxChars, cell.f.length);
             }
             // compute sum of all ops/sec for pie charts
             if (chart == 'Pie') {
@@ -549,8 +581,9 @@
         if (chart == 'Bar') {
           // use minHeight to avoid sizing issues when there is only 1 bar
           height = max(minHeight, top + (rowCount * cellHeight));
-          // filters "all", "major" and "minor" need extra space for longer names
-          left = needsMoreSpace ? 160 : 130;
+          // compute left by adding the longest approximate vAxis text width and
+          // a right pad of 10px
+          left = (maxChars * (fontSize / 2)) + 10;
           // get percentage of width left after subtracting the chart's left
           // coordinate and room for the ops/sec number
           areaWidth = (100 - (((left + 50) / width) * 100)) + '%';
@@ -570,8 +603,9 @@
             // for the vAxis title's width, the approximate vAxis text width, and
             // the 13px gap between the chart and the right side of the vAxis text
             left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 2)) + 13;
-            // filters "all", "major" and "minor" need extra space for longer names
-            cellWidth = needsMoreSpace ? 150 : cellWidth;
+            // compute cell width by adding the longest approximate hAxis text
+            // width and a left pad of 10px
+            cellWidth = (maxChars * (fontSize / 2)) + 10;
             // use minWidth to avoid clipping the key
             width = max(minWidth, left + (rowCount * cellWidth));
           }
