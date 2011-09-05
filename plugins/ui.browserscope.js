@@ -606,8 +606,8 @@
             // the 13px gap between the chart and the right side of the vAxis text
             left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 2)) + 13;
             // compute cell width by adding the longest approximate hAxis text
-            // width and a left pad of 10px
-            cellWidth = (maxChars * (fontSize / 2)) + 10;
+            // width and wiggle room of 26px
+            cellWidth = (maxChars * (fontSize / 2)) + 26;
             // use minWidth to avoid clipping the key
             width = max(minWidth, left + (rowCount * cellWidth));
           }
