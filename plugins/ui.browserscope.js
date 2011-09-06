@@ -31,6 +31,7 @@
   /** Math shortcuts */
   max = Math.max,
   min = Math.min,
+  round = Math.round,
 
   /** Utility shortcuts */
   each = Benchmark.each,
@@ -63,18 +64,36 @@
    * @private
    * @param {String} tagName The tag name of the element to create.
    * @param {String} name A name to assign to the element.
-   * @returns {Object} Returns a new element.
+   * @param {Document|Element} context The document object used to create the element.
+   * @returns {Element} Returns a new element.
    */
-  function createElement(tagName, name) {
+  function createElement(tagName, name, context) {
     var result;
+    name && name.nodeType && (context = name, name = 0);
+    context =  context ? context.ownerDocument || context : document;
     name || (name = '');
     try {
       // set name attribute for IE6/7
-      result = document.createElement('<' + tagName + ' name="' + name + '">');
+      result = context.createElement('<' + tagName + ' name="' + name + '">');
     } catch(e) {
-      (result = document.createElement(tagName)).name = name;
+      (result = context.createElement(tagName)).name = name;
     }
     return result;
+  }
+
+  /**
+   * Creates a new style element.
+   * @private
+   * @param {String} cssText The css text of the style element.
+   * @param {Document|Element} context The document object used to create the element.
+   * @returns {Element} Returns the new style element.
+   */
+  function createStyleSheet(cssText, context) {
+    // use a text node, "x", to work around innerHTML issues with style elements
+    // http://msdn.microsoft.com/en-us/library/ms533897(v=vs.85).aspx#1
+    var div = createElement('div', context);
+    div.innerHTML = 'x<style>' + cssText + '</style>';
+    return div.lastChild;
   }
 
   /**
@@ -82,11 +101,13 @@
    * @private
    * @param {String} src The external script source.
    * @param {Object} sibling The element to inject the script after.
+   * @param {Document} context The document object used to create the script element.
    * @returns {Object} The new script element.
    */
-  function loadScript(src, sibling) {
-    var script = createElement('script'),
-        nextSibling = sibling ? sibling.nextSibling : query('script').pop();
+  function loadScript(src, sibling, context) {
+    context = sibling ? sibling.ownerDocument || [sibling, sibling = 0][0] : context;
+    var script = createElement('script', context),
+        nextSibling = sibling ? sibling.nextSibling : query('script', context).pop();
 
     script.src = src;
     return (sibling || nextSibling).parentNode.insertBefore(script,  nextSibling);
@@ -96,17 +117,20 @@
    * Queries the document for elements by id or tagName.
    * @private
    * @param {String} selector The css selector to match.
+   * @param {Document|Element} context The element whose descendants are queried.
    * @returns {Array} The array of results.
    */
-  function query(selector) {
-    var i = -1,
-        result = [],
-        nodes = /^#/.test(selector)
-          ? [document.getElementById(selector.slice(1))]
-          : document.getElementsByTagName(selector);
-
-    while ((result[++i] = nodes[i])) { }
-    return result.length-- && result;
+  function query(selector, context) {
+    var result = [];
+    context || (context = document);
+    each(selector.split(','), function(selector) {
+      each(/^#/.test(selector)
+          ? [context.getElementById(selector.slice(1))]
+          : context.getElementsByTagName(selector), function(node) {
+        result.push(node);
+      });
+    });
+    return result;
   }
 
   /**
@@ -152,9 +176,9 @@
     if (timers.cleanup && !ui.running) {
       // if expired, destroy the element to prevent pseudo memory leaks.
       // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
-      each(query('script').concat(query('iframe')), function(element) {
+      each(query('iframe,script'), function(element) {
         var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + max(delay, timings.timeout * 1e3);
-        if (now() > expire || /browserscope\.org|google\.com/.test(element.src)) {
+        if (new Date > expire || /browserscope\.org|google\.com/.test(element.src)) {
           trash.appendChild(element);
           trash.innerHTML = '';
         }
@@ -180,11 +204,9 @@
         each(value, function(value, index) {
           result[key][index] = clone(value);
         });
-      }
-      else if (value && typeof value == 'object') {
+      } else if (value && typeof value == 'object') {
         result[key] = clone(value);
-      }
-      else {
+      } else {
         result[key] = value;
       }
     });
@@ -197,27 +219,19 @@
    * @returns {Object|Null} Browserscope results object or null.
    */
   function createSnapshot() {
-    // clone benchmarks using the upper limit of the confidence interval to compute hz
-    var benches = map(ui.benchmarks, function(bench) {
-      var clone = bench.clone(),
-          stats = bench.stats;
-
-      clone.cycles = bench.cycles;
-      clone.hz = Math.round(1 / (stats.mean + stats.moe));
-      return clone;
-    });
-
-    // remove unrun, errored, or Infinity hz
-    benches = filter(benches, function(bench) {
-      return bench.cycles && isFinite(bench.hz);
-    });
-
-    // duplicate and non-alphanumeric benchmark names have their ids appended
-    return reduce(benches, function(result, bench, key) {
-      // Browserscope's labels can only contain alphanumeric characters and spaces
-      key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
-      result || (result = {});
-      result[key && !hasKey(result, 'key') ? key : key + bench.id ] = bench.hz;
+    return reduce(ui.benchmarks, function(result, bench, key) {
+      // ignore benches that are unrun, errored, or have hz of Infinity and
+      // append benchmark ids for duplicate names or names with no alphanumeric/space characters
+      var stats = bench.stats;
+      if (bench.cycles && isFinite(bench.hz)) {
+        result || (result = {});
+        // Browserscope labels can only contain alphanumeric characters and spaces
+        // http://code.google.com/p/browserscope/issues/detail?id=271
+        key = (/[a-z0-9]+/ig.exec(bench.name) || []).join(' ');
+        // use the upper limit of the confidence interval to compute a lower hz
+        // to avoid recording inflated results caused by a high margin or error
+        result[key && !hasKey(result, key) ? key : key + bench.id ] = round(1 / (stats.mean + stats.moe));
+      }
       return result;
     }, null);
   }
@@ -244,24 +258,21 @@
    * @returns {Array} An array of label objects.
    */
   function getDataLabels(object) {
-    var table = query('#test-table')[0],
+    var result = [],
         titles = [],
-        result = [];
+        table = query('#test-table')[0];
 
-    // resolve titles by duck typing because of munged property names
+    // resolve labels by duck typing because of munged property names
     forIn(object, function(value) {
       return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
-
     // collect test titles from the jsPerf test table
     each(table && table.getElementsByTagName('th'), function(node) {
       /^title-\d+$/.test(node.id) && titles.push(node.textContent || node.innerText);
     });
-
     // sort titles to match Browserscope's order
     titles.sort();
-
-    // replace Browserscope's basic label with the real jsPerf test title
+    // replace Browserscope's basic labels with the real jsPerf test titles
     return each(result, function(cell) {
       var label = cell.label;
       each(titles, function(title, index) {
@@ -288,7 +299,6 @@
     forIn(object, function(value, key) {
       return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
-
     // remove empty rows
     if (result.length) {
       result = object[name] = filter(result, function(value) {
@@ -328,15 +338,6 @@
    */
   function noop() {
     // no operation performed
-  }
-
-  /**
-   * Returns the number of milliseconds elapsed since 1 January 1970 00:00:00 UTC.
-   * @private
-   * @returns {Number} Number of milliseconds.
-   */
-  function now() {
-    return +new Date;
   }
 
   /**
@@ -390,10 +391,8 @@
     else {
       // set our own load timeout to display an error message and retry loading
       cache.timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
-
       // set "loading" message and attempt to load Browserscope data
       setMessage(me.texts.loading);
-
       // request Browserscope pass chart data to `google.visualization.Query.setResponse()`
       (new google.visualization.Query(
         '//www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
@@ -415,7 +414,7 @@
         me = ui.browserscope,
         key = me.key,
         timings = me.timings,
-        name = 'browserscope-' + (cache.counter++) + '-' + now(),
+        name = 'browserscope-' + (cache.counter++) + '-' + (+new Date),
         snapshot = createSnapshot();
 
     // set last action in case the post fails and a retry is needed
@@ -423,6 +422,7 @@
 
     if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
+      // (the name contains a timestamp so `cleanup()` can determine when to remove it)
       iframe = createElement('iframe', name);
       body.insertBefore(iframe, body.firstChild);
       idoc = frames[name].document;
@@ -430,10 +430,11 @@
 
       // expose results snapshot
       me.snapshot = snapshot;
-
       // set "posting" message and attempt to post the results snapshot
       setMessage(me.texts.post);
-
+      // Note: We originally created an iframe to avoid Browerscope's old limit
+      // of one beacon per page load. It's currently used to implement custom
+      // request timeout and retry routines.
       idoc.write(interpolate(
         // the doctype is required so Browserscope detects the correct IE compat mode
         '#{doctype}<html><body><script>' +
@@ -463,6 +464,7 @@
    * @member ui.browserscope
    */
   function purge() {
+    // we don't pave the cache object with a new one to preserve existing references
     forIn(cache.responses, function(value, key, responses) {
       delete responses[key];
     });
@@ -501,7 +503,7 @@
         left = 240,
         legend = 'top',
         maxChars = 0,
-        maxCharsLimit = 24,
+        maxCharsLimit = 20,
         maxOps = 0,
         minHeight = 480,
         minWidth = cont.offsetWidth || 948,
@@ -545,34 +547,31 @@
 
       // adjust data for non-tabular displays
       if (chart != 'Table') {
-        // remove "# Tests" run label (without the label data the row will be ignored)
+        // remove "# Tests" run count label (without label data the row will be ignored)
         labels.pop();
 
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
-            // cells[lastIndex] is the "# Tests" run cell and has no `f` prop
-            var lastIndex = cells.length - 1;
+            var className = cell.p && cell.p.className,
+                lastIndex = cells.length - 1;
 
             // cells[1] through cells[lastIndex - 1] are ops/sec cells
             if (/^[\d.,]+$/.test(cell.f)) {
               // assign ops/sec as cell value
               cell.v = +cell.f.replace(/,/g, '');
-              // add context to the numbers
+              // add rate to the text
               cell.f += ' ops/sec';
               // capture highest ops value to use when computing the left coordinate
               maxOps = max(maxOps, cell.v);
             }
             // cells[0] is the browser name cell
+            // cells[lastIndex] is the run count cell and has no `f` property
             else if (cell.f) {
               // add test run count to browser name
               cell.f += chart == 'Pie' ? '' : ' (' + (cells[lastIndex].v || 1) + ')';
               // capture longest char count to use when computing left coordinate/cell width
               maxChars = min(maxCharsLimit, max(maxChars, cell.f.length));
-              // add asterisks if Browserscope indicates that it's the user's browser
-              if (cell.p.className) {
-                cell.f = '** ' + cell.f + ' **';
-              }
             }
             // compute sum of all ops/sec for pie charts
             if (chart == 'Pie') {
@@ -581,6 +580,51 @@
               } else if (index > 1 && typeof cell.v == 'number') {
                 cells[1].v += cell.v;
               }
+            }
+            // if the browser name matches the user's browser then indicate it
+            // (use `setTimeout()` so the chart will exist before we try to access it)
+            if (className) {
+              setTimeout(function() {
+                var context = frames[query('iframe', cont)[0].name].document,
+                    styleSheet = query('#bs-style', context)[0],
+                    cssText = [];
+
+                // inject custom style sheet if it isn't already
+                if (!styleSheet) {
+                  // extract CSS rules for `className`
+                  each(query('link,style'), function(node) {
+                    // avoid access denied errors on external style sheets
+                    // outside the same origin policy
+                    try {
+                      var sheet = node.sheet || node.styleSheet;
+                      each(sheet.cssRules || sheet.rules, function(rule) {
+                        if ((rule.selectorText || rule.cssText).indexOf('.' + className) > -1) {
+                          cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
+                        }
+                      });
+                    } catch(e) { }
+                  });
+                  styleSheet = createStyleSheet('.' + className + '{' + cssText.join(';') + '}', context);
+                  query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
+                }
+                // scan chart elements looking for a match
+                each(query('text,textpath', context), function(node) {
+                  var nextSibling;
+                  if ((node.string || node.textContent || node.innerText) == cell.f) {
+                    // for VML
+                    if (node.string) {
+                      // IE requires reinserting the element to render correctly
+                      node.className = className;
+                      nextSibling = node.nextSibling;
+                      node.parentNode.insertBefore(node.removeNode(), nextSibling);
+                    }
+                    // for SVG
+                    else {
+                      node.setAttribute('class', className);
+                    }
+                  }
+                });
+              }, 1);
             }
           });
         });
@@ -591,7 +635,7 @@
           height = max(minHeight, top + (rowCount * cellHeight));
           // compute left by adding the longest approximate vAxis text width and
           // a right pad of 10px
-          left = (maxChars * (fontSize / 2)) + 10;
+          left = (maxChars * (fontSize / 1.6)) + 10;
           // get percentage of width left after subtracting the chart's left
           // coordinate and room for the ops/sec number
           areaWidth = (100 - (((left + 50) / width) * 100)) + '%';
@@ -610,7 +654,7 @@
             // compute left by getting the sum of the horizontal space wanted
             // for the vAxis title's width, the approximate vAxis text width, and
             // the 13px gap between the chart and the right side of the vAxis text
-            left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 2)) + 13;
+            left = vTitleWidth + (formatNumber(maxOps).length * (fontSize / 1.6)) + 13;
             // compute cell width by adding the longest approximate hAxis text
             // width and wiggle room of 26px
             cellWidth = (maxChars * (fontSize / 2)) + 26;
@@ -622,7 +666,6 @@
         // for the hAxis title's height, text size, the chart's top coordinate,
         // and the 8px gap between the chart and the top of the hAxis text
         areaHeight = (100 - (((hTitleHeight + fontSize + top + 8) / height) * 100)) + '%';
-
         // make chart type recognizable
         chart += 'Chart';
       }
@@ -716,6 +759,7 @@
         '<div class=bs-rt><div id=bs-chart></div></div>',
         { 'key': key });
 
+      // the element the charts are inserted into
       me.container = query('#bs-chart')[0];
 
       // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
