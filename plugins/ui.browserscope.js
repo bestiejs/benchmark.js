@@ -227,7 +227,7 @@
         result || (result = {});
         // Browserscope labels can only contain alphanumeric characters and spaces
         // http://code.google.com/p/browserscope/issues/detail?id=271
-        key = (/[a-z0-9]+/ig.exec(bench.name) || []).join(' ');
+        key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
         // use the upper limit of the confidence interval to compute a lower hz
         // to avoid recording inflated results caused by a high margin or error
         result[key && !hasKey(result, key) ? key : key + bench.id ] = round(1 / (stats.mean + stats.moe));
