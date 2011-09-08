@@ -49,7 +49,7 @@
         o = ['a', 'b', 'c'],
         values = [];
 
-    var result = Benchmark.each(o, function(value, index) {
+    var result = Benchmark.each(o, function(value) {
       args || (args = [].slice.call(arguments));
       values.push(value);
     });
@@ -118,6 +118,33 @@
 
     deepEqual(result, ['a', 'c'], 'basic');
     equal(count, 2, 'sparse check');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.forIn');
+
+  test('basic', function() {
+    var args,
+        O = function(){ var me = this; me.a = 1; me.b = 2; me.c = 3; },
+        o = (O.prototype.d = 4, new O),
+        values = [];
+
+    var result = Benchmark.forIn(o, function(value) {
+      args || (args = [].slice.call(arguments));
+      values.push(value);
+    });
+
+    ok(o === result, 'object returned');
+    deepEqual(values, [1, 2, 3], 'values');
+    deepEqual(args, [1, 'a', o], 'passed arguments to callback');
+    values.length = 0;
+
+    Benchmark.forIn(o, function(value, key) {
+      return key == 'c' ? false : values.push(value);
+    });
+
+    deepEqual(values, [1, 2], 'exit early');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -365,9 +392,29 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.Suite');
+  QUnit.module('Benchmark.Suite#abort');
 
-  test('Benchmark.Suite#add', function() {
+  test('basic', function() {
+    var fired = false;
+
+    var suite = new Benchmark.Suite('foo', {
+      'onAbort': function() { fired = true }
+    })
+    .add('bar', function() { });
+
+    suite.abort();
+    ok(fired == false, 'calling abort() won\'t fire an abort event when suite isn\'t running');
+
+    fired = false;
+    suite.reset();
+    ok(fired == false, 'calling reset() won\'t fire an abort event when suite isn\'t running');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#add');
+
+  test('event flow', function() {
     var args,
         pair,
         thisBinding,
@@ -396,7 +443,7 @@
       'onComplete': callback,
       'onReset': callback
     })
-    .run();
+    .run(false);
 
     // first Suite#onAdd
     pair = callbacks.shift();
@@ -404,13 +451,7 @@
     thisBinding = pair[1];
     ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onAdd');
 
-    // on run we first reset the Suite
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo', 'passed arguments to Suite#onReset');
-
-    // next we start the Suite
+    // next we start the Suite because no reset was needed
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
@@ -504,6 +545,34 @@
       QUnit.start();
     })
     .run(true);
+  });
+
+  asyncTest('Benchmark.Suite#abort', function() {
+    var count = -1,
+        fired = false;
+
+    var suite = new Benchmark.Suite('foo', {
+      'onAbort': function() { fired = true }
+    })
+    .add('a', function() {
+      // empty
+    })
+    .on('start', function() {
+      this[++count ? 'reset' : 'abort']();
+      this.aborted = true;
+    })
+    .on('complete', function() {
+      if (count == 0) {
+        ok(fired == true, 'calling abort() fires an abort event when suite is running');
+        fired = false;
+        suite.run(true);
+      } else {
+        ok(fired == true, 'calling reset() fires an abort event when suite is running');
+        QUnit.start();
+      }
+    });
+
+    suite.run(true);
   });
 
   /*--------------------------------------------------------------------------*/

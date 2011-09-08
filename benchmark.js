@@ -1019,10 +1019,19 @@
     if (raiseIndex() !== false) {
       bench = result[index];
       options.onStart.call(benches, new Event('start'), bench);
-      if (isAsync(bench)) {
-        call(bench, execute, true);
-      } else {
-        while (execute()) { }
+
+      // end early if the suite was aborted in an "onStart" listener
+      if (Object(benches).constructor == Suite && benches.aborted) {
+        options.onCycle.call(benches, new Event('cycle'), bench);
+        options.onComplete.call(benches, new Event('complete'), bench);
+      }
+      // else start
+      else {
+        if (isAsync(bench)) {
+          call(bench, execute, true);
+        } else {
+          while (execute()) { }
+        }
       }
     }
     return result;
@@ -1106,10 +1115,13 @@
    */
   function abortSuite() {
     var me = this;
-    me.aborted = true;
-    me.running = false;
-    invoke(me, 'abort');
-    me.emit('abort');
+    if (me.running) {
+      me.running = NaN;
+      me.reset();
+      me.aborted = true;
+      invoke(me, 'abort');
+      me.emit('abort');
+    }
     return me;
   }
 
@@ -1186,9 +1198,15 @@
    */
   function resetSuite() {
     var me = this;
-    me.aborted = me.running = false;
-    invoke(me, 'reset');
-    me.emit('reset');
+    if (me.running) {
+      me.abort();
+      me.aborted = false;
+    }
+    else if (me.aborted !== false || me.running !== false) {
+      me.aborted = me.running = false;
+      invoke(me, 'reset');
+      me.emit('reset');
+    }
     return me;
   }
 
@@ -1340,7 +1358,7 @@
         each(me._timerIds || [], clearTimeout);
         delete me._timerIds;
       }
-      // set running as NaN so reset() will detect it as falsey and *not* call abort(),
+      // set running to NaN so reset() will detect it as falsey and *not* call abort(),
       // but *will* detect it as a change and fire the onReset() callback
       me.running = NaN;
       me.reset();
@@ -1421,7 +1439,7 @@
           if (value && isClassOf(value, 'Object')) {
             pairs.push([value, other]);
           }
-          else if (value != other && !(value == null || isClassOf(value, 'Function'))) {
+          else if (value !== other && !(value == null || isClassOf(value, 'Function'))) {
             pair[1][key] = value;
             changed = true;
           }
