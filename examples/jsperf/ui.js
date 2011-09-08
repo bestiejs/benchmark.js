@@ -87,6 +87,7 @@
     'cycle': function() {
       var bench = this,
           size = bench.stats.size;
+
       if (!bench.aborted) {
         setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
           size + ' sample' + (size == 1 ? '' : 's') + ')');
@@ -154,19 +155,29 @@
      */
     'hashchange': function() {
       ui.parseHash();
-      var params = ui.params,
+      var scrollTop,
+          params = ui.params,
           chart = params.chart,
           filterBy = params.filterby;
 
       if (loaded) {
         // call user provided init() function
-        (typeof window.init == 'function') && init();
-        // auto-run
-        ('run' in params) && handlers.button.run();
-        // scroll down to the results when configuring them
+        if (typeof window.init == 'function') {
+          init();
+        }
+        // configure chart renderer
         if (chart || filterBy) {
-          scrollEl.scrollTop = $('results').offsetTop;
+          scrollTop = $('results').offsetTop;
           ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
+        }
+        // auto-run
+        if ('run' in params) {
+          scrollTop = $('runner').offsetTop;
+          handlers.button.run();
+        }
+        // scroll to the relevant section
+        if (scrollTop) {
+          scrollEl.scrollTop = scrollTop;
         }
       }
     },
