@@ -334,7 +334,7 @@
           }
           return true;
         }
-      }));
+      });
     }
     return result;
   }
