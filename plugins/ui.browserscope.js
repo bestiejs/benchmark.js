@@ -47,15 +47,17 @@
   /**
    * Registers an event listener.
    * @private
-   * @param {Object} element The element.
+   * @param {Element} element The element.
    * @param {String} eventName The name of the event to listen to.
    * @param {Function} handler The event handler.
    */
   function addListener(element, eventName, handler) {
-    if (typeof element.addEventListener != 'undefined') {
-      element.addEventListener(eventName, handler, false);
-    } else if (typeof element.attachEvent != 'undefined') {
-      element.attachEvent('on' + eventName, handler);
+    if ((element = typeof element == 'string' ? query(element)[0] : element)) {
+      if (typeof element.addEventListener != 'undefined') {
+        element.addEventListener(eventName, handler, false);
+      } else if (typeof element.attachEvent != 'undefined') {
+        element.attachEvent('on' + eventName, handler);
+      }
     }
   }
 
@@ -72,6 +74,7 @@
     name && name.nodeType && (context = name, name = 0);
     context =  context ? context.ownerDocument || context : document;
     name || (name = '');
+
     try {
       // set name attribute for IE6/7
       result = context.createElement('<' + tagName + ' name="' + name + '">');
@@ -94,6 +97,17 @@
     var div = createElement('div', context);
     div.innerHTML = 'x<style>' + cssText + '</style>';
     return div.lastChild;
+  }
+
+  /**
+   * Gets the text content of an element.
+   * @private
+   * @param {Element} element The element.
+   * @returns {String} The text content of the element.
+   */
+  function getText(element) {
+    element = query(element)[0];
+    return element && (element.textContent || element.innerText) || '';
   }
 
   /**
@@ -122,40 +136,50 @@
    */
   function query(selector, context) {
     var result = [];
-    context || (context = document);
-    each(selector.split(','), function(selector) {
-      each(/^#/.test(selector)
-          ? [context.getElementById(selector.slice(1))]
-          : context.getElementsByTagName(selector), function(node) {
-        result.push(node);
+    selector || (selector = '');
+    context = typeof context == 'string' ? query(context)[0] : context || document;
+
+    if (selector.nodeType) {
+      result = [selector];
+    }
+    else if (context) {
+      each(selector.split(','), function(selector) {
+        each(/^#/.test(selector)
+            ? [context.getElementById(selector.slice(1))]
+            : context.getElementsByTagName(selector), function(node) {
+          result.push(node);
+        });
       });
-    });
+    }
     return result;
   }
 
   /**
    * Set an element's innerHTML property.
    * @private
-   * @param {Object} element The element.
+   * @param {Element} element The element.
    * @param {String} html The HTML to set.
    * @param {Object} object The template object used to modify the html.
    */
   function setHTML(element, html, object) {
-    element.innerHTML = interpolate(html, object);
+    if ((element = query(element)[0])) {
+      element.innerHTML = interpolate(html, object);
+    }
   }
 
   /**
    * Displays a message in the "results" element.
    * @private
    * @param {String} text The text to display.
+   * @param {Object} object The template object used to modify the text.
    */
-  function setMessage(text) {
+  function setMessage(text, object) {
     var me = ui.browserscope,
         cont = me.container;
 
     if (cont) {
       cont.className = 'bs-rt-message';
-      cont.innerHTML = text;
+      setHTML(cont, text, object);
     }
   }
 
@@ -225,9 +249,7 @@
       var stats = bench.stats;
       if (bench.cycles && isFinite(bench.hz)) {
         result || (result = {});
-        // Browserscope labels can only contain alphanumeric characters and spaces
-        // http://code.google.com/p/browserscope/issues/detail?id=271
-        key = (bench.name.match(/[a-z0-9]+/ig) || []).join(' ');
+        key = toLabel(bench.name);
         // use the upper limit of the confidence interval to compute a lower hz
         // to avoid recording inflated results caused by a high margin or error
         result[key && !hasKey(result, key) ? key : key + bench.id ] = round(1 / (stats.mean + stats.moe));
@@ -259,29 +281,22 @@
    */
   function getDataLabels(object) {
     var result = [],
-        titles = [],
+        labelMap = {},
         table = query('#test-table')[0];
 
     // resolve labels by duck typing because of munged property names
     forIn(object, function(value) {
       return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
-    // collect test titles from the jsPerf test table
-    each(table && table.getElementsByTagName('th'), function(node) {
-      /^title-\d+$/.test(node.id) && titles.push(node.textContent || node.innerText);
+    // create a data map of labels to names
+    each(ui.benchmarks, function(bench) {
+      var key = toLabel(bench.name);
+      labelMap[key && !hasKey(labelMap, key) ? key : key + bench.id ] = bench.name;
     });
-    // sort titles to match Browserscope's order
-    titles.sort();
-    // replace Browserscope's basic labels with the real jsPerf test titles
+    // replace Browserscope's basic labels with benchmark names
     return each(result, function(cell) {
-      var label = cell.label;
-      each(titles, function(title, index) {
-        if (label.indexOf((title.match(/[a-z0-9]+/ig) || []).join(' ')) == 0) {
-          cell.label = title;
-          titles.splice(index, 1);
-          return false;
-        }
-      });
+      var name = labelMap[cell.label];
+      name && (cell.label = name);
     });
   }
 
@@ -293,18 +308,33 @@
    */
   function getDataRows(object) {
     var name,
+        filterBy = cache.lastFilterBy,
+        browserName = toBrowserName(getText(query('strong', '#bs-ua')[0]), filterBy),
+        uaClass = ui.browserscope.uaClass,
         result = [];
 
     // resolve rows by duck typing because of munged property names
     forIn(object, function(value, key) {
       return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
-    // remove empty rows
+    // remove empty rows and set the `p.className` on the browser
+    // name cell that matches the user's browser name
     if (result.length) {
       result = object[name] = filter(result, function(value) {
-        var cell = getDataCells(value)[1];
-        return cell && (cell.f || cell.v);
-      });
+        var cells = getDataCells(value),
+            first = cells[0],
+            second = cells[1];
+
+        // cells[0] is the browser name cell so instead we check cells[1]
+        // for the presence of ops/sec data
+        if (first && second && second.f) {
+          delete first.p.className;
+          if (browserName == toBrowserName(first.f, filterBy)) {
+            first.p.className = uaClass;
+          }
+          return true;
+        }
+      }));
     }
     return result;
   }
@@ -350,6 +380,37 @@
     cache.lastAction = action;
   }
 
+  /**
+   * Converts the browser name version number to the format allowed by the specified filter.
+   * @private
+   * @param {String} name The full browser name .
+   * @param {String} filterBy The filter formating rules to apply.
+   * @returns {String} The converted browser name.
+   */
+  function toBrowserName(name, filterBy) {
+    name || (name = '');
+    if (filterBy == 'all') {
+      // truncate something like 1.0.0 to 1 but leave something like 1.0 alone
+      name = name.replace(/(\d+)[.0]+$/, '$1');
+    } else {
+      // truncate something like 1.0 to 1 or 1.2.3 to 1 but leave something like 1.2 alone
+      name = name.replace(/(\d+)(?:(\.[1-9]$)|(\.[.\d]+$))/, '$1$2');
+    }
+    return name;
+  }
+
+  /**
+   * Replaces non-alphanumeric characters with spaces because Browserscope labels
+   * can only contain alphanumeric characters and spaces.
+   * @private
+   * @param {String} text The text to be converted.
+   * @returns {String} The Browserscope safe label text.
+   * @see http://code.google.com/p/browserscope/issues/detail?id=271
+   */
+  function toLabel(text) {
+    return (text || '').replace(/[^a-z0-9]+/gi, ' ');
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -366,7 +427,8 @@
         cont = me.container,
         filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
         responses = cache.responses,
-        response = cache.responses[filterBy];
+        response = cache.responses[filterBy],
+        visualization = window.google && google.visualization;
 
     function onComplete(response) {
       // set a flag to avoid Google's own timeout
@@ -374,6 +436,9 @@
         fired = true;
         // render if the filter is still the same, else cache the result
         if (filterBy == cache.lastFilterBy) {
+          // delete the cached response before setting it again so `render()`
+          // will recognize the response change
+          delete responses[filterBy];
           me.render({ 'response': response });
         } else if(!responses[filterBy] && response && !response.isError()) {
           responses[filterBy] = response;
@@ -385,10 +450,11 @@
     setAction('load');
 
     // exit early if there is no container element or the response is cached
-    if (!cont || response) {
+    // and retry if the visualization library hasn't loaded yet
+    if (!cont || !visualization || response) {
       cont && onComplete(response);
     }
-    else {
+    else if (!ui.running) {
       // set our own load timeout to display an error message and retry loading
       cache.timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
       // set "loading" message and attempt to load Browserscope data
@@ -420,7 +486,7 @@
     // set last action in case the post fails and a retry is needed
     setAction('post');
 
-    if (key && snapshot && !/Simulator/i.test(Benchmark.platform)) {
+    if (key && snapshot && !ui.running && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
       // (the name contains a timestamp so `cleanup()` can determine when to remove it)
       iframe = createElement('iframe', name);
@@ -488,12 +554,15 @@
         rowCount,
         rows,
         me = ui.browserscope,
-        chart = cache.lastChart = options.chart || cache.lastChart,
         cont = me.container,
-        filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
         responses = cache.responses,
-        response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : responses[filterBy],
         visualization = window.google && google.visualization,
+        lastChart = cache.lastChart,
+        chart = cache.lastChart = options.chart || lastChart,
+        lastFilterBy = cache.lastFilterBy,
+        filterBy = cache.lastFilterBy = options.filterBy || lastFilterBy,
+        lastResponse = responses[filterBy],
+        response = responses[filterBy] = 'response' in options ? (response = options.response) && !response.isError() && response : lastResponse,
         areaWidth = '100%',
         cellHeight = 80,
         fontSize = 13,
@@ -525,19 +594,20 @@
     // set action to clear any timeouts and prep for retries
     setAction(response ? 'render' : cache.lastAction);
 
-    // exit early if there is no container element or the data filter has changed
-    if (!cont || (options.filterBy && visualization && !ui.running)) {
-      cont && load(options);
+    // exit early if there is no container element, the data filter has changed or nothing has changed
+    if (!cont || visualization && (filterBy != lastFilterBy ||
+        (chart == lastChart && response == lastResponse))) {
+      cont && filterBy != lastFilterBy && load(options);
     }
-    // retry if response data is empty/errored or benchmarks are running
-    else if (!response || !visualization || ui.running) {
+    // retry if response data is empty/errored or the visualization library hasn't loaded yet
+    else if (!response || !visualization) {
       // set error message for empty/errored response
       !response && visualization && setMessage(me.texts.error);
       retry(true);
     }
     // visualization chart gallary
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
-    else {
+    else if (!ui.running) {
       cont.className = '';
       data = clone(response.getDataTable());
       labels = getDataLabels(data);
@@ -553,8 +623,8 @@
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
-            var className = cell.p && cell.p.className,
-                lastIndex = cells.length - 1;
+            var lastIndex = cells.length - 1,
+                uaClass = cell.p && cell.p.className;
 
             // cells[1] through cells[lastIndex - 1] are ops/sec cells
             if (/^[\d.,]+$/.test(cell.f)) {
@@ -582,45 +652,48 @@
               }
             }
             // if the browser name matches the user's browser then indicate it
-            // (use `setTimeout()` so the chart will exist before we try to access it)
-            if (className) {
+            if (uaClass) {
+              // prefix the browser name with a line separator because it's not rendered
+              // (IE may render a negligible space in the tooltip of clipped browser names)
+              cell.f = '\u2028' + cell.f;
+              // use `setTimeout()` so the chart will exist when we try to access it
               setTimeout(function() {
-                var context = frames[query('iframe', cont)[0].name].document,
-                    styleSheet = query('#bs-style', context)[0],
+                var styleSheet,
+                    context = frames[query('iframe', cont)[0].name].document,
                     cssText = [];
 
-                // inject custom style sheet if it isn't already
-                if (!styleSheet) {
-                  // extract CSS rules for `className`
-                  each(query('link,style'), function(node) {
-                    // avoid access denied errors on external style sheets
-                    // outside the same origin policy
-                    try {
-                      var sheet = node.sheet || node.styleSheet;
-                      each(sheet.cssRules || sheet.rules, function(rule) {
-                        if ((rule.selectorText || rule.cssText).indexOf('.' + className) > -1) {
-                          cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
-                        }
-                      });
-                    } catch(e) { }
-                  });
-                  styleSheet = createStyleSheet('.' + className + '{' + cssText.join(';') + '}', context);
-                  query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
-                }
+                // extract CSS rules for `uaClass`
+                each(query('link,style'), function(node) {
+                  // avoid access denied errors on external style sheets
+                  // outside the same origin policy
+                  try {
+                    var sheet = node.sheet || node.styleSheet;
+                    each(sheet.cssRules || sheet.rules, function(rule) {
+                      if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
+                        cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
+                      }
+                    });
+                  } catch(e) { }
+                });
+
+                // insert custom style sheet
+                styleSheet = createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context);
+                query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
+
                 // scan chart elements looking for a match
                 each(query('text,textpath', context), function(node) {
                   var nextSibling;
-                  if ((node.string || node.textContent || node.innerText) == cell.f) {
+                  if ((node.string || getText(node)).charAt(0) == '\u2028') {
                     // for VML
                     if (node.string) {
                       // IE requires reinserting the element to render correctly
-                      node.className = className;
+                      node.className = uaClass;
                       nextSibling = node.nextSibling;
                       node.parentNode.insertBefore(node.removeNode(), nextSibling);
                     }
                     // for SVG
                     else {
-                      node.setAttribute('class', className);
+                      node.setAttribute('class', uaClass);
                     }
                   }
                 });
@@ -696,8 +769,11 @@
     /** Your Browserscope API key */
     'key': '',
 
-    /** Selector of the element used for displaying the cumulative results table */
+    /** The selector of the element to contain the entire Browserscope UI */
     'selector': '',
+
+    /** The class name used to style the user's browser name when it appears in charts */
+    'uaClass': 'rt-ua-cur',
 
     /** Object containing various timings settings */
     'timings': {
@@ -718,17 +794,20 @@
     /** Object containing various text messages */
     'texts': {
 
-      /** Text shown when their is no recorded data available to report */
+      /** The text shown when their is no recorded data available to report */
       'empty': 'No data available',
 
-      /** Text shown when the cumulative results data cannot be retrieved */
+      /** The text shown when the cumulative results data cannot be retrieved */
       'error': 'The get/post request has failed :(',
 
-      /** Text shown while waiting for the cumulative results data to load */
+      /** The text shown while waiting for the cumulative results data to load */
       'loading': 'Loading cumulative results data&hellip;',
 
-      /** Text shown while posting the results snapshot to Browserscope */
-      'post': 'Posting results snapshot&hellip;'
+      /** The text shown while posting the results snapshot to Browserscope */
+      'post': 'Posting results snapshot&hellip;',
+
+      /** The text shown while benchmarks are running */
+      'wait': 'Benchmarks running. Please wait&hellip;'
     },
 
     // loads cumulative results table
@@ -779,6 +858,14 @@
       // init garbage collector
       cleanup();
     }
+  });
+
+  // hide the chart while benchmarks are running
+  ui.addListener('start', function() {
+    setMessage(ui.browserscope.texts.wait);
+  })
+  .addListener('abort', function() {
+    ui.browserscope.render();
   });
 
 }(this, document));
