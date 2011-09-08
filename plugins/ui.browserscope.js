@@ -371,6 +371,21 @@
   }
 
   /**
+   * Executes a callback at a given delay interval until it returns `false`.
+   * @private
+   * @param {Function} callback The function called every poll interval.
+   * @param {Number} delay The delay between callback calls (secs).
+   */
+  function poll(callback, delay) {
+    function poller(init) {
+      if (init || callback() !== false) {
+        setTimeout(poller, delay * 1e3);
+      }
+    }
+    poller(true);
+  }
+
+  /**
    * Cleans up the last action and sets the current action.
    * @private
    * @param {String} action The current action.
@@ -378,6 +393,62 @@
   function setAction(action) {
     clearTimeout(cache.timers[cache.lastAction]);
     cache.lastAction = action;
+  }
+
+  /**
+   * Sets the `ui.browserscope.uaClass` class name on the chart element
+   * containing the user's browser name.
+   * @private
+   * @returns {Boolean} Returns `true` if the operation succeeded, else `false`.
+   */
+  function setUaClass() {
+    var styleSheet,
+        me = ui.browserscope,
+        cssText = [],
+        context = frames[query('iframe', me.container)[0].name].document,
+        chartNodes = query('text,textpath', context),
+        uaClass = me.uaClass,
+        result = false;
+
+    if (chartNodes.length) {
+      // extract CSS rules for `uaClass`
+      each(query('link,style'), function(node) {
+        // avoid access denied errors on external style sheets
+        // outside the same origin policy
+        try {
+          var sheet = node.sheet || node.styleSheet;
+          each(sheet.cssRules || sheet.rules, function(rule) {
+            if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
+              cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
+            }
+          });
+        } catch(e) { }
+      });
+
+      // insert custom style sheet
+      styleSheet = createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context);
+      query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
+
+      // scan chart elements looking for a match
+      each(chartNodes, function(node) {
+        var nextSibling;
+        if ((node.string || getText(node)).charAt(0) == '\u2028') {
+          // for VML
+          if (node.string) {
+            // IE requires reinserting the element to render correctly
+            node.className = uaClass;
+            nextSibling = node.nextSibling;
+            node.parentNode.insertBefore(node.removeNode(), nextSibling);
+          }
+          // for SVG
+          else {
+            node.setAttribute('class', uaClass);
+          }
+          result = true;
+        }
+      });
+    }
+    return result;
   }
 
   /**
@@ -623,8 +694,7 @@
         // modify row data
         each(rows, function(row) {
           each(getDataCells(row), function(cell, index, cells) {
-            var lastIndex = cells.length - 1,
-                uaClass = cell.p && cell.p.className;
+            var lastIndex = cells.length - 1;
 
             // cells[1] through cells[lastIndex - 1] are ops/sec cells
             if (/^[\d.,]+$/.test(cell.f)) {
@@ -652,52 +722,12 @@
               }
             }
             // if the browser name matches the user's browser then indicate it
-            if (uaClass) {
+            if (cell.p && cell.p.className) {
               // prefix the browser name with a line separator because it's not rendered
               // (IE may render a negligible space in the tooltip of clipped browser names)
               cell.f = '\u2028' + cell.f;
-              // use `setTimeout()` so the chart will exist when we try to access it
-              setTimeout(function() {
-                var styleSheet,
-                    context = frames[query('iframe', cont)[0].name].document,
-                    cssText = [];
-
-                // extract CSS rules for `uaClass`
-                each(query('link,style'), function(node) {
-                  // avoid access denied errors on external style sheets
-                  // outside the same origin policy
-                  try {
-                    var sheet = node.sheet || node.styleSheet;
-                    each(sheet.cssRules || sheet.rules, function(rule) {
-                      if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
-                        cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
-                      }
-                    });
-                  } catch(e) { }
-                });
-
-                // insert custom style sheet
-                styleSheet = createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context);
-                query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
-
-                // scan chart elements looking for a match
-                each(query('text,textpath', context), function(node) {
-                  var nextSibling;
-                  if ((node.string || getText(node)).charAt(0) == '\u2028') {
-                    // for VML
-                    if (node.string) {
-                      // IE requires reinserting the element to render correctly
-                      node.className = uaClass;
-                      nextSibling = node.nextSibling;
-                      node.parentNode.insertBefore(node.removeNode(), nextSibling);
-                    }
-                    // for SVG
-                    else {
-                      node.setAttribute('class', uaClass);
-                    }
-                  }
-                });
-              }, 1);
+              // poll until the chart elements exist and modify them
+              poll(function() { return !setUaClass(); }, 0.05);
             }
           });
         });
