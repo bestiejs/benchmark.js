@@ -28,6 +28,15 @@
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
 
+  /**
+   * The `uaToken` is prepended to the value of the data cell of the Google
+   * visualization data table object that matches the user's browser name. After
+   * the chart is rendered the element containing the `uaToken` is assigned the
+   * `ui.browserscope.uaClass` class name to allow for the creation of a visual
+   * indicator to help the user more easily find their browser's results.
+   */
+  uaToken = '\u2028',
+
   /** Math shortcuts */
   max = Math.max,
   min = Math.min,
@@ -186,6 +195,61 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Adds a style sheet to the current chart and assigns the `ui.browserscope.uaClass`
+   * class name to the chart element containing the user's browser name.
+   * @private
+   * @returns {Boolean} Returns `true` if the operation succeeded, else `false`.
+   */
+  function addChartStyle() {
+    var me = ui.browserscope,
+        cssText = [],
+        context = frames[query('iframe', me.container)[0].name].document,
+        chartNodes = query('text,textpath', context),
+        uaClass = me.uaClass,
+        result = false;
+
+    if (chartNodes.length) {
+      // extract CSS rules for `uaClass`
+      each(query('link,style'), function(node) {
+        // avoid access denied errors on external style sheets
+        // outside the same origin policy
+        try {
+          var sheet = node.sheet || node.styleSheet;
+          each(sheet.cssRules || sheet.rules, function(rule) {
+            if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
+              cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
+            }
+          });
+        } catch(e) { }
+      });
+
+      // insert custom style sheet
+      query('head', context)[0].appendChild(
+        createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context));
+
+      // scan chart elements for a match
+      each(chartNodes, function(node) {
+        var nextSibling;
+        if ((node.string || getText(node)).charAt(0) == uaToken) {
+          // for VML
+          if (node.string) {
+            // IE requires reinserting the element to render correctly
+            node.className = uaClass;
+            nextSibling = node.nextSibling;
+            node.parentNode.insertBefore(node.removeNode(), nextSibling);
+          }
+          // for SVG
+          else {
+            node.setAttribute('class', uaClass);
+          }
+          result = true;
+        }
+      });
+    }
+    return result;
+  }
+
+  /**
    * Periodically executed callback that removes injected script and iframe elements.
    * @private
    */
@@ -326,7 +390,7 @@
             second = cells[1];
 
         // cells[0] is the browser name cell so instead we check cells[1]
-        // for the presence of ops/sec data
+        // for the presence of ops/sec data to determine if a row is empty or not
         if (first && second && second.f) {
           delete first.p.className;
           if (browserName == toBrowserName(first.f, filterBy)) {
@@ -396,62 +460,6 @@
   }
 
   /**
-   * Sets the `ui.browserscope.uaClass` class name on the chart element
-   * containing the user's browser name.
-   * @private
-   * @returns {Boolean} Returns `true` if the operation succeeded, else `false`.
-   */
-  function setUaClass() {
-    var styleSheet,
-        me = ui.browserscope,
-        cssText = [],
-        context = frames[query('iframe', me.container)[0].name].document,
-        chartNodes = query('text,textpath', context),
-        uaClass = me.uaClass,
-        result = false;
-
-    if (chartNodes.length) {
-      // extract CSS rules for `uaClass`
-      each(query('link,style'), function(node) {
-        // avoid access denied errors on external style sheets
-        // outside the same origin policy
-        try {
-          var sheet = node.sheet || node.styleSheet;
-          each(sheet.cssRules || sheet.rules, function(rule) {
-            if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
-              cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
-            }
-          });
-        } catch(e) { }
-      });
-
-      // insert custom style sheet
-      styleSheet = createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context);
-      query('head', context)[0].appendChild(styleSheet).id = 'bs-style';
-
-      // scan chart elements looking for a match
-      each(chartNodes, function(node) {
-        var nextSibling;
-        if ((node.string || getText(node)).charAt(0) == '\u2028') {
-          // for VML
-          if (node.string) {
-            // IE requires reinserting the element to render correctly
-            node.className = uaClass;
-            nextSibling = node.nextSibling;
-            node.parentNode.insertBefore(node.removeNode(), nextSibling);
-          }
-          // for SVG
-          else {
-            node.setAttribute('class', uaClass);
-          }
-          result = true;
-        }
-      });
-    }
-    return result;
-  }
-
-  /**
    * Converts the browser name version number to the format allowed by the specified filter.
    * @private
    * @param {String} name The full browser name .
@@ -509,8 +517,7 @@
         if (filterBy == cache.lastFilterBy) {
           // delete the cached response before setting it again so `render()`
           // will recognize the response change
-          delete responses[filterBy];
-          me.render({ 'response': response });
+          me.render({ 'force': true, 'response': response });
         } else if(!responses[filterBy] && response && !response.isError()) {
           responses[filterBy] = response;
         }
@@ -599,12 +606,18 @@
    * Purges the Browserscope response cache.
    * @static
    * @member ui.browserscope
+   * @param {String} key The key of a single cache entry to clear.
    */
-  function purge() {
+  function purge(key) {
     // we don't pave the cache object with a new one to preserve existing references
-    forIn(cache.responses, function(value, key, responses) {
+    var responses = cache.responses;
+    if (key) {
       delete responses[key];
-    });
+    } else {
+      forIn(responses, function(value, key) {
+        delete responses[key];
+      });
+    }
   }
 
   /**
@@ -667,7 +680,7 @@
 
     // exit early if there is no container element, the data filter has changed or nothing has changed
     if (!cont || visualization && (filterBy != lastFilterBy ||
-        (chart == lastChart && response == lastResponse))) {
+        (!options.force && chart == lastChart && response == lastResponse))) {
       cont && filterBy != lastFilterBy && load(options);
     }
     // retry if response data is empty/errored or the visualization library hasn't loaded yet
@@ -721,13 +734,13 @@
                 cells[1].v += cell.v;
               }
             }
-            // if the browser name matches the user's browser then indicate it
+            // if the browser name matches the user's browser then style it
             if (cell.p && cell.p.className) {
-              // prefix the browser name with a line separator because it's not rendered
-              // (IE may render a negligible space in the tooltip of clipped browser names)
-              cell.f = '\u2028' + cell.f;
-              // poll until the chart elements exist and modify them
-              poll(function() { return !setUaClass(); }, 0.05);
+              // prefix the browser name with a line separator (\u2028) because it's not rendered
+              // (IE may render a negligible space in the tooltip of browser names truncated with ellipsis)
+              cell.f = uaToken + cell.f;
+              // poll until the chart elements exist and are styled
+              poll(function() { return !addChartStyle(); }, 0.05);
             }
           });
         });
@@ -895,7 +908,7 @@
     setMessage(ui.browserscope.texts.wait);
   })
   .addListener('abort', function() {
-    ui.browserscope.render();
+    ui.browserscope.render({ 'force': true });
   });
 
 }(this, document));
