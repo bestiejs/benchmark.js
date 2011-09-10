@@ -23,6 +23,9 @@
   /** Used to integrity check compiled tests */
   uid = 'uid' + (+new Date),
 
+  /** Used to avoid infinite recursion when methods each call each other */
+  calledBy = {},
+
   /** Used to avoid hz of Infinity */
   divisors = {
     '1': 4096,
@@ -1021,7 +1024,7 @@
       options.onStart.call(benches, new Event('start'), bench);
 
       // end early if the suite was aborted in an "onStart" listener
-      if (Object(benches).constructor == Suite && benches.aborted) {
+      if (benches.aborted && benches.constructor == Suite && name == 'run') {
         options.onCycle.call(benches, new Event('cycle'), bench);
         options.onComplete.call(benches, new Event('complete'), bench);
       }
@@ -1115,11 +1118,14 @@
    */
   function abortSuite() {
     var me = this;
+
     if (me.running) {
-      me.running = NaN;
+      calledBy.abortSuite = true;
       me.reset();
+      delete calledBy.abortSuite;
+
       me.aborted = true;
-      invoke(me, 'abort');
+      !calledBy.resetSuite && invoke(me, 'abort');
       me.emit('abort');
     }
     return me;
@@ -1197,14 +1203,18 @@
    * @returns {Object} The suite instance.
    */
   function resetSuite() {
-    var me = this;
-    if (me.running) {
+    var me = this,
+        notAborting = !calledBy.abortSuite;
+
+    if (me.running && notAborting) {
+      calledBy.resetSuite = true;
       me.abort();
+      delete calledBy.resetSuite;
       me.aborted = false;
     }
     else if (me.aborted !== false || me.running !== false) {
       me.aborted = me.running = false;
-      invoke(me, 'reset');
+      notAborting && invoke(me, 'reset');
       me.emit('reset');
     }
     return me;
@@ -1358,10 +1368,11 @@
         each(me._timerIds || [], clearTimeout);
         delete me._timerIds;
       }
-      // set running to NaN so reset() will detect it as falsey and *not* call abort(),
-      // but *will* detect it as a change and fire the onReset() callback
-      me.running = NaN;
+      // avoid infinite recursion
+      calledBy.abort = true;
       me.reset();
+      delete calledBy.abort;
+
       me.aborted = true;
       me.emit('abort');
     }
@@ -1425,8 +1436,8 @@
         source = extend({}, me.constructor.prototype, me.options),
         pairs = [[source, me]];
 
-    if (me.running) {
-      // no worries, reset() is called within abort()
+    if (me.running && !calledBy.abort) {
+      // no worries, `reset()` is called within `abort()`
       me.abort();
       me.aborted = source.aborted;
     }

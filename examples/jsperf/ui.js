@@ -422,7 +422,8 @@
   /*--------------------------------------------------------------------------*/
 
   ui.on('add', function(event, bench) {
-    var id = ui.benchmarks.length + 1,
+    var index = ui.benchmarks.length,
+        id = index + 1,
         title = $('title-' + id);
 
     title.tabIndex = 0;
@@ -434,7 +435,7 @@
 
     delete ui[--ui.length];
     ui.benchmarks.push(bench);
-    ui.render();
+    ui.render(index);
   })
   .on('start cycle', function() {
     ui.render();
