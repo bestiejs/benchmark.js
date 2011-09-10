@@ -123,6 +123,7 @@
      */
     'click': function(event) {
       event || (event = window.event);
+
       var id,
           index,
           target = event.target || event.srcElement;
@@ -155,6 +156,7 @@
      */
     'hashchange': function() {
       ui.parseHash();
+
       var scrollTop,
           params = ui.params,
           chart = params.chart,

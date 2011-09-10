@@ -510,15 +510,14 @@
         visualization = window.google && google.visualization;
 
     function onComplete(response) {
-      // set a flag to avoid Google's own timeout
+      var lastResponse = responses[filterBy];
       if (!fired) {
+        // set the fired flag to avoid Google's own timeout
         fired = true;
         // render if the filter is still the same, else cache the result
         if (filterBy == cache.lastFilterBy) {
-          // delete the cached response before setting it again so `render()`
-          // will recognize the response change
-          me.render({ 'force': true, 'response': response });
-        } else if(!responses[filterBy] && response && !response.isError()) {
+          me.render({ 'force': true, 'response': lastResponse || response });
+        } else if(!lastResponse && response && !response.isError()) {
           responses[filterBy] = response;
         }
       }
@@ -740,7 +739,7 @@
               // (IE may render a negligible space in the tooltip of browser names truncated with ellipsis)
               cell.f = uaToken + cell.f;
               // poll until the chart elements exist and are styled
-              poll(function() { return !addChartStyle(); }, 0.05);
+              poll(function() { return !addChartStyle(); }, 0.01);
             }
           });
         });
