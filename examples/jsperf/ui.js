@@ -560,6 +560,15 @@
     }
   }());
 
+  // inject Dart disclaimer for Chrome/Android
+  // (recycle other elements/styles for now)
+  (function() {
+    if (/Android|Chrome/.test(Benchmark.platform)) {
+      setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart-disclaimer">Dart disclaimer</a>.</strong>');
+      addClass('java', classNames.show);
+    }
+  }());
+
   // provide a simple UI for toggling between chart types and filtering results
   // (assumes ui.js is just before </body>)
   (function() {
