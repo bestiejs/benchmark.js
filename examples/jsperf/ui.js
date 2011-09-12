@@ -211,7 +211,7 @@
         });
       }
       // show warning when Firebug is enabled
-      if (typeof window.console != 'undefined' && typeof console.firebug == 'string') {
+      if (typeof window.console != 'undefined' && 'firebug' in console) {
         addClass('firebug', classNames.show);
       }
       // evaluate hash values
@@ -560,15 +560,6 @@
     }
   }());
 
-  // inject Dart disclaimer for Chrome/Android
-  // (recycle other elements/styles for now)
-  (function() {
-    if (/Android|Chrome/.test(Benchmark.platform)) {
-      setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart-disclaimer">Dart disclaimer</a>.</strong>');
-      addClass('java', classNames.show);
-    }
-  }());
-
   // provide a simple UI for toggling between chart types and filtering results
   // (assumes ui.js is just before </body>)
   (function() {
@@ -602,6 +593,12 @@
     };
   }());
 
+  // inject /dart notice for Android/Chrome
+  // (recycle other elements/styles for now)
+  if (/Android|Chrome/.test(Benchmark.platform)) {
+    setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart">Dart summary</a>.</strong>');
+    addClass('java', classNames.show);
+  }
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
   if (gaId) {
