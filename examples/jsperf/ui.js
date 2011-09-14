@@ -228,8 +228,8 @@
   /**
    * Shortcut for document.getElementById().
    * @private
-   * @param {String|Object} id The id of the element to retrieve.
-   * @returns {Object} The element, if found, or null.
+   * @param {Element|String} id The id of the element to retrieve.
+   * @returns {Element} The element, if found, or null.
    */
   function $(id) {
     return typeof id == 'string' ? document.getElementById(id) : id;
@@ -238,21 +238,24 @@
   /**
    * Adds a CSS class name to an element's className property.
    * @private
-   * @param {Object} element The element.
+   * @param {Element|String} element The element or id of the element.
    * @param {String} className The class name.
+   * @returns {Element} The element.
    */
   function addClass(element, className) {
     if (!hasClass(element = $(element), className)) {
       element.className += (element.className ? ' ' : '') + className;
     }
+    return element;
   }
 
   /**
    * Registers an event listener on an element.
    * @private
-   * @param {Object} element The element.
+   * @param {Element|String} element The element or id of the element.
    * @param {String} eventName The name of the event.
    * @param {Function} handler The event handler.
+   * @returns {Element} The element.
    */
   function addListener(element, eventName, handler) {
     element = $(element);
@@ -261,23 +264,28 @@
     } else if (element.attachEvent != 'undefined') {
       element.attachEvent('on' + eventName, handler);
     }
+    return element;
   }
 
   /**
    * Appends to an element's innerHTML property.
    * @private
-   * @param {Object} element The element.
+   * @param {Element|String} element The element or id of the element.
    * @param {String} html The HTML to append.
+   * @returns {Element} The element.
    */
   function appendHTML(element, html) {
-    html != null && ($(element).innerHTML += html);
+    if ((element = $(element)) && html != null) {
+      element.innerHTML += html;
+    }
+    return element;
   }
 
   /**
    * Shortcut for document.createElement().
    * @private
    * @param {String} tag The tag name of the element to create.
-   * @returns {Object} A new of the given tag name element.
+   * @returns {Element} A new element of the given tag name.
    */
   function createElement(tagName) {
     return document.createElement(tagName);
@@ -286,7 +294,7 @@
   /**
    * Checks if an element is assigned the given class name.
    * @private
-   * @param {Object} element The element.
+   * @param {Element|String} element The element or id of the element.
    * @param {String} className The class name.
    * @returns {Boolean} If assigned the class name return true, else false.
    */
@@ -297,11 +305,15 @@
   /**
    * Set an element's innerHTML property.
    * @private
-   * @param {Object} element The element.
+   * @param {Element|String} element The element or id of the element.
    * @param {String} html The HTML to set.
+   * @returns {Element} The element.
    */
   function setHTML(element, html) {
-    $(element).innerHTML = html == null ? '' : html;
+    if ((element = $(element))) {
+      element.innerHTML = html == null ? '' : html;
+    }
+    return element;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -547,16 +559,12 @@
   // inject nano applet
   // (assumes ui.js just before </body>)
   (function() {
-    var applet,
-        body = document.body;
-
+    var body = document.body;
     if ('nojava' in ui.params) {
       addClass('java', classNames.show);
     } else {
-      applet = createElement('applet');
-      applet.code = 'nano';
-      applet.archive = archive;
-      body.insertBefore(applet, body.firstChild);
+      body.insertBefore(setHTML(createElement('div'),
+        '<applet code=nano archive=' + archive + '>').lastChild, body.firstChild);
     }
   }());
 
