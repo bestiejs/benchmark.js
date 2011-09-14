@@ -469,9 +469,14 @@
   function toBrowserName(name, filterBy) {
     name || (name = '');
     if (filterBy == 'all') {
-      // truncate something like 1.0.0 to 1 but leave something like 1.0 alone
+      // truncate something like 1.0.0 to 1
       name = name.replace(/(\d+)[.0]+$/, '$1');
-    } else {
+    }
+    else if (/minor|popular/.test(filterBy) && /\d+(?:\.[1-9])+$/) {
+      // truncate something like 1.2.3 to 1.2
+      name = name.replace(/(\d+\.[1-9])(\.[.\d]+$)/, '$1');
+    }
+    else {
       // truncate something like 1.0 to 1 or 1.2.3 to 1 but leave something like 1.2 alone
       name = name.replace(/(\d+)(?:(\.[1-9]$)|(\.[.\d]+$))/, '$1$2');
     }
