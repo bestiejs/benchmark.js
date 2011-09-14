@@ -210,8 +210,8 @@
           };
         });
       }
-      // show warning when Firebug is enabled
-      if (typeof window.console != 'undefined' && 'firebug' in console) {
+      // show warning when Firebug is enabled (avoids showing for Firebug Lite)
+      if (typeof window.console != 'undefined' && typeof console.firebug != 'undefined') {
         addClass('firebug', classNames.show);
       }
       // evaluate hash values
