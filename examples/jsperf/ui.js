@@ -102,11 +102,11 @@
      * @private
      */
     'run': function() {
-      var run = $('run').innerHTML != texts.run.running;
+      var stopped = !ui.running;
       ui.abort();
       ui.length = 0;
 
-      if (run) {
+      if (stopped) {
         logError(false);
         ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
         ui.run(true, true);
@@ -163,6 +163,9 @@
           filterBy = params.filterby;
 
       if (loaded) {
+        // configure posting
+        ui.browserscope.postable = !('nopost' in params);
+
         // call user provided init() function
         if (typeof window.init == 'function') {
           init();
@@ -172,10 +175,14 @@
           scrollTop = $('results').offsetTop;
           ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
         }
+        // call user provided init() function
+        if (typeof window.init == 'function') {
+          init();
+        }
         // auto-run
         if ('run' in params) {
           scrollTop = $('runner').offsetTop;
-          handlers.button.run();
+          setTimeout(handlers.button.run, 1);
         }
         // scroll to the relevant section
         if (scrollTop) {
@@ -360,7 +367,7 @@
   /**
    * Parses the window.location.hash value into an object assigned to `ui.params`.
    * @static
-   * @member ui
+   * @memberOf ui
    * @returns {Object} The suite instance.
    */
   function parseHash() {
@@ -384,7 +391,7 @@
   /**
    * Renders the results table cell of the corresponding benchmark(s).
    * @static
-   * @member ui
+   * @memberOf ui
    * @param {Number} [index] The index of the benchmark to render.
    * @returns {Object} The suite instance.
    */
@@ -498,13 +505,15 @@
 
   /**
    * An array of benchmarks created from test cases.
-   * @member ui
+   * @memberOf ui
+   * @type Array
    */
   ui.benchmarks = [];
 
   /**
    * The parsed query parameters of the pages url hash.
-   * @member ui
+   * @memberOf ui
+   * @type Object
    */
   ui.params = {};
 
@@ -557,7 +566,7 @@
   }());
 
   // inject nano applet
-  // (assumes ui.js just before </body>)
+  // (assumes ui.js is just before </body>)
   (function() {
     var body = document.body;
     if ('nojava' in ui.params) {

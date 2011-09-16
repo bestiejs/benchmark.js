@@ -500,7 +500,7 @@
   /**
    * Loads Browserscope's cumulative results table.
    * @static
-   * @member ui.browserscope
+   * @memberOf ui.browserscope
    * @param {Object} options The options object.
    */
   function load(options) {
@@ -553,7 +553,7 @@
   /**
    * Creates a Browserscope beacon and posts the benchmark results.
    * @static
-   * @member ui.browserscope
+   * @memberOf ui.browserscope
    */
   function post() {
     var idoc,
@@ -568,7 +568,7 @@
     // set last action in case the post fails and a retry is needed
     setAction('post');
 
-    if (key && snapshot && !ui.running && !/Simulator/i.test(Benchmark.platform)) {
+    if (key && snapshot && me.postable && !ui.running && !/Simulator/i.test(Benchmark.platform)) {
       // create new beacon
       // (the name contains a timestamp so `cleanup()` can determine when to remove it)
       iframe = createElement('iframe', name);
@@ -604,12 +604,15 @@
       // http://www.google.com/search?q=IE+throbber+of+doom
       idoc.close();
     }
+    else {
+      me.load();
+    }
   }
 
   /**
    * Purges the Browserscope response cache.
    * @static
-   * @member ui.browserscope
+   * @memberOf ui.browserscope
    * @param {String} key The key of a single cache entry to clear.
    */
   function purge(key) {
@@ -628,7 +631,7 @@
    * Renders the cumulative results table.
    * (tweak the dimensions and styles to best fit your environment)
    * @static
-   * @member ui.browserscope
+   * @memberOf ui.browserscope
    * @param {Object} options The options object.
    */
   function render(options) {
@@ -813,47 +816,110 @@
   // expose
   ui.browserscope = {
 
-    /** Your Browserscope API key */
+    /**
+     * Your Browserscope API key.
+     * @memberOf ui.browserscope
+     * @type String
+     */
     'key': '',
 
-    /** The selector of the element to contain the entire Browserscope UI */
+    /**
+     * A flag to indicate if posting is enabled or disabled.
+     * @memberOf ui.browserscope
+     * @type Boolean
+     */
+    'postable': true,
+
+    /**
+     * The selector of the element to contain the entire Browserscope UI.
+     * @memberOf ui.browserscope
+     * @type String
+     */
     'selector': '',
 
-    /** The class name used to style the user's browser name when it appears in charts */
+    /**
+     * The class name used to style the user's browser name when it appears in charts.
+     * @memberOf ui.browserscope
+     * @type String
+     */
     'uaClass': 'rt-ua-cur',
 
-    /** Object containing various timings settings */
+    /**
+     * Object containing various timings settings.
+     * @memberOf ui.browserscope
+     * @type Object
+     */
     'timings': {
 
-      /** The delay between removing abandoned script and iframe elements (secs) */
+      /**
+       * The delay between removing abandoned script and iframe elements (secs).
+       * @memberOf ui.browserscope.timings
+       * @type Number
+       */
       'cleanup': 10,
 
-      /** The delay before refreshing the cumulative results after posting (secs) */
+      /**
+       * The delay before refreshing the cumulative results after posting (secs).
+       * @memberOf ui.browserscope.timings
+       * @type Number
+       */
       'refresh': 3,
 
-      /** The delay between load attempts (secs) */
+      /**
+       * The delay between load attempts (secs).
+       * @memberOf ui.browserscope.timings
+       * @type Number
+       */
       'retry': 5,
 
-      /** The time to wait for a request to finish (secs) */
+      /**
+       * The time to wait for a request to finish (secs).
+       * @memberOf ui.browserscope.timings
+       * @type Number
+       */
       'timeout': 10
     },
 
-    /** Object containing various text messages */
+    /**
+     * Object containing various text messages.
+     * @memberOf ui.browserscope
+     * @type Object
+     */
     'texts': {
 
-      /** The text shown when their is no recorded data available to report */
+      /**
+       * The text shown when their is no recorded data available to report.
+       * @memberOf ui.browserscope.texts
+       * @type String
+       */
       'empty': 'No data available',
 
-      /** The text shown when the cumulative results data cannot be retrieved */
+      /**
+       * The text shown when the cumulative results data cannot be retrieved.
+       * @memberOf ui.browserscope.texts
+       * @type String
+       */
       'error': 'The get/post request has failed :(',
 
-      /** The text shown while waiting for the cumulative results data to load */
+      /**
+       * The text shown while waiting for the cumulative results data to load.
+       * @memberOf ui.browserscope.texts
+       * @type String
+       */
       'loading': 'Loading cumulative results data&hellip;',
 
-      /** The text shown while posting the results snapshot to Browserscope */
+      /**
+       * The text shown while posting the results snapshot to Browserscope.
+       * @memberOf ui.browserscope.texts
+       * @type String
+       */
       'post': 'Posting results snapshot&hellip;',
 
-      /** The text shown while benchmarks are running */
+      /**
+       * The text shown while benchmarks are running.
+       * @memberOf ui.browserscope.texts
+       * @type String
+       */
       'wait': 'Benchmarks running. Please wait&hellip;'
     },
 
