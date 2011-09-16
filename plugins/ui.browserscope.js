@@ -472,7 +472,7 @@
       // truncate something like 1.0.0 to 1
       name = name.replace(/(\d+)[.0]+$/, '$1');
     }
-    else if (/minor|popular/.test(filterBy) && /\d+(?:\.[1-9])+$/) {
+    else if (/minor|popular/.test(filterBy) && /\d+(?:\.[1-9])+$/.test(name)) {
       // truncate something like 1.2.3 to 1.2
       name = name.replace(/(\d+\.[1-9])(\.[.\d]+$)/, '$1');
     }
