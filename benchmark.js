@@ -527,9 +527,16 @@
    * @returns {String} The function's source code.
    */
   function getSource(fn) {
-    return ((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
-      .replace(/^\s+|\s+$/g, '')
-      .replace(/([^\n])$/, '$1\n');
+    return (fn.toString == Function.prototype.toString
+      ? ((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
+      : String(fn)
+    )
+    // trim whitespace
+    .replace(/^\s+|\s+$/g, '')
+    // insert newline before snippet
+    .replace(/^([^\n])/, '\n$1')
+    // insert newline after snippet
+    .replace(/([^\n])$/, '$1\n')
   }
 
   /**

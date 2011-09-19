@@ -303,7 +303,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.version" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1979" title="View in source">`Benchmark.version`</a>
+### <a id="Benchmark.version" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1986" title="View in source">`Benchmark.version`</a>
 *(String)*: The version number.
 [&#9650;][1]
 
@@ -312,7 +312,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L709" title="View in source">`Benchmark.each(object, callback, thisArg)`</a>
+### <a id="Benchmark.each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L716" title="View in source">`Benchmark.each(object, callback, thisArg)`</a>
 A generic `Array#forEach` / `for...in` own property utility function.
 [&#9650;][1]
 
@@ -329,7 +329,7 @@ A generic `Array#forEach` / `for...in` own property utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L755" title="View in source">`Benchmark.filter(array, callback, thisArg)`</a>
+### <a id="Benchmark.filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L762" title="View in source">`Benchmark.filter(array, callback, thisArg)`</a>
 A generic `Array#filter` utility function.
 [&#9650;][1]
 
@@ -363,7 +363,7 @@ Benchmark.filter(benches, 'successful');
 
 <!-- div -->
 
-### <a id="Benchmark.forIn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L786" title="View in source">`Benchmark.forIn(object, callback, thisArg)`</a>
+### <a id="Benchmark.forIn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L793" title="View in source">`Benchmark.forIn(object, callback, thisArg)`</a>
 Iterates over an object's own properties, executing the `callback` for each.
 [&#9650;][1]
 
@@ -380,7 +380,7 @@ Iterates over an object's own properties, executing the `callback` for each.
 
 <!-- div -->
 
-### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L805" title="View in source">`Benchmark.formatNumber(number)`</a>
+### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L812" title="View in source">`Benchmark.formatNumber(number)`</a>
 Converts a number to a more readable comma-separated string representation.
 [&#9650;][1]
 
@@ -395,7 +395,7 @@ Converts a number to a more readable comma-separated string representation.
 
 <!-- div -->
 
-### <a id="Benchmark.hasKey" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L818" title="View in source">`Benchmark.hasKey(object, key)`</a>
+### <a id="Benchmark.hasKey" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L825" title="View in source">`Benchmark.hasKey(object, key)`</a>
 Checks if an object has the specified key as a direct property.
 [&#9650;][1]
 
@@ -411,7 +411,7 @@ Checks if an object has the specified key as a direct property.
 
 <!-- div -->
 
-### <a id="Benchmark.indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L848" title="View in source">`Benchmark.indexOf(array, value)`</a>
+### <a id="Benchmark.indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L855" title="View in source">`Benchmark.indexOf(array, value)`</a>
 A generic `Array#indexOf` utility function.
 [&#9650;][1]
 
@@ -427,7 +427,7 @@ A generic `Array#indexOf` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L897" title="View in source">`Benchmark.invoke(benches, name [, arg1, arg2, ...])`</a>
+### <a id="Benchmark.invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L904" title="View in source">`Benchmark.invoke(benches, name [, arg1, arg2, ...])`</a>
 Invokes a method on all items in an array.
 [&#9650;][1]
 
@@ -475,7 +475,7 @@ Benchmark.invoke(benches, {
 
 <!-- div -->
 
-### <a id="Benchmark.join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1052" title="View in source">`Benchmark.join(object [, separator1=',', separator2=': '])`</a>
+### <a id="Benchmark.join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1059" title="View in source">`Benchmark.join(object [, separator1=',', separator2=': '])`</a>
 Creates a string of joined array values or object key-value pairs.
 [&#9650;][1]
 
@@ -492,7 +492,7 @@ Creates a string of joined array values or object key-value pairs.
 
 <!-- div -->
 
-### <a id="Benchmark.map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1073" title="View in source">`Benchmark.map(array, callback, thisArg)`</a>
+### <a id="Benchmark.map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1080" title="View in source">`Benchmark.map(array, callback, thisArg)`</a>
 A generic `Array#map` utility function.
 [&#9650;][1]
 
@@ -509,7 +509,7 @@ A generic `Array#map` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1088" title="View in source">`Benchmark.pluck(array, property)`</a>
+### <a id="Benchmark.pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1095" title="View in source">`Benchmark.pluck(array, property)`</a>
 Retrieves the value of a specified property from all items in an array.
 [&#9650;][1]
 
@@ -525,7 +525,7 @@ Retrieves the value of a specified property from all items in an array.
 
 <!-- div -->
 
-### <a id="Benchmark.reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1103" title="View in source">`Benchmark.reduce(array, callback, accumulator)`</a>
+### <a id="Benchmark.reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1110" title="View in source">`Benchmark.reduce(array, callback, accumulator)`</a>
 A generic `Array#reduce` utility function.
 [&#9650;][1]
 
@@ -552,7 +552,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2196" title="View in source">`Benchmark#aborted`</a>
+### <a id="Benchmark:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2203" title="View in source">`Benchmark#aborted`</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
 [&#9650;][1]
 
@@ -561,7 +561,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:count" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2161" title="View in source">`Benchmark#count`</a>
+### <a id="Benchmark:count" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2168" title="View in source">`Benchmark#count`</a>
 *(Number)*: The number of times a test was executed.
 [&#9650;][1]
 
@@ -570,7 +570,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2168" title="View in source">`Benchmark#cycles`</a>
+### <a id="Benchmark:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2175" title="View in source">`Benchmark#cycles`</a>
 *(Number)*: The number of cycles performed while benchmarking.
 [&#9650;][1]
 
@@ -579,7 +579,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:error" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2175" title="View in source">`Benchmark#error`</a>
+### <a id="Benchmark:error" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2182" title="View in source">`Benchmark#error`</a>
 *(Object, Null)*: The error object if the test failed.
 [&#9650;][1]
 
@@ -588,7 +588,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:hz" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2182" title="View in source">`Benchmark#hz`</a>
+### <a id="Benchmark:hz" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2189" title="View in source">`Benchmark#hz`</a>
 *(Number)*: The number of executions per second.
 [&#9650;][1]
 
@@ -597,7 +597,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:on" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2209" title="View in source">`Benchmark.Suite#on`</a>
+### <a id="Benchmark:on" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2216" title="View in source">`Benchmark.Suite#on`</a>
 *(Unknown)*: Alias of [`Benchmark#addListener`](#Benchmark:addListener).
 [&#9650;][1]
 
@@ -606,7 +606,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2203" title="View in source">`Benchmark#running`</a>
+### <a id="Benchmark:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2210" title="View in source">`Benchmark#running`</a>
 *(Boolean)*: A flag to indicate if the benchmark is running.
 [&#9650;][1]
 
@@ -615,7 +615,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:abort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1363" title="View in source">`Benchmark#abort`</a>
+### <a id="Benchmark:abort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1370" title="View in source">`Benchmark#abort`</a>
 Aborts the benchmark without recording times.
 [&#9650;][1]
 
@@ -627,7 +627,7 @@ Aborts the benchmark without recording times.
 
 <!-- div -->
 
-### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1273" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
+### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1280" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
 Registers a single listener of a specified event type.
 [&#9650;][1]
 
@@ -652,7 +652,7 @@ bench.addListener('start cycle', listener);
 
 <!-- div -->
 
-### <a id="Benchmark:clone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1393" title="View in source">`Benchmark#clone(options)`</a>
+### <a id="Benchmark:clone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1400" title="View in source">`Benchmark#clone(options)`</a>
 Creates a new benchmark using the same test and options.
 [&#9650;][1]
 
@@ -674,7 +674,7 @@ var bizarro = bench.clone({
 
 <!-- div -->
 
-### <a id="Benchmark:compare" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1412" title="View in source">`Benchmark#compare(other)`</a>
+### <a id="Benchmark:compare" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1419" title="View in source">`Benchmark#compare(other)`</a>
 Determines if the benchmark's period is smaller than another.
 [&#9650;][1]
 
@@ -689,7 +689,7 @@ Determines if the benchmark's period is smaller than another.
 
 <!-- div -->
 
-### <a id="Benchmark:emit" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1289" title="View in source">`Benchmark.Suite#emit(type)`</a>
+### <a id="Benchmark:emit" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1296" title="View in source">`Benchmark.Suite#emit(type)`</a>
 Executes all registered listeners of a specified event type.
 [&#9650;][1]
 
@@ -704,7 +704,7 @@ Executes all registered listeners of a specified event type.
 
 <!-- div -->
 
-### <a id="Benchmark:fn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2189" title="View in source">`Benchmark#fn`</a>
+### <a id="Benchmark:fn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2196" title="View in source">`Benchmark#fn`</a>
 The test to benchmark.
 [&#9650;][1]
 
@@ -713,7 +713,7 @@ The test to benchmark.
 
 <!-- div -->
 
-### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1346" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
+### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1353" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
 Unregisters all listeners of a specified event type.
 [&#9650;][1]
 
@@ -737,7 +737,7 @@ bench.removeListener('start cycle');
 
 <!-- div -->
 
-### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1319" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
+### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1326" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
 Unregisters a single listener of a specified event type.
 [&#9650;][1]
 
@@ -762,7 +762,7 @@ bench.removeListener('start cycle', listener);
 
 <!-- div -->
 
-### <a id="Benchmark:reset" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1432" title="View in source">`Benchmark#reset`</a>
+### <a id="Benchmark:reset" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1439" title="View in source">`Benchmark#reset`</a>
 Reset properties and abort if running.
 [&#9650;][1]
 
@@ -774,7 +774,7 @@ Reset properties and abort if running.
 
 <!-- div -->
 
-### <a id="Benchmark:run" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1944" title="View in source">`Benchmark#run([async=false])`</a>
+### <a id="Benchmark:run" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1951" title="View in source">`Benchmark#run([async=false])`</a>
 Runs the benchmark.
 [&#9650;][1]
 
@@ -789,7 +789,7 @@ Runs the benchmark.
 
 <!-- div -->
 
-### <a id="Benchmark:setup" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2235" title="View in source">`Benchmark#setup`</a>
+### <a id="Benchmark:setup" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2242" title="View in source">`Benchmark#setup`</a>
 Compiled into the test and executed immediately **before** the test loop.
 [&#9650;][1]
 
@@ -819,7 +819,7 @@ var end = new Date - start;
 
 <!-- div -->
 
-### <a id="Benchmark:teardown" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2242" title="View in source">`Benchmark#teardown`</a>
+### <a id="Benchmark:teardown" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2249" title="View in source">`Benchmark#teardown`</a>
 Compiled into the test and executed immediately **after** the test loop.
 [&#9650;][1]
 
@@ -828,7 +828,7 @@ Compiled into the test and executed immediately **after** the test loop.
 
 <!-- div -->
 
-### <a id="Benchmark:toString" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1471" title="View in source">`Benchmark#toString`</a>
+### <a id="Benchmark:toString" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1478" title="View in source">`Benchmark#toString`</a>
 Displays relevant benchmark information when coerced to a string.
 [&#9650;][1]
 
@@ -847,7 +847,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1987" title="View in source">`options`</a>
+### <a id="Benchmark.options" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1994" title="View in source">`options`</a>
 *(Object)*: The default options copied by benchmark instances.
 [&#9650;][1]
 
@@ -856,7 +856,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.async" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1994" title="View in source">`Benchmark.options.async`</a>
+### <a id="Benchmark.options.async" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2001" title="View in source">`Benchmark.options.async`</a>
 *(Boolean)*: A flag to indicate that benchmark cycles will execute asynchronously by default.
 [&#9650;][1]
 
@@ -865,7 +865,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.defer" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2001" title="View in source">`Benchmark.options.defer`</a>
+### <a id="Benchmark.options.defer" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2008" title="View in source">`Benchmark.options.defer`</a>
 *(Boolean)*: A flag to indicate that the benchmark clock is deferred.
 [&#9650;][1]
 
@@ -874,7 +874,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.delay" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2008" title="View in source">`Benchmark.options.delay`</a>
+### <a id="Benchmark.options.delay" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2015" title="View in source">`Benchmark.options.delay`</a>
 *(Number)*: The delay between test cycles *(secs)*.
 [&#9650;][1]
 
@@ -883,7 +883,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.id" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2015" title="View in source">`Benchmark.options.id`</a>
+### <a id="Benchmark.options.id" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2022" title="View in source">`Benchmark.options.id`</a>
 *(String, Null)*: Displayed by Benchmark#toString when a `name` is not available *(auto-generated if `null`)*.
 [&#9650;][1]
 
@@ -892,7 +892,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.initCount" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2022" title="View in source">`Benchmark.options.initCount`</a>
+### <a id="Benchmark.options.initCount" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2029" title="View in source">`Benchmark.options.initCount`</a>
 *(Number)*: The default number of times to execute a test on a benchmark's first cycle.
 [&#9650;][1]
 
@@ -901,7 +901,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.maxTime" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2030" title="View in source">`Benchmark.options.maxTime`</a>
+### <a id="Benchmark.options.maxTime" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2037" title="View in source">`Benchmark.options.maxTime`</a>
 *(Number)*: The maximum time a benchmark is allowed to run before finishing *(secs)*.
 [&#9650;][1]
 
@@ -910,7 +910,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.minSamples" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2037" title="View in source">`Benchmark.options.minSamples`</a>
+### <a id="Benchmark.options.minSamples" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2044" title="View in source">`Benchmark.options.minSamples`</a>
 *(Number)*: The minimum sample size required to perform statistical analysis.
 [&#9650;][1]
 
@@ -919,7 +919,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.minTime" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2044" title="View in source">`Benchmark.options.minTime`</a>
+### <a id="Benchmark.options.minTime" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2051" title="View in source">`Benchmark.options.minTime`</a>
 *(Number)*: The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
 [&#9650;][1]
 
@@ -928,7 +928,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.options.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2051" title="View in source">`Benchmark.options.name`</a>
+### <a id="Benchmark.options.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2058" title="View in source">`Benchmark.options.name`</a>
 *(String, Null)*: The name of the benchmark.
 [&#9650;][1]
 
@@ -944,7 +944,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2060" title="View in source">`platform`</a>
+### <a id="Benchmark.platform" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2067" title="View in source">`platform`</a>
 *(Object)*: Platform object containing browser name, version, and operating system.
 [&#9650;][1]
 
@@ -953,7 +953,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.description" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2067" title="View in source">`Benchmark.platform.description`</a>
+### <a id="Benchmark.platform.description" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2074" title="View in source">`Benchmark.platform.description`</a>
 *(String)*: The platform description.
 [&#9650;][1]
 
@@ -962,7 +962,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.layout" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2074" title="View in source">`Benchmark.platform.layout`</a>
+### <a id="Benchmark.platform.layout" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2081" title="View in source">`Benchmark.platform.layout`</a>
 *(String, Null)*: The name of the browser layout engine.
 [&#9650;][1]
 
@@ -971,7 +971,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2088" title="View in source">`Benchmark.platform.name`</a>
+### <a id="Benchmark.platform.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2095" title="View in source">`Benchmark.platform.name`</a>
 *(String, Null)*: The name of the browser/environment.
 [&#9650;][1]
 
@@ -980,7 +980,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.os" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2095" title="View in source">`Benchmark.platform.os`</a>
+### <a id="Benchmark.platform.os" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2102" title="View in source">`Benchmark.platform.os`</a>
 *(String, Null)*: The name of the operating system.
 [&#9650;][1]
 
@@ -989,7 +989,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.product" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2081" title="View in source">`Benchmark.platform.product`</a>
+### <a id="Benchmark.platform.product" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2088" title="View in source">`Benchmark.platform.product`</a>
 *(String, Null)*: The name of the product hosting the browser.
 [&#9650;][1]
 
@@ -998,7 +998,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.version" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2102" title="View in source">`Benchmark.platform.version`</a>
+### <a id="Benchmark.platform.version" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2109" title="View in source">`Benchmark.platform.version`</a>
 *(String, Null)*: The browser/environment version.
 [&#9650;][1]
 
@@ -1007,7 +1007,7 @@ Displays relevant benchmark information when coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.platform.toString" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2110" title="View in source">`Benchmark.platform.toString`</a>
+### <a id="Benchmark.platform.toString" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2117" title="View in source">`Benchmark.platform.toString`</a>
 Return platform description when the platform object is coerced to a string.
 [&#9650;][1]
 
@@ -1026,7 +1026,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2249" title="View in source">`stats`</a>
+### <a id="Benchmark:stats" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2256" title="View in source">`stats`</a>
 *(Object)*: An object of stats including mean, margin or error, and standard deviation.
 [&#9650;][1]
 
@@ -1035,7 +1035,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.deviation" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2277" title="View in source">`Benchmark#stats.deviation`</a>
+### <a id="Benchmark:stats.deviation" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2284" title="View in source">`Benchmark#stats.deviation`</a>
 *(Number)*: The sample standard deviation.
 [&#9650;][1]
 
@@ -1044,7 +1044,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.mean" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2284" title="View in source">`Benchmark#stats.mean`</a>
+### <a id="Benchmark:stats.mean" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2291" title="View in source">`Benchmark#stats.mean`</a>
 *(Number)*: The sample arithmetic mean.
 [&#9650;][1]
 
@@ -1053,7 +1053,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.moe" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2256" title="View in source">`Benchmark#stats.moe`</a>
+### <a id="Benchmark:stats.moe" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2263" title="View in source">`Benchmark#stats.moe`</a>
 *(Number)*: The margin of error.
 [&#9650;][1]
 
@@ -1062,7 +1062,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.rme" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2263" title="View in source">`Benchmark#stats.rme`</a>
+### <a id="Benchmark:stats.rme" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2270" title="View in source">`Benchmark#stats.rme`</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
 [&#9650;][1]
 
@@ -1071,7 +1071,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.sem" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2270" title="View in source">`Benchmark#stats.sem`</a>
+### <a id="Benchmark:stats.sem" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2277" title="View in source">`Benchmark#stats.sem`</a>
 *(Number)*: The standard error of the mean.
 [&#9650;][1]
 
@@ -1080,7 +1080,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.size" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2291" title="View in source">`Benchmark#stats.size`</a>
+### <a id="Benchmark:stats.size" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2298" title="View in source">`Benchmark#stats.size`</a>
 *(Number)*: The sample size.
 [&#9650;][1]
 
@@ -1089,7 +1089,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.variance" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2298" title="View in source">`Benchmark#stats.variance`</a>
+### <a id="Benchmark:stats.variance" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2305" title="View in source">`Benchmark#stats.variance`</a>
 *(Number)*: The sample variance.
 [&#9650;][1]
 
@@ -1105,7 +1105,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2306" title="View in source">`times`</a>
+### <a id="Benchmark:times" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2313" title="View in source">`times`</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop.
 [&#9650;][1]
 
@@ -1114,7 +1114,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.cycle" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2313" title="View in source">`Benchmark#times.cycle`</a>
+### <a id="Benchmark:times.cycle" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2320" title="View in source">`Benchmark#times.cycle`</a>
 *(Number)*: The time taken to complete the last cycle *(secs)*.
 [&#9650;][1]
 
@@ -1123,7 +1123,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2320" title="View in source">`Benchmark#times.elapsed`</a>
+### <a id="Benchmark:times.elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2327" title="View in source">`Benchmark#times.elapsed`</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*.
 [&#9650;][1]
 
@@ -1132,7 +1132,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.period" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2327" title="View in source">`Benchmark#times.period`</a>
+### <a id="Benchmark:times.period" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2334" title="View in source">`Benchmark#times.period`</a>
 *(Number)*: The time taken to execute the test once *(secs)*.
 [&#9650;][1]
 
@@ -1141,7 +1141,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2334" title="View in source">`Benchmark#times.timeStamp`</a>
+### <a id="Benchmark:times.timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2341" title="View in source">`Benchmark#times.timeStamp`</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*.
 [&#9650;][1]
 
@@ -1179,7 +1179,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2552" title="View in source">`Benchmark.Deferred#cycles`</a>
+### <a id="Benchmark.Deferred:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2559" title="View in source">`Benchmark.Deferred#cycles`</a>
 *(Number)*: The number of deferred cycles performed while benchmarking.
 [&#9650;][1]
 
@@ -1188,7 +1188,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2559" title="View in source">`Benchmark.Deferred#elapsed`</a>
+### <a id="Benchmark.Deferred:elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2566" title="View in source">`Benchmark.Deferred#elapsed`</a>
 *(Number)*: The time taken to complete the deferred benchmark *(secs)*.
 [&#9650;][1]
 
@@ -1197,7 +1197,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L685" title="View in source">`Benchmark.Deferred#resolve`</a>
+### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L692" title="View in source">`Benchmark.Deferred#resolve`</a>
 *(Unknown)*: Handles cycling/completing the deferred benchmark.
 [&#9650;][1]
 
@@ -1206,7 +1206,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2566" title="View in source">`Benchmark.Deferred#timeStamp`</a>
+### <a id="Benchmark.Deferred:timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2573" title="View in source">`Benchmark.Deferred#timeStamp`</a>
 *(Number)*: A timestamp of when the deferred benchmark started *(ms)*.
 [&#9650;][1]
 
@@ -1222,7 +1222,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:benchmark" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2545" title="View in source">`benchmark`</a>
+### <a id="Benchmark.Deferred:benchmark" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2552" title="View in source">`benchmark`</a>
 *(Object)*: The deferred benchmark instance.
 [&#9650;][1]
 
@@ -1260,7 +1260,7 @@ Event constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Event:type" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2579" title="View in source">`Benchmark.Event#type`</a>
+### <a id="Benchmark.Event:type" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2586" title="View in source">`Benchmark.Event#type`</a>
 *(String)*: The event type.
 [&#9650;][1]
 
@@ -1330,7 +1330,7 @@ Suite constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2399" title="View in source">`Benchmark.Suite#aborted`</a>
+### <a id="Benchmark.Suite:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2406" title="View in source">`Benchmark.Suite#aborted`</a>
 *(Boolean)*: A flag to indicate if the suite is aborted.
 [&#9650;][1]
 
@@ -1339,7 +1339,7 @@ Suite constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:length" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2392" title="View in source">`Benchmark.Suite#length`</a>
+### <a id="Benchmark.Suite:length" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2399" title="View in source">`Benchmark.Suite#length`</a>
 *(Number)*: The number of benchmarks in the suite.
 [&#9650;][1]
 
@@ -1348,7 +1348,7 @@ Suite constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:on" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2209" title="View in source">`Benchmark.Suite#on`</a>
+### <a id="Benchmark:on" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2216" title="View in source">`Benchmark.Suite#on`</a>
 *(Unknown)*: Alias of [`Benchmark#addListener`](#Benchmark:addListener).
 [&#9650;][1]
 
@@ -1357,7 +1357,7 @@ Suite constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2406" title="View in source">`Benchmark.Suite#running`</a>
+### <a id="Benchmark.Suite:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2413" title="View in source">`Benchmark.Suite#running`</a>
 *(Boolean)*: A flag to indicate if the suite is running.
 [&#9650;][1]
 
@@ -1366,7 +1366,7 @@ Suite constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:abort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1119" title="View in source">`Benchmark.Suite#abortSuite`</a>
+### <a id="Benchmark.Suite:abort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1126" title="View in source">`Benchmark.Suite#abortSuite`</a>
 Aborts all benchmarks in the suite.
 [&#9650;][1]
 
@@ -1378,7 +1378,7 @@ Aborts all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:add" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1155" title="View in source">`Benchmark.Suite#add(name, fn [, options={}])`</a>
+### <a id="Benchmark.Suite:add" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1162" title="View in source">`Benchmark.Suite#add(name, fn [, options={}])`</a>
 Adds a test to the benchmark suite.
 [&#9650;][1]
 
@@ -1410,7 +1410,7 @@ suite.add('foo', fn, {
 
 <!-- div -->
 
-### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1273" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
+### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1280" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
 Registers a single listener of a specified event type.
 [&#9650;][1]
 
@@ -1435,7 +1435,7 @@ bench.addListener('start cycle', listener);
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:clone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1171" title="View in source">`Benchmark.Suite#cloneSuite(options)`</a>
+### <a id="Benchmark.Suite:clone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1178" title="View in source">`Benchmark.Suite#cloneSuite(options)`</a>
 Creates a new suite with cloned benchmarks.
 [&#9650;][1]
 
@@ -1450,7 +1450,7 @@ Creates a new suite with cloned benchmarks.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2415" title="View in source">`Benchmark.Suite#each(callback)`</a>
+### <a id="Benchmark.Suite:each" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2422" title="View in source">`Benchmark.Suite#each(callback)`</a>
 An `Array#forEach` utility function.
 [&#9650;][1]
 
@@ -1465,7 +1465,7 @@ An `Array#forEach` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark:emit" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1289" title="View in source">`Benchmark.Suite#emit(type)`</a>
+### <a id="Benchmark:emit" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1296" title="View in source">`Benchmark.Suite#emit(type)`</a>
 Executes all registered listeners of a specified event type.
 [&#9650;][1]
 
@@ -1480,7 +1480,7 @@ Executes all registered listeners of a specified event type.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1191" title="View in source">`Benchmark.Suite#filterSuite(callback)`</a>
+### <a id="Benchmark.Suite:filter" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1198" title="View in source">`Benchmark.Suite#filterSuite(callback)`</a>
 A `Array#filter` utility function.
 [&#9650;][1]
 
@@ -1495,7 +1495,7 @@ A `Array#filter` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2423" title="View in source">`Benchmark.Suite#indexOf(value)`</a>
+### <a id="Benchmark.Suite:indexOf" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2430" title="View in source">`Benchmark.Suite#indexOf(value)`</a>
 An `Array#indexOf` utility function.
 [&#9650;][1]
 
@@ -1510,7 +1510,7 @@ An `Array#indexOf` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2432" title="View in source">`Benchmark.Suite#invoke(name [, arg1, arg2, ...])`</a>
+### <a id="Benchmark.Suite:invoke" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2439" title="View in source">`Benchmark.Suite#invoke(name [, arg1, arg2, ...])`</a>
 Invokes a method on all benchmarks in the suite.
 [&#9650;][1]
 
@@ -1526,7 +1526,7 @@ Invokes a method on all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2440" title="View in source">`Benchmark.Suite#join([separator=','])`</a>
+### <a id="Benchmark.Suite:join" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2447" title="View in source">`Benchmark.Suite#join([separator=','])`</a>
 Converts the array to a string.
 [&#9650;][1]
 
@@ -1541,7 +1541,7 @@ Converts the array to a string.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2448" title="View in source">`Benchmark.Suite#map(callback)`</a>
+### <a id="Benchmark.Suite:map" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2455" title="View in source">`Benchmark.Suite#map(callback)`</a>
 An `Array#map` utility function.
 [&#9650;][1]
 
@@ -1556,7 +1556,7 @@ An `Array#map` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2456" title="View in source">`Benchmark.Suite#pluck(property)`</a>
+### <a id="Benchmark.Suite:pluck" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2463" title="View in source">`Benchmark.Suite#pluck(property)`</a>
 Retrieves the value of a specified property from all benchmarks in the suite.
 [&#9650;][1]
 
@@ -1571,7 +1571,7 @@ Retrieves the value of a specified property from all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:pop" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2463" title="View in source">`Benchmark.Suite#pop`</a>
+### <a id="Benchmark.Suite:pop" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2470" title="View in source">`Benchmark.Suite#pop`</a>
 Removes the last element of the host array and returns it.
 [&#9650;][1]
 
@@ -1583,7 +1583,7 @@ Removes the last element of the host array and returns it.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:push" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2470" title="View in source">`Benchmark.Suite#push`</a>
+### <a id="Benchmark.Suite:push" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2477" title="View in source">`Benchmark.Suite#push`</a>
 Appends arguments to the end of the array.
 [&#9650;][1]
 
@@ -1595,7 +1595,7 @@ Appends arguments to the end of the array.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2487" title="View in source">`Benchmark.Suite#reduce(callback, accumulator)`</a>
+### <a id="Benchmark.Suite:reduce" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2494" title="View in source">`Benchmark.Suite#reduce(callback, accumulator)`</a>
 An `Array#reduce` utility function.
 [&#9650;][1]
 
@@ -1611,7 +1611,7 @@ An `Array#reduce` utility function.
 
 <!-- div -->
 
-### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1346" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
+### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1353" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
 Unregisters all listeners of a specified event type.
 [&#9650;][1]
 
@@ -1635,7 +1635,7 @@ bench.removeListener('start cycle');
 
 <!-- div -->
 
-### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1319" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
+### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1326" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
 Unregisters a single listener of a specified event type.
 [&#9650;][1]
 
@@ -1660,7 +1660,7 @@ bench.removeListener('start cycle', listener);
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:reset" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1205" title="View in source">`Benchmark.Suite#resetSuite`</a>
+### <a id="Benchmark.Suite:reset" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1212" title="View in source">`Benchmark.Suite#resetSuite`</a>
 Resets all benchmarks in the suite.
 [&#9650;][1]
 
@@ -1684,7 +1684,7 @@ Rearrange the host array's elements in reverse order.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:run" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1231" title="View in source">`Benchmark.Suite#runSuite([async=false, queued=false])`</a>
+### <a id="Benchmark.Suite:run" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1238" title="View in source">`Benchmark.Suite#runSuite([async=false, queued=false])`</a>
 Runs the suite.
 [&#9650;][1]
 
@@ -1724,7 +1724,7 @@ Creates an array of the host array's elements from the start index up to,
 
 <!-- div -->
 
-### <a id="Benchmark.Suite:sort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2478" title="View in source">`Benchmark.Suite#sort([compareFn=null])`</a>
+### <a id="Benchmark.Suite:sort" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2485" title="View in source">`Benchmark.Suite#sort([compareFn=null])`</a>
 Sorts the elements of the host array.
 [&#9650;][1]
 
@@ -1770,7 +1770,7 @@ Appends arguments to the host array.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite.options" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2373" title="View in source">`options`</a>
+### <a id="Benchmark.Suite.options" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2380" title="View in source">`options`</a>
 *(Object)*: The default options copied by suite instances.
 [&#9650;][1]
 
@@ -1779,7 +1779,7 @@ Appends arguments to the host array.
 
 <!-- div -->
 
-### <a id="Benchmark.Suite.options.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2380" title="View in source">`Benchmark.Suite.options.name`</a>
+### <a id="Benchmark.Suite.options.name" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2387" title="View in source">`Benchmark.Suite.options.name`</a>
 *(String, Null)*: The name of the suite.
 [&#9650;][1]
 
