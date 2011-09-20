@@ -205,11 +205,12 @@
       setStatus(texts.status.ready);
 
       // answer spammer question
-      $('question').value = 'no';
+      ($('question') || {}).value = 'no';
 
       // prefill author details
       if (has.localStorage) {
         each([$('author'), $('author-email'), $('author-url')], function(element) {
+          if (!element) return false;
           element.value = localStorage[element.id] || '';
           element.oninput = element.onkeydown = function(event) {
             event && event.type < 'k' && (element.onkeydown = null);
@@ -250,7 +251,9 @@
    * @returns {Element} The element.
    */
   function addClass(element, className) {
-    if (!hasClass(element = $(element), className)) {
+    element = $(element);
+    if (!element) return;
+    if (!hasClass(element, className)) {
       element.className += (element.className ? ' ' : '') + className;
     }
     return element;
@@ -266,6 +269,7 @@
    */
   function addListener(element, eventName, handler) {
     element = $(element);
+    if (!element) return;
     if (typeof element.addEventListener != 'undefined') {
       element.addEventListener(eventName, handler, false);
     } else if (element.attachEvent != 'undefined') {
@@ -306,6 +310,7 @@
    * @returns {Boolean} If assigned the class name return true, else false.
    */
   function hasClass(element, className) {
+    if (!element) return;
     return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
   }
 
