@@ -47,11 +47,14 @@
 
   /** Used to flag environments/features */
   has = {
+    // used for pre-populating form fields
     'localStorage': !!function() {
       try {
         return !localStorage.getItem(+new Date);
       } catch(e) {}
-    }()
+    }(),
+    // used to distinguish between a regular test page and an embedded chart
+    'runner': !!$('runner')
   },
 
   /** Cache of error messages */
@@ -61,10 +64,13 @@
   handlers = {},
 
   /** A flag to indicate that the page has loaded */
-  loaded = false,
+  pageLoaded = false,
 
   /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
   scrollEl = document.body,
+
+  /** Used to resolve a value's internal [[Class]] */
+  toString = {}.toString,
 
   /** Namespace */
   ui = new Benchmark.Suite,
@@ -92,6 +98,17 @@
         setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
           size + ' sample' + (size == 1 ? '' : 's') + ')');
       }
+    },
+
+    /**
+     * The onStart callback assigned to new benchmarks.
+     * @private
+     */
+    'start': function() {
+        // call user provided init() function
+        if (isFunction(window.init)) {
+          init();
+        }
     }
   };
 
@@ -162,31 +179,29 @@
           chart = params.chart,
           filterBy = params.filterby;
 
-      if (loaded) {
+      if (pageLoaded) {
         // configure posting
-        ui.browserscope.postable = !('nopost' in params);
+        ui.browserscope.postable = !('nopost' in params || has.runner);
 
-        // call user provided init() function
-        if (typeof window.init == 'function') {
-          init();
-        }
         // configure chart renderer
         if (chart || filterBy) {
           scrollTop = $('results').offsetTop;
           ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
         }
-        // call user provided init() function
-        if (typeof window.init == 'function') {
-          init();
-        }
-        // auto-run
-        if ('run' in params) {
-          scrollTop = $('runner').offsetTop;
-          setTimeout(handlers.button.run, 1);
-        }
-        // scroll to the relevant section
-        if (scrollTop) {
-          scrollEl.scrollTop = scrollTop;
+        if (has.runner) {
+          // call user provided init() function
+          if (isFunction(window.init)) {
+            init();
+          }
+          // auto-run
+          if ('run' in params) {
+            scrollTop = $('runner').offsetTop;
+            setTimeout(handlers.button.run, 1);
+          }
+          // scroll to the relevant section
+          if (scrollTop) {
+            scrollEl.scrollTop = scrollTop;
+          }
         }
       }
     },
@@ -196,36 +211,38 @@
      * @private
      */
     'load': function() {
-      // init the ui
-      addClass('controls', classNames.show);
-      addListener('run', 'click', handlers.button.run);
+      // only for pages with a comment form
+      if (has.runner) {
+        // init the ui
+        addClass('controls', classNames.show);
+        addListener('run', 'click', handlers.button.run);
 
-      setHTML('run', texts.run.ready);
-      setHTML('user-agent', Benchmark.platform);
-      setStatus(texts.status.ready);
+        setHTML('run', texts.run.ready);
+        setHTML('user-agent', Benchmark.platform);
+        setStatus(texts.status.ready);
 
-      // answer spammer question
-      ($('question') || {}).value = 'no';
+        // answer spammer question
+        $('question').value = 'no';
 
-      // prefill author details
-      if (has.localStorage) {
-        each([$('author'), $('author-email'), $('author-url')], function(element) {
-          if (!element) return false;
-          element.value = localStorage[element.id] || '';
-          element.oninput = element.onkeydown = function(event) {
-            event && event.type < 'k' && (element.onkeydown = null);
-            localStorage[element.id] = element.value;
-          };
-        });
-      }
-      // show warning when Firebug is enabled (avoids showing for Firebug Lite)
-      if (typeof window.console != 'undefined' && typeof console.firebug != 'undefined') {
-        addClass('firebug', classNames.show);
+        // prefill author details
+        if (has.localStorage) {
+          each([$('author'), $('author-email'), $('author-url')], function(element) {
+            element.value = localStorage[element.id] || '';
+            element.oninput = element.onkeydown = function(event) {
+              event && event.type < 'k' && (element.onkeydown = null);
+              localStorage[element.id] = element.value;
+            };
+          });
+        }
+        // show warning when Firebug is enabled (avoids showing for Firebug Lite)
+        if (typeof window.console != 'undefined' && typeof console.firebug != 'undefined') {
+          addClass('firebug', classNames.show);
+        }
       }
       // evaluate hash values
       // (delay in an attempt to ensure this is executed after all other window load handlers)
       setTimeout(function() {
-        loaded = true;
+        pageLoaded = true;
         handlers.window.hashchange();
       }, 1);
     }
@@ -251,9 +268,7 @@
    * @returns {Element} The element.
    */
   function addClass(element, className) {
-    element = $(element);
-    if (!element) return;
-    if (!hasClass(element, className)) {
+    if ((element = $(element)) && !hasClass(element, className)) {
       element.className += (element.className ? ' ' : '') + className;
     }
     return element;
@@ -268,12 +283,12 @@
    * @returns {Element} The element.
    */
   function addListener(element, eventName, handler) {
-    element = $(element);
-    if (!element) return;
-    if (typeof element.addEventListener != 'undefined') {
-      element.addEventListener(eventName, handler, false);
-    } else if (element.attachEvent != 'undefined') {
-      element.attachEvent('on' + eventName, handler);
+    if ((element = $(element))) {
+      if (typeof element.addEventListener != 'undefined') {
+        element.addEventListener(eventName, handler, false);
+      } else if (typeof element.attachEvent != 'undefined') {
+        element.attachEvent('on' + eventName, handler);
+      }
     }
     return element;
   }
@@ -310,8 +325,8 @@
    * @returns {Boolean} If assigned the class name return true, else false.
    */
   function hasClass(element, className) {
-    if (!element) return;
-    return (' ' + $(element).className + ' ').indexOf(' ' + className + ' ') > -1;
+    return !!(element = $(element)) &&
+      (' ' + element.className + ' ').indexOf(' ' + className + ' ') > -1;
   }
 
   /**
@@ -329,6 +344,16 @@
   }
 
   /*--------------------------------------------------------------------------*/
+
+  /**
+   * Checks if a value has an internal [[Class]] of Function.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if the value is a function, else `false`.
+   */
+  function isFunction(value) {
+    return toString.call(value) == '[object Function]';
+  }
 
   /**
    * Appends to or clears the error log.
@@ -457,6 +482,8 @@
 
     addListener(title, 'click', handlers.title.click);
     addListener(title, 'keyup', handlers.title.keyup);
+
+    bench.on('start', handlers.benchmark.start);
     bench.on('start cycle', handlers.benchmark.cycle);
 
     delete ui[--ui.length];
@@ -545,43 +572,6 @@
   // parse location hash string
   ui.parseHash();
 
-  // detect the scroll element
-  (function() {
-    var div = document.createElement('div'),
-        body = document.body,
-        bodyStyle = body.style,
-        bodyHeight = bodyStyle.height,
-        html = document.documentElement,
-        htmlStyle = html.style,
-        htmlHeight = htmlStyle.height,
-        scrollTop = html.scrollTop;
-
-    bodyStyle.height  = htmlStyle.height = 'auto';
-    div.style.cssText = 'display:block;height:8500px;';
-    body.insertBefore(div, body.firstChild);
-
-    // set `scrollEl` that's used in `handlers.window.hashchange()`
-    if (html.clientWidth !== 0 && ++html.scrollTop && html.scrollTop == scrollTop + 1) {
-      scrollEl = html;
-    }
-    body.removeChild(div);
-    bodyStyle.height = bodyHeight;
-    htmlStyle.height = htmlHeight;
-    html.scrollTop = scrollTop;
-  }());
-
-  // inject nano applet
-  // (assumes ui.js is just before </body>)
-  (function() {
-    var body = document.body;
-    if ('nojava' in ui.params) {
-      addClass('java', classNames.show);
-    } else {
-      body.insertBefore(setHTML(createElement('div'),
-        '<applet code=nano archive=' + archive + '>').lastChild, body.firstChild);
-    }
-  }());
-
   // provide a simple UI for toggling between chart types and filtering results
   // (assumes ui.js is just before </body>)
   (function() {
@@ -593,8 +583,9 @@
       '<a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, ' +
       '<a href=#>table</a></span><br>' +
       '<span id=filters><strong>Filter:</strong> <a href=#>popular</a>, ' +
-      '<a href=#>all</a>, <a href=#>desktop</a>, <a href=#>major</a>, ' +
-      '<a href=#>minor</a>, <a href=#>mobile</a>, <a href=#>prerelease</a></span>';
+      '<a href=#>all</a>, <a href=#>desktop</a>, <a href=#>family</a>, ' +
+      '<a href=#>major</a>, <a href=#>minor</a>, <a href=#>mobile</a>, ' +
+      '<a href=#>prerelease</a></span>';
 
     sibling.parentNode.insertBefore(p, sibling);
 
@@ -615,12 +606,55 @@
     };
   }());
 
-  // inject /dart notice for Android/Chrome
-  // (recycle other elements/styles for now)
-  if (/Android|Chrome/.test(Benchmark.platform)) {
-    setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart">Dart summary</a>.</strong>');
-    addClass('java', classNames.show);
+  // fork for runner or embedded chart
+  if (has.runner) {
+    // detect the scroll element
+    (function() {
+      var div = document.createElement('div'),
+          body = document.body,
+          bodyStyle = body.style,
+          bodyHeight = bodyStyle.height,
+          html = document.documentElement,
+          htmlStyle = html.style,
+          htmlHeight = htmlStyle.height,
+          scrollTop = html.scrollTop;
+
+      bodyStyle.height  = htmlStyle.height = 'auto';
+      div.style.cssText = 'display:block;height:8500px;';
+      body.insertBefore(div, body.firstChild);
+
+      // set `scrollEl` that's used in `handlers.window.hashchange()`
+      if (html.clientWidth !== 0 && ++html.scrollTop && html.scrollTop == scrollTop + 1) {
+        scrollEl = html;
+      }
+      body.removeChild(div);
+      bodyStyle.height = bodyHeight;
+      htmlStyle.height = htmlHeight;
+      html.scrollTop = scrollTop;
+    }());
+
+    // inject nano applet
+    // (assumes ui.js is just before </body>)
+    if ('nojava' in ui.params) {
+      addClass('java', classNames.show);
+    } else {
+      document.body.insertBefore(setHTML(createElement('div'),
+        '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
+    }
+    // inject /dart notice for Android/Chrome
+    // (recycle other elements/styles for now)
+    if (/Android|Chrome/.test(Benchmark.platform)) {
+      setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart">Dart summary</a>.</strong>');
+      addClass('java', classNames.show);
+    }
   }
+  else {
+    // short circuit unusable methods
+    ui.render = function() { };
+    ui.removeAllListeners();
+    setTimeout(function() { ui.browserscope.post = function() { }; }, 1);
+  }
+
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
   if (gaId) {
