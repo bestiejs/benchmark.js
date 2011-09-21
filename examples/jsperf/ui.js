@@ -181,7 +181,7 @@
 
       if (pageLoaded) {
         // configure posting
-        ui.browserscope.postable = !('nopost' in params || has.runner);
+        ui.browserscope.postable = has.runner && !('nopost' in params);
 
         // configure chart renderer
         if (chart || filterBy) {
