@@ -18,6 +18,7 @@
   filterMap = {
     'all': 3,
     'desktop': 'top-d',
+    'family': 0,
     'major': 1,
     'minor': 2,
     'mobile': 'top-m',
@@ -59,6 +60,7 @@
    * @param {Element} element The element.
    * @param {String} eventName The name of the event to listen to.
    * @param {Function} handler The event handler.
+   * @returns {Element} The element.
    */
   function addListener(element, eventName, handler) {
     if ((element = typeof element == 'string' ? query(element)[0] : element)) {
@@ -68,6 +70,7 @@
         element.attachEvent('on' + eventName, handler);
       }
     }
+    return element;
   }
 
   /**
@@ -169,11 +172,13 @@
    * @param {Element} element The element.
    * @param {String} html The HTML to set.
    * @param {Object} object The template object used to modify the html.
+   * @returns {Element} The element.
    */
   function setHTML(element, html, object) {
     if ((element = query(element)[0])) {
       element.innerHTML = interpolate(html, object);
     }
+    return element;
   }
 
   /**
@@ -542,7 +547,7 @@
       // set "loading" message and attempt to load Browserscope data
       setMessage(me.texts.loading);
       // request Browserscope pass chart data to `google.visualization.Query.setResponse()`
-      (new google.visualization.Query(
+      (new visualization.Query(
         '//www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
         { 'sendMethod': 'scriptInjection' }
       ))
