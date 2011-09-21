@@ -20,6 +20,9 @@
   /** Used to assign each benchmark an incrimented id */
   counter = 0,
 
+  /** Used to resolve a value's internal [[Class]] */
+  toString = {}.toString,
+
   /** Used to integrity check compiled tests */
   uid = 'uid' + (+new Date),
 
@@ -527,6 +530,7 @@
    * @returns {String} The function's source code.
    */
   function getSource(fn) {
+    // extract function body
     return (fn.toString == Function.prototype.toString
       ? ((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
       : String(fn)
@@ -560,7 +564,7 @@
    * @returns {Boolean} Returns `true` if of the class, else `false`.
    */
   function isClassOf(object, name) {
-    return object != null && {}.toString.call(object).slice(8, -1) == name;
+    return object != null && toString.call(object).slice(8, -1) == name;
   }
 
   /**
@@ -1472,10 +1476,11 @@
 
   /**
    * Displays relevant benchmark information when coerced to a string.
+   * @name toString
    * @memberOf Benchmark
    * @returns {String} A string representation of the benchmark instance.
    */
-  function toString() {
+  function toStringBench() {
     var me = this,
         error = me.error,
         hz = me.hz,
@@ -2156,7 +2161,7 @@
   /*--------------------------------------------------------------------------*/
 
   // IE may ignore `toString` in a for-in loop
-  Benchmark.prototype.toString = toString;
+  Benchmark.prototype.toString = toStringBench;
 
   extend(Benchmark.prototype, {
 
@@ -2221,23 +2226,65 @@
      * @type Function
      * @example
      *
+     * // basic usage
      * var bench = new Benchmark({
      *   'fn': function() {
-     *     a += 1;
+     *     element.removeChild(element.lastChild);
      *   },
      *   'setup': function() {
-     *     // reset local var `a` at the beginning of each test cycle
-     *     a = 0;
-     *   }
+     *     var c = this.count,
+     *         element = document.getElementById('container');
+     *
+     *     while (c--) {
+     *       element.appendChild(document.createElement('div'));
+     *     }
      * });
      *
-     * // compiles into something like:
-     * var a = 0;
+     * // compiles to something like:
+     * var c = this.count,
+     *     element = document.getElementById('container');
+     *
+     * while (c--) {
+     *   element.appendChild(document.createElement('div'));
+     * }
      * var start = new Date;
      * while (count--) {
-     *   a += 1;
+     *   element.removeChild(element.lastChild);
      * }
      * var end = new Date - start;
+     *
+     * // or using a custom toString() method
+     * var bench = new Benchmark(function() { a += 1; });
+     * window.a = 0;
+     *
+     * (bench.setup = function() { }).toString = function() {
+     *   return [
+     *     '(function() {',
+     *     '  (function() {',
+     *     '    (function() {'
+     *   ].join('\n');
+     * };
+     *
+     * (bench.teardown = function() { }).toString = function() {
+     *   return [
+     *     '    }())',
+     *     '  }())',
+     *     '}())'
+     *   ].join('\n');
+     * };
+     *
+     * // compiles to something like:
+     * (function() {
+     *   (function() {
+     *     (function() {
+     *       var start = new Date;
+     *       while (count--) {
+     *         a += 1;
+     *       }
+     *       var end = new Date - start;
+     *     }())
+     *   }())
+     * }())
      */
     'setup': noop,
 
