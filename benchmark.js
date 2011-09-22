@@ -120,7 +120,10 @@
    *   'deferred': true,
    *
    *   // benchmark test function
-   *   'fn': fn
+   *   'fn': function(deferred) {
+   *     // call resolve() when the deferred test is finished
+   *     deferred.resolve();
+   *   }
    * });
    *
    * // or options only
