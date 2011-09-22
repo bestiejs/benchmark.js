@@ -1268,14 +1268,14 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Registers a single listener of a specified event type.
+   * Registers a single listener of the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function called when the event occurs.
    * @returns {Object} The benchmark instance.
    * @example
    *
-   * // basic usage
+   * // register a listener for an event type
    * bench.addListener('cycle', listener);
    *
    * // register a listener for multiple event types
@@ -1292,7 +1292,7 @@
   }
 
   /**
-   * Executes all registered listeners of a specified event type.
+   * Executes all registered listeners of the specified event type.
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String|Object} type The event type or object.
    * @returns {Boolean} Returns `true` if all listeners were executed, else `false`.
@@ -1314,14 +1314,14 @@
   }
 
   /**
-   * Unregisters a single listener of a specified event type.
+   * Unregisters a single listener of the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function to unregister.
    * @returns {Object} The benchmark instance.
    * @example
    *
-   * // basic usage
+   * // unregister a listener for an event type
    * bench.removeListener('cycle', listener);
    *
    * // unregister a listener for multiple event types
@@ -1342,17 +1342,20 @@
   }
 
   /**
-   * Unregisters all listeners of a specified event type.
+   * Unregisters all listeners or those of the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @returns {Object} The benchmark instance.
    * @example
    *
-   * // basic usage
+   * // unregister all listeners
+   * bench.removeAllListeners();
+   *
+   * // unregister all listeners for an event type
    * bench.removeAllListeners('cycle');
    *
    * // unregister all listeners for multiple event types
-   * bench.removeListener('start cycle');
+   * bench.removeAllListener('start cycle complete');
    */
   function removeAllListeners(type) {
     var me = this,
