@@ -1268,7 +1268,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Registers a single listener of the specified event type(s).
+   * Registers a single listener for the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function called when the event occurs.
@@ -1314,7 +1314,7 @@
   }
 
   /**
-   * Unregisters a single listener of the specified event type(s).
+   * Unregisters a single listener for the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function to unregister.
@@ -1342,7 +1342,7 @@
   }
 
   /**
-   * Unregisters all listeners or those of the specified event type(s).
+   * Unregisters all listeners or those for the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @returns {Object} The benchmark instance.
@@ -1355,7 +1355,7 @@
    * bench.removeAllListeners('cycle');
    *
    * // unregister all listeners for multiple event types
-   * bench.removeAllListener('start cycle complete');
+   * bench.removeAllListeners('start cycle complete');
    */
   function removeAllListeners(type) {
     var me = this,

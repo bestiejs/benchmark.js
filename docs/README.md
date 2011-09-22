@@ -621,7 +621,7 @@ Aborts the benchmark without recording times.
 <!-- div -->
 
 ### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1284" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
-Registers a single listener of the specified event type(s).
+Registers a single listener for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
@@ -707,7 +707,7 @@ The test to benchmark.
 <!-- div -->
 
 ### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1360" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
-Unregisters all listeners or those of the specified event type(s).
+Unregisters all listeners or those for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
@@ -725,7 +725,7 @@ bench.removeAllListeners();
 bench.removeAllListeners('cycle');
 
 // unregister all listeners for multiple event types
-bench.removeAllListener('start cycle complete');
+bench.removeAllListeners('start cycle complete');
 ~~~
 
 <!-- /div -->
@@ -734,7 +734,7 @@ bench.removeAllListener('start cycle complete');
 <!-- div -->
 
 ### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1330" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
-Unregisters a single listener of the specified event type(s).
+Unregisters a single listener for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
@@ -1442,7 +1442,7 @@ suite.add('foo', fn, {
 <!-- div -->
 
 ### <a id="Benchmark:addListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1284" title="View in source">`Benchmark.Suite#addListener(type, listener)`</a>
-Registers a single listener of the specified event type(s).
+Registers a single listener for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
@@ -1643,7 +1643,7 @@ An `Array#reduce` utility function.
 <!-- div -->
 
 ### <a id="Benchmark:removeAllListeners" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1360" title="View in source">`Benchmark.Suite#removeAllListeners(type)`</a>
-Unregisters all listeners or those of the specified event type(s).
+Unregisters all listeners or those for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
@@ -1661,7 +1661,7 @@ bench.removeAllListeners();
 bench.removeAllListeners('cycle');
 
 // unregister all listeners for multiple event types
-bench.removeAllListener('start cycle complete');
+bench.removeAllListeners('start cycle complete');
 ~~~
 
 <!-- /div -->
@@ -1670,7 +1670,7 @@ bench.removeAllListener('start cycle complete');
 <!-- div -->
 
 ### <a id="Benchmark:removeListener" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1330" title="View in source">`Benchmark.Suite#removeListener(type, listener)`</a>
-Unregisters a single listener of the specified event type(s).
+Unregisters a single listener for the specified event type(s).
 [&#9650;][1]
 
 #### Arguments
