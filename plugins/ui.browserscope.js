@@ -350,8 +350,7 @@
    */
   function getDataLabels(object) {
     var result = [],
-        labelMap = {},
-        table = query('#test-table')[0];
+        labelMap = {};
 
     // resolve labels by duck typing because of munged property names
     forIn(object, function(value) {

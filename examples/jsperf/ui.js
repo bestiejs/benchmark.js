@@ -478,18 +478,20 @@
         id = index + 1,
         title = $('title-' + id);
 
-    title.tabIndex = 0;
-    title.title = 'Click to run this test again.';
-
-    addListener(title, 'click', handlers.title.click);
-    addListener(title, 'keyup', handlers.title.keyup);
-
-    bench.on('start', handlers.benchmark.start);
-    bench.on('start cycle', handlers.benchmark.cycle);
-
     delete ui[--ui.length];
     ui.benchmarks.push(bench);
-    ui.render(index);
+
+    if (has.runner) {
+      title.tabIndex = 0;
+      title.title = 'Click to run this test again.';
+
+      addListener(title, 'click', handlers.title.click);
+      addListener(title, 'keyup', handlers.title.keyup);
+
+      bench.on('start', handlers.benchmark.start);
+      bench.on('start cycle', handlers.benchmark.cycle);
+      ui.render(index);
+    }
   })
   .on('start cycle', function() {
     ui.render();
