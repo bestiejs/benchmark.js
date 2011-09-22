@@ -80,7 +80,8 @@
   filter = Benchmark.filter,
   forIn = Benchmark.forIn,
   formatNumber = Benchmark.formatNumber,
-  indexOf = Benchmark.indexOf;
+  indexOf = Benchmark.indexOf,
+  invoke = Benchmark.invoke;
 
   /*--------------------------------------------------------------------------*/
 
@@ -651,8 +652,12 @@
   else {
     // short circuit unusable methods
     ui.render = function() { };
-    ui.removeAllListeners();
-    setTimeout(function() { ui.browserscope.post = function() { }; }, 1);
+    ui.removeAllListeners('start cycle complete');
+    setTimeout(function() {
+      ui.removeAllListeners();
+      ui.browserscope.post = function() { };
+      invoke(ui.benchmarks, 'removeAllListeners');
+    }, 1);
   }
 
   // optimized asynchronous Google Analytics snippet based on
