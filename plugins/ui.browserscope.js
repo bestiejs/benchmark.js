@@ -476,6 +476,10 @@
       // truncate something like 1.0.0 to 1
       name = name.replace(/(\d+)[.0]+$/, '$1');
     }
+    else if (filterBy == 'family') {
+      // truncate something like XYZ 1.2 to XYZ
+      name = name.replace(/[.\d\s]+$/, '');
+    }
     else if (/minor|popular/.test(filterBy) && /\d+(?:\.[1-9])+$/.test(name)) {
       // truncate something like 1.2.3 to 1.2
       name = name.replace(/(\d+\.[1-9])(\.[.\d]+$)/, '$1');
