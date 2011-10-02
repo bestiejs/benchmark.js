@@ -524,7 +524,7 @@
         maxTime = options.maxTime,
         suite = new Benchmark.Suite;
 
-    options.minTime && (options.maxTime = options.minTime * 4);
+    options.minTime && (options.maxTime = options.minTime * 5);
 
     suite.add('a', function() {
       // empty

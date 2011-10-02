@@ -20,6 +20,9 @@
   /** Used to assign each benchmark an incrimented id */
   counter = 0,
 
+  /** Used to preserve a pristine reference */
+  hasOwnProperty = {}.hasOwnProperty,
+
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
 
@@ -831,8 +834,6 @@
    */
   function hasKey(object, key) {
     var result,
-        o = {},
-        hasOwnProperty = o.hasOwnProperty,
         parent = (object.constructor || Object).prototype;
 
     // for modern browsers
@@ -841,7 +842,7 @@
       result = hasOwnProperty.call(object, key);
     }
     // for Safari 2
-    else if (o.__proto__ == Object.prototype) {
+    else if ({}.__proto__ == Object.prototype) {
       object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
     }
     // for others (not as accurate)
