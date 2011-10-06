@@ -5,7 +5,7 @@
     'counter': 0,
     'lastAction': 'load',
     'lastChart': 'bar',
-    'lastFilterBy': 'popular',
+    'lastFilterBy': 'all',
     'responses': { /* 'all': null, 'desktop': null, 'major': null, ... */ },
     'timers': { /* 'cleanup': null, 'load': null, 'post': null, ... */ },
     'trash': createElement('div')

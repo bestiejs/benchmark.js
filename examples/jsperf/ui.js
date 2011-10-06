@@ -644,12 +644,6 @@
       document.body.insertBefore(setHTML(createElement('div'),
         '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
     }
-    // inject /dart notice for Android/Chrome
-    // (recycle other elements/styles for now)
-    if (/Android|Chrome/.test(Benchmark.platform)) {
-      setHTML('java', '<strong>Is Google JavaScript’s BFF? Check out the <a href="http://jsperf.com/dart">Dart summary</a>.</strong>');
-      addClass('java', classNames.show);
-    }
   }
   else {
     // short circuit unusable methods
