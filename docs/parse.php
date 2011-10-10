@@ -6,11 +6,13 @@
   $file .= preg_match('/\.[a-z]+$/', $file) ? '' : '.js';
 
   // output filename
-  $output = isset($_GET['o'])
-    ? $_GET['o']
-    : isset($_SERVER['argv'][1])
-      ? $_SERVER['argv'][1]
-      : basename($file);
+  if (isset($_GET['o'])) {
+    $output = $_GET['o'];
+  } else if (isset($_SERVER['argv'][1])) {
+    $output = $_SERVER['argv'][1];
+  } else {
+    $output = basename($file);
+  }
 
   /*--------------------------------------------------------------------------*/
 
