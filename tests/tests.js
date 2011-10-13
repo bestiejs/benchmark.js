@@ -352,8 +352,8 @@
 
   test('event object', function() {
     var args = [],
-        bench = new Benchmark(function() {}),
-        event = new Benchmark.Event('custom'),
+        bench = Benchmark(function() {}),
+        event = Benchmark.Event('custom'),
         listener2 = function(event) { event.listener2 = 1 };
 
     bench.on('custom', function(event) { event.touched = 1; });
@@ -397,7 +397,7 @@
   test('basic', function() {
     var fired = false;
 
-    var suite = new Benchmark.Suite('foo', {
+    var suite = Benchmark.Suite('foo', {
       'onAbort': function() { fired = true }
     })
     .add('bar', function() { });
@@ -422,7 +422,7 @@
         callbacks = [],
         callback = function() { callbacks.push([arguments, this]); };
 
-    var suite = new Benchmark.Suite('foo', {
+    var suite = Benchmark.Suite('foo', {
       'onAdd': callback,
       'onAbort': callback,
       'onClone': callback,
@@ -443,7 +443,7 @@
       'onComplete': callback,
       'onReset': callback
     })
-    .run(false);
+    .run({ 'async': false });
 
     // first Suite#onAdd
     pair = callbacks.shift();
@@ -544,14 +544,14 @@
       options.maxTime = maxTime;
       QUnit.start();
     })
-    .run(true);
+    .run({ 'async': true });
   });
 
   asyncTest('Benchmark.Suite#abort', function() {
     var count = -1,
         fired = false;
 
-    var suite = new Benchmark.Suite('foo', {
+    var suite = Benchmark.Suite('foo', {
       'onAbort': function() { fired = true }
     })
     .add('a', function() {
@@ -565,14 +565,14 @@
       if (count == 0) {
         ok(fired == true, 'calling abort() fires an abort event when suite is running');
         fired = false;
-        suite.run(true);
+        suite.run({ 'async': true });
       } else {
         ok(fired == true, 'calling reset() fires an abort event when suite is running');
         QUnit.start();
       }
     });
 
-    suite.run(true);
+    suite.run({ 'async': true });
   });
 
   /*--------------------------------------------------------------------------*/

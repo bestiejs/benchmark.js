@@ -66,6 +66,9 @@
   /** A flag to indicate that the page has loaded */
   pageLoaded = false,
 
+  /** The options object for Benchmark.Suite#run */
+  runOptions = { 'async': platform.name != 'Opera Mini', 'queued': true },
+
   /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
   scrollEl = document.body,
 
@@ -127,7 +130,7 @@
       if (stopped) {
         logError(false);
         ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
-        ui.run(true, true);
+        ui.run(runOptions);
       }
     }
   };
@@ -151,7 +154,7 @@
       }
       index = id && --id.split('-')[1] || 0;
       ui.push(ui.benchmarks[index].reset());
-      ui.running ? ui.render(index) : ui.run(true, true);
+      ui.running ? ui.render(index) : ui.run(runOptions);
     },
 
     /**
@@ -613,18 +616,19 @@
   if (has.runner) {
     // detect the scroll element
     (function() {
-      var div = document.createElement('div'),
+      var scrollTop,
+          div = document.createElement('div'),
           body = document.body,
           bodyStyle = body.style,
           bodyHeight = bodyStyle.height,
           html = document.documentElement,
           htmlStyle = html.style,
-          htmlHeight = htmlStyle.height,
-          scrollTop = html.scrollTop;
+          htmlHeight = htmlStyle.height;
 
       bodyStyle.height  = htmlStyle.height = 'auto';
-      div.style.cssText = 'display:block;height:8500px;';
+      div.style.cssText = 'display:block;height:9001px;';
       body.insertBefore(div, body.firstChild);
+      scrollTop = html.scrollTop;
 
       // set `scrollEl` that's used in `handlers.window.hashchange()`
       if (html.clientWidth !== 0 && ++html.scrollTop && html.scrollTop == scrollTop + 1) {
@@ -641,6 +645,7 @@
     if ('nojava' in ui.params) {
       addClass('java', classNames.show);
     } else {
+      // using innerHTML avoids an alert in some versions of IE6
       document.body.insertBefore(setHTML(createElement('div'),
         '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
     }

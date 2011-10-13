@@ -79,7 +79,7 @@
    * @param {Object} [options={}] Options object.
    * @example
    *
-   * // basic usage
+   * // basic usage (the `new` operator is optional)
    * var bench = new Benchmark(fn);
    *
    * // or using a name first
@@ -147,6 +147,10 @@
   function Benchmark(name, fn, options) {
     var me = this;
 
+    // allow instance creation without the `new` operator
+    if (me && me.constructor != Benchmark) {
+      return new Benchmark(name, fn, options);
+    }
     // juggle arguments
     if (isClassOf(name, 'Object')) {
       // 1 argument (options)
@@ -181,6 +185,9 @@
    */
   function Deferred(bench) {
     var me = this;
+    if (me && me.constructor != Deferred) {
+      return new Deferred(bench);
+    }
     me.benchmark = bench;
     clock(me);
   }
@@ -192,8 +199,12 @@
    * @param {String|Object} type The event type.
    */
   function Event(type) {
-    return type instanceof Event ? type :
-      extend(this, typeof type == 'string' ? { 'type': type } : type);
+    var me = this;
+    return (me && me.constructor != Event)
+      ? new Event(type)
+      : (type instanceof Event)
+          ? type
+          : extend(me, typeof type == 'string' ? { 'type': type } : type);
   }
 
   /**
@@ -204,7 +215,7 @@
    * @param {Object} [options={}] Options object.
    * @example
    *
-   * // basic usage
+   * // basic usage (the `new` operator is optional)
    * var suite = new Benchmark.Suite;
    *
    * // or using a name first
@@ -235,6 +246,10 @@
   function Suite(name, options) {
     var me = this;
 
+    // allow instance creation without the `new` operator
+    if (me && me.constructor != Suite) {
+      return new Suite(name, options);
+    }
     // juggle arguments
     if (isClassOf(name, 'Object')) {
       // 1 argument (options)
@@ -921,7 +936,8 @@
      * Checks if invoking `run` with asynchronous cycles.
      */
     function isAsync(object) {
-      return isRun(object) && (args[0] == null ? object.options.async : args[0]) && has.timeout;
+      var async = args[0] && args[0].async;
+      return isRun(object) && (async == null ? object.options.async : async) && has.timeout;
     }
 
     /**
@@ -977,7 +993,7 @@
         last.emit('complete');
       }
       // choose next benchmark if not exiting early
-      if (options.onCycle.call(benches, new Event('cycle'), last) !== false && raiseIndex() !== false) {
+      if (options.onCycle.call(benches, Event('cycle'), last) !== false && raiseIndex() !== false) {
         bench = queued ? benches[0] : result[index];
         if (!isSync(bench)) {
           call(bench, execute, isAsync(bench));
@@ -991,7 +1007,7 @@
           return true;
         }
       } else {
-        options.onComplete.call(benches, new Event('complete'), last);
+        options.onComplete.call(benches, Event('complete'), last);
       }
       // when async the `return false` will cancel the rest of the "complete"
       // listeners because they were called above and when synchronous it will
@@ -1036,12 +1052,12 @@
     // start iterating over the array
     if (raiseIndex() !== false) {
       bench = result[index];
-      options.onStart.call(benches, new Event('start'), bench);
+      options.onStart.call(benches, Event('start'), bench);
 
       // end early if the suite was aborted in an "onStart" listener
       if (benches.aborted && benches.constructor == Suite && name == 'run') {
-        options.onCycle.call(benches, new Event('cycle'), bench);
-        options.onComplete.call(benches, new Event('complete'), bench);
+        options.onCycle.call(benches, Event('cycle'), bench);
+        options.onComplete.call(benches, Event('complete'), bench);
       }
       // else start
       else {
@@ -1169,7 +1185,7 @@
    */
   function add(name, fn, options) {
     var me = this,
-        bench = new Benchmark(name, fn, options);
+        bench = Benchmark(name, fn, options);
 
     me.push(bench);
     me.emit('add', bench);
@@ -1239,19 +1255,26 @@
    * Runs the suite.
    * @name run
    * @memberOf Benchmark.Suite
-   * @param {Boolean} [async=false] Flag to cycle asynchronously.
-   * @param {Boolean} [queued=false] Flag to treat benchmarks as a queue.
+   * @param {Object} [options={}] Options object.
    * @returns {Object} The suite instance.
+   * @example
+   *
+   * // basic usage
+   * suite.run();
+   *
+   * // or with options
+   * suite.run({ 'async': true, 'queued': true });
    */
-  function runSuite(async, queued) {
+  function runSuite(options) {
     var me = this;
     me.reset();
     me.running = true;
+    options || (options = {});
 
     invoke(me, {
       'name': 'run',
-      'args': async,
-      'queued': queued,
+      'args': options,
+      'queued': options.queued,
       'onStart': function(event, bench) {
         me.emit('start', bench);
       },
@@ -1303,7 +1326,7 @@
    */
   function emit(type) {
     var me = this,
-        event = new Event(type),
+        event = Event(type),
         args = (arguments[0] = event, slice.call(arguments)),
         events = me.events,
         listeners = events && events[event.type] || [],
@@ -1869,7 +1892,7 @@
     enqueue(bench.minSamples);
     invoke(queue, {
       'name': 'run',
-      'args': async,
+      'args': { 'async': async },
       'queued': true,
       'onCycle': evaluate,
       'onComplete': function() {
@@ -1883,7 +1906,7 @@
    * @private
    * @param {Object} bench The benchmark instance.
    * @param {Boolean} [async=false] Flag to cycle asynchronously.
-   * @param {Object} deferred The deferred instance.
+   * @param {Object} [deferred=undefined] The deferred instance.
    */
   function cycle(bench, async, deferred) {
     var clocked,
@@ -1957,12 +1980,19 @@
   /**
    * Runs the benchmark.
    * @memberOf Benchmark
-   * @param {Boolean} [async=false] Flag to cycle asynchronously.
+   * @param {Object} [options={}] Options object.
    * @returns {Object} The benchmark instance.
+   * @example
+   *
+   * // basic usage
+   * bench.run();
+   *
+   * // or with options
+   * bench.run({ 'async': true });
    */
-  function run(async) {
-    var me = this;
-    async = (async == null ? me.async : async) && has.timeout;
+  function run(options) {
+    var me = this,
+        async = ((async = options && options.async) == null ? me.async : async) && has.timeout;
 
     // set running to false so reset() won't call abort()
     me.running = false;
@@ -1975,7 +2005,7 @@
 
     if (me._host) {
       if (me.defer) {
-        new Deferred(me);
+        Deferred(me);
       } else {
         cycle(me, async);
       }
@@ -2234,7 +2264,7 @@
      * @example
      *
      * // basic usage
-     * var bench = new Benchmark({
+     * var bench = Benchmark({
      *   'fn': function() {
      *     element.removeChild(element.lastChild);
      *   },
@@ -2261,7 +2291,7 @@
      * var end = new Date - start;
      *
      * // or using a custom toString() method
-     * var bench = new Benchmark(function() { a += 1; });
+     * var bench = Benchmark(function() { a += 1; });
      * window.a = 0;
      *
      * (bench.setup = function() { }).toString = function() {
