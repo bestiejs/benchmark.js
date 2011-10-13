@@ -97,7 +97,7 @@ suite.add('RegExp#test', function() {
   console.log('Fastest is ' + this.filter('fastest').pluck('name'));
 })
 // run async
-.run(true);
+.run({ 'async': true });
 
 // logs:
 // > RegExp#test x 4,161,532 +-0.99% (59 cycles)
