@@ -354,6 +354,21 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Copies own/inherited properties of a source object to the destination object.
+   * @private
+   * @param {Object} destination The destination object.
+   * @param {Object} [source={}] The source object.
+   * @returns {Object} The destination object.
+   */
+  function extend(destination, source) {
+    source || (source = {});
+    for (var key in source) {
+      destination[key] = source[key];
+    }
+    return destination;
+  }
+
+  /**
    * Checks if a value has an internal [[Class]] of Function.
    * @private
    * @param {Mixed} value The value to check.
@@ -511,10 +526,23 @@
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest');
 
+    // normalize fastest / slowest
+    each([[fastest.slice(-1), fastest.slice(0, -1)],
+        [slowest[0], slowest.slice(1)]], function(pair) {
+      var source = pair[0];
+      each(pair[1], function(bench) {
+        bench.count = source.count;
+        bench.cycles = source.cycles;
+        bench.hz = source.hz;
+        bench.stats = extend({}, source.stats);
+      });
+    });
+
     ui.render();
     setHTML('run', texts.run.again);
     setStatus(texts.status.again);
 
+    // highlight result cells
     each(benches, function(bench) {
       var percent,
           text = 'fastest',
