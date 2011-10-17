@@ -132,7 +132,7 @@
       ui.length = 0;
 
       if (stopped) {
-        logError(false);
+        logError({ 'clear': true });
         ui.push.apply(ui, filter(ui.benchmarks, function(bench) {
           return !bench.error && bench.reset();
         }));
@@ -383,28 +383,35 @@
   /**
    * Appends to or clears the error log.
    * @private
-   * @param {String|Boolean} text The text to append or `false` to clear.
+   * @param {String|Object} text The text to append or options object.
    */
   function logError(text) {
     var table,
-        div = $('error-info');
+        div = $('error-info'),
+        options = {};
 
+    // juggle arguments
+    if (typeof text == 'object' && text) {
+      options = text;
+      text = options.text;
+    }
+    else if (arguments.length) {
+      options.text = text;
+    }
     if (!div) {
       table = $('test-table');
       div = createElement('div');
       div.id = 'error-info';
       table.parentNode.insertBefore(div, table.nextSibling);
     }
-    if (text === false) {
+    if (options.clear) {
       div.className = div.innerHTML = '';
       errors.length = 0;
     }
-    else {
-      if (indexOf(errors, text) < 0) {
-        errors.push(text);
-        addClass(div, classNames.show);
-        appendHTML(div, text);
-      }
+    if ('text' in options && indexOf(errors, text) < 0) {
+      errors.push(text);
+      addClass(div, classNames.show);
+      appendHTML(div, text);
     }
   }
 
