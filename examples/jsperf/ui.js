@@ -133,7 +133,9 @@
 
       if (stopped) {
         logError(false);
-        ui.push.apply(ui, filter(ui.benchmarks, function(bench) { return !bench.error; }));
+        ui.push.apply(ui, filter(ui.benchmarks, function(bench) {
+          return !bench.error && bench.reset();
+        }));
         ui.run(runOptions);
       }
     }
@@ -471,12 +473,18 @@
         if (bench.running) {
           setHTML(cell, 'running&hellip;');
         }
-        // status: finished
+        // status: completed
         else if (bench.cycles) {
-          cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
-            bench.times.cycle.toFixed(3) + ' seconds.';
-          setHTML(cell, formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) +
-            ' <small>&plusmn;' + bench.stats.rme.toFixed(2) + '%</small>');
+          // obscure details until the suite has completed
+          if (ui.running) {
+            setHTML(cell, 'completed');
+          }
+          else {
+            cell.title = 'Ran ' + formatNumber(bench.count) + ' times in ' +
+              bench.times.cycle.toFixed(3) + ' seconds.';
+            setHTML(cell, formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) +
+              ' <small>&plusmn;' + bench.stats.rme.toFixed(2) + '%</small>');
+          }
         }
         else {
           // status: pending
