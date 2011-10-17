@@ -674,7 +674,7 @@
         maxCharsLimit = 20,
         maxOps = 0,
         minHeight = 480,
-        minWidth = cont.offsetWidth || 948,
+        minWidth = cont && cont.offsetWidth || 948,
         title = '',
         top = 50,
         vTitle = '',

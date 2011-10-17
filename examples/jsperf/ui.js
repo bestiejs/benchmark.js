@@ -527,7 +527,7 @@
         slowest = filter(benches, 'slowest');
 
     // normalize fastest / slowest
-    each([[fastest.slice(-1), fastest.slice(0, -1)],
+    each([[fastest.slice(-1)[0], fastest.slice(0, -1)],
         [slowest[0], slowest.slice(1)]], function(pair) {
       var source = pair[0];
       each(pair[1], function(bench) {
