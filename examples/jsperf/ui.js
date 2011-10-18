@@ -265,7 +265,7 @@
      * @private
      */
     'scroll': function() {
-      // init the ui
+      // display the scroll warning
       addClass('scroll', classNames.show);
       window.onscroll = null;
     }
