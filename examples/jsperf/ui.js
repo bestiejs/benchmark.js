@@ -132,11 +132,14 @@
       ui.length = 0;
 
       if (stopped) {
+        window.onscroll = handlers.window.scroll;
         logError({ 'clear': true });
         ui.push.apply(ui, filter(ui.benchmarks, function(bench) {
           return !bench.error && bench.reset();
         }));
         ui.run(runOptions);
+      } else {
+        window.onscroll = null;
       }
     }
   };
@@ -255,7 +258,18 @@
         pageLoaded = true;
         handlers.window.hashchange();
       }, 1);
+    },
+
+    /**
+     * The window scroll event handler used to show a warning.
+     * @private
+     */
+    'scroll': function() {
+      // init the ui
+      addClass('scroll', classNames.show);
+      window.onscroll = null;
     }
+
   };
 
   /*--------------------------------------------------------------------------*/
