@@ -540,7 +540,7 @@
     .on('complete', function() {
       deepEqual(this.filter('fastest').pluck('name'), ['a'], 'by fastest');
       deepEqual(this.filter('slowest').pluck('name'), ['b'], 'by slowest');
-      deepEqual(['a', 'b'], this.filter('successful').pluck('name'), 'by successful');
+      deepEqual(this.filter('successful').pluck('name'), ['a', 'b'], 'by successful');
       options.maxTime = maxTime;
       QUnit.start();
     })
