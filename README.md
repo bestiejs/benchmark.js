@@ -138,5 +138,5 @@ Feel free to fork if you see possible improvements!
 
 ## Contributors
 
-* [Kit Goncharov](http://kitgoncharov.github.com/)
-  [![twitter/kitgoncharov](http://gravatar.com/avatar/6662a1d02f351b5ef2f8b4d815804661?s=70)](https://twitter.com/kitgoncharov "Follow @kitgoncharov on Twitter")
+* [Kit Cambridge](http://kitcambridge.github.com/)
+  [![twitter/kitcambridge](http://gravatar.com/avatar/6662a1d02f351b5ef2f8b4d815804661?s=70)](https://twitter.com/kitcambridge "Follow @kitcambridge on Twitter")
