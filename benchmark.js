@@ -95,7 +95,7 @@
     * @memberOf timer
     * @param {Object} deferred The deferred instance.
     */
-    'start': null,
+    'start': null, // lazy defined in `clock()`
 
    /**
     * Stops the deferred timer.
@@ -103,7 +103,7 @@
     * @memberOf timer
     * @param {Object} deferred The deferred instance.
     */
-    'stop': null
+    'stop': null // lazy defined in `clock()`
   },
 
   /** Math shortcuts */

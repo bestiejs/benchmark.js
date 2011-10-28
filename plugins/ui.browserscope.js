@@ -39,9 +39,9 @@
   uaToken = '\u2028',
 
   /** Math shortcuts */
+  floor = Math.floor,
   max = Math.max,
   min = Math.min,
-  round = Math.round,
 
   /** Utility shortcuts */
   each = Benchmark.each,
@@ -321,7 +321,7 @@
         key = toLabel(bench.name);
         // use the upper limit of the confidence interval to compute a lower hz
         // to avoid recording inflated results caused by a high margin or error
-        result[key && !hasKey(result, key) ? key : key + bench.id ] = round(1 / (stats.mean + stats.moe));
+        result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
       }
       return result;
     }, null);
