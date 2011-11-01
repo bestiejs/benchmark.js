@@ -63,7 +63,15 @@
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
       try{
-        return Function('return ' + (function() { return 1; }))()() === 1;
+        // Safari 2.x removes commas in object literals
+        // from Function#toString results
+        // http://webk.it/11609
+        // Firefox 3.6 and Opera 9.25 strip grouping
+        // parentheses from Function#toString results
+        // http://bugzil.la/559438
+        return Function(
+          'return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')'
+        )()(0).x === '1';
       } catch(e) { }
     }()),
 
@@ -216,10 +224,14 @@
       me.name = name;
     }
     setOptions(me, options);
-    me.fn || (me.fn = fn);
     me.id || (me.id = ++counter);
     me.stats = extend({}, me.stats);
     me.times = extend({}, me.times);
+
+    fn = me.fn || (me.fn = fn);
+    if (isClassOf(fn, 'String')) {
+      (me.fn = function() { }).toString = Function(fn);
+    }
   }
 
   /**
@@ -598,11 +610,11 @@
    * @returns {String} The function's source code.
    */
   function getSource(fn) {
-    // extract function body and trim whitespace
-    return (fn.toString == Function.prototype.toString
-      ? ((/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1] || '')
-      : String(fn)
-    ).replace(/^\s+|\s+$/g, '');
+    try {
+      var result = hasKey(fn, 'toString') ? String(fn) :
+        (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
+    } catch(e) { }
+    return (result || '').replace(/^\s+|\s+$/g, '');
   }
 
   /**
@@ -1291,7 +1303,9 @@
    * suite.run({ 'async': true, 'queued': true });
    */
   function runSuite(options) {
-    var me = this;
+    var me = this,
+        benches = [];
+
     me.reset();
     me.running = true;
     options || (options = {});
@@ -1306,11 +1320,34 @@
       'onCycle': function(event, bench) {
         if (bench.error) {
           me.emit('error', bench);
+        } else if (bench.cycles) {
+          benches.push(bench);
         }
         return !me.aborted && me.emit('cycle', bench);
       },
       'onComplete': function(event, bench) {
+        var prev;
         me.running = false;
+
+        // normalize results
+        each(benches.sort(function(a, b) {
+          // sort slowest to fastest
+          // (a larger `mean` indicates a slower benchmark)
+          a = a.stats; b = b.stats;
+          return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
+        }), function(bench) {
+          // if the previous slower benchmark is indistinguishable from
+          // the current then use the previous benchmark's values
+          if (prev && !prev.compare(bench)) {
+            bench.count = prev.count;
+            bench.cycles = prev.cycles;
+            bench.hz = prev.hz;
+            bench.stats = extend({}, prev.stats);
+            prev = bench;
+          }
+          prev = bench;
+        });
+
         me.emit('complete', bench);
       }
     });
@@ -1470,10 +1507,10 @@
   }
 
   /**
-   * Determines if the benchmark's period is smaller than another.
+   * Determines if a benchmark is faster than another.
    * @memberOf Benchmark
    * @param {Object} other The benchmark to compare.
-   * @returns {Number} Returns `1` if smaller, `-1` if larger, and `0` if indeterminate.
+   * @returns {Number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
    */
   function compare(other) {
     // unpaired two-sample t-test assuming equal variance
@@ -1487,6 +1524,7 @@
         near = abs(1 - a.mean / b.mean) < 0.055 && a.rme < 3 && b.rme < 3;
 
     // check if the means aren't close and the t-statistic is significant
+    // (a larger `mean` indicates a slower benchmark)
     return !near && abs(tstat) > getCriticalValue(df) ? (tstat > 0 ? -1 : 1) : 0;
   }
 
@@ -1571,11 +1609,20 @@
     // lazy defined for hi-res timers
     clock = function(bench) {
       var deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
-          decompilable = has.decompilation,
-          fn = bench.fn,
           host = bench._host || bench,
-          count = host.count = bench.count,
+          fn = host.fn,
+          hasToString = hasKey(fn, 'toString'),
+          decompilable = has.decompilation || hasToString,
+          source = {
+            'setup': decompilable ? getSource(host.setup) : 'm$.setup()',
+            'fn': decompilable ? getSource(fn) : 'f$()',
+            'teardown': decompilable ? getSource(host.teardown) : 'm$.teardown()'
+          },
           compiled = fn.compiled,
+          count = host.count = bench.count,
+          id = host.id,
+          isEmpty = !(source.fn || hasToString),
+          name = host.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
           ns = timer.ns,
           result = 0;
 
@@ -1602,39 +1649,36 @@
       if(!compiled) {
         // compile in setup/teardown functions and the test loop
         compiled = createFunction(preprocess('n$,t$'), interpolate(
-          preprocess(
-            'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'
-          ), {
-            'setup': decompilable ? getSource(host.setup) : 'm$.setup()',
-            'fn': decompilable ? getSource(fn) : 'f$()',
-            'teardown': decompilable ? getSource(host.teardown) : 'm$.teardown()'
-          }
+          preprocess('var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'),
+          source
         ));
 
         try {
-          // pretest to determine if compiled code is exits early, usually by a
-          // rogue `return` statement, by checking for a return object with the uid
-          host.count = 1;
-          compiled = (compiled.call(host, ns) || {}).uid == uid && compiled;
-          host.count = count;
+          if (isEmpty) {
+            // Firefox may remove dead code from Function#toString results
+            // http://bugzil.la/536085
+            throw new Error('The test, ' + name + ', is empty. This may be the result of dead code removal.');
+          }
+          else {
+            // pretest to determine if compiled code is exits early, usually by a
+            // rogue `return` statement, by checking for a return object with the uid
+            host.count = 1;
+            compiled = (compiled.call(host, ns) || {}).uid == uid && compiled;
+            host.count = count;
+          }
         } catch(e) {
           compiled = false;
           bench.error = e || new Error(String(e));
           host.count = count;
         }
         // fallback when a test exits early or errors during pretest
-        if (!compiled) {
+        if (decompilable && !compiled && !isEmpty) {
           compiled = createFunction(preprocess('n$'), interpolate(
-            preprocess(
-              (bench.error
-                ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;'
-                : 'function f$(){#{fn}\n}var r$,s$,i$=this.count;'
-              ) + '#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{time:r$}'
-            ), {
-              'fn': getSource(fn),
-              'setup': getSource(host.setup),
-              'teardown': getSource(host.teardown)
-            }
+            preprocess((bench.error
+              ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;'
+              : 'function f$(){#{fn}\n}var r$,s$,i$=this.count;'
+            ) + '#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{time:r$}'),
+            source
           ));
 
           try {
@@ -1644,8 +1688,7 @@
             host.count = count;
             delete bench.error;
           } catch(e) {
-            bench.error = e || new Error(String(e));
-            host.count = count;
+            bench.error || (bench.error = e || new Error(String(e)));
           }
         }
       }
