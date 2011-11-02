@@ -65,13 +65,15 @@
     var options = Benchmark.options,
         maxTime = options.maxTime;
 
-    var bench = Benchmark(function() { });
-    bench.run();
-    ok(bench.error, 'test errored');
-
+    // inits Benchmark.options.minTime
+    var bench = Benchmark(function() { throw ''; }).run();
     options.minTime && (options.maxTime = options.minTime * 5);
-    bench = Benchmark({ 'fn': '' });
-    bench.run();
+
+    bench = Benchmark(function() { }).run();
+    var error = bench.error;
+    ok(/setup\(\)/.test(bench.fn.compiled) ? !error : error, 'error check');
+
+    bench = Benchmark({ 'fn': '' }).run();
     ok(!bench.error, 'no error on explicitly empty');
     options.maxTime = maxTime;
   });

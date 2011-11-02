@@ -1616,9 +1616,9 @@
           hasToString = hasKey(fn, 'toString'),
           decompilable = has.decompilation || hasToString,
           source = {
-            'setup': decompilable ? getSource(host.setup) : 'm$.setup()',
-            'fn': decompilable ? getSource(fn) : 'f$()',
-            'teardown': decompilable ? getSource(host.teardown) : 'm$.teardown()'
+            'setup': decompilable ? getSource(host.setup) : preprocess('m$.setup()'),
+            'fn': decompilable ? getSource(fn) : preprocess('f$()'),
+            'teardown': decompilable ? getSource(host.teardown) : preprocess('m$.teardown()')
           },
           compiled = fn.compiled,
           count = host.count = bench.count,
