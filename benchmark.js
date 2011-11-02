@@ -217,6 +217,7 @@
     else if (isClassOf(fn, 'Object')) {
       // 2 arguments (name, options)
       options = fn;
+      fn = null;
       me.name = name;
     }
     else {
@@ -228,7 +229,7 @@
     me.stats = extend({}, me.stats);
     me.times = extend({}, me.times);
 
-    fn ? (me.fn = fn) : (fn = me.fn);
+    fn == null ? (fn = me.fn) : (me.fn = fn);
     if (isClassOf(fn, 'String')) {
       (me.fn = me.options.fn = function() { }).toString = function() {
         return fn;
