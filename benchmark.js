@@ -188,8 +188,8 @@
    *   // benchmark name
    *   'name': 'foo',
    *
-   *   // benchmark test function
-   *   'fn': fn
+   *   // benchmark test as a string
+   *   'fn': '[1,2,3,4].sort()'
    * });
    *
    * // a test's `this` binding is set to the benchmark instance
@@ -228,9 +228,11 @@
     me.stats = extend({}, me.stats);
     me.times = extend({}, me.times);
 
-    fn = me.fn || (me.fn = fn);
+    fn ? (me.fn = fn) : (fn = me.fn);
     if (isClassOf(fn, 'String')) {
-      (me.fn = function() { }).toString = Function(fn);
+      (me.fn = me.options.fn = function() { }).toString = function() {
+        return fn;
+      };
     }
   }
 

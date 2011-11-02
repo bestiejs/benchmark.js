@@ -42,6 +42,42 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark constructor');
+
+  test('basic', function() {
+    var bench = Benchmark(function() { });
+    ok(bench instanceof Benchmark, 'creation without `new` operator');
+
+    bench = Benchmark({ 'name': 'foo', 'fn': function() { } });
+    ok(bench.fn && bench.name == 'foo', 'arguments (options)');
+
+    bench = Benchmark('foo', function() { });
+    ok(bench.fn && bench.name == 'foo', 'arguments (name, function)');
+
+    bench = Benchmark('foo', { 'fn': function() { } });
+    ok(bench.fn && bench.name == 'foo', 'arguments (name, options)');
+
+    bench = Benchmark('foo', function() { }, { 'id': 'bar' });
+    ok(bench.fn && bench.name == 'foo' && bench.id == 'bar', 'arguments (name, function, options)');
+  });
+
+  test('empty', function() {
+    var options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    var bench = Benchmark(function() { });
+    bench.run();
+    ok(bench.error, 'test errored');
+
+    options.minTime && (options.maxTime = options.minTime * 5);
+    bench = Benchmark({ 'fn': '' });
+    bench.run();
+    ok(!bench.error, 'no error on explicitly empty');
+    options.maxTime = maxTime;
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.each');
 
   test('basic', function() {
@@ -392,6 +428,25 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark.Suite');
+
+  test('basic', function() {
+    var options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    options.minTime && (options.maxTime = options.minTime * 5);
+
+    var suite = Benchmark.Suite('foo')
+      .add('foo', function() { [3,1,5,2,4].sort(); })
+      .add('bar', function() { [3,1,5,2,4].sort(); })
+      .run();
+
+    ok(suite[0].hz && suite[0].hz == suite[1].hz, 'normalize like benchmarks');
+    options.maxTime = maxTime;
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.Suite#abort');
 
   test('basic', function() {
@@ -517,6 +572,25 @@
   /*--------------------------------------------------------------------------*/
 
   QUnit.module('Async tests');
+
+  asyncTest('Benchmark.options.defer', function() {
+    var options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    options.minTime && (options.maxTime = options.minTime * 5);
+
+    Benchmark(function(deferred) {
+      setTimeout(function() { deferred.resolve(); }, 10);
+    }, {
+      'defer': true,
+      'onComplete': function() {
+        ok(this.cycles, 'deferred benchmark');
+        options.maxTime = maxTime;
+        QUnit.start();
+      }
+    })
+    .run();
+  });
 
   asyncTest('Benchmark.filter', function() {
     var count = 0,
