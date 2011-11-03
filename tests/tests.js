@@ -438,7 +438,7 @@
 
     options.minTime && (options.maxTime = options.minTime * 5);
 
-    var suite = Benchmark.Suite('foo')
+    var suite = Benchmark.Suite('suite')
       .add('foo', function() { [3,1,5,2,4].sort(); })
       .add('bar', function() { [3,1,5,2,4].sort(); })
       .run();
@@ -454,10 +454,10 @@
   test('basic', function() {
     var fired = false;
 
-    var suite = Benchmark.Suite('foo', {
+    var suite = Benchmark.Suite('suite', {
       'onAbort': function() { fired = true }
     })
-    .add('bar', function() { });
+    .add('foo', function() { });
 
     suite.abort();
     ok(fired == false, 'calling abort() won\'t fire an abort event when suite isn\'t running');
