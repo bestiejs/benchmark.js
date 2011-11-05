@@ -479,7 +479,7 @@
         callbacks = [],
         callback = function() { callbacks.push([arguments, this]); };
 
-    var suite = Benchmark.Suite('foo', {
+    var suite = Benchmark.Suite('suite', {
       'onAdd': callback,
       'onAbort': callback,
       'onClone': callback,
@@ -489,7 +489,7 @@
       'onComplete': callback,
       'onReset': callback
     })
-    .add('bar', function() {
+    .add('foo', function() {
       throw null;
     }, {
       'onAbort': callback,
@@ -506,69 +506,69 @@
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onAdd');
+    ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onAdd');
 
     // next we start the Suite because no reset was needed
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'start' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onStart');
+    ok(args.length == 2 && args[0].type == 'start' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onStart');
 
     // and so start the first benchmark
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onStart');
+    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onStart');
 
     // after starting we reset the benchmark
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onReset');
+    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onReset');
 
     // oh no! we abort because of an error
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'abort' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onAbort');
+    ok(args.length == 1 && args[0].type == 'abort' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onAbort');
 
     // benchmark error triggered
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'error' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onError');
+    ok(args.length == 1 && args[0].type == 'error' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onError');
 
     // benchmark is cycle is finished
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'cycle' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onCycle');
+    ok(args.length == 1 && args[0].type == 'cycle' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onCycle');
 
     // benchmark is complete
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'bar', 'passed arguments to Benchmark#onComplete');
+    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onComplete');
 
     // the benchmark error triggers a Suite error
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'error' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onError');
+    ok(args.length == 2 && args[0].type == 'error' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onError');
 
     // the Suite cycle finishes
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'cycle' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onCycle');
+    ok(args.length == 2 && args[0].type == 'cycle' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onCycle');
 
     // the Suite completes
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'complete' && thisBinding.name == 'foo' && args[1].name == 'bar', 'passed arguments to Suite#onComplete');
+    ok(args.length == 2 && args[0].type == 'complete' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onComplete');
 
-    ok(callbacks.length == 0, 'callbacks executed in order');
+    ok(callbacks.length == 0, 'all callbacks executed');
   });
 
   /*--------------------------------------------------------------------------*/
