@@ -71,11 +71,56 @@
 
     bench = Benchmark(function() { }).run();
     var error = bench.error;
-    ok(/setup\(\)/.test(bench.fn.compiled) ? !error : error, 'error check');
+    ok(/setup\(\)/.test(bench.compiled) ? !error : error, 'error check');
 
     bench = Benchmark({ 'fn': '' }).run();
     ok(!bench.error, 'no error on explicitly empty');
     options.maxTime = maxTime;
+  });
+
+ /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark compiling');
+
+  test('basic', function() {
+    var bench = Benchmark({
+      'setup': function() { var a = 1; },
+      'fn': function() { throw a; },
+      'teardown': function() { a = 2; }
+    }).run();
+
+    var compiled = bench.compiled;
+    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
+  });
+
+  test('toString', function() {
+    var bench = Benchmark({
+      'setup': function() { },
+      'fn': function() { },
+      'teardown': function() { }
+    });
+
+    bench.setup.toString = function() { return 'var a = 1;' };
+    bench.fn.toString = function() { return 'throw a;' };
+    bench.teardown.toString = function() { return 'a = 2;' };
+    bench.run();
+
+    var compiled = bench.compiled;
+    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
+  });
+
+  test('as a string', function() {
+    var bench = Benchmark({
+      'setup': 'var a = 1;',
+      'fn': 'throw a;',
+      'teardown': 'a = 2;'
+    }).run();
+
+    var compiled = bench.compiled;
+    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
   });
 
   /*--------------------------------------------------------------------------*/

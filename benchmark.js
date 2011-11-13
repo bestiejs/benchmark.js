@@ -128,7 +128,7 @@
    * Benchmark constructor.
    * @constructor
    * @param {String} name A name to identify the benchmark.
-   * @param {Function} fn The test to benchmark.
+   * @param {Function|String} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    * @example
    *
@@ -226,15 +226,9 @@
     }
     setOptions(me, options);
     me.id || (me.id = ++counter);
+    me.fn == null && (me.fn = fn);
     me.stats = extend({}, me.stats);
     me.times = extend({}, me.times);
-
-    fn == null ? (fn = me.fn) : (me.fn = fn);
-    if (isClassOf(fn, 'String')) {
-      (me.fn = me.options.fn = function() { }).toString = function() {
-        return fn;
-      };
-    }
   }
 
   /**
@@ -614,8 +608,9 @@
    */
   function getSource(fn) {
     try {
-      var result = hasKey(fn, 'toString') ? String(fn) :
-        (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
+      var result = hasKey(fn, 'toString') || isClassOf(fn, 'String')
+        ? String(fn)
+        : (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
     } catch(e) { }
     return (result || '').replace(/^\s+|\s+$/g, '');
   }
@@ -773,7 +768,7 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * A generic `Array#forEach` / `for...in` own property utility function.
+   * An iteration utility for arrays and objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
    * @memberOf Benchmark
@@ -859,12 +854,12 @@
    * @param {Object} thisArg The `this` binding for the callback function.
    * @returns {Object} Returns the object iterated over.
    */
-  function forIn(object, callback, thisArg){
+  function forIn(object, callback, thisArg) {
     var result = object;
     object = Object(object);
-    for(var key in object){
-      if(hasKey(object, key) &&
-        callback.call(thisArg, object[key], key, object) === false){
+    for (var key in object) {
+      if (hasKey(object, key) &&
+        callback.call(thisArg, object[key], key, object) === false) {
         break;
       }
     }
@@ -892,24 +887,30 @@
    * @param {String} key The key to check for.
    * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
    */
-  function hasKey(object, key) {
-    var result,
-        parent = (object.constructor || Object).prototype;
-
-    // for modern browsers
-    object = Object(object);
+  function hasKey() {
+    // lazy define for modern browsers
     if (isClassOf(hasOwnProperty, 'Function')) {
-      result = hasOwnProperty.call(object, key);
+      hasKey = function(object, key) {
+        return hasOwnProperty.call(object, key);
+      };
     }
     // for Safari 2
     else if ({}.__proto__ == Object.prototype) {
-      object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
+      hasKey = function(object, key) {
+        var result;
+        object = Object(object);
+        object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
+        return result;
+      };
     }
     // for others (not as accurate)
     else {
-      result = key in object && !(key in parent && object[key] === parent[key]);
+      hasKey = function(object, key) {
+        var parent = (object.constructor || Object).prototype;
+        return key in Object(object) && !(key in parent && object[key] === parent[key]);
+      };
     }
-    return result;
+    return hasKey.apply(this, arguments);
   }
 
   /**
@@ -1206,7 +1207,7 @@
    * Adds a test to the benchmark suite.
    * @memberOf Benchmark.Suite
    * @param {String} name A name to identify the benchmark.
-   * @param {Function} fn The test to benchmark.
+   * @param {Function|String} fn The test to benchmark.
    * @param {Object} [options={}] Options object.
    * @returns {Object} The benchmark instance.
    * @example
@@ -1614,8 +1615,8 @@
       var deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
           host = bench._host || bench,
           fn = host.fn,
-          hasToString = hasKey(fn, 'toString'),
-          decompilable = has.decompilation || hasToString,
+          stringable = hasKey(fn, 'toString') || isClassOf(fn, 'String'),
+          decompilable = has.decompilation || stringable,
           source = {
             'setup': decompilable ? getSource(host.setup) : preprocess('m$.setup()'),
             'fn': decompilable ? getSource(fn) : preprocess('f$()'),
@@ -1624,7 +1625,7 @@
           compiled = fn.compiled,
           count = host.count = bench.count,
           id = host.id,
-          isEmpty = !(source.fn || hasToString),
+          isEmpty = !(source.fn || stringable),
           name = host.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
           ns = timer.ns,
           result = 0;
@@ -1651,7 +1652,7 @@
       }
       if(!compiled) {
         // compile in setup/teardown functions and the test loop
-        compiled = createFunction(preprocess('n$,t$'), interpolate(
+        compiled = host.compiled = createFunction(preprocess('n$,t$'), interpolate(
           preprocess('var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'),
           source
         ));
@@ -1675,9 +1676,9 @@
           host.count = count;
         }
         // fallback when a test exits early or errors during pretest
-        if (decompilable && !compiled && !isEmpty) {
+        if (decompilable && !isEmpty && !compiled) {
           compiled = createFunction(preprocess('n$'), interpolate(
-            preprocess((bench.error
+            preprocess((bench.error && !stringable
               ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;'
               : 'function f$(){#{fn}\n}var r$,s$,i$=this.count;'
             ) + '#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{time:r$}'),
@@ -1688,17 +1689,21 @@
             // pretest one more time to check for errors
             host.count = 1;
             compiled.call(host, ns);
+            host.compiled = compiled;
             host.count = count;
             delete bench.error;
           } catch(e) {
-            bench.error || (bench.error = e || new Error(String(e)));
+            host.count = count;
+            if (!bench.error) {
+              host.compiled = compiled;
+              bench.error = e || new Error(String(e));
+            }
           }
         }
       }
       // if no errors run the full test loop
       if (!bench.error) {
         result = compiled.call(host, ns).time;
-        fn.compiled = compiled;
       }
       return result;
     };
@@ -2191,7 +2196,8 @@
     },
 
     /**
-     * Platform object containing browser name, version, and operating system.
+     * Platform object with properties describing things like browser name,
+     * version, and operating system.
      * @static
      * @memberOf Benchmark
      * @type Object
@@ -2227,11 +2233,25 @@
       'name': null,
 
       /**
+       * The name of the product's manufacturer.
+       * @memberOf Benchmark.platform
+       * @type String|Null
+       */
+      'manufacturer': null,
+
+      /**
        * The name of the operating system.
        * @memberOf Benchmark.platform
        * @type String|Null
        */
       'os': null,
+
+      /**
+       * The alpha/beta release indicator.
+       * @memberOf Benchmark.platform
+       * @type String|Null
+       */
+      'prerelease': null,
 
       /**
        * The browser/environment version.
@@ -2251,7 +2271,7 @@
       }
     },
 
-    // generic Array#forEach / for...in utility
+    // iteration utility
     'each': each,
 
     // generic Array#filter
@@ -2264,7 +2284,8 @@
     'formatNumber': formatNumber,
 
     // generic Object#hasOwnProperty
-    'hasKey': hasKey,
+    // (trigger hasKey's lazy define before assigning it to Benchmark)
+    'hasKey': (hasKey(Benchmark, ''), hasKey),
 
     // generic Array#indexOf
     'indexOf': indexOf,
@@ -2307,13 +2328,6 @@
     'cycles': 0,
 
     /**
-     * The error object if the test failed.
-     * @memberOf Benchmark
-     * @type Object|Null
-     */
-    'error': null,
-
-    /**
      * The number of executions per second.
      * @memberOf Benchmark
      * @type Number
@@ -2321,9 +2335,23 @@
     'hz': 0,
 
     /**
+     * The compiled test function.
+     * @memberOf Benchmark
+     * @type Function|String
+     */
+    'compiled': null,
+
+    /**
+     * The error object if the test failed.
+     * @memberOf Benchmark
+     * @type Object|Null
+     */
+    'error': null,
+
+    /**
      * The test to benchmark.
      * @memberOf Benchmark
-     * @type Function
+     * @type Function|String
      */
     'fn': null,
 
@@ -2350,7 +2378,7 @@
     /**
      * Compiled into the test and executed immediately **before** the test loop.
      * @memberOf Benchmark
-     * @type Function
+     * @type Function|String
      * @example
      *
      * // basic usage
@@ -2418,7 +2446,7 @@
     /**
      * Compiled into the test and executed immediately **after** the test loop.
      * @memberOf Benchmark
-     * @type Function
+     * @type Function|String
      */
     'teardown': noop,
 
