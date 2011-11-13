@@ -699,9 +699,10 @@
         sibling,
         anchor = freeDefine ? define.amd : Benchmark,
         prop = uid + 'runScript',
-        prefix = (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '();';
+        prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
 
-    // Non-browser environments and IE < 9 will error here and that's OK.
+    // Non-browser environments, Firefox 2.0.0.2 (executes asynchronously),
+    // and IE < 9 will error here and that's OK.
     // Script injection is only used to avoid the previously commented JaegerMonkey bug.
     // We remove the inserted script *before* running the code to avoid differences
     // in the expected script element count/order of the document.
@@ -1769,12 +1770,6 @@
     timer.ns = reduce(window.document && document.applets || [], function(ns, element) {
       return (applet = ns || 'nanoTime' in element && element);
     });
-
-    // or the exposed Java API
-    // http://download.oracle.com/javase/6/docs/api/java/lang/System.html#nanoTime()
-    try {
-      timer.ns || (timer.ns = java.lang.System);
-    } catch(e) { }
 
     // check type in case Safari returns an object instead of a number
     try {
