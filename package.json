@@ -1,6 +1,6 @@
 {
   "name": "benchmark",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results.",
   "homepage": "http://benchmarkjs.com/",
   "main": "benchmark",
@@ -25,14 +25,14 @@
   },
   "maintainers": [
     {
-      "name": "Mathias Bynens",
-      "email": "mathias@benchmarkjs.com",
-      "web": "http://mathiasbynens.be/"
-    },
-    {
       "name": "John-David Dalton",
       "email": "john@fusejs.com",
       "web": "http://allyoucanleet.com/"
+    },
+    {
+      "name": "Mathias Bynens",
+      "email": "mathias@benchmarkjs.com",
+      "web": "http://mathiasbynens.be/"
     }
   ],
   "bugs": {
