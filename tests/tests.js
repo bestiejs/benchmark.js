@@ -17,28 +17,35 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // in-browser tests
-  if (window.document) {
-    // must explicitly use `QUnit.module` instead of `module()`
-    // in case we are in a CLI environment
-    QUnit.module('Benchmark');
+  // must explicitly use `QUnit.module` instead of `module()`
+  // in case we are in a CLI environment
+  QUnit.module('Benchmark');
 
-    test('Benchmark.platform', function() {
+  test('Benchmark.platform', function() {
+    if (window.document) {
       equal(navigator.userAgent, String(Benchmark.platform), 'default value');
-    });
-
-    if (window.require) {
-      test('require("benchmark")', function() {
-        equal((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
-      });
-
-      test('require("platform")', function() {
-        var bench = Benchmark2 || {},
-            platform = bench.platform || {};
-        equal(typeof platform.name, 'string', 'auto required');
-      });
+    } else {
+      ok(true, 'test skipped');
     }
-  }
+  });
+
+  test('require("benchmark")', function() {
+    if (window.document && window.require) {
+      equal((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
+    } else {
+      ok(true, 'test skipped');
+    }
+  });
+
+  test('require("platform")', function() {
+    if (window.document && window.require) {
+      var bench = Benchmark2 || {},
+          platform = bench.platform || {};
+      equal(typeof platform.name, 'string', 'auto required');
+    } else {
+      ok(true, 'test skipped');
+    }
+  });
 
   /*--------------------------------------------------------------------------*/
 
@@ -160,8 +167,8 @@
     deepEqual(values, ['a', 'c'], 'sparse check');
   });
 
-  if (window.document && document.evaluate) {
-    test('xpath snapshot', function() {
+  test('xpath snapshot', function() {
+    if (window.document && document.evaluate) {
       var o = document.evaluate('//html', document, null, 7, null),
           values = [];
 
@@ -170,8 +177,11 @@
       });
 
       deepEqual(values, [document.documentElement], 'basic');
-    });
-  }
+    }
+    else {
+      ok(true, 'test skipped');
+    }
+  });
 
   /*--------------------------------------------------------------------------*/
 
