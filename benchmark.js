@@ -2367,6 +2367,7 @@
     /**
      * Alias of [`Benchmark#addListener`](#Benchmark:addListener).
      * @memberOf Benchmark, Benchmark.Suite
+     * @type Function
      */
     'on': addListener,
 
