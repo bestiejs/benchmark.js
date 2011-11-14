@@ -20,7 +20,7 @@
   /** Used to assign each benchmark an incrimented id */
   counter = 0,
 
-  /** Used to preserve a pristine reference */
+  /** Used to check for own properties of an object */
   hasOwnProperty = {}.hasOwnProperty,
 
   /** Used to resolve a value's internal [[Class]] */
@@ -889,7 +889,12 @@
    * @returns {Boolean} Returns `true` if key is a direct property, else `false`.
    */
   function hasKey() {
-    // lazy define for modern browsers
+    // lazy define for others (not as accurate)
+    hasKey = function(object, key) {
+      var parent = (object.constructor || Object).prototype;
+      return key in Object(object) && !(key in parent && object[key] === parent[key]);
+    };
+    // for modern browsers
     if (isClassOf(hasOwnProperty, 'Function')) {
       hasKey = function(object, key) {
         return hasOwnProperty.call(object, key);
@@ -902,13 +907,6 @@
         object = Object(object);
         object.__proto__ = [object.__proto__, object.__proto__ = null, result = key in object][0];
         return result;
-      };
-    }
-    // for others (not as accurate)
-    else {
-      hasKey = function(object, key) {
-        var parent = (object.constructor || Object).prototype;
-        return key in Object(object) && !(key in parent && object[key] === parent[key]);
       };
     }
     return hasKey.apply(this, arguments);
