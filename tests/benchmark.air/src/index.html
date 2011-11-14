@@ -23,14 +23,15 @@ var console = air.Introspector.Console;
     'Hello World!'.indexOf('o') > -1;
   })
   // add listeners
-  .on('cycle', function(bench) {
-    console.log(String(bench));
+  .on('cycle', function(event, bench) {
+    console.log(bench);
   })
   .on('complete', function() {
     console.log('Fastest is ' + this.filter('fastest').pluck('name'));
   })
-  // run async
-  .run(true);
+  // don't run async to avoid JavaScript security errors
+  // http://help.adobe.com/en_US/AIR/1.5/devappshtml/WS5b3ccc516d4fbf351e63e3d118666ade46-7f0e.html
+  .run({ 'async': false });
 
 }());
 </script>
