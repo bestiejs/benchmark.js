@@ -2377,22 +2377,21 @@
      *
      * // basic usage
      * var bench = Benchmark({
-     *   'fn': function() {
-     *     element.removeChild(element.lastChild);
-     *   },
      *   'setup': function() {
      *     var c = this.count,
      *         element = document.getElementById('container');
-     *
      *     while (c--) {
      *       element.appendChild(document.createElement('div'));
      *     }
+     *   },
+     *   'fn': function() {
+     *     element.removeChild(element.lastChild);
+     *   }
      * });
      *
      * // compiles to something like:
      * var c = this.count,
      *     element = document.getElementById('container');
-     *
      * while (c--) {
      *   element.appendChild(document.createElement('div'));
      * }
@@ -2402,27 +2401,22 @@
      * }
      * var end = new Date - start;
      *
-     * // or using a custom toString() method
-     * var bench = Benchmark(function() { a += 1; });
-     * window.a = 0;
-     *
-     * (bench.setup = function() { }).toString = function() {
-     *   return [
-     *     '(function() {',
-     *     '  (function() {',
-     *     '    (function() {'
-     *   ].join('\n');
-     * };
-     *
-     * (bench.teardown = function() { }).toString = function() {
-     *   return [
-     *     '    }())',
-     *     '  }())',
-     *     '}())'
-     *   ].join('\n');
-     * };
+     * // or using strings
+     * var bench = Benchmark({
+     *   'setup': '\
+     *     var a = 0;\n\
+     *     (function() {\n\
+     *       (function() {\n\
+     *         (function() {',
+     *   'fn': 'a += 1;',
+     *   'teardown': '\
+     *          }())\n\
+     *        }())\n\
+     *      }())'
+     * });
      *
      * // compiles to something like:
+     * var a = 0;
      * (function() {
      *   (function() {
      *     (function() {
