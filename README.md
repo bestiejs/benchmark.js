@@ -36,7 +36,7 @@ Via [npm](http://npmjs.org/):
 npm install benchmark
 ~~~
 
-In [Node.js](http://nodejs.org/):
+In [Node.js](http://nodejs.org/) and [RingoJS v0.8.0+](http://ringojs.org/):
 
 ~~~ js
 var Benchmark = require('benchmark');
@@ -48,7 +48,7 @@ Optionally, use the [microtime module](https://github.com/wadey/node-microtime) 
 npm install microtime
 ~~~
 
-In [Narwhal](http://narwhaljs.org/) and [RingoJS](http://ringojs.org/):
+In [Narwhal](http://narwhaljs.org/) and [RingoJS v0.7.0-](http://ringojs.org/):
 
 ~~~ js
 var Benchmark = require('benchmark').Benchmark;

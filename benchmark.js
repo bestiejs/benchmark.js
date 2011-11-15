@@ -2786,18 +2786,18 @@
 
   // expose Benchmark
   if (freeExports) {
-    // in Node.js
+    // in Node.js or Ringo v0.8.0
     if (typeof module == 'object' && module && module.exports == freeExports) {
-      module.exports = Benchmark;
+      (module.exports = Benchmark).Benchmark = Benchmark;
     }
-    // in Narwhal or Ringo
+    // in Narwhal or Ringo v0.7.0
     else {
       freeExports.Benchmark = Benchmark;
     }
   }
   // via curl.js or RequireJS
   else if (freeDefine) {
-    freeDefine(['platform'], function(platform) {
+    define('benchmark', ['platform'], function(platform) {
       Benchmark.platform = platform;
       return Benchmark;
     });
