@@ -49,12 +49,16 @@
 			require({
 				'baseUrl': '../vendor/requirejs/',
 				'urlArgs': 't=' + (+new Date),
-				'paths': { 'platform': '../platform.js/platform', 'src': '../../' }
+				'paths': {
+					'benchmark': '../../benchmark',
+					'platform': '../platform.js/platform'
+				}
 			},
-			['src/benchmark'], function(Benchmark) {
+			['benchmark', 'platform'], function(Benchmark, platform) {
 				Benchmark2 = Benchmark;
+				Benchmark2.platform = platform;
+				document.getElementById('qunit-userAgent').innerHTML = platform;
 				require(['tests.js']);
-				document.getElementById('qunit-userAgent').innerHTML = Benchmark2.platform;
 			});
 		}
 		if (!/[?&]nojava=true(?:&|$)/.test(location.search)) {

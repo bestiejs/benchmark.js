@@ -63,16 +63,25 @@ load('benchmark.js');
 In [RequireJS](http://requirejs.org/):
 
 ~~~ js
-require(['path/to/benchmark'], function(Benchmark) {
+require({
+  'paths': {
+    'benchmark': 'path/to/benchmark'
+  }
+},
+['benchmark'], function(Benchmark) {
   console.log(Benchmark.version);
 });
 
-// auto-require platform.js
+// or with platform.js
 // https://github.com/bestiejs/platform.js
 require({
-  'paths': { 'platform': 'path/to/platform' }
+  'paths': {
+    'benchmark': 'path/to/benchmark',
+    'platform': 'path/to/platform'
+  }
 },
-['path/to/benchmark'], function(Benchmark) {
+['benchmark', 'platform'], function(Benchmark, platform) {
+  Benchmark.platform = platform;
   console.log(Benchmark.platform.name);
 });
 ~~~

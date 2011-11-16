@@ -2797,8 +2797,7 @@
   }
   // via curl.js or RequireJS
   else if (freeDefine) {
-    define('benchmark', ['platform'], function(platform) {
-      Benchmark.platform = platform;
+    define('benchmark', function() {
       return Benchmark;
     });
   }

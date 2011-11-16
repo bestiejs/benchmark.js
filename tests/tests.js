@@ -41,7 +41,7 @@
     if (window.document && window.require) {
       var bench = Benchmark2 || {},
           platform = bench.platform || {};
-      equal(typeof platform.name, 'string', 'auto required');
+      equal(typeof platform.name, 'string', 'required("platform")');
     } else {
       ok(true, 'test skipped');
     }
