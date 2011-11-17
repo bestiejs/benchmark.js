@@ -1691,7 +1691,8 @@
             host.compiled = compiled;
             host.count = count;
             delete bench.error;
-          } catch(e) {
+          }
+          catch(e) {
             host.count = count;
             if (!bench.error) {
               host.compiled = compiled;
@@ -2797,9 +2798,7 @@
   }
   // via curl.js or RequireJS
   else if (freeDefine) {
-    define('benchmark', function() {
-      return Benchmark;
-    });
+    define('benchmark', function() { return Benchmark; });
   }
   // in a browser or Rhino
   else {
