@@ -85,7 +85,7 @@
   /** API Shortcuts */
   each = Benchmark.each,
   filter = Benchmark.filter,
-  forIn = Benchmark.forIn,
+  forOwn = Benchmark.forOwn,
   formatNumber = Benchmark.formatNumber,
   indexOf = Benchmark.indexOf,
   invoke = Benchmark.invoke;
@@ -438,7 +438,7 @@
         params = me.params || (me.params = {});
 
     // remove old params
-    forIn(params, function(value, key) {
+    forOwn(params, function(value, key) {
       delete params[key];
     });
 

@@ -9,7 +9,7 @@
       window.setTimeout || (window.addEventListener = window.setTimeout = / /),
       window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit,
       load('../vendor/qunit-clib/qunit-clib.js'),
-      window.addEventListener.test && delete window.addEventListener,
+      (window.addEventListener || 0).test && delete window.addEventListener,
       window.QUnit
     );
 
@@ -220,7 +220,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.forIn');
+  QUnit.module('Benchmark.forOwn');
 
   test('basic', function() {
     var args,
@@ -228,7 +228,7 @@
         o = (O.prototype.d = 4, new O),
         values = [];
 
-    var result = Benchmark.forIn(o, function(value) {
+    var result = Benchmark.forOwn(o, function(value) {
       args || (args = [].slice.call(arguments));
       values.push(value);
     });
@@ -238,7 +238,7 @@
     deepEqual(args, [1, 'a', o], 'passed arguments to callback');
     values.length = 0;
 
-    Benchmark.forIn(o, function(value, key) {
+    Benchmark.forOwn(o, function(value, key) {
       return key == 'c' ? false : values.push(value);
     });
 

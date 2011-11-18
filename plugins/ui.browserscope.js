@@ -46,7 +46,7 @@
   /** Utility shortcuts */
   each = Benchmark.each,
   filter = Benchmark.filter,
-  forIn = Benchmark.forIn,
+  forOwn = Benchmark.forOwn,
   formatNumber = Benchmark.formatNumber,
   hasKey = Benchmark.hasKey,
   map = Benchmark.map,
@@ -291,7 +291,7 @@
     var ctor = object.constructor,
         result = ctor ? (noop.prototype = ctor.prototype, new noop) : {};
 
-    forIn(object, function(value, key) {
+    forOwn(object, function(value, key) {
       if (isArray(value)) {
         result[key] = [];
         each(value, function(value, index) {
@@ -336,7 +336,7 @@
   function getDataCells(object) {
     // resolve cells by duck typing because of munged property names
     var result = [];
-    forIn(object, function(value) {
+    forOwn(object, function(value) {
       return !(isArray(value) && (result = value));
     });
     return result;
@@ -353,7 +353,7 @@
         labelMap = {};
 
     // resolve labels by duck typing because of munged property names
-    forIn(object, function(value) {
+    forOwn(object, function(value) {
       return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
     // create a data map of labels to names
@@ -382,7 +382,7 @@
         result = [];
 
     // resolve rows by duck typing because of munged property names
-    forIn(object, function(value, key) {
+    forOwn(object, function(value, key) {
       return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
     // remove empty rows and set the `p.className` on the browser
@@ -629,7 +629,7 @@
     if (key) {
       delete responses[key];
     } else {
-      forIn(responses, function(value, key) {
+      forOwn(responses, function(value, key) {
         delete responses[key];
       });
     }

@@ -10,8 +10,8 @@
 * [`Benchmark.version`](#Benchmark.version)
 * [`Benchmark.each`](#Benchmark.each)
 * [`Benchmark.filter`](#Benchmark.filter)
-* [`Benchmark.forIn`](#Benchmark.forIn)
 * [`Benchmark.formatNumber`](#Benchmark.formatNumber)
+* [`Benchmark.forOwn`](#Benchmark.forOwn)
 * [`Benchmark.hasKey`](#Benchmark.hasKey)
 * [`Benchmark.indexOf`](#Benchmark.indexOf)
 * [`Benchmark.invoke`](#Benchmark.invoke)
@@ -362,7 +362,22 @@ Benchmark.filter(benches, 'successful');
 
 <!-- div -->
 
-### <a id="Benchmark.forIn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L858" title="View in source">`Benchmark.forIn(object, callback, thisArg)`</a>
+### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L877" title="View in source">`Benchmark.formatNumber(number)`</a>
+Converts a number to a more readable comma-separated string representation.
+[&#9650;][1]
+
+#### Arguments
+1. `number` *(Number)*: The number to convert.
+
+#### Returns
+*(String)*: The more readable string representation.
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="Benchmark.forOwn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L858" title="View in source">`Benchmark.forOwn(object, callback, thisArg)`</a>
 Iterates over an object's own properties, executing the `callback` for each.
 [&#9650;][1]
 
@@ -373,21 +388,6 @@ Iterates over an object's own properties, executing the `callback` for each.
 
 #### Returns
 *(Object)*: Returns the object iterated over.
-
-<!-- /div -->
-
-
-<!-- div -->
-
-### <a id="Benchmark.formatNumber" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L877" title="View in source">`Benchmark.formatNumber(number)`</a>
-Converts a number to a more readable comma-separated string representation.
-[&#9650;][1]
-
-#### Arguments
-1. `number` *(Number)*: The number to convert.
-
-#### Returns
-*(String)*: The more readable string representation.
 
 <!-- /div -->
 

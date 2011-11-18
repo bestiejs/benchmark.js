@@ -795,7 +795,7 @@
         }
       }
     } else {
-      forIn(object, callback, thisArg);
+      forOwn(object, callback, thisArg);
     }
     return result;
   }
@@ -855,7 +855,7 @@
    * @param {Object} thisArg The `this` binding for the callback function.
    * @returns {Object} Returns the object iterated over.
    */
-  function forIn(object, callback, thisArg) {
+  function forOwn(object, callback, thisArg) {
     var result = object;
     object = Object(object);
     for (var key in object) {
@@ -1244,7 +1244,7 @@
         result = new me.constructor(extend({}, me.options, options));
 
     // copy own properties
-    forIn(me, function(value, key) {
+    forOwn(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : value;
       }
@@ -1501,7 +1501,7 @@
         result = new me.constructor(me.fn, extend({}, me.options, { 'id': me.id }, options));
 
     // copy own properties
-    forIn(me, function(value, key) {
+    forOwn(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value;
       }
@@ -2271,8 +2271,8 @@
     // generic Array#filter
     'filter': filter,
 
-    // generic for...in utility
-    'forIn': forIn,
+    // generic own property iteration utility
+    'forOwn': forOwn,
 
     // converts a number to a comma-separated string
     'formatNumber': formatNumber,
