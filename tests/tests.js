@@ -280,6 +280,16 @@
     equal(Benchmark.indexOf(o, undefined), -1, 'sparse check');
   });
 
+  test('fromIndex', function() {
+    var o = ['a', 'b', 'c', 'a'];
+    o['-1'] = 'z';
+    equal(Benchmark.indexOf(o, 'a', 1), 3, 'fromIndex');
+    equal(Benchmark.indexOf(o, 'z', -5), -1, 'extreme negative fromIndex');
+
+    var o = { '0': 'a', '2': 'c', '3': 'z', 'length': 3 };
+    equal(Benchmark.indexOf(o, 'z', 3), -1, 'extreme positive fromIndex');
+  });
+
   /*--------------------------------------------------------------------------*/
 
   QUnit.module('Benchmark.invoke');

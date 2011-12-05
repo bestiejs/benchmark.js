@@ -8,7 +8,8 @@
 ;(function(window, undefined) {
 
   /** Detect free variable `define` */
-  var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define,
+  var freeDefine = typeof define == 'function' &&
+    typeof define.amd == 'object' && define.amd && define,
 
   /** Detect free variable `exports` */
   freeExports = typeof exports == 'object' && exports &&
@@ -327,7 +328,7 @@
    * Normally only `splice()` is buggy. In compatibility mode, however, `shift()`
    * is also buggy.
    *
-   * Rhino and environments it powers, like Narwhal and Ringo, may have
+   * Rhino and environments it powers, like Narwhal and RingoJS, may have
    * buggy Array `concat()`, `reverse()`, `shift()`, `slice()`, `splice()` and
    * `unshift()` functions that make sparse arrays non-sparse by assigning the
    * undefined indexes a value of undefined. For more info see:
@@ -579,6 +580,18 @@
   }
 
   /**
+   * Gets the name of the first argument from a function's source.
+   * @private
+   * @param {Function} fn The function.
+   * @param {String} altName A string used when the name of the first argument is unretrievable.
+   * @returns {String} The argument name.
+   */
+  function getArgumentName(fn, altName) {
+    return (!hasKey(fn, 'toString') &&
+      (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || altName || '';
+  }
+
+  /**
    * Gets the critical value for the specified degrees of freedom.
    * @private
    * @param {Number} df The degrees of freedom.
@@ -604,15 +617,14 @@
    * Gets the source code of a function.
    * @private
    * @param {Function} fn The function.
+   * @param {String} altSource A string used when a function's source code is unretrievable.
    * @returns {String} The function's source code.
    */
-  function getSource(fn) {
-    try {
-      var result = hasKey(fn, 'toString') || isClassOf(fn, 'String')
-        ? String(fn)
-        : (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
-    } catch(e) { }
-    return (result || '').replace(/^\s+|\s+$/g, '');
+  function getSource(fn, altSource) {
+    var result = isStringable(fn)
+      ? String(fn)
+      : has.decompilation && (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
+    return (result || altSource || '').replace(/^\s+|\s+$/g, '');
   }
 
   /**
@@ -652,6 +664,16 @@
     var type = object != null ? typeof object[property] : 'number';
     return !/^(?:boolean|number|string|undefined)$/.test(type) &&
       (type == 'object' ? !!object[property] : true);
+  }
+
+  /**
+   * Checks if a value can be correctly coerced to a string.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if the value can be coerced, else `false`.
+   */
+  function isStringable(value) {
+    return hasKey(value, 'toString') || isClassOf(value, 'String');
   }
 
   /**
@@ -751,10 +773,9 @@
         bench = me.benchmark;
 
     if (++me.cycles < bench.count) {
-      bench.fn(me);
+      (bench._host || bench).compiled.call(me, timer.ns, timer);
     } else {
       timer.stop(me);
-      bench.teardown();
       call({
         'async': true,
         'benchmark': bench,
@@ -762,7 +783,6 @@
           cycle({ 'benchmark': bench, 'deferred': me });
         }
       });
-
     }
   }
 
@@ -786,7 +806,7 @@
         length = isSnapshot ? object.snapshotLength : object.length;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
-    if (length == length >>> 0) {
+    if (length === length >>> 0) {
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
         if ((skipCheck || index in object) &&
@@ -918,17 +938,20 @@
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Mixed} value The value to search for.
+   * @param {Number} [fromIndex=0] The index to start searching from.
    * @returns {Number} The index of the matched value or `-1`.
    */
-  function indexOf(array, value) {
-    var result = -1;
-    each(array, function(other, index) {
-      if (value === other) {
-        result = index;
-        return false;
+  function indexOf(array, value, fromIndex) {
+    var index = toInteger(fromIndex),
+        length = (array = Object(array)).length >>> 0;
+
+    index = (index < 0 ? max(0, length + index) : index) - 1;
+    while (++index < length) {
+      if (index in array && value === array[index]) {
+        return index;
       }
-    });
-    return result;
+    }
+    return -1;
   }
 
   /**
@@ -1614,12 +1637,14 @@
       var deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
           host = bench._host || bench,
           fn = host.fn,
-          stringable = hasKey(fn, 'toString') || isClassOf(fn, 'String'),
+          fnArg = deferred ? getArgumentName(fn, 'deferred') : '',
+          stringable = isStringable(fn),
           decompilable = has.decompilation || stringable,
           source = {
-            'setup': decompilable ? getSource(host.setup) : preprocess('m$.setup()'),
-            'fn': decompilable ? getSource(fn) : preprocess('f$()'),
-            'teardown': decompilable ? getSource(host.teardown) : preprocess('m$.teardown()')
+            'setup': getSource(host.setup, preprocess('m$.setup()')),
+            'fn': getSource(fn, preprocess('f$(' + fnArg + ')')),
+            'fnArg': fnArg,
+            'teardown': getSource(host.teardown, preprocess('m$.teardown()'))
           },
           compiled = fn.compiled,
           count = host.count = bench.count,
@@ -1643,16 +1668,15 @@
         }
       }
 
-      if (deferred) {
-        host.setup();
-        timer.start(deferred);
-        host.fn(deferred);
-        return result;
-      }
       if(!compiled) {
         // compile in setup/teardown functions and the test loop
         compiled = host.compiled = createFunction(preprocess('n$,t$'), interpolate(
-          preprocess('var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'),
+          preprocess(deferred
+            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$.benchmark;m$=m$._host||m$,f$=m$.fn;' +
+              'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
+              'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}#{fn};return{}'
+            : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};' +
+              'while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'),
           source
         ));
 
@@ -1662,7 +1686,7 @@
             // http://bugzil.la/536085
             throw new Error('The test, ' + name + ', is empty. This may be the result of dead code removal.');
           }
-          else {
+          else if (!deferred) {
             // pretest to determine if compiled code is exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             host.count = 1;
@@ -1675,7 +1699,7 @@
           host.count = count;
         }
         // fallback when a test exits early or errors during pretest
-        if (decompilable && !isEmpty && !compiled) {
+        if (decompilable && !compiled && !deferred && !isEmpty) {
           compiled = createFunction(preprocess('n$'), interpolate(
             preprocess((bench.error && !stringable
               ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;'
@@ -1703,7 +1727,7 @@
       }
       // if no errors run the full test loop
       if (!bench.error) {
-        result = compiled.call(host, ns).time;
+        result = compiled.call(deferred || host, ns, timer).time;
       }
       return result;
     };
@@ -2047,7 +2071,7 @@
     if (bench.running) {
       bench.count = count;
       if (deferred) {
-        bench.fn(deferred);
+        (bench._host || bench).compiled.call(deferred, timer.ns, timer);
       } else {
         call({
           'async': async,
@@ -2302,7 +2326,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // IE may ignore `toString` in a for-in loop
+  // IE < 9 will ignore `toString` in a for-in loop
   Benchmark.prototype.toString = toStringBench;
 
   extend(Benchmark.prototype, {
@@ -2787,18 +2811,20 @@
 
   // expose Benchmark
   if (freeExports) {
-    // in Node.js or Ringo v0.8.0
+    // in Node.js or RingoJS v0.8.0+
     if (typeof module == 'object' && module && module.exports == freeExports) {
       (module.exports = Benchmark).Benchmark = Benchmark;
     }
-    // in Narwhal or Ringo v0.7.0
+    // in Narwhal or RingoJS v0.7.0-
     else {
       freeExports.Benchmark = Benchmark;
     }
   }
   // via curl.js or RequireJS
   else if (freeDefine) {
-    define('benchmark', function() { return Benchmark; });
+    define('benchmark', function() {
+      return Benchmark;
+    });
   }
   // in a browser or Rhino
   else {

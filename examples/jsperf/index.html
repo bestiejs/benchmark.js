@@ -238,8 +238,7 @@
 <script src="ui.js"></script>
 <script src="../../plugins/ui.browserscope.js"></script>
 <script>
-  var arr = [1, 5, 4, 2, 3],
-      i = 1;
+  var arr = [1, 5, 4, 2, 3];
 
   function init() {
     window.console && console.log('init called');
@@ -250,44 +249,41 @@
     ui.browserscope.key = 'agt1YS1wcm9maWxlcnINCxIEVGVzdBi_no8KDA';
     ui.browserscope.selector = '#bs-results';
 
-    ui.add('Normal', function() {
-      x.sort(function(a, b) {
-        return a - b;
-      });
-    })
-    .add('Exit Early', function() {
-      x.sort(function(a, b) {
-        return a - b;
-      });
-      return;
-    })
+    ui.add('Normal', '\
+      x.sort(function(a, b) {\n\
+        return a - b;\n\
+      });\n\
+    ')
+    .add('Exit Early', '\
+      x.sort(function(a, b) {\n\
+        return a - b;\n\
+      });\n\
+      return;\
+    ')
     .add('Async', {
       'defer': true,
-      'fn': function(deferred) {
-        setTimeout(function() {
-          deferred.resolve();
-        }, 10);
-      }
+      'fn': '\
+        setTimeout(function() {\n\
+          deferred.resolve();\n\
+        }, 10);'
     })
-    .add('Error', function() {
-      x.foo(); // unknown method
-    })
-    .add('Comments', function() {
-      // comments at start
-      x.reverse().sort(function(a, b) {
-        return a - b;
-      });
-      // comments at end
-    });
+    .add('Error', '\
+      x.foo(); // unknown method\
+    ')
+    .add('Comments', '\
+      // comments at start\n\
+      x.reverse().sort(function(a, b) {\n\
+        return a - b;\n\
+      });\n\
+      // comments at end\
+    ');
 
-    Benchmark.prototype.setup = function() {
-      window.foo = 42;
-      var x = arr;
-    };
+    Benchmark.prototype.setup = '\
+      window.foo = 42;\n\
+      var x = arr;';
 
-    Benchmark.prototype.teardown = function() {
-      window.foo = 24;
-    };
+    Benchmark.prototype.teardown = '\
+      window.foo = 24;';
   } catch(e) { }
 </script>
 </body>
