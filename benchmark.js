@@ -2138,7 +2138,7 @@
      * @memberOf Benchmark
      * @type String
      */
-    'version': '0.2.2',
+    'version': '0.3.0',
 
     /**
      * The default options copied by benchmark instances.
