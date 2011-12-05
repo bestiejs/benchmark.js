@@ -36,15 +36,14 @@
       class="sc2">&lt;<span class="sy0">/</span><span class="kw2">div</span>&gt;</span><br><span
       class="sc2">&lt;<span class="kw2">script</span>&gt;</span><br>&nbsp; <span
       class="kw2">var</span> arr <span class="sy0">=</span> <span class="br0">&#91;</span><span
-      class="nu0">1</span><span class="sy0">,</span><span class="nu0">5</span><span
-      class="sy0">,</span><span class="nu0">4</span><span class="sy0">,</span><span
-      class="nu0">2</span><span class="sy0">,</span><span class="nu0">3</span><span
-      class="br0">&#93;</span><span class="sy0">,</span><br>&nbsp; &nbsp; &nbsp; i <span
-      class="sy0">=</span> <span class="nu0">1</span><span class="sy0">;</span><br><br>&nbsp; <span
-      class="kw2">function</span> init<span class="br0">&#40;</span><span class="br0">&#41;</span> <span
-      class="br0">&#123;</span><br>&nbsp;&nbsp;&nbsp; window.<span class="me1">console</span> <span
-      class="sy0">&amp;&amp;</span> console.<span class="me1">log</span><span
-      class="br0">&#40;</span><span class="st0">'init called'</span><span
+      class="nu0">1</span><span class="sy0">,</span> <span class="nu0">5</span><span
+      class="sy0">,</span> <span class="nu0">4</span><span class="sy0">,</span> <span
+      class="nu0">2</span><span class="sy0">,</span> <span class="nu0">3</span><span
+      class="br0">&#93;</span><span class="sy0">;</span><br><br>&nbsp; <span
+      class="kw2">function</span> init<span class="br0">&#40;</span><span
+      class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp;&nbsp;&nbsp; window.<span
+      class="me1">console</span> <span class="sy0">&amp;&amp;</span> console.<span
+      class="me1">log</span><span class="br0">&#40;</span><span class="st0">'init called'</span><span
       class="br0">&#41;</span><span class="sy0">;</span><br>&nbsp; <span
       class="br0">&#125;</span><br><span class="sc2">&lt;<span class="sy0">/</span><span
       class="kw2">script</span>&gt;</span><br><span class="sc2">&lt;<span
@@ -245,46 +244,44 @@
   }
 </script>
 <script>
-  try {
-    ui.browserscope.key = 'agt1YS1wcm9maWxlcnINCxIEVGVzdBi_no8KDA';
-    ui.browserscope.selector = '#bs-results';
+  ui.browserscope.key = 'agt1YS1wcm9maWxlcnINCxIEVGVzdBi_no8KDA';
+  ui.browserscope.selector = '#bs-results';
 
-    ui.add('Normal', '\
-      x.sort(function(a, b) {\n\
-        return a - b;\n\
-      });\n\
-    ')
-    .add('Exit Early', '\
-      x.sort(function(a, b) {\n\
-        return a - b;\n\
-      });\n\
-      return;\
-    ')
-    .add('Async', {
-      'defer': true,
-      'fn': '\
-        setTimeout(function() {\n\
-          deferred.resolve();\n\
-        }, 10);'
-    })
-    .add('Error', '\
-      x.foo(); // unknown method\
-    ')
-    .add('Comments', '\
-      // comments at start\n\
-      x.reverse().sort(function(a, b) {\n\
-        return a - b;\n\
-      });\n\
-      // comments at end\
-    ');
+  ui.add('Normal', '\
+    x.sort(function(a, b) {\n\
+      return a - b;\n\
+    });'
+  )
+  .add('Exit Early', '\
+    x.sort(function(a, b) {\n\
+      return a - b;\n\
+    });\n\
+    return;'
+  )
+  .add('Async', {
+    'defer': true,
+    'fn': '\
+      setTimeout(function() {\n\
+        deferred.resolve();\n\
+      }, 10);'
+  })
+  .add('Error', '\
+    x.foo(); // unknown method'
+  )
+  .add('Comments', '\
+    // comments at start\n\
+    x.reverse().sort(function(a, b) {\n\
+      return a - b;\n\
+    });\n\
+    // comments at end'
+  );
 
-    Benchmark.prototype.setup = '\
-      window.foo = 42;\n\
-      var x = arr;';
+  Benchmark.prototype.setup = '\
+    window.foo = 42;\n\
+    var x = arr;';
 
-    Benchmark.prototype.teardown = '\
-      window.foo = 24;';
-  } catch(e) { }
+  Benchmark.prototype.teardown = '\
+    window.foo = 24;';
 </script>
 </body>
 </html>
