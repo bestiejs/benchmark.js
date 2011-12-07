@@ -30,7 +30,7 @@
   /** Used to integrity check compiled tests */
   uid = 'uid' + (+new Date),
 
-  /** Used to avoid infinite recursion when methods each call each other */
+  /** Used to avoid infinite recursion when methods call each other */
   calledBy = {},
 
   /** Used to avoid hz of Infinity */
@@ -320,18 +320,23 @@
 
   /**
    * Note: Some array methods have been implemented in plain JavaScript to avoid
-   * bugs in IE and Rhino.
+   * bugs in IE, Opera, Rhino, and Mobile Safari.
    *
    * IE compatibility mode and IE < 9 have buggy Array `shift()` and `splice()`
    * functions that fail to remove the last element, `object[0]`, of
    * array-like-objects (ALOs) even though the `length` property is set to `0`.
-   * Normally only `splice()` is buggy. In compatibility mode, however, `shift()`
-   * is also buggy.
+   * The `shift()` method is buggy in IE 8 compatibility mode, while `splice()`
+   * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
+   *
+   * In Opera < 9.50 and some older/beta Mobile Safari versions using `unshift()`
+   * generically to augment the arguments object will pave the value at index 0
+   * without incrimenting the other values's indexes.
+   * https://github.com/documentcloud/underscore/issues/9
    *
    * Rhino and environments it powers, like Narwhal and RingoJS, may have
    * buggy Array `concat()`, `reverse()`, `shift()`, `slice()`, `splice()` and
    * `unshift()` functions that make sparse arrays non-sparse by assigning the
-   * undefined indexes a value of undefined. For more info see:
+   * undefined indexes a value of undefined.
    * https://github.com/mozilla/rhino/commit/702abfed3f8ca043b2636efd31c14ba7552603dd
    */
 
@@ -667,7 +672,7 @@
   }
 
   /**
-   * Checks if a value can be correctly coerced to a string.
+   * Checks if a value can be safely coerced to a string.
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if the value can be coerced, else `false`.
@@ -703,11 +708,10 @@
    * @returns {Mixed} The exported module or `null`.
    */
   function req(id) {
-    var result = null;
     try {
-      freeExports && freeRequire && (result = freeRequire(id));
+      return freeExports && freeRequire && freeRequire(id);
     } catch(e) { }
-    return result;
+    return null;
   }
 
   /**
