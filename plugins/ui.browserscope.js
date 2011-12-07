@@ -49,7 +49,7 @@
   forOwn = Benchmark.forOwn,
   formatNumber = Benchmark.formatNumber,
   hasKey = Benchmark.hasKey,
-  map = Benchmark.map,
+  invoke = Benchmark.invoke,
   reduce = Benchmark.reduce;
 
   /*--------------------------------------------------------------------------*/
@@ -109,6 +109,21 @@
     var div = createElement('div', context);
     div.innerHTML = 'x<style>' + cssText + '</style>';
     return div.lastChild;
+  }
+
+  /**
+   * Copies own/inherited properties of a source object to the destination object.
+   * @private
+   * @param {Object} destination The destination object.
+   * @param {Object} [source={}] The source object.
+   * @returns {Object} The destination object.
+   */
+  function extend(destination, source) {
+    source || (source = {});
+    for (var key in source) {
+      destination[key] = source[key];
+    }
+    return destination;
   }
 
   /**
@@ -312,17 +327,38 @@
    * @returns {Object|Null} Browserscope results object or null.
    */
   function createSnapshot() {
-    return reduce(ui.benchmarks, function(result, bench, key) {
-      // ignore benches that are unrun, errored, or have hz of Infinity and
-      // append benchmark ids for duplicate names or names with no alphanumeric/space characters
-      var stats = bench.stats;
-      if (bench.cycles && isFinite(bench.hz)) {
-        result || (result = {});
-        key = toLabel(bench.name);
-        // use the upper limit of the confidence interval to compute a lower hz
-        // to avoid recording inflated results caused by a high margin or error
-        result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
+    // clone benches, ignore those that are unrun, errored, or have hz of Infinity
+    var benches = invoke(filter(ui.benchmarks, function(bench) {
+      return bench.cycles && isFinite(bench.hz);
+    }), 'clone');
+
+    // normalize results
+    var prev;
+    each(benches.sort(function(a, b) {
+      // sort slowest to fastest
+      // (a larger `mean` indicates a slower benchmark)
+      a = a.stats; b = b.stats;
+      return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
+    }), function(bench) {
+      // if the previous slower benchmark is indistinguishable from
+      // the current then use the previous benchmark's values
+      if (prev && !prev.compare(bench)) {
+        bench.count = prev.count;
+        bench.cycles = prev.cycles;
+        bench.hz = prev.hz;
+        bench.stats = extend({}, prev.stats);
       }
+      prev = bench;
+    });
+
+    // append benchmark ids for duplicate names or names with no alphanumeric/space characters
+    // and use the upper limit of the confidence interval to compute a lower hz
+    // to avoid recording inflated results caused by a high margin or error
+    return reduce(benches, function(result, bench, key) {
+      var stats = bench.stats;
+      result || (result = {});
+      key = toLabel(bench.name);
+      result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
       return result;
     }, null);
   }

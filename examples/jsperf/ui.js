@@ -537,28 +537,9 @@
     }
   })
   .on('complete', function() {
-    var prev,
-        benches = filter(ui.benchmarks, 'successful'),
+    var benches = filter(ui.benchmarks, 'successful'),
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest');
-
-    // normalize results
-    each(benches.sort(function(a, b) {
-      // sort slowest to fastest
-      // (a larger `mean` indicates a slower benchmark)
-      a = a.stats; b = b.stats;
-      return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
-    }), function(bench) {
-      // if the previous slower benchmark is indistinguishable from
-      // the current then use the previous benchmark's values
-      if (prev && !prev.compare(bench)) {
-        bench.count = prev.count;
-        bench.cycles = prev.cycles;
-        bench.hz = prev.hz;
-        bench.stats = extend({}, prev.stats);
-      }
-      prev = bench;
-    });
 
     ui.render();
     setHTML('run', texts.run.again);

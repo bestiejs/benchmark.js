@@ -1279,7 +1279,7 @@
         result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : value;
       }
     });
-    return result.reset();
+    return result;
   }
 
   /**
@@ -1359,28 +1359,7 @@
         return !me.aborted && me.emit('cycle', bench);
       },
       'onComplete': function(event, bench) {
-        var prev;
         me.running = false;
-
-        // normalize results
-        each(benches.sort(function(a, b) {
-          // sort slowest to fastest
-          // (a larger `mean` indicates a slower benchmark)
-          a = a.stats; b = b.stats;
-          return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
-        }), function(bench) {
-          // if the previous slower benchmark is indistinguishable from
-          // the current then use the previous benchmark's values
-          if (prev && !prev.compare(bench)) {
-            bench.count = prev.count;
-            bench.cycles = prev.cycles;
-            bench.hz = prev.hz;
-            bench.stats = extend({}, prev.stats);
-            prev = bench;
-          }
-          prev = bench;
-        });
-
         me.emit('complete', bench);
       }
     });
@@ -1528,7 +1507,7 @@
    */
   function clone(options) {
     var me = this,
-        result = new me.constructor(me.fn, extend({}, me.options, { 'id': me.id }, options));
+        result = new me.constructor(extend({}, me.options, { 'fn': me.fn, 'id': me.id }, options));
 
     // copy own properties
     forOwn(me, function(value, key) {
@@ -1536,7 +1515,7 @@
         result[key] = value;
       }
     });
-    return result.reset();
+    return result;
   }
 
   /**
