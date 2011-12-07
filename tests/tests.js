@@ -673,7 +673,7 @@
     options.minTime && (options.maxTime = options.minTime * 5);
 
     suite.add('a', function() {
-      var i = 1;
+      count = 1;
     })
     .add('b', function() {
       for (var i = 0; i < 1e6; i++) {

@@ -626,10 +626,13 @@
    * @returns {String} The function's source code.
    */
   function getSource(fn, altSource) {
-    var result = isStringable(fn)
-      ? String(fn)
-      : has.decompilation && (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
-    return (result || altSource || '').replace(/^\s+|\s+$/g, '');
+    var result = altSource;
+    if (isStringable(fn)) {
+      result = String(fn);
+    } else if (has.decompilation) {
+      result = (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
+    }
+    return (result || '').replace(/^\s+|\s+$/g, '');
   }
 
   /**
@@ -1827,7 +1830,7 @@
 
     // remove unused applet
     if (timer.unit != 'ns' && applet) {
-      applet = applet.parentNode.removeChild(applet), null;
+      applet = (applet.parentNode.removeChild(applet), null);
     }
     // error if there are no working timers
     if (timer.res == Infinity) {
