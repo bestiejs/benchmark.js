@@ -50,6 +50,7 @@
   formatNumber = Benchmark.formatNumber,
   hasKey = Benchmark.hasKey,
   invoke = Benchmark.invoke,
+  map = Benchmark.map,
   reduce = Benchmark.reduce;
 
   /*--------------------------------------------------------------------------*/
@@ -296,31 +297,6 @@
     timers.cleanup = setTimeout(cleanup, delay);
   }
 
- /**
-   * A simple object clone utility function.
-   * @private
-   * @param {Object} object The object to clone.
-   * @returns {Object} A new cloned object.
-   */
-  function clone(object) {
-    var ctor = object.constructor,
-        result = ctor ? (noop.prototype = ctor.prototype, new noop) : {};
-
-    forOwn(object, function(value, key) {
-      if (isArray(value)) {
-        result[key] = [];
-        each(value, function(value, index) {
-          result[key][index] = clone(value);
-        });
-      } else if (value && typeof value == 'object') {
-        result[key] = clone(value);
-      } else {
-        result[key] = value;
-      }
-    });
-    return result;
-  }
-
   /**
    * Creates a Browserscope results object.
    * @private
@@ -361,6 +337,30 @@
       result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
       return result;
     }, null);
+  }
+
+  /**
+   * A simple deep cloning utility function.
+   * @private
+   * @param {Mixed} value The value to clone.
+   * @returns {Mixed} The cloned value.
+   */
+  function deepClone(value) {
+    var fn,
+        ctor,
+        result = value;
+
+    if (isArray(value)) {
+      result = map(value, deepClone);
+    }
+    else if (value === Object(value)) {
+      ctor = value.constructor;
+      result = ctor == Object ? {} : (fn = function(){}, fn.prototype = ctor.prototype, new fn);
+      forOwn(value, function(subValue, key) {
+        result[key] = deepClone(subValue);
+      });
+    }
+    return result;
   }
 
   /**
@@ -464,14 +464,6 @@
     return reduce(object || {}, function(string, value, key) {
       return string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
     }, string);
-  }
-
-  /**
-   * A no-operation function.
-   * @private
-   */
-  function noop() {
-    // no operation performed
   }
 
   /**
@@ -744,7 +736,7 @@
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
     else if (!ui.running) {
       cont.className = '';
-      data = clone(response.getDataTable());
+      data = deepClone(response.getDataTable());
       labels = getDataLabels(data);
       rows = getDataRows(data);
       rowCount = rows.length;

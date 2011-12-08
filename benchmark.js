@@ -568,6 +568,26 @@
   }
 
   /**
+   * A simple deep cloning utility function.
+   * @private
+   * @param {Mixed} value The value to clone.
+   * @returns {Mixed} The cloned value.
+   */
+  function deepClone(value) {
+    var result = value;
+    if (isClassOf(value, 'Array')) {
+      result = map(value, deepClone);
+    }
+    else if (value === Object(value) && value.constructor == Object) {
+      result = {};
+      forOwn(value, function(subValue, key) {
+        result[key] = deepClone(subValue);
+      });
+    }
+    return result;
+  }
+
+  /**
    * Copies own/inherited properties of a source object to the destination object.
    * @private
    * @param {Object} destination The destination object.
@@ -755,7 +775,7 @@
    */
   function setOptions(bench, options) {
     options = extend({}, bench.constructor.options, options);
-    bench.options = each(options, function(value, key) {
+    bench.options = forOwn(options, function(value, key) {
       if (value != null) {
         // add event listeners
         if (/^on[A-Z]/.test(key)) {
@@ -763,7 +783,7 @@
             bench.on(key.slice(2).toLowerCase(), value);
           });
         } else {
-          bench[key] = value;
+          bench[key] = deepClone(value);
         }
       }
     });
@@ -1276,7 +1296,7 @@
     // copy own properties
     forOwn(me, function(value, key) {
       if (!hasKey(result, key)) {
-        result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : value;
+        result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : deepClone(value);
       }
     });
     return result;
@@ -1510,10 +1530,10 @@
         result = new me.constructor(extend({}, me.options,
           { 'fn': me.fn, 'id': me.id, 'stats': me.stats, 'times': me.times }, options));
 
-    // copy own properties
+    // copy own custom properties
     forOwn(me, function(value, key) {
       if (!hasKey(result, key)) {
-        result[key] = value;
+        result[key] = deepClone(value);
       }
     });
     return result;
