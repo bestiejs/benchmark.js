@@ -1507,7 +1507,8 @@
    */
   function clone(options) {
     var me = this,
-        result = new me.constructor(extend({}, me.options, { 'fn': me.fn, 'id': me.id }, options));
+        result = new me.constructor(extend({}, me.options,
+          { 'fn': me.fn, 'id': me.id, 'stats': me.stats, 'times': me.times }, options));
 
     // copy own properties
     forOwn(me, function(value, key) {
