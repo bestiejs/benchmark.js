@@ -667,7 +667,7 @@
         // Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
         // (if the prototype or a property on the prototype has been set)
         // incorrectly set a function's `prototype` property [[Enumerable]] value
-        // to true. Because of this we standardize on skipping the the `prototype`
+        // to `true`. Because of this we standardize on skipping the `prototype`
         // property of functions regardless of their [[Enumerable]] value.
         if (done =
             !(skipProto && key == 'prototype') &&
