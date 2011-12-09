@@ -874,7 +874,7 @@
   }
 
   /**
-   * A simple each, for dealing with non-sparse arrays and arguments objects.
+   * A simple `each()` for dealing with non-sparse arrays and arguments objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
    * @param {Array} array The array to iterate over.
