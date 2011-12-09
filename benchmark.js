@@ -553,7 +553,7 @@
    * @returns {Function} The new function.
    */
   function createFunction() {
-    // lazy defined to fork based on supported features.
+    // lazy defined to fork based on supported features
     createFunction = function(args, body) {
       var anchor = freeDefine ? define.amd : Benchmark,
           prop = uid + 'createFunction';
@@ -580,9 +580,9 @@
     }
     else if (value === Object(value) && value.constructor == Object) {
       result = {};
-      forOwn(value, function(subValue, key) {
+      forProps(value, function(subValue, key) {
         result[key] = deepClone(subValue);
-      });
+      }, true);
     }
     return result;
   }
@@ -859,7 +859,7 @@
    */
   function setOptions(bench, options) {
     options = extend({}, bench.constructor.options, options);
-    bench.options = forOwn(options, function(value, key) {
+    bench.options = forProps(options, function(value, key) {
       if (value != null) {
         // add event listeners
         if (/^on[A-Z]/.test(key)) {
@@ -870,7 +870,7 @@
           bench[key] = deepClone(value);
         }
       }
-    });
+    }, true);
   }
 
   /**
@@ -1397,11 +1397,11 @@
         result = new me.constructor(extend({}, me.options, options));
 
     // copy own properties
-    forOwn(me, function(value, key) {
+    forProps(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = value && isClassOf(value.clone, 'Function') ? value.clone() : deepClone(value);
       }
-    });
+    }, true);
     return result;
   }
 
@@ -1634,11 +1634,11 @@
           { 'fn': me.fn, 'id': me.id, 'stats': me.stats, 'times': me.times }, options));
 
     // copy own custom properties
-    forOwn(me, function(value, key) {
+    forProps(me, function(value, key) {
       if (!hasKey(result, key)) {
         result[key] = deepClone(value);
       }
-    });
+    }, true);
     return result;
   }
 
