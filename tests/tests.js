@@ -500,25 +500,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.Suite');
-
-  test('basic', function() {
-    var options = Benchmark.options,
-        maxTime = options.maxTime;
-
-    options.minTime && (options.maxTime = options.minTime * 5);
-
-    var suite = Benchmark.Suite('suite')
-      .add('foo', function() { [3,1,5,2,4].sort(); })
-      .add('bar', function() { [3,1,5,2,4].sort(); })
-      .run();
-
-    ok(suite[0].hz && suite[0].hz == suite[1].hz, 'normalize like benchmarks');
-    options.maxTime = maxTime;
-  });
-
-  /*--------------------------------------------------------------------------*/
-
   QUnit.module('Benchmark.Suite#abort');
 
   test('basic', function() {

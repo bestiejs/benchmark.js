@@ -595,13 +595,95 @@
    * @returns {Object} The destination object.
    */
   function extend(destination, source) {
-    each(slice.call(arguments, 1), function(source) {
-      source || (source = {});
-      for (var key in source) {
-        destination[key] = source[key];
-      }
-    });
+    simpleEach(arguments, function(source) {
+      forProps(source, function(value, key) {
+        destination[key] = value;
+      });
+    }, 1);
     return destination;
+  }
+
+  /**
+   * Iterates over an object's properties, executing the `callback` for each.
+   * @private
+   * @param {Object} object The object to iterate over.
+   * @param {Function} callback The function executed per own property.
+   * @param {Boolean} ownFlag A flag to limit iteratation to an object's own properties.
+   * @returns {Object} Returns the object iterated over.
+   */
+  function forProps() {
+    // list of possible shadowed properties of Object.prototype
+    var shadowed = [
+      'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
+      'toLocaleString', 'toString', 'valueOf'
+    ];
+
+    // flag for..in bugs
+    var flag;
+    (function() {
+      // test must use a non-native constructor to catch the Safari 2 issue
+      function Klass() { this.valueOf = 0; }
+      flag = Klass.prototype.valueOf = 0;
+      for (var key in new Klass) {
+        flag += key == 'valueOf' ? 1 : 0;
+      }
+    }());
+
+    // Safari 2 iterates over shadowed properties twice
+    // http://replay.waybackmachine.org/20090428222941/http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
+    var hasSeen = flag == 2 &&
+      function(seen, key) {
+        return hasKey(seen, key) || !(seen[key] = true);
+      };
+
+    // IE < 9 makes properties, shadowing non-enumerable ones, non-enumerable too
+    var forShadowed = flag == 0 &&
+      function(object, callback) {
+        // Because IE < 9 can't set the `[[Enumerable]]` attribute of an existing
+        // property and the `constructor` property of a prototype defaults to
+        // non-enumerable, we manually skip the `constructor` property when we
+        // think we are iterating over a `prototype` object.
+        var ctor = object.constructor,
+            skipCtor = ctor && ctor.prototype && ctor.prototype.constructor === ctor;
+        for (var key, index = 0; key = shadowed[index]; index++) {
+          if (!(skipCtor && key == 'constructor') &&
+              hasKey(object, key) &&
+              callback(object[key], key, object) === false) {
+            break;
+          }
+        }
+      };
+
+    // lazy define
+    forProps = function(object, callback, ownFlag) {
+      var done = !object,
+          result = object,
+          seen = {},
+          skipProto = isClassOf(object, 'Function');
+
+      object = Object(object);
+
+      for (var key in object) {
+        // Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
+        // (if the prototype or a property on the prototype has been set)
+        // incorrectly set a function's `prototype` property [[Enumerable]] value
+        // to true. Because of this we standardize on skipping the the `prototype`
+        // property of functions regardless of their [[Enumerable]] value.
+        if (done =
+            !(skipProto && key == 'prototype') &&
+            !(hasSeen && hasSeen(seen, key)) &&
+            (!ownFlag || ownFlag && hasKey(object, key)) &&
+            callback(object[key], key, object) === false) {
+          break;
+        }
+      }
+      if (!done && forShadowed) {
+        forShadowed(object, callback);
+      }
+      return result;
+    };
+
+    return forProps.apply(null, arguments);
   }
 
   /**
@@ -712,7 +794,9 @@
    */
   function methodize(fn) {
     return function() {
-      return fn.apply(this, [this].concat(slice.call(arguments)));
+      var args = [this];
+      args.push.apply(args, arguments);
+      return fn.apply(this, args);
     };
   }
 
@@ -779,7 +863,7 @@
       if (value != null) {
         // add event listeners
         if (/^on[A-Z]/.test(key)) {
-          each(key.split(' '), function(key) {
+          simpleEach(key.split(' '), function(key) {
             bench.on(key.slice(2).toLowerCase(), value);
           });
         } else {
@@ -787,6 +871,25 @@
         }
       }
     });
+  }
+
+  /**
+   * A simple each, for dealing with non-sparse arrays and arguments objects.
+   * Callbacks may terminate the loop by explicitly returning `false`.
+   * @private
+   * @param {Array} array The array to iterate over.
+   * @param {Function} callback The function called per iteration.
+   * @param {Number} [index=0] The starting index.
+   * @returns {Array} Returns the array iterated over.
+   */
+  function simpleEach(array, callback, index) {
+    index || (index = 0);
+    for (var length = array.length; index < length; index++) {
+      if (callback(array[index], index) === false) {
+        break;
+      }
+    }
+    return array;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -827,22 +930,26 @@
    */
   function each(object, callback, thisArg) {
     var index = -1,
+        fn = callback,
         result = [object, object = Object(object)][0],
         isSnapshot = 'snapshotLength' in object && 'snapshotItem' in object,
         skipCheck = isSnapshot || 'item' in object,
         length = isSnapshot ? object.snapshotLength : object.length;
 
+    if (thisArg !== undefined) {
+      callback = function() { return fn.apply(thisArg, arguments); };
+    }
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
     if (length === length >>> 0) {
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
         if ((skipCheck || index in object) &&
-            callback.call(thisArg, isSnapshot ? object.snapshotItem(index) : object[index], index, object) === false) {
+            callback(isSnapshot ? object.snapshotItem(index) : object[index], index, object) === false) {
           break;
         }
       }
     } else {
-      forOwn(object, callback, thisArg);
+      forProps(object, callback, true);
     }
     return result;
   }
@@ -903,15 +1010,11 @@
    * @returns {Object} Returns the object iterated over.
    */
   function forOwn(object, callback, thisArg) {
-    var result = object;
-    object = Object(object);
-    for (var key in object) {
-      if (hasKey(object, key) &&
-        callback.call(thisArg, object[key], key, object) === false) {
-        break;
-      }
+    var fn = callback;
+    if (thisArg !== undefined) {
+      callback = function() { return fn.apply(thisArg, arguments); };
     }
-    return result;
+    return forProps(object, callback, true);
   }
 
   /**
@@ -1406,7 +1509,7 @@
     var me = this,
         events = me.events || (me.events = {});
 
-    each(type.split(' '), function(type) {
+    simpleEach(type.split(' '), function(type) {
       (events[type] || (events[type] = [])).push(listener);
     });
     return me;
@@ -1421,12 +1524,12 @@
   function emit(type) {
     var me = this,
         event = Event(type),
-        args = (arguments[0] = event, slice.call(arguments)),
+        args = (arguments[0] = event, arguments),
         events = me.events,
         listeners = events && events[event.type] || [],
         result = true;
 
-    each(listeners.slice(), function(listener) {
+    simpleEach(listeners.slice(), function(listener) {
       if (!(result = listener.apply(me, args) !== false)) {
         return result;
       }
@@ -1452,7 +1555,7 @@
     var me = this,
         events = me.events;
 
-    each(type.split(' '), function(type) {
+    simpleEach(type.split(' '), function(type) {
       var listeners = events && events[type] || [],
           index = indexOf(listeners, listener);
       if (index > -1) {
@@ -1482,7 +1585,7 @@
     var me = this,
         events = me.events;
 
-    each(type ? type.split(' ') : events, function(type) {
+    simpleEach(type ? type.split(' ') : events, function(type) {
       (events && events[type] || []).length = 0;
     });
     return me;
@@ -1500,7 +1603,7 @@
 
     if (me.running) {
       if (has.timeout) {
-        each(me._timerIds || [], clearTimeout);
+        simpleEach(me._timerIds || [], clearTimeout);
         delete me._timerIds;
       }
       // avoid infinite recursion
@@ -2333,9 +2436,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // IE < 9 will ignore `toString` in a for-in loop
-  Benchmark.prototype.toString = toStringBench;
-
   extend(Benchmark.prototype, {
 
     /**
@@ -2588,7 +2688,10 @@
     'reset': reset,
 
     // runs the benchmark
-    'run': run
+    'run': run,
+
+    // pretty print benchmark info
+    'toString': toStringBench
   });
 
   /*--------------------------------------------------------------------------*/
