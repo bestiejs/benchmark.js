@@ -2337,7 +2337,7 @@
        * @memberOf Benchmark.platform
        * @type String
        */
-      'description': window.navigator && navigator.userAgent || 'unknown platform',
+      'description': window.navigator && navigator.userAgent || null,
 
       /**
        * The name of the browser layout engine.
@@ -2395,7 +2395,7 @@
        * @returns {String} The platform description.
        */
       'toString': function() {
-        return this.description;
+        return this.description || '';
       }
     },
 
