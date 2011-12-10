@@ -329,7 +329,7 @@
    * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
    *
    * In Opera < 9.50 and some older/beta Mobile Safari versions using `unshift()`
-   * generically to augment the arguments object will pave the value at index 0
+   * generically to augment the `arguments` object will pave the value at index 0
    * without incrimenting the other values's indexes.
    * https://github.com/documentcloud/underscore/issues/9
    *
@@ -612,10 +612,10 @@
    * @returns {Object} Returns the object iterated over.
    */
   function forProps() {
-    var forArgs = simpleEach,
+    var enumFlag = 0,
+        forArgs = simpleEach,
         forShadowed = false,
         hasSeen = false,
-        enumFlag = 0,
         shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
     (function(key) {
@@ -626,9 +626,9 @@
       for (key in new Klass) {
         enumFlag += key == 'valueOf' ? 1 : 0;
       }
-      // check if arguments objects have non-enumerable indexes
+      // check if `arguments` objects have non-enumerable indexes
       for (key in arguments) {
-        key === '0' && (forArgs = false);
+        key == '0' && (forArgs = false);
       }
     }(0));
 
@@ -639,7 +639,8 @@
         return hasKey(seen, key) || !(seen[key] = true);
       };
     }
-    // IE < 9 makes properties, shadowing non-enumerable ones, non-enumerable too
+    // IE < 9 incorrectly makes an object's properties non-enumerable if they have
+    // the same name as other non-enumerable properties in its prototype chain.
     else if (!enumFlag) {
       forShadowed = function(object, callback) {
         // Because IE < 9 can't set the `[[Enumerable]]` attribute of an existing
@@ -758,10 +759,10 @@
   }
 
   /**
-   * Checks if a value is an arguments object.
+   * Checks if a value is an `arguments` object.
    * @private
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if the value is an arguments object, else `false`.
+   * @returns {Boolean} Returns `true` if the value is an `arguments` object, else `false`.
    */
   function isArguments() {
     // lazy define
@@ -900,7 +901,7 @@
   }
 
   /**
-   * A simple `each()` for dealing with non-sparse arrays and arguments objects.
+   * A simple `each()` for dealing with non-sparse arrays and `arguments` objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
    * @param {Array} array The array to iterate over.
