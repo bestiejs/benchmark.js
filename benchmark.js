@@ -612,33 +612,36 @@
    * @returns {Object} Returns the object iterated over.
    */
   function forProps() {
-    // list of possible shadowed properties of Object.prototype
-    var shadowed = [
-      'constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable',
-      'toLocaleString', 'toString', 'valueOf'
-    ];
+    var forArgs = simpleEach,
+        forShadowed = false,
+        hasSeen = false,
+        enumFlag = 0,
+        shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
-    // flag for..in bugs
-    var flag;
-    (function() {
-      // test must use a non-native constructor to catch the Safari 2 issue
-      function Klass() { this.valueOf = 0; }
-      flag = Klass.prototype.valueOf = 0;
-      for (var key in new Klass) {
-        flag += key == 'valueOf' ? 1 : 0;
+    (function(key) {
+      // must use a non-native constructor to catch the Safari 2 issue
+      function Klass() { this.valueOf = 0; };
+      Klass.prototype.valueOf = 0;
+      // check various for..in bugs
+      for (key in new Klass) {
+        enumFlag += key == 'valueOf' ? 1 : 0;
       }
-    }());
+      // check if arguments objects have non-enumerable indexes
+      for (key in arguments) {
+        key === '0' && (forArgs = false);
+      }
+    }(0));
 
     // Safari 2 iterates over shadowed properties twice
     // http://replay.waybackmachine.org/20090428222941/http://tobielangel.com/2007/1/29/for-in-loop-broken-in-safari/
-    var hasSeen = flag == 2 &&
-      function(seen, key) {
+    if (enumFlag == 2) {
+      hasSeen = function(seen, key) {
         return hasKey(seen, key) || !(seen[key] = true);
       };
-
+    }
     // IE < 9 makes properties, shadowing non-enumerable ones, non-enumerable too
-    var forShadowed = flag == 0 &&
-      function(object, callback) {
+    else if (!enumFlag) {
+      forShadowed = function(object, callback) {
         // Because IE < 9 can't set the `[[Enumerable]]` attribute of an existing
         // property and the `constructor` property of a prototype defaults to
         // non-enumerable, we manually skip the `constructor` property when we
@@ -653,6 +656,7 @@
           }
         }
       };
+    }
 
     // lazy define
     forProps = function(object, callback, ownFlag) {
@@ -676,6 +680,9 @@
             callback(object[key], key, object) === false) {
           break;
         }
+      }
+      if (!done && forArgs && isArguments(object)) {
+        done = forArgs(object, callback) === false;
       }
       if (!done && forShadowed) {
         forShadowed(object, callback);
@@ -751,14 +758,33 @@
   }
 
   /**
+   * Checks if a value is an arguments object.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if the value is an arguments object, else `false`.
+   */
+  function isArguments() {
+    // lazy define
+    isArguments = function(value) {
+      return toString.call(value) == '[object Arguments]';
+    };
+    if (!isArguments(arguments)) {
+      isArguments = function(value) {
+        return !!value && hasKey(value, 'callee');
+      };
+    }
+    return isArguments(arguments[0]);
+  }
+
+  /**
    * Checks if an object is of the specified class.
    * @private
-   * @param {Object} object The object.
+   * @param {Mixed} value The value to check.
    * @param {String} name The name of the class.
-   * @returns {Boolean} Returns `true` if of the class, else `false`.
+   * @returns {Boolean} Returns `true` if the value is of the specified class, else `false`.
    */
-  function isClassOf(object, name) {
-    return object != null && toString.call(object).slice(8, -1) == name;
+  function isClassOf(value, name) {
+    return value != null && toString.call(value).slice(8, -1) == name;
   }
 
   /**
@@ -885,7 +911,7 @@
   function simpleEach(array, callback, index) {
     index || (index = 0);
     for (var length = array.length; index < length; index++) {
-      if (callback(array[index], index) === false) {
+      if (callback(array[index], index, array) === false) {
         break;
       }
     }
