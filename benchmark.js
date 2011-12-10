@@ -615,6 +615,7 @@
     var enumFlag = 0,
         forArgs = simpleEach,
         forShadowed = false,
+        forString = !'0'[0] && simpleEach,
         hasSeen = false,
         shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
@@ -682,7 +683,11 @@
           break;
         }
       }
-      if (!done && forArgs && isArguments(object)) {
+      // IE < 9 doesn't support accessing individual characters of a string by index properties
+      if (!done && forString && isClassOf(object, 'String')) {
+        done = forString(object.split(''), callback) === false;
+      }
+      else if (!done && forArgs && isArguments(object)) {
         done = forArgs(object, callback) === false;
       }
       if (!done && forShadowed) {
