@@ -162,14 +162,21 @@
   });
 
   test('array-like-object', function() {
-    var o = { '0': 'a', '2': 'c', 'length': 3 },
-        values = [];
+    var values = [],
+        o = { '0': 'a', '2': 'c', 'length': 3 };
 
     Benchmark.each(o, function(value) {
       values.push(value);
     });
 
     deepEqual(values, ['a', 'c'], 'sparse check');
+    values.length = 0;
+
+    Benchmark.each('hello', function(value) {
+      values.push(value);
+    });
+
+    deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed');
   });
 
   test('xpath snapshot', function() {
@@ -223,18 +230,21 @@
   QUnit.module('Benchmark.forOwn');
 
   test('basic', function() {
-    var args,
+    var args = [],
+        values = [],
         O = function(){ var me = this; me.a = 1; me.b = 2; me.c = 3; },
-        o = (O.prototype.d = 4, new O),
-        values = [];
+        o = (O.prototype.d = 4, new O);
 
     var result = Benchmark.forOwn(o, function(value) {
-      args || (args = [].slice.call(arguments));
+      if (value == 1) {
+        args = [].slice.call(arguments);
+      }
       values.push(value);
     });
 
     ok(o === result, 'object returned');
-    deepEqual(values, [1, 2, 3], 'values');
+    deepEqual(values.sort(), [1, 2, 3], 'values');
+
     deepEqual(args, [1, 'a', o], 'passed arguments to callback');
     values.length = 0;
 
@@ -242,7 +252,71 @@
       return key == 'c' ? false : values.push(value);
     });
 
-    deepEqual(values, [1, 2], 'exit early');
+    deepEqual(values.sort(), [1, 2], 'exit early');
+  });
+
+  test('enumeration', function() {
+    var keys = [],
+        values = [],
+        Klass = function() { },
+        o = { 'constructor': 1, 'hasOwnProperty': 2, 'isPrototypeOf': 3, 'propertyIsEnumerable': 4, 'toLocaleString': 5, 'toString': 6, 'valueOf': 7 };
+
+    Klass.a = 1;
+    Klass.prototype.b = 2;
+
+    Benchmark.forOwn(o, function(value, key) {
+      keys.push(key);
+      values.push(value);
+    });
+
+    deepEqual(keys.sort(), ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'], 'problem JScript props, keys check');
+    keys.length = 0;
+
+    deepEqual(values.sort(), [1, 2, 3, 4, 5, 6, 7], 'problem JScript props, values check');
+    values.length = 0;
+
+    (function(a, b, c) {
+      Benchmark.forOwn(arguments, function(value, key) {
+        keys.push(key);
+        values.push(value);
+      });
+    }('a', 'b', 'c'));
+
+    deepEqual(keys.sort(), ['0', '1', '2'], 'arguments object, keys check');
+    keys.length = 0;
+
+    deepEqual(values.sort(), ['a', 'b', 'c'], 'arguments object, values check');
+    values.length = 0;
+
+    Benchmark.forOwn(Klass, function(value, key) {
+      keys.push(key);
+      values.push(value);
+    });
+
+    deepEqual(keys, ['a'], 'function passed, keys check');
+    keys.length = 0;
+
+    deepEqual(values, [1], 'function passed, values check');
+    values.length = 0;
+
+    Benchmark.forOwn(Klass.prototype, function(value, key) {
+      keys.push(key);
+      values.push(value);
+    });
+
+    deepEqual(keys, ['b'], 'prototype passed, keys check');
+    keys.length = 0;
+
+    deepEqual(values, [2], 'prototype passed, values check');
+    values.length = 0;
+
+    Benchmark.forOwn('hello', function(value, key) {
+      keys.push(key);
+      values.push(value);
+    });
+
+    deepEqual(keys.sort(), ['0', '1', '2', '3', '4'], 'string passed, keys check');
+    deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed, values check');
   });
 
   /*--------------------------------------------------------------------------*/

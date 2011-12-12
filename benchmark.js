@@ -61,6 +61,9 @@
     /** Detect Adobe AIR */
     'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
 
+    /** Detect if strings support accessing characters by index */
+    'charByIndex': '0'[0] == '0',
+
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
       try{
@@ -615,7 +618,7 @@
     var enumFlag = 0,
         forArgs = simpleEach,
         forShadowed = false,
-        forString = !'0'[0] && simpleEach,
+        forString = !has.charByIndex && simpleEach,
         hasSeen = false,
         shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
@@ -683,7 +686,7 @@
           break;
         }
       }
-      // IE < 9 doesn't support accessing individual characters of a string by index properties
+      // in IE < 9 strings don't support accessing characters by index
       if (!done && forString && isClassOf(object, 'String')) {
         done = forString(object.split(''), callback) === false;
       }
@@ -695,7 +698,6 @@
       }
       return result;
     };
-
     return forProps.apply(null, arguments);
   }
 
@@ -917,7 +919,7 @@
   function simpleEach(array, callback, index) {
     index || (index = 0);
     for (var length = array.length; index < length; index++) {
-      if (callback(array[index], index, array) === false) {
+      if (callback(array[index], String(index), array) === false) {
         break;
       }
     }
@@ -969,10 +971,16 @@
         length = isSnapshot ? object.snapshotLength : object.length;
 
     if (thisArg !== undefined) {
-      callback = function() { return fn.apply(thisArg, arguments); };
+      callback = function(value, index, object) {
+        return fn.call(thisArg, value, index, object);
+      };
     }
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
     if (length === length >>> 0) {
+      // in IE < 9 strings don't support accessing characters by index
+      if (!has.charByIndex && isClassOf(object, 'String')) {
+        object = object.split('');
+      }
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
         if ((skipCheck || index in object) &&
@@ -1044,7 +1052,9 @@
   function forOwn(object, callback, thisArg) {
     var fn = callback;
     if (thisArg !== undefined) {
-      callback = function() { return fn.apply(thisArg, arguments); };
+      callback = function(value, index, object) {
+        return fn.call(thisArg, value, index, object);
+      };
     }
     return forProps(object, callback, true);
   }
