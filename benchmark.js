@@ -980,6 +980,7 @@
       // in IE < 9 strings don't support accessing characters by index
       if (!has.charByIndex && isClassOf(object, 'String')) {
         object = object.split('');
+        skipCheck = true;
       }
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
