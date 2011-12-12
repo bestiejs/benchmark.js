@@ -118,6 +118,9 @@
     'stop': null // lazy defined in `clock()`
   },
 
+  /** Shortcut for inverse result */
+  noCharByIndex = !has.charByIndex,
+
   /** Math shortcuts */
   abs   = Math.abs,
   floor = Math.floor,
@@ -618,7 +621,7 @@
     var enumFlag = 0,
         forArgs = simpleEach,
         forShadowed = false,
-        forString = !has.charByIndex && simpleEach,
+        forString = noCharByIndex && simpleEach,
         hasSeen = false,
         shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
@@ -792,7 +795,7 @@
    * @returns {Boolean} Returns `true` if the value is of the specified class, else `false`.
    */
   function isClassOf(value, name) {
-    return value != null && toString.call(value).slice(8, -1) == name;
+    return value != null && toString.call(value) == '[object ' + name + ']';
   }
 
   /**
@@ -978,7 +981,7 @@
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
     if (length === length >>> 0) {
       // in IE < 9 strings don't support accessing characters by index
-      if (!has.charByIndex && isClassOf(object, 'String')) {
+      if (noCharByIndex && isClassOf(object, 'String')) {
         object = object.split('');
         skipCheck = true;
       }
