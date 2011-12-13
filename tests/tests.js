@@ -137,6 +137,28 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark.clone');
+
+  test('basic', function() {
+    var i = 0,
+        options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    options.minTime && (options.maxTime = options.minTime * 5);
+    var bench = Benchmark(function() { i++; }).run();
+    options.maxTime = maxTime;
+
+    var clone = bench.clone();
+    deepEqual(clone, bench, 'clones properties');
+    ok(clone.stats != bench.stats && clone.times != bench.times && clone.options != bench.options, 'deep clones object properties');
+
+    clone = bench.clone({ 'fn': '', 'name': 'foo' });
+    ok(clone.fn === '' && clone.options.fn === '', 'adds custom "fn" option');
+    equal(clone.name, 'foo', 'adds other custom options');
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.each');
 
   test('basic', function() {
@@ -155,14 +177,16 @@
     values.length = 0;
 
     Benchmark.each(o, function(value, index) {
-      return index == 2 ? false : values.push(value);
+      values.push(value);
+      return !(index == 1);
     });
 
     deepEqual(values, ['a', 'b'], 'exit early');
   });
 
   test('array-like-object', function() {
-    var values = [],
+    var thirdArg,
+        values = [],
         o = { '0': 'a', '2': 'c', 'length': 3 };
 
     Benchmark.each(o, function(value) {
@@ -172,11 +196,21 @@
     deepEqual(values, ['a', 'c'], 'sparse check');
     values.length = 0;
 
-    Benchmark.each('hello', function(value) {
+    Benchmark.each('hello', function(value, index, object) {
+      thirdArg = object;
       values.push(value);
     });
 
-    deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed');
+    equal(thirdArg, 'hello', 'string passed, third callback arg');
+    deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed, values check');
+    values.length = 0;
+
+    Benchmark.each('hello', function(value) {
+      values.push(value);
+      return !(value == 'e');
+    });
+
+    deepEqual(values, ['h', 'e'], 'string passed, exit early');
   });
 
   test('xpath snapshot', function() {
@@ -249,14 +283,16 @@
     values.length = 0;
 
     Benchmark.forOwn(o, function(value, key) {
-      return key == 'c' ? false : values.push(value);
+      values.push(value);
+      return !(key == 'b');
     });
 
     deepEqual(values.sort(), [1, 2], 'exit early');
   });
 
   test('enumeration', function() {
-    var keys = [],
+    var thirdArg,
+        keys = [],
         values = [],
         Klass = function() { },
         o = { 'constructor': 1, 'hasOwnProperty': 2, 'isPrototypeOf': 3, 'propertyIsEnumerable': 4, 'toLocaleString': 5, 'toString': 6, 'valueOf': 7 };
@@ -275,6 +311,26 @@
     deepEqual(values.sort(), [1, 2, 3, 4, 5, 6, 7], 'problem JScript props, values check');
     values.length = 0;
 
+    Benchmark.forOwn(o, function(value, key) {
+      keys.push(key);
+      return !(key == 'hasOwnProperty');
+    });
+
+    ok(keys.length < 7, 'problem JScript props, exit early during forced iteration');
+    keys.length = 0;
+
+    o = { 'a': 1 };
+    Benchmark.forOwn(o, function(value, key) {
+      keys.push(key);
+      if (key == 'a') {
+        o.toString = 'toString';
+        return false;
+      }
+    });
+
+    deepEqual(keys, ['a'], 'problem JScript props, exit early before forced iteration');
+    keys.length = 0;
+
     (function(a, b, c) {
       Benchmark.forOwn(arguments, function(value, key) {
         keys.push(key);
@@ -286,6 +342,19 @@
     keys.length = 0;
 
     deepEqual(values.sort(), ['a', 'b', 'c'], 'arguments object, values check');
+    values.length = 0;
+
+    (function(a, b, c) {
+      Benchmark.forOwn(arguments, function(value, key, object) {
+        values.push(value);
+        if (value == 'b') {
+          object.toString = 'toString';
+          return false;
+        }
+      });
+    }('a', 'b', 'c'));
+
+    deepEqual(values.sort(), ['a', 'b'], 'arguments object, exit early');
     values.length = 0;
 
     Benchmark.forOwn(Klass, function(value, key) {
@@ -310,13 +379,26 @@
     deepEqual(values, [2], 'prototype passed, values check');
     values.length = 0;
 
-    Benchmark.forOwn('hello', function(value, key) {
+    Benchmark.forOwn('hello', function(value, key, object) {
+      thirdArg = object;
       keys.push(key);
       values.push(value);
     });
 
+    equal(thirdArg, 'hello', 'string passed, third callback arg');
     deepEqual(keys.sort(), ['0', '1', '2', '3', '4'], 'string passed, keys check');
     deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed, values check');
+    values.length = 0;
+
+    Benchmark.forOwn('hello', function(value, key, object) {
+      values.push(value);
+      if (value == 'e') {
+        object.toString = 'toString';
+        return false;
+      }
+    });
+
+    deepEqual(values, ['h', 'e'], 'string passed, exit early');
   });
 
   /*--------------------------------------------------------------------------*/

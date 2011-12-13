@@ -330,7 +330,7 @@
    *
    * IE compatibility mode and IE < 9 have buggy Array `shift()` and `splice()`
    * functions that fail to remove the last element, `object[0]`, of
-   * array-like-objects (ALOs) even though the `length` property is set to `0`.
+   * array-like-objects even though the `length` property is set to `0`.
    * The `shift()` method is buggy in IE 8 compatibility mode, while `splice()`
    * is buggy regardless of mode in IE < 9 and buggy in compatibility mode in IE 9.
    *
@@ -691,7 +691,7 @@
       }
       // in IE < 9 strings don't support accessing characters by index
       if (!done && forString && isClassOf(object, 'String')) {
-        done = forString(object.split(''), callback) === false;
+        done = forString(object, callback, 0, object.split('')) === false;
       }
       else if (!done && forArgs && isArguments(object)) {
         done = forArgs(object, callback) === false;
@@ -911,22 +911,24 @@
   }
 
   /**
-   * A simple `each()` for dealing with non-sparse arrays and `arguments` objects.
+   * A simple `each()` for dealing with non-sparse arrays and array-like-objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
-   * @param {Array} array The array to iterate over.
+   * @param {Array|Object} object The object to iterate over and pass to the callback.
    * @param {Function} callback The function called per iteration.
    * @param {Number} [index=0] The starting index.
-   * @returns {Array} Returns the array iterated over.
+   * @param {Array|Object} [iteratee=`object`] An alternate object to iterate over.
+   * @returns {Boolean|Undefined} Returns `false` if the loop was terminated, else `undefined`.
    */
-  function simpleEach(array, callback, index) {
+  function simpleEach(object, callback, index, iteratee) {
     index || (index = 0);
-    for (var length = array.length; index < length; index++) {
-      if (callback(array[index], String(index), array) === false) {
-        break;
+    iteratee || (iteratee = object);
+    for (var length = object.length; index < length; index++) {
+      // coerce the index to a string because `simpleEach()` is used by `forProps()`
+      if (callback(iteratee[index], String(index), object) === false) {
+        return false;
       }
     }
-    return array;
   }
 
   /*--------------------------------------------------------------------------*/
@@ -969,6 +971,7 @@
     var index = -1,
         fn = callback,
         result = [object, object = Object(object)][0],
+        iteratee = object,
         isSnapshot = 'snapshotLength' in object && 'snapshotItem' in object,
         skipCheck = isSnapshot || 'item' in object,
         length = isSnapshot ? object.snapshotLength : object.length;
@@ -982,13 +985,13 @@
     if (length === length >>> 0) {
       // in IE < 9 strings don't support accessing characters by index
       if (noCharByIndex && isClassOf(object, 'String')) {
-        object = object.split('');
+        iteratee = object.split('');
         skipCheck = true;
       }
       while (++index < length) {
         // in Safari 2 `index in object` is always `false` for NodeLists
-        if ((skipCheck || index in object) &&
-            callback(isSnapshot ? object.snapshotItem(index) : object[index], index, object) === false) {
+        if ((skipCheck || index in iteratee) &&
+            callback(isSnapshot ? object.snapshotItem(index) : iteratee[index], index, object) === false) {
           break;
         }
       }
@@ -1678,6 +1681,9 @@
     var me = this,
         result = new me.constructor(extend({}, me.options,
           { 'fn': me.fn, 'id': me.id, 'stats': me.stats, 'times': me.times }, options));
+
+    // pave explicitly set options `fn`, `id`, `stats`, and `times`
+    result.options = extend({}, me.options, options);
 
     // copy own custom properties
     forProps(me, function(value, key) {
