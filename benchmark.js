@@ -611,6 +611,7 @@
 
   /**
    * Iterates over an object's properties, executing the `callback` for each.
+   * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
    * @param {Object} object The object to iterate over.
    * @param {Function} callback The function executed per own property.
@@ -924,8 +925,9 @@
     index || (index = 0);
     iteratee || (iteratee = object);
     for (var length = object.length; index < length; index++) {
-      // coerce the index to a string because `simpleEach()` is used by `forProps()`
+      // coerce the index to a string because the `key` argument is used by `forProps()`
       if (callback(iteratee[index], String(index), object) === false) {
+        // return `false` is needed for use in `forProps()`
         return false;
       }
     }
@@ -1049,6 +1051,7 @@
 
   /**
    * Iterates over an object's own properties, executing the `callback` for each.
+   * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
    * @memberOf Benchmark
    * @param {Object} object The object to iterate over.
