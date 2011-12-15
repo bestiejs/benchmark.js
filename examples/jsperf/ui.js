@@ -88,7 +88,8 @@
   forOwn = Benchmark.forOwn,
   formatNumber = Benchmark.formatNumber,
   indexOf = Benchmark.indexOf,
-  invoke = Benchmark.invoke;
+  invoke = Benchmark.invoke,
+  join = Benchmark.join;
 
   /*--------------------------------------------------------------------------*/
 
@@ -472,7 +473,7 @@
       if (error) {
         setHTML(cell, 'Error');
         addClass(cell, classNames.error);
-        parsed = Benchmark.join(error, '</li><li>');
+        parsed = join(error, '</li><li>');
         logError('<p>' + error + '.</p>' + (parsed ? '<ul><li>' + parsed + '</li></ul>' : ''));
       }
       else {
@@ -649,6 +650,8 @@
     };
   }());
 
+  /*--------------------------------------------------------------------------*/
+
   // fork for runner or embedded chart
   if (has.runner) {
     // detect the scroll element
@@ -679,7 +682,7 @@
 
     // catch and display errors from the "preparation code"
     window.onerror = function(message, fileName, lineNumber) {
-      logError('<p>' + message + '.</p><ul><li>' + Benchmark.join({
+      logError('<p>' + message + '.</p><ul><li>' + join({
         'message': message,
         'fileName': fileName,
         'lineNumber': lineNumber
@@ -706,6 +709,8 @@
       invoke(ui.benchmarks, 'removeAllListeners');
     }, 1);
   }
+
+  /*--------------------------------------------------------------------------*/
 
   // optimized asynchronous Google Analytics snippet based on
   // http://mathiasbynens.be/notes/async-analytics-snippet
