@@ -677,6 +677,15 @@
       html.scrollTop = scrollTop;
     }());
 
+    // catch and display errors from the "preparation code"
+    window.onerror = function(message, fileName, lineNumber) {
+      logError('<p>' + message + '.</p><ul><li>' + Benchmark.join({
+        'message': message,
+        'fileName': fileName,
+        'lineNumber': lineNumber
+      }, '</li><li>') + '</li></ul>');
+      scrollEl.scrollTop = $('error-info').offsetTop;
+    };
     // inject nano applet
     // (assumes ui.js is just before </body>)
     if ('nojava' in ui.params) {
