@@ -298,6 +298,30 @@
   }
 
   /**
+   * A simple object cloning utility.
+   * @private
+   * @param {Mixed} value The value to clone.
+   * @returns {Mixed} The cloned value.
+   */
+  function cloneObject(value) {
+    var fn,
+        ctor,
+        result = value;
+
+    if (isArray(value)) {
+      result = map(value, cloneObject);
+    }
+    else if (value === Object(value)) {
+      ctor = value.constructor;
+      result = ctor == Object ? {} : (fn = function(){}, fn.prototype = ctor.prototype, new fn);
+      forOwn(value, function(subValue, key) {
+        result[key] = cloneObject(subValue);
+      });
+    }
+    return result;
+  }
+
+  /**
    * Creates a Browserscope results object.
    * @private
    * @returns {Object|Null} Browserscope results object or null.
@@ -337,30 +361,6 @@
       result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
       return result;
     }, null);
-  }
-
-  /**
-   * A simple deep cloning utility function.
-   * @private
-   * @param {Mixed} value The value to clone.
-   * @returns {Mixed} The cloned value.
-   */
-  function deepClone(value) {
-    var fn,
-        ctor,
-        result = value;
-
-    if (isArray(value)) {
-      result = map(value, deepClone);
-    }
-    else if (value === Object(value)) {
-      ctor = value.constructor;
-      result = ctor == Object ? {} : (fn = function(){}, fn.prototype = ctor.prototype, new fn);
-      forOwn(value, function(subValue, key) {
-        result[key] = deepClone(subValue);
-      });
-    }
-    return result;
   }
 
   /**
@@ -461,9 +461,10 @@
    * @returns {String} The modified string.
    */
   function interpolate(string, object) {
-    return reduce(object || {}, function(string, value, key) {
-      return string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
-    }, string);
+    forOwn(object, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+    });
+    return string;
   }
 
   /**
@@ -736,7 +737,7 @@
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
     else if (!ui.running) {
       cont.className = '';
-      data = deepClone(response.getDataTable());
+      data = cloneObject(response.getDataTable());
       labels = getDataLabels(data);
       rows = getDataRows(data);
       rowCount = rows.length;
