@@ -585,77 +585,106 @@
         ctor,
         data,
         isArray,
+        isObject,
         key,
+        markerKey,
         parent,
         result,
-        uidKey,
         index = -1,
-        pool = [],
-        queue = [{ 'value': value }],
-        uidData = function(value) { this.raw = value; },
-        getUid = function(object) {
-          var result = uid;
-          while (object[result] && !(object[result] instanceof uidData)) {
-            result += 1;
-          }
-          return result;
-        };
+        marked = [],
+        queue = [{ 'value': value }];
+
+    /**
+     * An easily detectable decorator for cloned values.
+     */
+    function Marker(object) {
+      this.raw = object;
+    }
+
+    /**
+     * Gets an available marker key for the given object.
+     */
+    function getMarkerKey(object) {
+      // avoid collisions with existing keys
+      var result = uid;
+      while (object[result] && object[result].constructor != Marker) {
+        result += 1;
+      }
+      return result;
+    }
 
     while ((data = queue.pop())) {
       key = data.key;
       parent = data.parent;
       clone = value = data.source ? data.source[key] : data.value;
 
-      if (typeof value == 'object' && value) {
-        ctor = value.constructor;
-        switch ((classOf = toString.call(value))) {
-          case '[object Boolean]':
-            clone = new ctor(value == true);
-            break;
-
-          case '[object Date]':
-            clone = new ctor(+value);
-            break;
-
-          case '[object RegExp]':
-            clone = ctor(value.source,
-              (value.global     ? 'g' : '') +
-              (value.ignoreCase ? 'i' : '') +
-              (value.multiline  ? 'm' : ''));
-            break;
-
-          case '[object Number]':
-          case '[object String]':
-            clone = new ctor(value);
-            break;
-
-          default:
-            isArray = classOf == '[object Array]';
-            if (isArray || value.constructor == Object) {
-              clone = isArray ? [] : {};
-              (isArray ? forEach : forOwn)(value, function(subValue, subKey) {
-                if (subValue instanceof uidData) {
-                  return;
-                }
-                if (typeof subValue == 'object' && subValue) {
-                  // check if already seen (prevents circular references)
-                  uidKey = getUid(subValue);
-                  if (subValue[uidKey]) {
-                    clone[subKey] = subValue[uidKey].raw;
-                  } else {
-                    // add to "call" queue
-                    pool.push({ 'uid': uidKey, 'object': subValue });
-                    queue.push({ 'key': subKey, 'parent': clone, 'source': value });
-                  }
-                } else {
-                  clone[subKey] = subValue;
-                }
-              });
-            }
+      if (value === Object(value)) {
+        markerKey = getMarkerKey(value);
+        if (value[markerKey]) {
+          // use an existing clone (circular references)
+          clone = value[markerKey].raw;
         }
-        uidKey = getUid(value);
-        pool.push({ 'uid': uidKey, 'object': value });
-        value[uidKey] = new uidData(clone);
+        else {
+          // else create new clone
+          ctor = value.constructor;
+          classOf = toString.call(value);
+          isArray = classOf == '[object Array]';
+          isObject = classOf == '[object Object]' && isClassOf(ctor, 'Function') && ctor instanceof ctor;
+          switch (classOf) {
+            case '[object Array]':
+              clone = new ctor(value.length);
+              break;
+
+            case '[object Boolean]':
+              clone = new ctor(value == true);
+              break;
+
+            case '[object Date]':
+              clone = new ctor(+value);
+              break;
+
+            case '[object Object]':
+              isObject && (clone = new ctor);
+              break;
+
+            case '[object Number]':
+            case '[object String]':
+              clone = new ctor(value);
+              break;
+
+            case '[object RegExp]':
+              clone = ctor(value.source,
+                (value.global     ? 'g' : '') +
+                (value.ignoreCase ? 'i' : '') +
+                (value.multiline  ? 'm' : ''));
+          }
+          // mark object to allow detecting circular reference and tie it to its clone
+          if (clone != value) {
+            value[markerKey] = new Marker(clone);
+            marked.push({ 'key': markerKey, 'object': value });
+          }
+          // iterate over object properties
+          if (isArray || isObject) {
+            (isArray ? forEach : forOwn)(value, function(subValue, subKey) {
+              // exit early to avoid cloning the marker
+              if (subValue && subValue.constructor == Marker) {
+                return;
+              }
+              if (subValue === Object(subValue)) {
+                markerKey = getMarkerKey(subValue);
+                if (subValue[markerKey]) {
+                  // handle circular references
+                  clone[subKey] = subValue[markerKey].raw;
+                } else {
+                  // add to the "call" queue
+                  queue.push({ 'key': subKey, 'parent': clone, 'source': value });
+                }
+              } else {
+                clone[subKey] = subValue;
+              }
+            });
+          }
+        }
       }
       if (parent) {
         parent[key] = clone;
@@ -663,9 +692,9 @@
         result = clone;
       }
     }
-    // cleanup
-    while ((data = pool[++index])) {
-      delete data.object[data.uid];
+    // remove markers
+    while ((data = marked[++index])) {
+      delete data.object[data.key];
     }
     return result;
   }
@@ -1284,13 +1313,6 @@
     }
 
     /**
-     * Checks if the benchmark clock is deferred.
-     */
-    function isDeferred(object) {
-      return isRun(object) && object.defer;
-    }
-
-    /**
      * Checks if invoking `run` on a benchmark instance.
      */
     function isRun(object) {
@@ -1302,7 +1324,8 @@
      * Checks if invoking `run` with synchronous cycles.
      */
     function isSync(object) {
-      return !(isAsync(object) || isDeferred(object));
+      // if not asynchronous or deferred
+      return !isAsync(object) && !(isRun(object) && object.defer);
     }
 
     /**
@@ -1367,7 +1390,7 @@
       if (queued) {
         do {
           ++index > 0 && shift.call(benches);
-        } while ((length = benches.length) && !(0 in benches));
+        } while ((length = benches.length) && !('0' in benches));
       }
       else {
         while (++index < length && !(index in result)) { }
@@ -1675,9 +1698,7 @@
         result = true;
 
     forEach(listeners.slice(), function(listener) {
-      if (!(result = listener.apply(me, args) !== false)) {
-        return result;
-      }
+      return (result = listener.apply(me, args) !== false);
     });
     return result;
   }
@@ -2038,8 +2059,8 @@
     }
 
     /**
-     * Replaces all occurrences of `$` with a unique number and template tokens
-     * with content.
+     * Replaces all occurrences of `$` with a unique number and
+     * template tokens with content.
      */
     function preprocess(code) {
       return interpolate(code, template).replace(/\$/g, /\d+/.exec(uid));

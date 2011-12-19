@@ -298,24 +298,24 @@
   }
 
   /**
-   * A simple object cloning utility.
+   * A simple data object cloning utility.
    * @private
-   * @param {Mixed} value The value to clone.
-   * @returns {Mixed} The cloned value.
+   * @param {Mixed} data The data object to clone.
+   * @returns {Mixed} The cloned data object.
    */
-  function cloneObject(value) {
+  function cloneData(data) {
     var fn,
         ctor,
-        result = value;
+        result = data;
 
-    if (isArray(value)) {
-      result = map(value, cloneObject);
+    if (isArray(data)) {
+      result = map(data, cloneData);
     }
-    else if (value === Object(value)) {
-      ctor = value.constructor;
+    else if (data === Object(data)) {
+      ctor = data.constructor;
       result = ctor == Object ? {} : (fn = function(){}, fn.prototype = ctor.prototype, new fn);
-      forOwn(value, function(subValue, key) {
-        result[key] = cloneObject(subValue);
+      forOwn(data, function(value, key) {
+        result[key] = cloneData(value);
       });
     }
     return result;
@@ -737,7 +737,7 @@
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
     else if (!ui.running) {
       cont.className = '';
-      data = cloneObject(response.getDataTable());
+      data = cloneData(response.getDataTable());
       labels = getDataLabels(data);
       rows = getDataRows(data);
       rowCount = rows.length;
