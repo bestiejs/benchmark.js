@@ -580,14 +580,14 @@
    * @returns {Mixed} The cloned value.
    */
   function deepClone(value) {
-    var classOf,
+    var array,
+        classOf,
         clone,
         ctor,
         data,
-        isArray,
-        isObject,
         key,
         markerKey,
+        object,
         parent,
         result,
         index = -1,
@@ -621,18 +621,17 @@
       if (value === Object(value)) {
         markerKey = getMarkerKey(value);
         if (value[markerKey]) {
-          // use an existing clone (circular references)
+          // use an existing clone (circular reference)
           clone = value[markerKey].raw;
         }
         else {
           // else create new clone
           ctor = value.constructor;
           classOf = toString.call(value);
-          isArray = classOf == '[object Array]';
-          isObject = classOf == '[object Object]' && isClassOf(ctor, 'Function') && ctor instanceof ctor;
+          array = object = false;
           switch (classOf) {
             case '[object Array]':
-              clone = new ctor(value.length);
+              array = clone = new ctor(value.length);
               break;
 
             case '[object Boolean]':
@@ -644,7 +643,7 @@
               break;
 
             case '[object Object]':
-              isObject && (clone = new ctor);
+              object = isObject(value) && (clone = new ctor);
               break;
 
             case '[object Number]':
@@ -658,32 +657,30 @@
                 (value.ignoreCase ? 'i' : '') +
                 (value.multiline  ? 'm' : ''));
           }
-          // mark object to allow detecting circular reference and tie it to its clone
+          // mark object to allow detecting circular references and tie it to its clone
           if (clone != value) {
             value[markerKey] = new Marker(clone);
             marked.push({ 'key': markerKey, 'object': value });
           }
           // iterate over object properties
-          if (isArray || isObject) {
-            (isArray ? forEach : forOwn)(value, function(subValue, subKey) {
-              // exit early to avoid cloning the marker
-              if (subValue && subValue.constructor == Marker) {
-                return;
-              }
-              if (subValue === Object(subValue)) {
-                markerKey = getMarkerKey(subValue);
-                if (subValue[markerKey]) {
-                  // handle circular references
-                  clone[subKey] = subValue[markerKey].raw;
-                } else {
-                  // add to the "call" queue
-                  queue.push({ 'key': subKey, 'parent': clone, 'source': value });
-                }
+          (array || object) && (array ? forEach : forOwn)(value, function(subValue, subKey) {
+            // exit early to avoid cloning the marker
+            if (subValue && subValue.constructor == Marker) {
+              return;
+            }
+            if (subValue === Object(subValue)) {
+              markerKey = getMarkerKey(subValue);
+              if (subValue[markerKey]) {
+                // use an existing clone (circular reference)
+                clone[subKey] = subValue[markerKey].raw;
               } else {
-                clone[subKey] = subValue;
+                // else add to the "call" queue
+                queue.push({ 'key': subKey, 'parent': clone, 'source': value });
               }
-            });
-          }
+            } else {
+              clone[subKey] = subValue;
+            }
+          });
         }
       }
       if (parent) {
@@ -707,7 +704,9 @@
    * @returns {Object} The destination object.
    */
   function extend(destination, source) {
-    delete arguments[0];
+    // Chrome < 14 incorrectly sets `destination` to `undefined` when we `delete arguments[0]`
+    // http://code.google.com/p/v8/issues/detail?id=839
+    destination = [destination, delete arguments[0]][0];
     forEach(arguments, function(source) {
       forProps(source, function(value, key) {
         destination[key] = value;
@@ -930,6 +929,37 @@
     var type = object != null ? typeof object[property] : 'number';
     return !/^(?:boolean|number|string|undefined)$/.test(type) &&
       (type == 'object' ? !!object[property] : true);
+  }
+
+  /**
+   * Checks if the specified `value` is an Object object created by the Object constructor.
+   * @private
+   * @param {Mixed} value The value to check.
+   * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
+   */
+  function isObject(value) {
+    var ctor,
+        result = !!value && toString.call(value) == '[object Object]';
+
+    if (result) {
+      // IE < 9 presents nodes like Object objects:
+      // IE < 8 are missing the node's constructor property
+      // IE 8 node constructors are typeof "object"
+      ctor = value.constructor;
+      // check if the constructor is `Object` as `Object instanceof Object` is `true`
+      if ((result = isClassOf(ctor, 'Function') && ctor instanceof ctor)) {
+        // assume objects created by the Object constructor have no inherited enumerable properties
+        // (we assume there are no Object.prototype extensions)
+        forProps(value, function(subValue, subKey) {
+          result = subKey;
+        });
+        // An object's own properties are iterated before inherited properties.
+        // If the last iterated key belongs to an object's own property then
+        // there are no inherited enumerable properties.
+        result = result === true || hasKey(value, result);
+      }
+    }
+    return result;
   }
 
   /**
