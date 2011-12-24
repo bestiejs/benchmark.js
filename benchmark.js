@@ -24,6 +24,9 @@
   /** Used to check for own properties of an object */
   hasOwnProperty = {}.hasOwnProperty,
 
+  /** Used to check if an own property is enumerable */
+  propertyIsEnumerable = {}.propertyIsEnumerable,
+
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
 
@@ -61,8 +64,14 @@
     /** Detect Adobe AIR */
     'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
 
-    /** Detect if strings support accessing characters by index */
-    'charByIndex': '0'[0] == '0',
+    /** Detect if `arguments` objects have the correct internal [[Class]] value */
+    'argumentsClass': toString.call(arguments) == '[object Arguments]',
+
+    /**
+     * Detect if strings support accessing characters by index.
+     * IE8 supports accessing characters by index on string literals but not string objects.
+     */
+    'charByIndex': (new String('0'))[0] == '0',
 
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
@@ -119,6 +128,7 @@
   },
 
   /** Shortcut for inverse result */
+  noArgumentsClass = !has.argumentsClass,
   noCharByIndex = !has.charByIndex,
 
   /** Math shortcuts */
@@ -574,148 +584,6 @@
   }
 
   /**
-   * A deep clone utility.
-   * @private
-   * @param {Mixed} value The value to clone.
-   * @returns {Mixed} The cloned value.
-   */
-  function deepClone(value) {
-    var array,
-        classOf,
-        clone,
-        ctor,
-        data,
-        key,
-        markerKey,
-        object,
-        parent,
-        result,
-        index = -1,
-        marked = [],
-        queue = [{ 'value': value }];
-
-    /**
-     * An easily detectable decorator for cloned values.
-     */
-    function Marker(object) {
-      this.raw = object;
-    }
-
-    /**
-     * Gets an available marker key for the given object.
-     */
-    function getMarkerKey(object) {
-      // avoid collisions with existing keys
-      var result = uid;
-      while (object[result] && object[result].constructor != Marker) {
-        result += 1;
-      }
-      return result;
-    }
-
-    while ((data = queue.pop())) {
-      key = data.key;
-      parent = data.parent;
-      clone = value = data.source ? data.source[key] : data.value;
-
-      if (value === Object(value)) {
-        markerKey = getMarkerKey(value);
-        if (value[markerKey]) {
-          // use an existing clone (circular reference)
-          clone = value[markerKey].raw;
-        }
-        else {
-          // else create new clone
-          ctor = value.constructor;
-          classOf = toString.call(value);
-          array = object = false;
-          switch (classOf) {
-            case '[object Array]':
-              array = clone = new ctor(value.length);
-              break;
-
-            case '[object Boolean]':
-              clone = new ctor(value == true);
-              break;
-
-            case '[object Date]':
-              clone = new ctor(+value);
-              break;
-
-            case '[object Object]':
-              object = isObject(value) && (clone = new ctor);
-              break;
-
-            case '[object Number]':
-            case '[object String]':
-              clone = new ctor(value);
-              break;
-
-            case '[object RegExp]':
-              clone = ctor(value.source,
-                (value.global     ? 'g' : '') +
-                (value.ignoreCase ? 'i' : '') +
-                (value.multiline  ? 'm' : ''));
-          }
-          // mark object to allow detecting circular references and tie it to its clone
-          if (clone != value) {
-            value[markerKey] = new Marker(clone);
-            marked.push({ 'key': markerKey, 'object': value });
-          }
-          // iterate over object properties
-          (array || object) && (array ? forEach : forOwn)(value, function(subValue, subKey) {
-            // exit early to avoid cloning the marker
-            if (subValue && subValue.constructor == Marker) {
-              return;
-            }
-            if (subValue === Object(subValue)) {
-              markerKey = getMarkerKey(subValue);
-              if (subValue[markerKey]) {
-                // use an existing clone (circular reference)
-                clone[subKey] = subValue[markerKey].raw;
-              } else {
-                // else add to the "call" queue
-                queue.push({ 'key': subKey, 'parent': clone, 'source': value });
-              }
-            } else {
-              clone[subKey] = subValue;
-            }
-          });
-        }
-      }
-      if (parent) {
-        parent[key] = clone;
-      } else {
-        result = clone;
-      }
-    }
-    // remove markers
-    while ((data = marked[++index])) {
-      delete data.object[data.key];
-    }
-    return result;
-  }
-
-  /**
-   * Copies own/inherited properties of a source object to the destination object.
-   * @private
-   * @param {Object} destination The destination object.
-   * @param {Object} [source={}] The source object.
-   * @returns {Object} The destination object.
-   */
-  function extend(destination, source) {
-    // Chrome < 14 incorrectly sets `destination` to `undefined` when we `delete arguments[0]`
-    // http://code.google.com/p/v8/issues/detail?id=839
-    destination = [destination, delete arguments[0]][0];
-    forEach(arguments, function(source) {
-      forProps(source, function(value, key) {
-        destination[key] = value;
-      });
-    });
-    return destination;
-  }
-
-  /**
    * Iterates over an object's properties, executing the `callback` for each.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
@@ -897,9 +765,10 @@
     isArguments = function(value) {
       return toString.call(value) == '[object Arguments]';
     };
-    if (!isArguments(arguments)) {
+    if (noArgumentsClass) {
       isArguments = function(value) {
-        return hasKey(value, 'callee');
+        return hasKey(value, 'callee') &&
+          !(propertyIsEnumerable && propertyIsEnumerable.call(value, 'callee'));
       };
     }
     return isArguments(arguments[0]);
@@ -932,7 +801,7 @@
   }
 
   /**
-   * Checks if the specified `value` is an Object object created by the Object constructor.
+   * Checks if the specified `value` is an object created by the Object constructor.
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
@@ -941,6 +810,10 @@
     var ctor,
         result = !!value && toString.call(value) == '[object Object]';
 
+    if (result && noArgumentsClass) {
+      // avoid false positives for `arguments` objects in IE < 9
+      result = !isArguments(value);
+    }
     if (result) {
       // IE < 9 presents nodes like Object objects:
       // IE < 8 are missing the node's constructor property
@@ -982,7 +855,7 @@
     return function() {
       var args = [this];
       args.push.apply(args, arguments);
-      return fn.apply(this, args);
+      return fn.apply(null, args);
     };
   }
 
@@ -1002,7 +875,7 @@
    */
   function req(id) {
     try {
-      return freeExports && freeRequire && freeRequire(id);
+      return freeExports && freeRequire(id);
     } catch(e) { }
     return null;
   }
@@ -1086,6 +959,130 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * A deep clone utility.
+   * @static
+   * @memberOf Benchmark
+   * @param {Mixed} value The value to clone.
+   * @returns {Mixed} The cloned value.
+   */
+  function deepClone(value) {
+    var array,
+        classOf,
+        clone,
+        ctor,
+        data,
+        key,
+        markerKey,
+        object,
+        parent,
+        result,
+        index = -1,
+        marked = [],
+        queue = [{ 'value': value }];
+
+    /**
+     * An easily detectable decorator for cloned values.
+     */
+    function Marker(object) {
+      this.raw = object;
+    }
+
+    /**
+     * Gets an available marker key for the given object.
+     */
+    function getMarkerKey(object) {
+      // avoid collisions with existing keys
+      var result = uid;
+      while (object[result] && object[result].constructor != Marker) {
+        result += 1;
+      }
+      return result;
+    }
+
+    while ((data = queue.shift())) {
+      key = data.key;
+      parent = data.parent;
+      clone = value = data.source ? data.source[key] : data.value;
+
+      if (value === Object(value)) {
+        markerKey = getMarkerKey(value);
+        if (value[markerKey]) {
+          // use an existing clone (circular reference)
+          clone = value[markerKey].raw;
+        }
+        else {
+          // else create new clone
+          ctor = value.constructor;
+          classOf = toString.call(value);
+          array = object = false;
+          switch (classOf) {
+            case '[object Array]':
+              array = clone = new ctor(value.length);
+              break;
+
+            case '[object Boolean]':
+              clone = new ctor(value == true);
+              break;
+
+            case '[object Date]':
+              clone = new ctor(+value);
+              break;
+
+            case '[object Object]':
+              object = isObject(value) && (clone = new ctor);
+              break;
+
+            case '[object Number]':
+            case '[object String]':
+              clone = new ctor(value);
+              break;
+
+            case '[object RegExp]':
+              clone = ctor(value.source,
+                (value.global     ? 'g' : '') +
+                (value.ignoreCase ? 'i' : '') +
+                (value.multiline  ? 'm' : ''));
+          }
+          // mark object to allow detecting circular references and tie it to its clone
+          if (clone != value) {
+            value[markerKey] = new Marker(clone);
+            marked.push({ 'key': markerKey, 'object': value });
+          }
+          // iterate over object properties
+          (array || object) && (array ? forEach : forOwn)(value, function(subValue, subKey) {
+            // exit early to avoid cloning the marker
+            if (subValue && subValue.constructor == Marker) {
+              return;
+            }
+            if (subValue === Object(subValue)) {
+              markerKey = getMarkerKey(subValue);
+              if (subValue[markerKey]) {
+                // use an existing clone (circular reference)
+                clone[subKey] = subValue[markerKey].raw;
+              } else {
+                // else add to the "call" queue
+                queue.push({ 'key': subKey, 'parent': clone, 'source': value });
+              }
+            } else {
+              clone[subKey] = subValue;
+            }
+          });
+        }
+      }
+      if (parent) {
+        parent[key] = clone;
+      } else {
+        result = clone;
+      }
+    }
+    // remove markers
+    while ((data = marked[++index])) {
+      delete data.object[data.key];
+    }
+    return result;
+  }
+
+  /**
    * An iteration utility for arrays and objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @static
@@ -1110,7 +1107,7 @@
       if (isConvertable) {
         // the third argument of the callback is the original non-array object
         callback = function(value, index) {
-          fn.call(this, value, index, origObject);
+          return fn.call(this, value, index, origObject);
         };
         // in IE < 9 strings don't support accessing characters by index
         if (isSplittable) {
@@ -1128,6 +1125,26 @@
       forOwn(object, callback, thisArg);
     }
     return result;
+  }
+
+  /**
+   * Copies own/inherited properties of a source object to the destination object.
+   * @static
+   * @memberOf Benchmark
+   * @param {Object} destination The destination object.
+   * @param {Object} [source={}] The source object.
+   * @returns {Object} The destination object.
+   */
+  function extend(destination, source) {
+    // Chrome < 14 incorrectly sets `destination` to `undefined` when we `delete arguments[0]`
+    // http://code.google.com/p/v8/issues/detail?id=839
+    destination = [destination, delete arguments[0]][0];
+    forEach(arguments, function(source) {
+      forProps(source, function(value, key) {
+        destination[key] = value;
+      });
+    });
+    return destination;
   }
 
   /**
@@ -1826,10 +1843,9 @@
    */
   function clone(options) {
     var me = this,
-        result = new me.constructor(extend({}, me.options,
-          { 'fn': me.fn, 'id': me.id, 'stats': me.stats, 'times': me.times }, options));
+        result = new me.constructor(extend({}, me, options));
 
-    // pave explicitly set options `fn`, `id`, `stats`, and `times`
+    // correct the options object
     result.options = extend({}, me.options, options);
 
     // copy own custom properties
@@ -2598,8 +2614,14 @@
       }
     },
 
+    // clone objects
+    'deepClone': deepClone,
+
     // iteration utility
     'each': each,
+
+    // augment objects
+    'extend': extend,
 
     // generic Array#filter
     'filter': filter,

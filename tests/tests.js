@@ -137,24 +137,107 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.clone');
+  QUnit.module('Benchmark.deepClone');
 
   test('basic', function() {
-    var i = 0,
-        options = Benchmark.options,
-        maxTime = options.maxTime;
+    var o = { 'a': 1, 'b': '2' },
+        Klass = function() {},
+        toString = {}.toString,
+        result = Benchmark.deepClone(o);
 
-    options.minTime && (options.maxTime = options.minTime * 5);
-    var bench = Benchmark(function() { i++; }).run();
-    options.maxTime = maxTime;
+    Klass.prototype = { 'x': 1 };
 
-    var clone = bench.clone();
-    deepEqual(clone, bench, 'clones properties');
-    ok(clone.stats != bench.stats && clone.times != bench.times && clone.options != bench.options, 'deep clones object properties');
+    deepEqual(result, o, 'clones simple object');
+    ok(result != o, 'clone isn\'t the original object');
 
-    clone = bench.clone({ 'fn': '', 'name': 'foo' });
-    ok(clone.fn === '' && clone.options.fn === '', 'adds custom "fn" option');
-    equal(clone.name, 'foo', 'adds other custom options');
+    o = { 'a': /a/, 'b': ['B'], 'c': { 'C': 1 } };
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones complex object');
+
+    o = 'x';
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones string primitive');
+
+    o = new String('x');
+    result = Benchmark.deepClone(o);
+    ok(result == 'x' && typeof result == 'object' && toString.call(result) == '[object String]', 'clones string object');
+
+    o = 3;
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones number primitive');
+
+    o = new Number(3);
+    result = Benchmark.deepClone(o);
+    ok(result == 3 && typeof result == 'object' && toString.call(result) == '[object Number]', 'clones number object');
+
+    o = false;
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones boolean primitive');
+
+    o = new Boolean(false);
+    result = Benchmark.deepClone(o);
+    ok(result == false && typeof result == 'object' && toString.call(result) == '[object Boolean]', 'clones boolean object');
+
+    o = null;
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones null');
+
+    o = undefined;
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones undefined');
+
+    o = [1, 'b', false];
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones array');
+
+    o = /x/gim;
+    result = Benchmark.deepClone(o);
+    deepEqual(result, o, 'clones regexp');
+
+    o = new Klass;
+    ok(Benchmark.deepClone(o) === o, 'Klass instance is not cloned');
+    ok(Benchmark.deepClone(arguments) === arguments, 'arguments object is not cloned');
+    ok(Benchmark.deepClone(Klass) === Klass, 'function is not cloned');
+  });
+
+  test('edge', function() {
+    var sub,
+        i = -1,
+        count = 0,
+        recurse = function() { count++; recurse(); },
+        o = { 'constructor': 1, 'hasOwnProperty': 2, 'isPrototypeOf': 3, 'propertyIsEnumerable': 4, 'toLocaleString': 5, 'toString': 6, 'valueOf': 7 },
+        result = Benchmark.deepClone(o);
+
+    deepEqual(result, o, 'clones problem JScript props');
+
+    o = {
+      'foo': { 'b': { 'foo': { 'c': { } } } },
+      'bar': { }
+    };
+    o.foo.b.foo.c.foo = o;
+    o.bar.b = o.foo.b;
+
+    result = Benchmark.deepClone(o);
+    ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo && result !== o, 'clones objects with circular references');
+
+    try {
+      recurse();
+    } catch(e) { }
+
+    count++;
+    o = sub = {};
+    while (++i <= count) {
+      sub = sub[i] = {};
+    }
+
+    try {
+      i = -1;
+      sub = Benchmark.deepClone(o);
+      while ((sub = sub[++i])) { }
+      result = --i == count;
+    } catch(e) { }
+
+    ok(result, 'avoids call stack overflow (stack limit is ' + (count - 1) + ')');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -201,7 +284,7 @@
       values.push(value);
     });
 
-    equal(thirdArg, 'hello', 'string passed, third callback arg');
+    ok(thirdArg == 'hello' && typeof thirdArg == 'object', 'string passed, third callback arg');
     deepEqual(values, ['h', 'e', 'l', 'l', 'o'], 'string passed, values check');
     values.length = 0;
 
@@ -608,6 +691,28 @@
     });
 
     equal(result, 'ac', 'sparse check');
+  });
+
+ /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark#clone');
+
+  test('basic', function() {
+    var i = 0,
+        options = Benchmark.options,
+        maxTime = options.maxTime;
+
+    options.minTime && (options.maxTime = options.minTime * 5);
+    var bench = Benchmark(function() { i++; }).run();
+    options.maxTime = maxTime;
+
+    var clone = bench.clone();
+    deepEqual(clone, bench, 'clones properties');
+    ok(clone.stats != bench.stats && clone.times != bench.times && clone.options != bench.options, 'deep clones object properties');
+
+    clone = bench.clone({ 'fn': '', 'name': 'foo' });
+    ok(clone.fn === '' && clone.options.fn === '', 'adds custom "fn" option');
+    equal(clone.name, 'foo', 'adds other custom options');
   });
 
   /*--------------------------------------------------------------------------*/
