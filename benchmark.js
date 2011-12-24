@@ -978,7 +978,7 @@
         result,
         index = -1,
         marked = [],
-        queue = [{ 'value': value }];
+        queue = { '0': { 'value': value }, 'length': 1 };
 
     /**
      * An easily detectable decorator for cloned values.
@@ -999,10 +999,11 @@
       return result;
     }
 
-    while ((data = queue.shift())) {
+    while ((data = queue[++index])) {
       key = data.key;
       parent = data.parent;
       clone = value = data.source ? data.source[key] : data.value;
+      delete queue[index - 1];
 
       if (value === Object(value)) {
         markerKey = getMarkerKey(value);
@@ -1061,7 +1062,7 @@
                 clone[subKey] = subValue[markerKey].raw;
               } else {
                 // else add to the "call" queue
-                queue.push({ 'key': subKey, 'parent': clone, 'source': value });
+                queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
               }
             } else {
               clone[subKey] = subValue;
@@ -1076,6 +1077,7 @@
       }
     }
     // remove markers
+    index = -1;
     while ((data = marked[++index])) {
       delete data.object[data.key];
     }
