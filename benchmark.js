@@ -801,7 +801,7 @@
   }
 
   /**
-   * Checks if the specified `value` is an object created by the Object constructor.
+   * Checks if the specified `value` is an object created by the `Object` constructor.
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
@@ -821,8 +821,8 @@
       ctor = value.constructor;
       // check if the constructor is `Object` as `Object instanceof Object` is `true`
       if ((result = isClassOf(ctor, 'Function') && ctor instanceof ctor)) {
-        // assume objects created by the Object constructor have no inherited enumerable properties
-        // (we assume there are no Object.prototype extensions)
+        // assume objects created by the `Object` constructor have no inherited enumerable properties
+        // (we assume there are no `Object.prototype` extensions)
         forProps(value, function(subValue, subKey) {
           result = subKey;
         });
@@ -1845,7 +1845,7 @@
     var me = this,
         result = new me.constructor(extend({}, me, options));
 
-    // correct the options object
+    // correct the `options` object
     result.options = extend({}, me.options, options);
 
     // copy own custom properties
