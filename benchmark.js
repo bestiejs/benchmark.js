@@ -84,6 +84,12 @@
       // IE8 supports indexes on string literals but not string objects
       Object('x')[0] == 'x',
 
+    /** Detect if strings have indexes as own properties */
+    'charByOwnIndex':
+      // Narwhal, Rhino, RingoJS, and Opera < 10.52 support indexes on strings
+      // but don't detect them as own properties
+      hasKey('x', '0'),
+
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
       try{
@@ -156,6 +162,7 @@
   /** Shortcut for inverse results */
   noArgumentsClass = !has.argumentsClass,
   noCharByIndex = !has.charByIndex,
+  noCharByOwnIndex = !has.charByOwnIndex,
 
   /** Math shortcuts */
   abs   = Math.abs,
@@ -622,7 +629,6 @@
     var forShadowed,
         skipSeen,
         forArgs = true,
-        forString = noCharByIndex,
         shadowed = ['constructor', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf'];
 
     (function(enumFlag, key) {
@@ -701,7 +707,8 @@
         // in IE < 9 strings don't support accessing characters by index
         if (!done && (
             forArgs && isArguments(object) ||
-            forString && isClassOf(object, 'String') && (iteratee = object.split('')))) {
+            (noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String'))) {
+          noCharByIndex && (iteratee = object.split(''));
           while (++index < length) {
             if ((done =
                 callback(iteratee[index], String(index), object) === false)) {
@@ -1179,7 +1186,7 @@
         origObject = object,
         length = object.length,
         isSnapshot = !!(object.snapshotItem && (length = object.snapshotLength)),
-        isSplittable = noCharByIndex && isClassOf(object, 'String'),
+        isSplittable = (noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String'),
         isConvertable = isSnapshot || isSplittable || 'item' in object;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
@@ -2077,7 +2084,7 @@
         // compile in setup/teardown functions and the test loop
         compiled = host.compiled = createFunction(preprocess('n$,t$'), interpolate(
           preprocess(deferred
-            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$.benchmark;m$=m$._host||m$,f$=m$.fn;' +
+            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=(m$=d$.benchmark)._host||m$,f$=m$.fn;' +
               'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
               'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}#{fn}\nreturn{}'
             : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};' +

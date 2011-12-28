@@ -333,7 +333,8 @@
         o = {},
         count = 0,
         recurse = function() { count++; recurse(); },
-        setTimeout = window.setTimeout;
+        setTimeout = window.setTimeout,
+        toString = {}.toString;
 
     function fn() {
       try {
@@ -347,10 +348,16 @@
     if (setTimeout) {
       setTimeout(fn, 1);
     }
-    try {
-      recurse();
-    } catch(e) { }
-
+    if (toString.call(window.java) == '[object JavaPackage]') {
+      // Java throws uncatchable errors on call stack overflows, so to avoid
+      // them I chose a number higher than Rhino's call stack limit without
+      // dynamically testing for that limit
+      count = 3e3;
+    } else {
+      try {
+        recurse();
+      } catch(e) { }
+    }
     count++;
     for (var i = 0, sub = o; i <= count; i++) {
       sub = sub[i] = {};
@@ -1035,7 +1042,7 @@
     options.minTime && (options.maxTime = options.minTime * 5);
 
     suite.add('a', function() {
-      count = 1;
+      count++;
     })
     .add('b', function() {
       for (var i = 0; i < 1e6; i++) {
