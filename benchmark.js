@@ -1010,11 +1010,11 @@
   function deepClone(value) {
     var accessor,
         circular,
-        classOf,
         clone,
         ctor,
         data,
         descriptor,
+        extensible,
         key,
         length,
         markerKey,
@@ -1076,8 +1076,7 @@
       // other non `Object` objects
       if (value === Object(value)) {
         ctor = value.constructor;
-        classOf = toString.call(value);
-        switch (classOf) {
+        switch (toString.call(value)) {
           case '[object Array]':
             clone = new ctor(value.length);
             break;
@@ -1111,7 +1110,7 @@
             !(descriptor = source && has.descriptors && getDescriptor(source, key),
               accessor = descriptor && (descriptor.get || descriptor.set))) {
           // use an existing clone (circular reference)
-          if (isExtensible(value)) {
+          if ((extensible = isExtensible(value))) {
             markerKey = getMarkerKey(value);
             if (value[markerKey]) {
               circular = clone = value[markerKey].raw;
@@ -1128,7 +1127,7 @@
           }
           if (!circular) {
             // mark object to allow quickly detecting circular references and tie it to its clone
-            if (isExtensible(value)) {
+            if (extensible) {
               value[markerKey] = new Marker(clone);
               marked.push({ 'key': markerKey, 'object': value });
             } else {
