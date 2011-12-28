@@ -21,11 +21,23 @@
   /** Used to assign each benchmark an incrimented id */
   counter = 0,
 
-  /** Used to check for own properties of an object */
+  /** Used to crawl all properties regardless of enumerability */
+  getAllKeys = Object.getOwnPropertyNames,
+
+  /** Used to get property descriptors */
+  getDescriptor = Object.getOwnPropertyDescriptor,
+
+  /** Used in case an object doesn't have its own method */
   hasOwnProperty = {}.hasOwnProperty,
+
+  /** Used to check if an object is extensible */
+  isExtensible = Object.isExtensible || function() { return true; },
 
   /** Used to check if an own property is enumerable */
   propertyIsEnumerable = {}.propertyIsEnumerable,
+
+  /** Used to set property descriptors */
+  setDescriptor = Object.defineProperty,
 
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
@@ -65,13 +77,12 @@
     'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
 
     /** Detect if `arguments` objects have the correct internal [[Class]] value */
-    'argumentsClass': toString.call(arguments) == '[object Arguments]',
+    'argumentsClass': isClassOf(arguments, 'Arguments'),
 
-    /**
-     * Detect if strings support accessing characters by index.
-     * IE8 supports accessing characters by index on string literals but not string objects.
-     */
-    'charByIndex': (new String('0'))[0] == '0',
+    /** Detect if strings support accessing characters by index */
+    'charByIndex':
+      // IE8 supports accessing characters by index on string literals but not string objects
+      Object('x')[0] == 'x',
 
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
@@ -85,6 +96,21 @@
         return Function(
           'return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')'
         )()(0).x === '1';
+      } catch(e) { }
+    }()),
+
+    /** Detect ES5+ property descriptor API */
+    'descriptors' : !!(function() {
+      try {
+        var o = {};
+        return (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
+      } catch(e) { }
+    }()),
+
+    /** Detect ES5+ Object.getOwnPropertyNames() */
+    'getAllKeys': !!(function() {
+      try {
+        return /\bvalueOf\b/.test(getAllKeys(Object.prototype));
       } catch(e) { }
     }()),
 
@@ -127,7 +153,7 @@
     'stop': null // lazy defined in `clock()`
   },
 
-  /** Shortcut for inverse result */
+  /** Shortcut for inverse results */
   noArgumentsClass = !has.argumentsClass,
   noCharByIndex = !has.charByIndex,
 
@@ -628,11 +654,13 @@
           skipCtor,
           done = !object,
           result = [object, object = Object(object)][0],
+          which = options.which,
+          allFlag = which == 'all',
           fn = callback,
           index = -1,
           iteratee = object,
           length = object.length,
-          ownFlag = options.iterate == 'own',
+          ownFlag = allFlag || which == 'own',
           seen = {},
           skipProto = isClassOf(object, 'Function'),
           thisArg = options.bind;
@@ -644,43 +672,56 @@
           return fn.call(thisArg, value, key, object);
         };
       }
-      for (key in object) {
-        // Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
-        // (if the prototype or a property on the prototype has been set)
-        // incorrectly set a function's `prototype` property [[Enumerable]] value
-        // to `true`. Because of this we standardize on skipping the `prototype`
-        // property of functions regardless of their [[Enumerable]] value.
-        if (done =
-            !(skipProto && key == 'prototype') &&
-            !(skipSeen && (hasKey(seen, key) || !(seen[key] = true))) &&
-            (!ownFlag || ownFlag && hasKey(object, key)) &&
-            callback(object[key], key, object) === false) {
-          break;
-        }
-      }
-      // in IE < 9 strings don't support accessing characters by index
-      if (!done && (
-          forArgs && isArguments(object) ||
-          forString && isClassOf(object, 'String') && (iteratee = object.split('')))) {
-        while (++index < length) {
-          if (done =
-              callback(iteratee[index], String(index), object) === false) {
+      // iterate all properties
+      if (allFlag && has.getAllKeys) {
+        for (index = 0, keys = getAllKeys(object), length = keys.length; index < length; index++) {
+          key = keys[index];
+          if (callback(object[key], key, object) === false) {
             break;
           }
         }
       }
-      if (!done && forShadowed) {
-        // Because IE < 9 can't set the `[[Enumerable]]` attribute of an existing
-        // property and the `constructor` property of a prototype defaults to
-        // non-enumerable, we manually skip the `constructor` property when we
-        // think we are iterating over a `prototype` object.
-        ctor = object.constructor;
-        skipCtor = ctor && ctor.prototype && ctor.prototype.constructor === ctor;
-        for (index = 0; key = shadowed[index]; index++) {
-          if (!(skipCtor && key == 'constructor') &&
-              hasKey(object, key) &&
-              callback(object[key], key, object) === false) {
+      // else iterate only enumerable properties
+      else {
+        for (key in object) {
+          // Firefox < 3.6, Opera > 9.50 - Opera < 11.60, and Safari < 5.1
+          // (if the prototype or a property on the prototype has been set)
+          // incorrectly set a function's `prototype` property [[Enumerable]] value
+          // to `true`. Because of this we standardize on skipping the `prototype`
+          // property of functions regardless of their [[Enumerable]] value.
+          if ((done =
+              !(skipProto && key == 'prototype') &&
+              !(skipSeen && (hasKey(seen, key) || !(seen[key] = true))) &&
+              (!ownFlag || ownFlag && hasKey(object, key)) &&
+              callback(object[key], key, object) === false)) {
             break;
+          }
+        }
+        // in IE < 9 strings don't support accessing characters by index
+        if (!done && (
+            forArgs && isArguments(object) ||
+            forString && isClassOf(object, 'String') && (iteratee = object.split('')))) {
+          while (++index < length) {
+            if ((done =
+                callback(iteratee[index], String(index), object) === false)) {
+              break;
+            }
+          }
+        }
+        if (!done && forShadowed) {
+          // Because IE < 9 can't set the `[[Enumerable]]` attribute of an existing
+          // property and the `constructor` property of a prototype defaults to
+          // non-enumerable, we manually skip the `constructor` property when we
+          // think we are iterating over a `prototype` object.
+          ctor = object.constructor;
+          skipCtor = ctor && ctor.prototype && ctor.prototype.constructor === ctor;
+          for (index = 0; index < 7; index++) {
+            key = shadowed[index];
+            if (!(skipCtor && key == 'constructor') &&
+                hasKey(object, key) &&
+                callback(object[key], key, object) === false) {
+              break;
+            }
           }
         }
       }
@@ -815,7 +856,7 @@
       result = !isArguments(value);
     }
     if (result) {
-      // IE < 9 presents nodes like Object objects:
+      // IE < 9 presents nodes like `Object` objects:
       // IE < 8 are missing the node's constructor property
       // IE 8 node constructors are typeof "object"
       ctor = value.constructor;
@@ -966,18 +1007,24 @@
    * @returns {Mixed} The cloned value.
    */
   function deepClone(value) {
-    var array,
+    var accessor,
+        circular,
         classOf,
         clone,
         ctor,
         data,
+        descriptor,
         key,
+        keys,
+        length,
         markerKey,
-        object,
         parent,
         result,
+        source,
+        subIndex,
         index = -1,
         marked = [],
+        unmarked = [],
         queue = { '0': { 'value': value }, 'length': 1 };
 
     /**
@@ -999,86 +1046,118 @@
       return result;
     }
 
+    /**
+     * The callback used by `forProps()`.
+     */
+    function propCallback(subValue, subKey) {
+      // exit early to avoid cloning the marker
+      if (subValue && subValue.constructor == Marker) {
+        return;
+      }
+      // add objects to the queue
+      if (subValue === Object(subValue)) {
+        queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
+      }
+      // assign non `Object` objects
+      else {
+        clone[subKey] = subValue;
+      }
+    }
+
     while ((data = queue[++index])) {
       key = data.key;
       parent = data.parent;
-      clone = value = data.source ? data.source[key] : data.value;
+      source = data.source;
+      clone = value = source ? source[key] : data.value;
+      accessor = circular = descriptor = false;
       delete queue[index - 1];
 
+      // create a basic clone to filter out functions, DOM elements, and
+      // other non `Object` objects
       if (value === Object(value)) {
-        markerKey = getMarkerKey(value);
-        if (value[markerKey]) {
-          // use an existing clone (circular reference)
-          clone = value[markerKey].raw;
+        ctor = value.constructor;
+        classOf = toString.call(value);
+        switch (classOf) {
+          case '[object Array]':
+            clone = new ctor(value.length);
+            break;
+
+          case '[object Boolean]':
+            clone = new ctor(value == true);
+            break;
+
+          case '[object Date]':
+            clone = new ctor(+value);
+            break;
+
+          case '[object Object]':
+            isObject(value) && (clone = new ctor);
+            break;
+
+          case '[object Number]':
+          case '[object String]':
+            clone = new ctor(value);
+            break;
+
+          case '[object RegExp]':
+            clone = ctor(value.source,
+              (value.global     ? 'g' : '') +
+              (value.ignoreCase ? 'i' : '') +
+              (value.multiline  ? 'm' : ''));
         }
-        else {
-          // else create new clone
-          ctor = value.constructor;
-          classOf = toString.call(value);
-          array = object = false;
-          switch (classOf) {
-            case '[object Array]':
-              array = clone = new ctor(value.length);
-              break;
-
-            case '[object Boolean]':
-              clone = new ctor(value == true);
-              break;
-
-            case '[object Date]':
-              clone = new ctor(+value);
-              break;
-
-            case '[object Object]':
-              object = isObject(value) && (clone = new ctor);
-              break;
-
-            case '[object Number]':
-            case '[object String]':
-              clone = new ctor(value);
-              break;
-
-            case '[object RegExp]':
-              clone = ctor(value.source,
-                (value.global     ? 'g' : '') +
-                (value.ignoreCase ? 'i' : '') +
-                (value.multiline  ? 'm' : ''));
-          }
-          // mark object to allow detecting circular references and tie it to its clone
-          if (clone != value) {
-            value[markerKey] = new Marker(clone);
-            marked.push({ 'key': markerKey, 'object': value });
-          }
-          // iterate over object properties
-          (array || object) && (array ? forEach : forOwn)(value, function(subValue, subKey) {
-            // exit early to avoid cloning the marker
-            if (subValue && subValue.constructor == Marker) {
-              return;
+        // continue clone if `value` doesn't have an accessor descriptor
+        // http://es5.github.com/#x8.10.1
+        if (clone != value &&
+            !(descriptor = source && has.descriptors && getDescriptor(source, key),
+              accessor = descriptor && (descriptor.get || descriptor.set))) {
+          // use an existing clone (circular reference)
+          if (isExtensible(value)) {
+            markerKey = getMarkerKey(value);
+            if (value[markerKey]) {
+              circular = clone = value[markerKey].raw;
             }
-            if (subValue === Object(subValue)) {
-              markerKey = getMarkerKey(subValue);
-              if (subValue[markerKey]) {
-                // use an existing clone (circular reference)
-                clone[subKey] = subValue[markerKey].raw;
-              } else {
-                // else add to the "call" queue
-                queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
+          } else {
+            // for frozen/sealed objects
+            for (subIndex = 0, length = unmarked.length; subIndex < length; subIndex++) {
+              data = unmarked[subIndex];
+              if (data.object === value) {
+                circular = clone = data.clone;
+                break;
               }
-            } else {
-              clone[subKey] = subValue;
             }
-          });
+          }
+          if (!circular) {
+            // mark object to allow quickly detecting circular references and tie it to its clone
+            if (isExtensible(value)) {
+              value[markerKey] = new Marker(clone);
+              marked.push({ 'key': markerKey, 'object': value });
+            } else {
+              // for frozen/sealed objects
+              unmarked.push({ 'clone': clone, 'object': value });
+            }
+            // iterate over object properties
+            forProps(value, propCallback, { 'which': 'all' });
+          }
         }
       }
       if (parent) {
-        parent[key] = clone;
+        // for custom property descriptors
+        if (accessor || (descriptor &&
+            !(descriptor.configurable && descriptor.enumerable && descriptor.writable))) {
+          descriptor.value && (descriptor.value = clone);
+          setDescriptor(parent, key, descriptor);
+        }
+        // for default property descriptors
+        else {
+          parent[key] = clone;
+        }
       } else {
         result = clone;
       }
     }
     // remove markers
-    index = -1;
-    while ((data = marked[++index])) {
+    for (index = 0, length = marked.length; index < length; index++) {
+      data = marked[index];
       delete data.object[data.key];
     }
     return result;
@@ -1235,7 +1314,7 @@
    * @returns {Object} Returns the object iterated over.
    */
   function forOwn(object, callback, thisArg) {
-    return forProps(object, callback, { 'bind': thisArg, 'iterate': 'own' });
+    return forProps(object, callback, { 'bind': thisArg, 'which': 'own' });
   }
 
   /**

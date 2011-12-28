@@ -160,7 +160,8 @@
 
     o = new String('x');
     result = Benchmark.deepClone(o);
-    ok(result == 'x' && typeof result == 'object' && toString.call(result) == '[object String]', 'clones string object');
+    ok(result == 'x' && typeof result == 'object' &&
+      toString.call(result) == '[object String]', 'clones string object');
 
     o = 3;
     result = Benchmark.deepClone(o);
@@ -168,7 +169,8 @@
 
     o = new Number(3);
     result = Benchmark.deepClone(o);
-    ok(result == 3 && typeof result == 'object' && toString.call(result) == '[object Number]', 'clones number object');
+    ok(result == 3 && typeof result == 'object' &&
+      toString.call(result) == '[object Number]', 'clones number object');
 
     o = false;
     result = Benchmark.deepClone(o);
@@ -176,7 +178,8 @@
 
     o = new Boolean(false);
     result = Benchmark.deepClone(o);
-    ok(result == false && typeof result == 'object' && toString.call(result) == '[object Boolean]', 'clones boolean object');
+    ok(result == false && typeof result == 'object' &&
+      toString.call(result) == '[object Boolean]', 'clones boolean object');
 
     o = null;
     result = Benchmark.deepClone(o);
@@ -198,46 +201,163 @@
     ok(Benchmark.deepClone(o) === o, 'Klass instance is not cloned');
     ok(Benchmark.deepClone(arguments) === arguments, 'arguments object is not cloned');
     ok(Benchmark.deepClone(Klass) === Klass, 'function is not cloned');
+
+    if (window.document) {
+      ok(Benchmark.deepClone(document.body) === document.body, 'DOM element is not cloned');
+    } else {
+      ok(true, 'test skipped');
+    }
   });
 
   test('edge', function() {
-    var sub,
-        i = -1,
-        count = 0,
-        recurse = function() { count++; recurse(); },
-        o = { 'constructor': 1, 'hasOwnProperty': 2, 'isPrototypeOf': 3, 'propertyIsEnumerable': 4, 'toLocaleString': 5, 'toString': 6, 'valueOf': 7 },
-        result = Benchmark.deepClone(o);
+    var result,
+        getDescriptor = Object.getOwnPropertyDescriptor,
+        setDescriptor = Object.defineProperty,
+        toString = {}.toString;
 
-    deepEqual(result, o, 'clones problem JScript props');
-
-    o = {
-      'foo': { 'b': { 'foo': { 'c': { } } } },
-      'bar': { }
+    var has = {
+      'descriptors' : !!(function() {
+        try {
+          var o = {};
+          return (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
+        } catch(e) { }
+      }())
     };
-    o.foo.b.foo.c.foo = o;
-    o.bar.b = o.foo.b;
+
+    var o = {
+      'constructor': 1,
+      'hasOwnProperty': 2,
+      'isPrototypeOf': 3,
+      'propertyIsEnumerable': 4,
+      'toLocaleString': 5,
+      'toString': 6,
+      'valueOf': 7
+    };
+
+    function createCircularObject() {
+      var result = {
+        'foo': { 'b': { 'foo': { 'c': { } } } },
+        'bar': { }
+      };
+      result.foo.b.foo.c.foo = result;
+      result.bar.b = result.foo.b;
+      return result;
+    }
 
     result = Benchmark.deepClone(o);
-    ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo && result !== o, 'clones objects with circular references');
+    deepEqual(result, o, 'clones problem JScript props');
 
+    o = new String('x');
+    o.x = 1;
+    result = Benchmark.deepClone(o);
+    ok(result == 'x' && typeof result == 'object' && result.x === 1 &&
+      toString.call(result) == '[object String]', 'clones string object with custom property');
+
+    o = createCircularObject();
+    result = Benchmark.deepClone(o);
+    ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
+      result !== o, 'clones objects with circular references');
+
+    if (Object.preventExtensions) {
+      o = Object.preventExtensions(createCircularObject());
+      Object.preventExtensions(o.bar.b);
+      result = Benchmark.deepClone(o);
+      ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
+        result !== o, 'clones non-extensible objects with circular references');
+    } else {
+      ok(true, 'test skipped');
+    }
+
+    if (Object.seal) {
+      o = Object.seal(createCircularObject());
+      Object.seal(o.bar.b);
+      result = Benchmark.deepClone(o);
+      ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
+        result !== o, 'clones sealed objects with circular references');
+    } else {
+      ok(true, 'test skipped');
+    }
+
+    if (Object.freeze) {
+      o = Object.freeze(createCircularObject());
+      Object.freeze(o.bar.b);
+      result = Benchmark.deepClone(o);
+      ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
+        result !== o, 'clones frozen objects with circular references');
+    } else {
+      ok(true, 'test skipped');
+    }
+
+    if (has.descriptors) {
+      var accessor;
+      o = setDescriptor({}, 'foo', {
+        'configurable': true,
+        'value': setDescriptor({}, 'b', {
+          'writable': true,
+          'value': setDescriptor({}, 'foo', {
+            'get': function() { return accessor; },
+            'set': function(value) { accessor = value; }
+          })
+        })
+      });
+
+      setDescriptor(o, 'bar', { 'value': {} });
+      o.foo.b.foo = { 'c': o };
+      o.bar.b = o.foo.b;
+
+      result = Benchmark.deepClone(o);
+
+      var descriptor;
+      ok(result !== o &&
+        result.bar.b === result.foo.b &&
+        result !== result.foo.b.foo.c.foo &&
+        (descriptor = getDescriptor(result, 'foo')) &&
+        descriptor.configurable && !(descriptor.enumerable && descriptor.writable) &&
+        (descriptor = getDescriptor(result.foo, 'b')) &&
+        descriptor.writable && !(descriptor.configurable && descriptor.enumerable) &&
+        (descriptor = getDescriptor(result.foo.b, 'foo')) &&
+        descriptor.get && descriptor.set &&
+        (descriptor = getDescriptor(result.foo.b, 'foo')) &&
+        !(descriptor.configurable && descriptor.enumerable && descriptor.writable) &&
+        (descriptor = getDescriptor(result, 'bar')) &&
+        !(descriptor.configurable && descriptor.enumerable && descriptor.writable),
+        'clones objects with custom descriptors and circular references');
+    }
+    else {
+      ok(true, 'test skipped');
+    }
+  });
+
+  asyncTest('call stack overflow', function() {
+    var result,
+        o = {},
+        count = 0,
+        recurse = function() { count++; recurse(); },
+        setTimeout = window.setTimeout;
+
+    function fn() {
+      try {
+        for (var i = 0, sub = Benchmark.deepClone(o); sub = sub[i]; i++) { }
+        result = --i == count;
+      } catch(e) { }
+      ok(result, 'avoids call stack overflow (stack limit is ' + (count - 1) + ')');
+      QUnit.start();
+    }
+
+    if (setTimeout) {
+      setTimeout(fn, 1);
+    }
     try {
       recurse();
     } catch(e) { }
 
     count++;
-    o = sub = {};
-    while (++i <= count) {
+    for (var i = 0, sub = o; i <= count; i++) {
       sub = sub[i] = {};
     }
-
-    try {
-      i = -1;
-      sub = Benchmark.deepClone(o);
-      while ((sub = sub[++i])) { }
-      result = --i == count;
-    } catch(e) { }
-
-    ok(result, 'avoids call stack overflow (stack limit is ' + (count - 1) + ')');
+    if (!setTimeout) {
+      fn();
+    }
   });
 
   /*--------------------------------------------------------------------------*/
