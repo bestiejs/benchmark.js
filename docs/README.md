@@ -314,7 +314,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.deepClone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1009" title="View in source">`Benchmark.deepClone(value)`</a>
+### <a id="Benchmark.deepClone" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1010" title="View in source">`Benchmark.deepClone(value)`</a>
 A deep clone utility.
 [&#9650;][1]
 
@@ -1332,7 +1332,7 @@ Deferred constructor.
 
 <!-- div -->
 
-### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L982" title="View in source">`Benchmark.Deferred#resolve`</a>
+### <a id="Benchmark.Deferred:resolve" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L983" title="View in source">`Benchmark.Deferred#resolve`</a>
 *(Unknown)*: Handles cycling/completing the deferred benchmark.
 [&#9650;][1]
 

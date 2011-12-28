@@ -81,7 +81,7 @@
 
     /** Detect if strings support accessing characters by index */
     'charByIndex':
-      // IE8 supports accessing characters by index on string literals but not string objects
+      // IE8 supports indexes on string literals but not string objects
       Object('x')[0] == 'x',
 
     /** Detect if functions support decompilation */
@@ -651,6 +651,7 @@
 
       var ctor,
           key,
+          keys,
           skipCtor,
           done = !object,
           result = [object, object = Object(object)][0],
@@ -1015,7 +1016,6 @@
         data,
         descriptor,
         key,
-        keys,
         length,
         markerKey,
         parent,
@@ -1058,7 +1058,7 @@
       if (subValue === Object(subValue)) {
         queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
       }
-      // assign non `Object` objects
+      // assign non-objects
       else {
         clone[subKey] = subValue;
       }
