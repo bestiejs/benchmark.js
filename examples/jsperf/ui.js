@@ -51,7 +51,7 @@
     'localStorage': !!function() {
       try {
         return !localStorage.getItem(+new Date);
-      } catch(e) {}
+      } catch(e) { }
     }(),
 
     // detects Opera Mini
@@ -246,9 +246,12 @@
           });
         }
         // show warning when Firebug is enabled (avoids showing for Firebug Lite)
-        if (typeof window.console != 'undefined' && typeof console.firebug != 'undefined') {
-          addClass('firebug', classNames.show);
-        }
+        try {
+          // Firebug 1.9 no longer has `console.firebug`
+          if (console.firebug || /firebug/i.test(console.table())) {
+            addClass('firebug', classNames.show);
+          }
+        } catch(e) { }
       }
       // evaluate hash values
       // (delay in an attempt to ensure this is executed after all other window load handlers)
