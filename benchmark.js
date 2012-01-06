@@ -635,7 +635,7 @@
       // must use a non-native constructor to catch the Safari 2 issue
       function Klass() { this.valueOf = 0; };
       Klass.prototype.valueOf = 0;
-      // check various for..in bugs
+      // check various for-in bugs
       for (key in new Klass) {
         enumFlag += key == 'valueOf' ? 1 : 0;
       }
@@ -784,7 +784,8 @@
     if (isStringable(fn)) {
       result = String(fn);
     } else if (has.decompilation) {
-      result = (/^[^{]+{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
+      // escape the `{` for Firefox 1
+      result = (/^[^{]+\{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
     }
     return (result || '').replace(/^\s+|\s+$/g, '');
   }
@@ -2542,15 +2543,13 @@
 
   /*--------------------------------------------------------------------------*/
 
+  // Firefox 1 erroneously defines variable and argument names of functions on
+  // the function itself as non-configurable properties with `undefined` values.
+  // The buggyness continues as the `Benchmark` constructor has an argument
+  // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
+  // making it non-writable in the process, unless it is the first property
+  // assigned by `extend()`.
   extend(Benchmark, {
-
-    /**
-     * The version number.
-     * @static
-     * @memberOf Benchmark
-     * @type String
-     */
-    'version': '0.3.0',
 
     /**
      * The default options copied by benchmark instances.
@@ -2700,6 +2699,14 @@
         return this.description || '';
       }
     },
+
+    /**
+     * The version number.
+     * @static
+     * @memberOf Benchmark
+     * @type String
+     */
+    'version': '0.3.0',
 
     // clone objects
     'deepClone': deepClone,
