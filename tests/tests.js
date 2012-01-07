@@ -28,7 +28,7 @@
 
   test('Benchmark.platform', function() {
     if (window.document) {
-      equal(navigator.userAgent, String(Benchmark.platform), 'default value');
+      equal(String(Benchmark.platform), navigator.userAgent, 'default value');
     } else {
       ok(true, 'test skipped');
     }
@@ -36,7 +36,7 @@
 
   test('require("benchmark")', function() {
     if (window.document && window.require) {
-      equal((Benchmark2 || {}).version, Benchmark2.version, 'require("benchmark")');
+      equal((Benchmark2 || {}).version, Benchmark.version, 'require("benchmark")');
     } else {
       ok(true, 'test skipped');
     }

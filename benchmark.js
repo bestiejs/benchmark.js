@@ -791,20 +791,6 @@
   }
 
   /**
-   * Modify a string by replacing named tokens with matching object property values.
-   * @private
-   * @param {String} string The string to modify.
-   * @param {Object} object The template object.
-   * @returns {String} The modified string.
-   */
-  function interpolate(string, object) {
-    forOwn(object, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
-    });
-    return string;
-  }
-
-  /**
    * Checks if a value is an `arguments` object.
    * @private
    * @param {Mixed} value The value to check.
@@ -1391,6 +1377,21 @@
       }
     }
     return -1;
+  }
+
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   * @static
+   * @memberOf Benchmark
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   */
+  function interpolate(string, object) {
+    forOwn(object, function(value, key) {
+      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+    });
+    return string;
   }
 
   /**
@@ -2548,7 +2549,7 @@
   // The bugginess continues as the `Benchmark` constructor has an argument
   // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
   // making it non-writable in the process, unless it is the first property
-  // assigned by `extend()`.
+  // assigned by for-in loop of `extend()`.
   extend(Benchmark, {
 
     /**
@@ -2735,6 +2736,9 @@
 
     // generic Array#indexOf
     'indexOf': indexOf,
+
+    // template utility
+    'interpolate': interpolate,
 
     // invokes a method on each item in an array
     'invoke': invoke,
