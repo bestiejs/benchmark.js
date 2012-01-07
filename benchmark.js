@@ -2545,7 +2545,7 @@
 
   // Firefox 1 erroneously defines variable and argument names of functions on
   // the function itself as non-configurable properties with `undefined` values.
-  // The buggyness continues as the `Benchmark` constructor has an argument
+  // The bugginess continues as the `Benchmark` constructor has an argument
   // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
   // making it non-writable in the process, unless it is the first property
   // assigned by `extend()`.
