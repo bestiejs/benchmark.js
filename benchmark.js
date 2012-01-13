@@ -1006,7 +1006,6 @@
         circular,
         clone,
         ctor,
-        data,
         descriptor,
         extensible,
         key,
@@ -1016,10 +1015,11 @@
         result,
         source,
         subIndex,
-        index = -1,
+        data = { 'value': value },
+        index = 0,
         marked = [],
         unmarked = [],
-        queue = { '0': { 'value': value }, 'length': 1 };
+        queue = [];
 
     /**
      * An easily detectable decorator for cloned values.
@@ -1050,7 +1050,7 @@
       }
       // add objects to the queue
       if (subValue === Object(subValue)) {
-        queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
+        queue[queue.length] = { 'key': subKey, 'parent': clone, 'source': value };
       }
       // assign non-objects
       else {
@@ -1058,13 +1058,12 @@
       }
     }
 
-    while ((data = queue[++index])) {
+    do {
       key = data.key;
       parent = data.parent;
       source = data.source;
       clone = value = source ? source[key] : data.value;
       accessor = circular = descriptor = false;
-      delete queue[index - 1];
 
       // create a basic clone to filter out functions, DOM elements, and
       // other non `Object` objects
@@ -1147,7 +1146,8 @@
       } else {
         result = clone;
       }
-    }
+    } while ((data = queue[index++]));
+
     // remove markers
     for (index = 0, length = marked.length; index < length; index++) {
       data = marked[index];
