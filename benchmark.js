@@ -2060,7 +2060,7 @@
             'fnArg': fnArg,
             'teardown': getSource(host.teardown, preprocess('m$.teardown()'))
           },
-          compiled = fn.compiled,
+          compiled = host.compiled,
           count = host.count = bench.count,
           id = host.id,
           isEmpty = !(source.fn || stringable),
