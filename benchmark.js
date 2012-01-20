@@ -979,7 +979,7 @@
         bench = me.benchmark;
 
     if (++me.cycles < bench.count) {
-      (bench._host || bench).compiled.call(me, timer.ns, timer);
+      (bench._host || bench).compiled.call(me, timer);
     } else {
       timer.stop(me);
       call({
@@ -2084,13 +2084,13 @@
 
       if(!compiled) {
         // compile in setup/teardown functions and the test loop
-        compiled = host.compiled = createFunction(preprocess('n$,t$'), interpolate(
+        compiled = host.compiled = createFunction(preprocess('t$'), interpolate(
           preprocess(deferred
             ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=(m$=d$.benchmark)._host||m$,f$=m$.fn;' +
               'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
               'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}#{fn}\nreturn{}'
-            : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;#{setup}\n#{begin};' +
-              'while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{time:r$,uid:"#{uid}"}'),
+            : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count,n$=t$.ns;#{setup}\n#{begin};' +
+              'while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{elapsed:r$,uid:"#{uid}"}'),
           source
         ));
 
@@ -2104,7 +2104,7 @@
             // pretest to determine if compiled code is exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             host.count = 1;
-            compiled = (compiled.call(host, ns) || {}).uid == uid && compiled;
+            compiled = (compiled.call(host, timer) || {}).uid == uid && compiled;
             host.count = count;
           }
         } catch(e) {
@@ -2114,18 +2114,18 @@
         }
         // fallback when a test exits early or errors during pretest
         if (decompilable && !compiled && !deferred && !isEmpty) {
-          compiled = createFunction(preprocess('n$'), interpolate(
+          compiled = createFunction(preprocess('t$'), interpolate(
             preprocess((bench.error && !stringable
-              ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count;'
-              : 'function f$(){#{fn}\n}var r$,s$,i$=this.count;'
-            ) + '#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{time:r$}'),
+              ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count'
+              : 'function f$(){#{fn}\n}var r$,s$,i$=this.count'
+            ) + ',n$=t$.ns;#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{elapsed:r$}'),
             source
           ));
 
           try {
             // pretest one more time to check for errors
             host.count = 1;
-            compiled.call(host, ns);
+            compiled.call(host, timer);
             host.compiled = compiled;
             host.count = count;
             delete bench.error;
@@ -2141,7 +2141,7 @@
       }
       // if no errors run the full test loop
       if (!bench.error) {
-        result = compiled.call(deferred || host, ns, timer).time;
+        result = compiled.call(deferred || host, timer).elapsed;
       }
       return result;
     };
@@ -2261,11 +2261,11 @@
     }
 
     // define `timer` methods
-    timer.start = createFunction(preprocess('d$'),
-      preprocess('var n$=this.ns,#{begin};d$.timeStamp=s$'));
+    timer.start = createFunction(preprocess('o$'),
+      preprocess('var n$=this.ns,#{begin};o$.timeStamp=s$'));
 
-    timer.stop = createFunction(preprocess('d$'),
-      preprocess('var n$=this.ns,s$=d$.timeStamp,#{end};d$.elapsed=r$'));
+    timer.stop = createFunction(preprocess('o$'),
+      preprocess('var n$=this.ns,s$=o$.timeStamp,#{end};o$.elapsed=r$'));
 
     // resolve time span required to achieve a percent uncertainty of at most 1%
     // http://spiff.rit.edu/classes/phys273/uncert/uncert.html
@@ -2485,7 +2485,7 @@
     if (bench.running) {
       bench.count = count;
       if (deferred) {
-        (bench._host || bench).compiled.call(deferred, timer.ns, timer);
+        (bench._host || bench).compiled.call(deferred, timer);
       } else {
         call({
           'async': async,
