@@ -552,17 +552,18 @@
     // highlight result cells
     each(benches, function(bench) {
       var percent,
-          text = 'fastest',
           cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
-          span = cell.getElementsByTagName('span')[0];
+          hz = bench.hz,
+          span = cell.getElementsByTagName('span')[0],
+          text = 'fastest';
 
       if (indexOf(fastest, bench) > -1) {
         // mark fastest
         addClass(cell, text);
       }
       else {
-        percent = Math.round((1 - bench.hz / fastest[0].hz) * 100);
-        text = percent + '% slower';
+        percent = Math.round((1 - hz / fastest[0].hz) * 100);
+        text = isFinite(hz) ? percent + '% slower' : '';
 
         // mark slowest
         if (indexOf(slowest, bench) > -1) {

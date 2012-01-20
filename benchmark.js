@@ -1250,8 +1250,8 @@
     var result;
 
     if (callback == 'successful') {
-      // callback to exclude errored or unrun benchmarks
-      callback = function(bench) { return bench.cycles; };
+      // callback to exclude those that are errored, unrun, or have hz of Infinity
+      callback = function(bench) { return bench.cycles && isFinite(bench.hz); };
     }
     else if (callback == 'fastest' || callback == 'slowest') {
       // get successful, sort by period + margin of error, and filter fastest/slowest

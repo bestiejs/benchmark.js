@@ -49,6 +49,7 @@
   forOwn = Benchmark.forOwn,
   formatNumber = Benchmark.formatNumber,
   hasKey = Benchmark.hasKey,
+  indexOf = Benchmark.indexOf,
   invoke = Benchmark.invoke,
   map = Benchmark.map,
   reduce = Benchmark.reduce;
@@ -327,28 +328,31 @@
    * @returns {Object|Null} Browserscope results object or null.
    */
   function createSnapshot() {
-    // clone benches, ignore those that are unrun, errored, or have hz of Infinity
-    var benches = invoke(filter(ui.benchmarks, function(bench) {
-      return bench.cycles && isFinite(bench.hz);
-    }), 'clone');
+    // clone benches, exclude those that are errored, unrun, or have hz of Infinity
+    var benches = invoke(filter(ui.benchmarks, 'successful'), 'clone'),
+        fastest = filter(benches, 'fastest'),
+        slowest = filter(benches, 'slowest'),
+        neither = filter(benches, function(bench) {
+          return indexOf(fastest, bench) < 0 && indexOf(slowest, bench) < 0;
+        }).sort(function(a, b) {
+          // sort slowest to fastest
+          // (a larger `mean` indicates a slower benchmark)
+          a = a.stats; b = b.stats;
+          return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
+        });
 
-    // normalize results
-    var prev;
-    each(benches.sort(function(a, b) {
-      // sort slowest to fastest
-      // (a larger `mean` indicates a slower benchmark)
-      a = a.stats; b = b.stats;
-      return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
-    }), function(bench) {
-      // if the previous slower benchmark is indistinguishable from
-      // the current then use the previous benchmark's values
-      if (prev && !prev.compare(bench)) {
-        bench.count = prev.count;
-        bench.cycles = prev.cycles;
-        bench.hz = prev.hz;
-        bench.stats = extend({}, prev.stats);
-      }
-      prev = bench;
+    // normalize results on slowest in each category
+    each(benches, function(bench) {
+      var slowBench = indexOf(fastest, bench) > -1
+        ? fastest[fastest.length - 1]
+        : indexOf(slowest, bench) > -1
+          ? slowest[0]
+          : neither[0];
+
+      bench.count = slowBench.count;
+      bench.cycles = slowBench.cycles;
+      bench.hz = slowBench.hz;
+      bench.stats = extend({}, slowBench.stats);
     });
 
     // append benchmark ids for duplicate names or names with no alphanumeric/space characters
@@ -570,7 +574,7 @@
 
     // exit early if there is no container element or the response is cached
     // and retry if the visualization library hasn't loaded yet
-    if (!cont || !visualization || response) {
+    if (!cont || !visualization || !visualization.Query || response) {
       cont && onComplete(response);
     }
     else if (!ui.running) {
