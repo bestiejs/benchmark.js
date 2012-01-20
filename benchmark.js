@@ -979,6 +979,7 @@
         bench = me.benchmark;
 
     if (++me.cycles < bench.count) {
+      // continue the test loop
       (bench._host || bench).compiled.call(me, timer);
     } else {
       timer.stop(me);
@@ -2483,6 +2484,7 @@
     }
     // figure out what to do next
     if (bench.running) {
+      // start a new cycle
       bench.count = count;
       if (deferred) {
         (bench._host || bench).compiled.call(deferred, timer);
