@@ -329,7 +329,8 @@
    */
   function createSnapshot() {
     // clone benches, exclude those that are errored, unrun, or have hz of Infinity
-    var benches = invoke(filter(ui.benchmarks, 'successful'), 'clone'),
+    var prev,
+        benches = invoke(filter(ui.benchmarks, 'successful'), 'clone'),
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest'),
         neither = filter(benches, function(bench) {
@@ -341,18 +342,26 @@
           return (a.mean + a.moe > b.mean + b.moe) ? -1 : 1;
         });
 
-    // normalize results on slowest in each category
-    each(benches, function(bench) {
-      var slowBench = indexOf(fastest, bench) > -1
-        ? fastest[fastest.length - 1]
-        : indexOf(slowest, bench) > -1
-          ? slowest[0]
-          : neither[0];
+    function merge(destination, source) {
+      destination.count = source.count;
+      destination.cycles = source.cycles;
+      destination.hz = source.hz;
+      destination.stats = extend({}, source.stats);
+    }
 
-      bench.count = slowBench.count;
-      bench.cycles = slowBench.cycles;
-      bench.hz = slowBench.hz;
-      bench.stats = extend({}, slowBench.stats);
+    // normalize results on slowest in each category
+    each(fastest.concat(slowest), function(bench) {
+      merge(bench, indexOf(fastest, bench) > -1 ? fastest[fastest.length - 1] : slowest[0]);
+    });
+
+    // normalize the leftover benchmarks
+    each(neither, function(bench) {
+      // if the previous slower benchmark is indistinguishable from
+      // the current then use the previous benchmark's values
+      if (prev && prev.compare(bench) == 0) {
+        merge(bench, prev);
+      }
+      prev = bench;
     });
 
     // append benchmark ids for duplicate names or names with no alphanumeric/space characters
