@@ -79,20 +79,23 @@
     /** Detect if `arguments` objects have the correct internal [[Class]] value */
     'argumentsClass': isClassOf(arguments, 'Arguments'),
 
+    /** Detect if in a browser environment */
+    'browser': isHostType(window, 'document') && isHostType(window, 'navigator'),
+
     /** Detect if strings support accessing characters by index */
     'charByIndex':
-      // IE8 supports indexes on string literals but not string objects
-      Object('x')[0] == 'x',
+      // IE 8 supports indexes on string literals but not string objects
+     ('x'[0] + Object('x')[0]) == 'xx',
 
     /** Detect if strings have indexes as own properties */
     'charByOwnIndex':
-      // Narwhal, Rhino, RingoJS, and Opera < 10.52 support indexes on strings
-      // but don't detect them as own properties
-      hasKey('x', '0'),
+      // Narwhal, Rhino, RingoJS, IE 8*, and Opera < 10.52 support indexes on
+      // strings but don't detect them as own properties
+      'x'[0] == 'x' && hasKey('x', '0'),
 
     /** Detect if functions support decompilation */
     'decompilation': !!(function() {
-      try{
+      try {
         // Safari 2.x removes commas in object literals
         // from Function#toString results
         // http://webk.it/11609
@@ -602,7 +605,7 @@
    * @returns {Function} The new function.
    */
   function createFunction() {
-    // lazy defined to fork based on supported features
+    // lazy define
     createFunction = function(args, body) {
       var anchor = freeDefine ? define.amd : Benchmark,
           prop = uid + 'createFunction';
@@ -612,7 +615,7 @@
     };
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
-    createFunction = (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
+    createFunction = has.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
     return createFunction.apply(null, arguments);
   }
 
@@ -707,8 +710,8 @@
         // in IE < 9 strings don't support accessing characters by index
         if (!done && (
             forArgs && isArguments(object) ||
-            (noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String'))) {
-          noCharByIndex && (iteratee = object.split(''));
+            ((noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String') &&
+              (iteratee = noCharByIndex ? object.split('') : object)))) {
           while (++index < length) {
             if ((done =
                 callback(iteratee[index], String(index), object) === false)) {
@@ -922,27 +925,27 @@
    * @param {String} code The code to run.
    */
   function runScript(code) {
-    var parent,
-        script,
-        sibling,
-        anchor = freeDefine ? define.amd : Benchmark,
+    var anchor = freeDefine ? define.amd : Benchmark,
+        script = document.createElement('script'),
+        sibling = document.getElementsByTagName('script')[0],
+        parent = sibling.parentNode,
         prop = uid + 'runScript',
         prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
 
-    // Non-browser environments, Firefox 2.0.0.2 (executes asynchronously),
-    // and IE < 9 will error here and that's OK.
-    // Script injection is only used to avoid the previously commented JaegerMonkey bug.
-    // We remove the inserted script *before* running the code to avoid differences
-    // in the expected script element count/order of the document.
+    // Firefox 2.0.0.2 cannot use script injection as intended because it executes
+    // asynchronously, but that's OK because script injection is only used to avoid
+    // the previously commented JaegerMonkey bug.
     try {
-      sibling = document.getElementsByTagName('script')[0];
-      parent = sibling.parentNode;
-      script = document.createElement('script');
-      anchor[prop] = function() { parent.removeChild(script); };
+      // remove the inserted script *before* running the code to avoid differences
+      // in the expected script element count/order of the document.
       script.appendChild(document.createTextNode(prefix + code));
-      parent.insertBefore(script, sibling);
-    } catch(e) { }
-
+      anchor[prop] = function() { parent.removeChild(script); };
+    } catch(e) {
+      parent = parent.cloneNode(false);
+      sibling = null;
+      script.text = code;
+    }
+    parent.insertBefore(script, sibling);
     delete anchor[prop];
   }
 
@@ -1260,7 +1263,7 @@
         return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback == 'fastest' ? 1 : -1);
       });
       result = filter(result, function(bench) {
-        return !result[0].compare(bench);
+        return result[0].compare(bench) == 0;
       });
     }
     return result || reduce(array, function(result, value, index) {
@@ -2047,7 +2050,7 @@
         template = { 'begin': 's$=new n$', 'end': 'r$=(new n$-s$)/1e3', 'uid': uid },
         timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }];
 
-    // lazy defined for hi-res timers
+    // lazy define for hi-res timers
     clock = function(bench) {
       var deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
           host = bench._host || bench,
@@ -2500,7 +2503,9 @@
     } else {
       // fix TraceMonkey bug associated with clock fallbacks
       // http://bugzil.la/509069
-      runScript('try{' + uid + '=1;delete ' + uid + '}catch(e){}');
+      if (has.browser) {
+        runScript(uid + '=1;delete ' + uid);
+      }
       // done
       bench.emit('complete');
     }
