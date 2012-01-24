@@ -772,7 +772,7 @@
   function getMean(sample) {
     return reduce(sample, function(sum, x) {
       return sum + x;
-    }, 0) / sample.length || 0;
+    }) / sample.length || 0;
   }
 
   /**
@@ -2369,7 +2369,7 @@
         variance = reduce(sample, varOf, 0) / (size - 1) || 0;
         // sample standard deviation (estimate of the population standard deviation)
         sd = sqrt(variance);
-        // standard error of the mean (aka the standard deviation of the sampling distribution of the sample mean)
+        // standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean)
         sem = sd / sqrt(size);
         // margin of error
         moe = sem * getCriticalValue(size - 1);
@@ -2386,7 +2386,7 @@
           'variance': variance
         });
 
-        // We exit early when the elapsed time exceeds the maximum time allowed
+        // Exit early when the elapsed time exceeds the maximum time allowed
         // per benchmark. To prevent massive wait times, we do this even if the
         // minimum sample size has not been reached. We don't count cycle delays
         // toward the max time because delays may be increased by browsers that
