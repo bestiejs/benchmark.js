@@ -1022,8 +1022,8 @@
         data = { 'value': value },
         index = 0,
         marked = [],
-        unmarked = [],
-        queue = [];
+        queue = { 'length': 0 },
+        unmarked = [];
 
     /**
      * An easily detectable decorator for cloned values.
@@ -1054,7 +1054,7 @@
       }
       // add objects to the queue
       if (subValue === Object(subValue)) {
-        queue[queue.length] = { 'key': subKey, 'parent': clone, 'source': value };
+        queue[queue.length++] = { 'key': subKey, 'parent': clone, 'source': value };
       }
       // assign non-objects
       else {
@@ -1072,38 +1072,43 @@
       // create a basic clone to filter out functions, DOM elements, and
       // other non `Object` objects
       if (value === Object(value)) {
-        ctor = value.constructor;
-        switch (toString.call(value)) {
-          case '[object Array]':
-            clone = new ctor(value.length);
-            break;
+        // use custom deep clone function if available
+        if (isClassOf(value.deepClone, 'Function')) {
+          clone = value.deepClone();
+        } else {
+          ctor = value.constructor;
+          switch (toString.call(value)) {
+            case '[object Array]':
+              clone = new ctor(value.length);
+              break;
 
-          case '[object Boolean]':
-            clone = new ctor(value == true);
-            break;
+            case '[object Boolean]':
+              clone = new ctor(value == true);
+              break;
 
-          case '[object Date]':
-            clone = new ctor(+value);
-            break;
+            case '[object Date]':
+              clone = new ctor(+value);
+              break;
 
-          case '[object Object]':
-            isObject(value) && (clone = new ctor);
-            break;
+            case '[object Object]':
+              isObject(value) && (clone = new ctor);
+              break;
 
-          case '[object Number]':
-          case '[object String]':
-            clone = new ctor(value);
-            break;
+            case '[object Number]':
+            case '[object String]':
+              clone = new ctor(value);
+              break;
 
-          case '[object RegExp]':
-            clone = ctor(value.source,
-              (value.global     ? 'g' : '') +
-              (value.ignoreCase ? 'i' : '') +
-              (value.multiline  ? 'm' : ''));
+            case '[object RegExp]':
+              clone = ctor(value.source,
+                (value.global     ? 'g' : '') +
+                (value.ignoreCase ? 'i' : '') +
+                (value.multiline  ? 'm' : ''));
+          }
         }
         // continue clone if `value` doesn't have an accessor descriptor
         // http://es5.github.com/#x8.10.1
-        if (clone != value &&
+        if (clone && clone != value &&
             !(descriptor = source && has.descriptors && getDescriptor(source, key),
               accessor = descriptor && (descriptor.get || descriptor.set))) {
           // use an existing clone (circular reference)

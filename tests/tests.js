@@ -202,6 +202,13 @@
     ok(Benchmark.deepClone(arguments) === arguments, 'arguments object is not cloned');
     ok(Benchmark.deepClone(Klass) === Klass, 'function is not cloned');
 
+    Klass.prototype.deepClone = function() {
+      return new Klass;
+    };
+
+    result = Benchmark.deepClone(o);
+    ok(result != o && result instanceof Klass, 'clones using Klass#deepClone');
+
     if (window.document) {
       ok(Benchmark.deepClone(document.body) === document.body, 'DOM element is not cloned');
     } else {
