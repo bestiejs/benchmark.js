@@ -1,13 +1,14 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
+		<meta charset="utf-8">
 		<title>Benchmark.js Test Suite</title>
 		<link rel="stylesheet" href="../vendor/qunit/qunit/qunit.css">
 		<style>
-		applet {
-			position: absolute;
-			left: -9999em;
-		}
+			applet {
+				position: absolute;
+				left: -9999em;
+			}
 		</style>
 	</head>
 	<body>
@@ -17,59 +18,59 @@
 		<h2 id="qunit-userAgent"></h2>
 		<ol id="qunit-tests"></ol>
 		<script>
-		(function() {
-			var hasOwnProperty = function hasOwnProperty(key) {
-				var parent = (this.constructor || Object).prototype;
-				return key in this && !(key in parent && this[key] === parent[key]);
-			};
-			if (typeof {}.hasOwnProperty != 'function') {
-				// redefine for Safari 2, else use the less accurate fallback for others
-				if ({}.__proto__ == Object.prototype) {
-					hasOwnProperty = function hasOwnProperty(key) {
-						var result;
-						this.__proto__ = [this.__proto__, this.__proto__ = null, result = key in this][0];
-						return result;
-					};
+			(function() {
+				var hasOwnProperty = function hasOwnProperty(key) {
+					var parent = (this.constructor || Object).prototype;
+					return key in this && !(key in parent && this[key] === parent[key]);
+				};
+				if (typeof {}.hasOwnProperty != 'function') {
+					// redefine for Safari 2, else use the less accurate fallback for others
+					if ({}.__proto__ == Object.prototype) {
+						hasOwnProperty = function hasOwnProperty(key) {
+							var result;
+							this.__proto__ = [this.__proto__, this.__proto__ = null, result = key in this][0];
+							return result;
+						};
+					}
+					Object.prototype.hasOwnProperty = hasOwnProperty;
 				}
-				Object.prototype.hasOwnProperty = hasOwnProperty;
-			}
-		}());
+			}());
 		</script>
 		<script src="../vendor/qunit/qunit/qunit.js"></script>
 		<script>var Benchmark2, platform;</script>
 		<script src="../benchmark.js"></script>
 		<script src="../vendor/requirejs/require.js"></script>
 		<script>
-		if (/[?&]norequire=true(?:&|$)/.test(location.search)) {
-			require = define = null;
-			document.write('<script src="tests.js"><\/script>');
-			document.write('<script src="../vendor/platform.js/platform.js"><\/script>');
-		}
-		else {
-			require({
-				'baseUrl': '../vendor/requirejs/',
-				'urlArgs': 't=' + (+new Date),
-				'paths': {
-					'benchmark': '../../benchmark',
-					'platform': '../platform.js/platform'
-				}
-			},
-			['benchmark', 'platform'], function(Benchmark, platform) {
-				Benchmark2 = Benchmark;
-				Benchmark2.platform = platform;
-				document.getElementById('qunit-userAgent').innerHTML = platform;
-				require(['tests.js']);
-			});
-		}
-		if (!/[?&]nojava=true(?:&|$)/.test(location.search)) {
-			document.write('<applet code="nano" archive="../nano.jar"></applet>');
-		}
-		window.onload = function() {
-			setTimeout(function() {
-				document.getElementById('qunit-userAgent').innerHTML =
-					platform || (Benchmark2 || 0).platform || Benchmark.platform;
-			}, 15);
-		};
+			if (/[?&]norequire=true(?:&|$)/.test(location.search)) {
+				require = define = null;
+				document.write('<script src="test.js"><\/script>');
+				document.write('<script src="../vendor/platform.js/platform.js"><\/script>');
+			}
+			else {
+				require({
+					'baseUrl': '../vendor/requirejs/',
+					'urlArgs': 't=' + (+new Date),
+					'paths': {
+						'benchmark': '../../benchmark',
+						'platform': '../platform.js/platform'
+					}
+				},
+				['benchmark', 'platform'], function(Benchmark, platform) {
+					Benchmark2 = Benchmark;
+					Benchmark2.platform = platform;
+					document.getElementById('qunit-userAgent').innerHTML = platform;
+					require(['test.js']);
+				});
+			}
+			if (!/[?&]nojava=true(?:&|$)/.test(location.search)) {
+				document.write('<applet code="nano" archive="../nano.jar"></applet>');
+			}
+			window.onload = function() {
+				setTimeout(function() {
+					document.getElementById('qunit-userAgent').innerHTML =
+						platform || (Benchmark2 || 0).platform || Benchmark.platform;
+				}, 15);
+			};
 		</script>
 	</body>
 </html>
