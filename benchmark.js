@@ -7,8 +7,11 @@
  */
 ;(function(window, undefined) {
 
+  /** Used to assign each benchmark an incrimented id */
+  var counter = 0,
+
   /** Detect DOM document object */
-  var document = isHostType(window, 'document') && document,
+  document = isHostType(window, 'document') && document,
 
   /** Detect free variable `define` */
   freeDefine = typeof define == 'function' &&
@@ -20,9 +23,6 @@
 
   /** Detect free variable `require` */
   freeRequire = typeof require == 'function' && require,
-
-  /** Used to assign each benchmark an incrimented id */
-  counter = 0,
 
   /** Used to crawl all properties regardless of enumerability */
   getAllKeys = Object.getOwnPropertyNames,

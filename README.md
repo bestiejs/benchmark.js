@@ -60,7 +60,7 @@ In [Rhino](http://www.mozilla.org/rhino/):
 load('benchmark.js');
 ~~~
 
-In [RequireJS](http://requirejs.org/):
+In an AMD loader like [RequireJS](http://requirejs.org/):
 
 ~~~ js
 require({
