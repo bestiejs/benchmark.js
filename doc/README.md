@@ -348,7 +348,7 @@ An iteration utility for arrays and objects. Callbacks may terminate the loop by
 <!-- div -->
 
 ### <a id="Benchmark.extend" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1237" title="View in source">`Benchmark.extend(destination [, source={}])`</a>
-Copies own/inherited properties of a source object to the destination object.
+Copies enumerable properties from the source object to the destination object.
 [&#9650;][1]
 
 #### Arguments

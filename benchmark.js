@@ -1227,7 +1227,7 @@
   }
 
   /**
-   * Copies own/inherited properties of a source object to the destination object.
+   * Copies enumerable properties from the source object to the destination object.
    * @static
    * @memberOf Benchmark
    * @param {Object} destination The destination object.
