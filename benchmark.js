@@ -7,8 +7,11 @@
  */
 ;(function(window, undefined) {
 
+  /** Detect DOM document object */
+  var document = isHostType(window, 'document') && document,
+
   /** Detect free variable `define` */
-  var freeDefine = typeof define == 'function' &&
+  freeDefine = typeof define == 'function' &&
     typeof define.amd == 'object' && define.amd && define,
 
   /** Detect free variable `exports` */
@@ -41,6 +44,9 @@
 
   /** Used to resolve a value's internal [[Class]] */
   toString = {}.toString,
+
+  /** Used to prevent a `removeChild` memory leak in IE < 9 */
+  trash = document && document.createElement('div'),
 
   /** Used to integrity check compiled tests */
   uid = 'uid' + (+new Date),
@@ -80,7 +86,7 @@
     'argumentsClass': isClassOf(arguments, 'Arguments'),
 
     /** Detect if in a browser environment */
-    'browser': isHostType(window, 'document') && isHostType(window, 'navigator'),
+    'browser': document && isHostType(window, 'navigator'),
 
     /** Detect if strings support accessing characters by index */
     'charByIndex':
@@ -226,7 +232,7 @@
    * var bench = new Benchmark('foo', {
    *
    *   // a flag to indicate the benchmark is deferred
-   *   'deferred': true,
+   *   'defer': true,
    *
    *   // benchmark test function
    *   'fn': function(deferred) {
@@ -620,6 +626,16 @@
   }
 
   /**
+   * Destroys the given element.
+   * @private
+   * @param {Element} element The element to destroy.
+   */
+  function destroyElement(element) {
+    trash.appendChild(element);
+    trash.innerHTML = '';
+  }
+
+  /**
    * Iterates over an object's properties, executing the `callback` for each.
    * Callbacks may terminate the loop by explicitly returning `false`.
    * @private
@@ -939,7 +955,7 @@
       // remove the inserted script *before* running the code to avoid differences
       // in the expected script element count/order of the document.
       script.appendChild(document.createTextNode(prefix + code));
-      anchor[prop] = function() { parent.removeChild(script); };
+      anchor[prop] = function() { destroyElement(script); };
     } catch(e) {
       parent = parent.cloneNode(false);
       sibling = null;
@@ -2213,7 +2229,7 @@
     /*------------------------------------------------------------------------*/
 
     // detect nanosecond support from a Java applet
-    each(window.document && document.applets || [], function(element) {
+    each(document && document.applets || [], function(element) {
       return !(timer.ns = applet = 'nanoTime' in element && element);
     });
 
@@ -2246,7 +2262,7 @@
 
     // remove unused applet
     if (timer.unit != 'ns' && applet) {
-      applet = (applet.parentNode.removeChild(applet), null);
+      applet = destroyElement(applet);
     }
     // error if there are no working timers
     if (timer.res == Infinity) {
@@ -3264,7 +3280,7 @@
       freeExports.Benchmark = Benchmark;
     }
   }
-  // via curl.js or RequireJS
+  // via an AMD loader
   else if (freeDefine) {
     define('benchmark', function() {
       return Benchmark;
