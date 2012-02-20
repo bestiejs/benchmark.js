@@ -7,16 +7,16 @@
 (function(window, document) {
 
   /** Java applet archive path */
-  var archive = '../../nano.jar',
+  var archive = '../../nano.jar';
 
   /** Google Analytics account id */
-  gaId = '',
+  var gaId = '';
 
   /** Benchmark results element id prefix (e.g. `results-1`) */
-  prefix = 'results-',
+  var prefix = 'results-';
 
   /** Object containing various css class names */
-  classNames = {
+  var classNames = {
 
     /** CSS class name used for error styles */
     'error': 'error',
@@ -26,10 +26,10 @@
 
     /** CSS class name used to reset result styles */
     'results': 'results'
-  },
+  };
 
   /** Object containing various text messages */
-  texts = {
+  var texts = {
 
     /** Inner text for the various run button states */
     'run': {
@@ -43,10 +43,10 @@
       'ready': 'Ready to run.',
       'again': 'Done. Ready to run again.'
     }
-  },
+  };
 
   /** Used to flag environments/features */
-  has = {
+  var has = {
     // used for pre-populating form fields
     'localStorage': !!function() {
       try {
@@ -59,37 +59,37 @@
 
     // used to distinguish between a regular test page and an embedded chart
     'runner': !!$('runner')
-  },
+  };
 
   /** Cache of error messages */
-  errors = [],
+  var errors = [];
 
   /** Cache of event handlers */
-  handlers = {},
+  var handlers = {};
 
   /** A flag to indicate that the page has loaded */
-  pageLoaded = false,
+  var pageLoaded = false;
 
   /** The options object for Benchmark.Suite#run */
-  runOptions = { 'async': !has.operaMini, 'queued': true },
+  var runOptions = { 'async': !has.operaMini, 'queued': true };
 
   /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
-  scrollEl = document.body,
+  var scrollEl = document.body;
 
   /** Used to resolve a value's internal [[Class]] */
-  toString = {}.toString,
+  var toString = {}.toString;
 
   /** Namespace */
-  ui = new Benchmark.Suite,
+  var ui = new Benchmark.Suite;
 
   /** API Shortcuts */
-  each = Benchmark.each,
-  filter = Benchmark.filter,
-  forOwn = Benchmark.forOwn,
-  formatNumber = Benchmark.formatNumber,
-  indexOf = Benchmark.indexOf,
-  invoke = Benchmark.invoke,
-  join = Benchmark.join;
+  var each = Benchmark.each,
+      filter = Benchmark.filter,
+      forOwn = Benchmark.forOwn,
+      formatNumber = Benchmark.formatNumber,
+      indexOf = Benchmark.indexOf,
+      invoke = Benchmark.invoke,
+      join = Benchmark.join;
 
   /*--------------------------------------------------------------------------*/
 

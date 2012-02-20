@@ -8,76 +8,76 @@
 ;(function(window, undefined) {
 
   /** Used to assign each benchmark an incrimented id */
-  var counter = 0,
+  var counter = 0;
 
   /** Detect DOM document object */
-  document = isHostType(window, 'document') && document,
+  var document = isHostType(window, 'document') && document;
 
   /** Detect free variable `define` */
-  freeDefine = typeof define == 'function' &&
-    typeof define.amd == 'object' && define.amd && define,
+  var freeDefine = typeof define == 'function' &&
+    typeof define.amd == 'object' && define.amd && define;
 
   /** Detect free variable `exports` */
-  freeExports = typeof exports == 'object' && exports &&
-    (typeof global == 'object' && global && global == global.global && (window = global), exports),
+  var freeExports = typeof exports == 'object' && exports &&
+    (typeof global == 'object' && global && global == global.global && (window = global), exports);
 
   /** Detect free variable `require` */
-  freeRequire = typeof require == 'function' && require,
+  var freeRequire = typeof require == 'function' && require;
 
   /** Used to crawl all properties regardless of enumerability */
-  getAllKeys = Object.getOwnPropertyNames,
+  var getAllKeys = Object.getOwnPropertyNames;
 
   /** Used to get property descriptors */
-  getDescriptor = Object.getOwnPropertyDescriptor,
+  var getDescriptor = Object.getOwnPropertyDescriptor;
 
   /** Used in case an object doesn't have its own method */
-  hasOwnProperty = {}.hasOwnProperty,
+  var hasOwnProperty = {}.hasOwnProperty;
 
   /** Used to check if an object is extensible */
-  isExtensible = Object.isExtensible || function() { return true; },
+  var isExtensible = Object.isExtensible || function() { return true; };
 
   /** Used to check if an own property is enumerable */
-  propertyIsEnumerable = {}.propertyIsEnumerable,
+  var propertyIsEnumerable = {}.propertyIsEnumerable;
 
   /** Used to set property descriptors */
-  setDescriptor = Object.defineProperty,
+  var setDescriptor = Object.defineProperty;
 
   /** Used to resolve a value's internal [[Class]] */
-  toString = {}.toString,
+  var toString = {}.toString;
 
   /** Used to prevent a `removeChild` memory leak in IE < 9 */
-  trash = document && document.createElement('div'),
+  var trash = document && document.createElement('div');
 
   /** Used to integrity check compiled tests */
-  uid = 'uid' + (+new Date),
+  var uid = 'uid' + (+new Date);
 
   /** Used to avoid infinite recursion when methods call each other */
-  calledBy = {},
+  var calledBy = {};
 
   /** Used to avoid hz of Infinity */
-  divisors = {
+  var divisors = {
     '1': 4096,
     '2': 512,
     '3': 64,
     '4': 8,
     '5': 0
-  },
+  };
 
   /**
    * T-Distribution two-tailed critical values for 95% confidence
    * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
    */
-  distribution = {
+  var distribution = {
     '1':  12.706,'2':  4.303, '3':  3.182, '4':  2.776, '5':  2.571, '6':  2.447,
     '7':  2.365, '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
     '13': 2.16,  '14': 2.145, '15': 2.131, '16': 2.12,  '17': 2.11,  '18': 2.101,
     '19': 2.093, '20': 2.086, '21': 2.08,  '22': 2.074, '23': 2.069, '24': 2.064,
     '25': 2.06,  '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
     'infinity': 1.96
-  },
+  };
 
   /** Used to flag environments/features */
-  has = {
+  var has = {
 
     /** Detect Adobe AIR */
     'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
@@ -134,14 +134,14 @@
 
     /** Detect if the Timers API exists */
     'timeout': isHostType(window, 'setTimeout') && isHostType(window, 'clearTimeout')
-  },
+  };
 
   /**
    * Timer utility object used by `clock()` and `Deferred#resolve`.
    * @private
    * @type Object
    */
-  timer = {
+  var timer = {
 
    /**
     * The timer namespace object or constructor.
@@ -166,20 +166,20 @@
     * @param {Object} deferred The deferred instance.
     */
     'stop': null // lazy defined in `clock()`
-  },
+  };
 
   /** Shortcut for inverse results */
-  noArgumentsClass = !has.argumentsClass,
-  noCharByIndex = !has.charByIndex,
-  noCharByOwnIndex = !has.charByOwnIndex,
+  var noArgumentsClass = !has.argumentsClass,
+      noCharByIndex = !has.charByIndex,
+      noCharByOwnIndex = !has.charByOwnIndex;
 
   /** Math shortcuts */
-  abs   = Math.abs,
-  floor = Math.floor,
-  max   = Math.max,
-  min   = Math.min,
-  pow   = Math.pow,
-  sqrt  = Math.sqrt;
+  var abs   = Math.abs,
+      floor = Math.floor,
+      max   = Math.max,
+      min   = Math.min,
+      pow   = Math.pow,
+      sqrt  = Math.sqrt;
 
   /*--------------------------------------------------------------------------*/
 

@@ -22,6 +22,19 @@
 
   /*--------------------------------------------------------------------------*/
 
+  /**
+   * Skips a given number of tests with a passing result.
+   * @private
+   * @param {Number} count The number of tests to skip.
+   */
+  function skipTest(count) {
+    while (count--) {
+      ok(true, 'test skipped');
+    }
+  }
+
+  /*--------------------------------------------------------------------------*/
+
   // must explicitly use `QUnit.module` instead of `module()`
   // in case we are in a CLI environment
   QUnit.module('Benchmark');
@@ -30,7 +43,7 @@
     if (window.document) {
       equal(String(Benchmark.platform), navigator.userAgent, 'default value');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
@@ -38,7 +51,7 @@
     if (window.document && window.require) {
       equal((Benchmark2 || {}).version, Benchmark.version, 'require("benchmark")');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
@@ -48,7 +61,7 @@
           platform = bench.platform || {};
       equal(typeof platform.name, 'string', 'required("platform")');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
@@ -212,7 +225,7 @@
     if (window.document) {
       ok(Benchmark.deepClone(document.body) === document.body, 'DOM element is not cloned');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
@@ -272,7 +285,7 @@
       ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
         result !== o, 'clones non-extensible objects with circular references');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
 
     if (Object.seal) {
@@ -282,7 +295,7 @@
       ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
         result !== o, 'clones sealed objects with circular references');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
 
     if (Object.freeze) {
@@ -292,7 +305,7 @@
       ok(result.bar.b === result.foo.b && result === result.foo.b.foo.c.foo &&
         result !== o, 'clones frozen objects with circular references');
     } else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
 
     if (has.descriptors) {
@@ -331,7 +344,7 @@
         'clones objects with custom descriptors and circular references');
     }
     else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
@@ -442,7 +455,7 @@
       deepEqual(values, [document.documentElement], 'basic');
     }
     else {
-      ok(true, 'test skipped');
+      skipTest(1)
     }
   });
 
