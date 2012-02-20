@@ -9,13 +9,13 @@
     'responses': { /* 'all': null, 'desktop': null, 'major': null, ... */ },
     'timers': { /* 'cleanup': null, 'load': null, 'post': null, ... */ },
     'trash': createElement('div')
-  },
+  };
 
   /**
    * Used to filter Browserscope results by browser category.
    * @see http://www.browserscope.org/user/tests/howto#urlparams
    */
-  filterMap = {
+  var filterMap = {
     'all': 3,
     'desktop': 'top-d',
     'family': 0,
@@ -24,10 +24,10 @@
     'mobile': 'top-m',
     'popular': 'top',
     'prerelease': 'top-d-e'
-  },
+  };
 
   /** Used to resolve a value's internal [[Class]] */
-  toString = {}.toString,
+  var toString = {}.toString;
 
   /**
    * The `uaToken` is prepended to the value of the data cell of the Google
@@ -36,23 +36,23 @@
    * `ui.browserscope.uaClass` class name to allow for the creation of a visual
    * indicator to help the user more easily find their browser's results.
    */
-  uaToken = '\u2028',
+  var uaToken = '\u2028';
 
   /** Math shortcuts */
-  floor = Math.floor,
-  max = Math.max,
-  min = Math.min,
+  var floor = Math.floor,
+      max = Math.max,
+      min = Math.min;
 
   /** Utility shortcuts */
-  each = Benchmark.each,
-  filter = Benchmark.filter,
-  forOwn = Benchmark.forOwn,
-  formatNumber = Benchmark.formatNumber,
-  hasKey = Benchmark.hasKey,
-  indexOf = Benchmark.indexOf,
-  invoke = Benchmark.invoke,
-  map = Benchmark.map,
-  reduce = Benchmark.reduce;
+  var each = Benchmark.each,
+      filter = Benchmark.filter,
+      forOwn = Benchmark.forOwn,
+      formatNumber = Benchmark.formatNumber,
+      hasKey = Benchmark.hasKey,
+      indexOf = Benchmark.indexOf,
+      invoke = Benchmark.invoke,
+      map = Benchmark.map,
+      reduce = Benchmark.reduce;
 
   /*--------------------------------------------------------------------------*/
 
@@ -636,14 +636,13 @@
       // request timeout and retry routines.
       idoc.write(interpolate(
         // the doctype is required so Browserscope detects the correct IE compat mode
-        '#{doctype}<html><body><script>' +
+        '#{doctype}<title></title><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},#{refresh}*1e3)},' +
         '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
         '}<\/script>' +
-        '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>' +
-        '</body></html>',
+        '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>',
         {
           'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
           'key': key,
@@ -853,8 +852,8 @@
           'title': title,
           'width': width,
           'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': areaWidth },
-          'hAxis': { 'title': hTitle },
-          'vAxis': { 'title': vTitle }
+          'hAxis': { 'baseline': 0, 'title': hTitle },
+          'vAxis': { 'baseline': 0, 'title': vTitle }
         });
       } else {
         setMessage(me.texts.empty);
