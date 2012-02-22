@@ -2730,7 +2730,7 @@
     },
 
     /**
-     * The version number.
+     * The semantic version number.
      * @static
      * @memberOf Benchmark
      * @type String

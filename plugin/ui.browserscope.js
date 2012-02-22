@@ -389,7 +389,8 @@
     forOwn(object, function(value) {
       return !(isArray(value) && (result = value));
     });
-    return result;
+    // remove empty entries which occur when not all the tests are recorded
+    return filter(result, Boolean);
   }
 
   /**

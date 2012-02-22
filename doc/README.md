@@ -307,7 +307,7 @@ Benchmark constructor.
 <!-- div -->
 
 ### <a id="Benchmark.version" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2738" title="View in source">`Benchmark.version`</a>
-*(String)*: The version number.
+*(String)*: The semantic version number.
 [&#9650;][1]
 
 <!-- /div -->
