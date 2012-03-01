@@ -1841,7 +1841,7 @@
         events = me.events || (me.events = {});
 
     forEach(type.split(' '), function(type) {
-      (isClassOf(events[type], 'Array')
+      (hasKey(events, type)
         ? events[type]
         : (events[type] = [])
       ).push(listener);
@@ -1863,7 +1863,7 @@
         events = me.events,
         result = true;
 
-    if (events && (listeners = events[event.type]) && listeners[0]) {
+    if (events && (listeners = hasKey(events, event.type) && events[event.type])) {
       forEach(listeners.slice(), function(listener) {
         return (result = listener.apply(me, args) !== false);
       });
@@ -1902,9 +1902,9 @@
 
     events && each(type ? type.split(' ') : events, function(type) {
       var index,
-          listeners = events[type];
+          listeners = hasKey(events, type) && events[type];
 
-      if (listeners && listeners[0]) {
+      if (listeners) {
         if (listener) {
           index = indexOf(listeners, listener);
           if (index > -1) {

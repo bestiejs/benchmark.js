@@ -22,6 +22,9 @@
 
   /*--------------------------------------------------------------------------*/
 
+  /** Shortcut used to convert array-like objects to arrays */
+  var slice = [].slice;
+
   /**
    * Skips a given number of tests with a passing result.
    * @private
@@ -38,6 +41,9 @@
   // must explicitly use `QUnit.module` instead of `module()`
   // in case we are in a CLI environment
   QUnit.module('Benchmark');
+
+  // init Benchmark.options.minTime
+  Benchmark(function() { throw 0; }).run();
 
   test('Benchmark.platform', function() {
     if (window.document) {
@@ -57,8 +63,7 @@
 
   test('require("platform")', function() {
     if (window.document && window.require) {
-      var bench = Benchmark2 || {},
-          platform = bench.platform || {};
+      var platform = (Benchmark2 || {}).platform || {};
       equal(typeof platform.name, 'string', 'required("platform")');
     } else {
       skipTest(1)
@@ -70,7 +75,7 @@
   QUnit.module('Benchmark constructor');
 
   test('basic', function() {
-    var bench = Benchmark(function() { });
+    var bench = Benchmark();
     ok(bench instanceof Benchmark, 'creation without `new` operator');
 
     bench = Benchmark({ 'name': 'foo', 'fn': function() { } });
@@ -90,12 +95,11 @@
     var options = Benchmark.options,
         maxTime = options.maxTime;
 
-    // inits Benchmark.options.minTime
-    var bench = Benchmark(function() { throw ''; }).run();
-    options.minTime && (options.maxTime = options.minTime * 5);
+    options.maxTime = options.minTime * 5;
 
-    bench = Benchmark(function() { }).run();
-    var error = bench.error;
+    var bench = Benchmark(function() { }).run(),
+        error = bench.error;
+
     ok(/setup\(\)/.test(bench.compiled) ? !error : error, 'error check');
 
     bench = Benchmark({ 'fn': '' }).run();
@@ -109,20 +113,21 @@
 
   test('basic', function() {
     var bench = Benchmark({
-      'setup': function() { var a = 1; },
       'fn': function() { throw a; },
+      'setup': function() { var a = 1; },
       'teardown': function() { a = 2; }
     }).run();
 
-    var compiled = bench.compiled;
-    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    var compiled = bench.compiled,
+        result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+
     ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
   });
 
   test('toString', function() {
     var bench = Benchmark({
-      'setup': function() { },
       'fn': function() { },
+      'setup': function() { },
       'teardown': function() { }
     });
 
@@ -131,20 +136,22 @@
     bench.teardown.toString = function() { return 'a = 2;' };
     bench.run();
 
-    var compiled = bench.compiled;
-    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    var compiled = bench.compiled,
+        result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+
     ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
   });
 
   test('as a string', function() {
     var bench = Benchmark({
-      'setup': 'var a = 1;',
       'fn': 'throw a;',
+      'setup': 'var a = 1;',
       'teardown': 'a = 2;'
     }).run();
 
-    var compiled = bench.compiled;
-    var result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+    var compiled = bench.compiled,
+        result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
+
     ok(/setup\(\)/.test(compiled) ? true : result, 'compiled');
   });
 
@@ -215,10 +222,7 @@
     ok(Benchmark.deepClone(arguments) === arguments, 'arguments object is not cloned');
     ok(Benchmark.deepClone(Klass) === Klass, 'function is not cloned');
 
-    Klass.prototype.deepClone = function() {
-      return new Klass;
-    };
-
+    Klass.prototype.deepClone = function() { return new Klass; };
     result = Benchmark.deepClone(o);
     ok(result != o && result instanceof Klass, 'clones using Klass#deepClone');
 
@@ -231,20 +235,19 @@
 
   test('edge', function() {
     var result,
+        has = {},
+        o = {},
         getDescriptor = Object.getOwnPropertyDescriptor,
         setDescriptor = Object.defineProperty,
         toString = {}.toString;
 
-    var has = {
-      'descriptors' : !!(function() {
-        try {
-          var o = {};
-          return (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
-        } catch(e) { }
-      }())
-    };
+    try {
+      has.descriptors = (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
+    } catch(e) {
+      has.descriptors = false;
+    }
 
-    var o = {
+    o = {
       'constructor': 1,
       'hasOwnProperty': 2,
       'isPrototypeOf': 3,
@@ -267,8 +270,7 @@
     result = Benchmark.deepClone(o);
     deepEqual(result, o, 'clones problem JScript props');
 
-    o = new String('x');
-    o.x = 1;
+    (o = new String('x')).x = 1;
     result = Benchmark.deepClone(o);
     ok(result == 'x' && typeof result == 'object' && result.x === 1 &&
       toString.call(result) == '[object String]', 'clones string object with custom property');
@@ -348,7 +350,7 @@
     }
   });
 
-  asyncTest('call stack overflow', function() {
+  test('call stack overflow', function() {
     var result,
         o = {},
         count = 0,
@@ -356,35 +358,24 @@
         setTimeout = window.setTimeout,
         toString = {}.toString;
 
-    function fn() {
-      try {
-        for (var i = 0, sub = Benchmark.deepClone(o); sub = sub[i]; i++) { }
-        result = --i == count;
-      } catch(e) { }
-      ok(result, 'avoids call stack overflow (stack limit is ' + (count - 1) + ')');
-      QUnit.start();
-    }
-
-    if (setTimeout) {
-      setTimeout(fn, 1);
-    }
     if (toString.call(window.java) == '[object JavaPackage]') {
       // Java throws uncatchable errors on call stack overflows, so to avoid
       // them I chose a number higher than Rhino's call stack limit without
-      // dynamically testing for that limit
+      // dynamically testing for the actual limit
       count = 3e3;
     } else {
-      try {
-        recurse();
-      } catch(e) { }
+      try { recurse(); } catch(e) { }
     }
     count++;
     for (var i = 0, sub = o; i <= count; i++) {
       sub = sub[i] = {};
     }
-    if (!setTimeout) {
-      fn();
-    }
+    try {
+      for (var i = 0, sub = Benchmark.deepClone(o); sub = sub[i]; i++) { }
+      result = --i == count;
+    } catch(e) { }
+
+    ok(result, 'avoids call stack overflow (stack limit is ' + (count - 1) + ')');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -397,7 +388,7 @@
         values = [];
 
     var result = Benchmark.each(o, function(value) {
-      args || (args = [].slice.call(arguments));
+      args || (args = slice.call(arguments));
       values.push(value);
     });
 
@@ -468,7 +459,7 @@
         o = ['a', 'b', 'c'];
 
     var result = Benchmark.filter(o, function(value) {
-      args || (args = [].slice.call(arguments));
+      args || (args = slice.call(arguments));
       return value == 'b';
     });
 
@@ -494,14 +485,14 @@
   QUnit.module('Benchmark.forOwn');
 
   test('basic', function() {
-    var args = [],
+    var Klass = function(){ var me = this; me.a = 1; me.b = 2; me.c = 3; },
+        args = [],
         values = [],
-        O = function(){ var me = this; me.a = 1; me.b = 2; me.c = 3; },
-        o = (O.prototype.d = 4, new O);
+        o = (Klass.prototype.d = 4, new Klass);
 
     var result = Benchmark.forOwn(o, function(value) {
       if (value == 1) {
-        args = [].slice.call(arguments);
+        args = slice.call(arguments);
       }
       values.push(value);
     });
@@ -522,10 +513,19 @@
 
   test('enumeration', function() {
     var thirdArg,
-        keys = [],
-        values = [],
         Klass = function() { },
-        o = { 'constructor': 1, 'hasOwnProperty': 2, 'isPrototypeOf': 3, 'propertyIsEnumerable': 4, 'toLocaleString': 5, 'toString': 6, 'valueOf': 7 };
+        keys = [],
+        values = [];
+
+    var o = {
+      'constructor': 1,
+      'hasOwnProperty': 2,
+      'isPrototypeOf': 3,
+      'propertyIsEnumerable': 4,
+      'toLocaleString': 5,
+      'toString': 6,
+      'valueOf': 7
+    };
 
     Klass.a = 1;
     Klass.prototype.b = 2;
@@ -672,7 +672,7 @@
     equal(Benchmark.indexOf(o, 'a', 1), 3, 'fromIndex');
     equal(Benchmark.indexOf(o, 'z', -5), -1, 'extreme negative fromIndex');
 
-    var o = { '0': 'a', '2': 'c', '3': 'z', 'length': 3 };
+    o = { '0': 'a', '2': 'c', '3': 'z', 'length': 3 };
     equal(Benchmark.indexOf(o, 'z', 3), -1, 'extreme positive fromIndex');
   });
 
@@ -681,10 +681,9 @@
   QUnit.module('Benchmark.invoke');
 
   test('basic', function() {
-    var callbacks = [],
+    var callback = function() { callbacks.push(slice.call(arguments)); },
+        callbacks = [],
         lengths = [],
-        callback = function() { callbacks.push(slice.call(arguments)); },
-        slice = [].slice,
         o = [new Array, null, new Array, new Array];
 
     var result = Benchmark.invoke(o, 'push', 'b');
@@ -708,8 +707,8 @@
   });
 
   test('queued', function() {
-    var lengths = [],
-        expected = [1, 1],
+    var expected = [1, 1],
+        lengths = [],
         o = [new Array, new Array];
 
     o[3] = new Array;
@@ -729,9 +728,12 @@
   });
 
   test('array-like-object', function() {
-    var expected = [1],
-        o = { '0': new Array, '2': new Array, 'length': 3 },
-        result = Benchmark.invoke(o, 'push', 'a');
+    var expected = [1];
+    var result = Benchmark.invoke({
+      '0': new Array,
+      '2': new Array,
+      'length': 3
+    }, 'push', 'a');
 
     expected[2] = 1;
     deepEqual(result, expected, 'sparse check');
@@ -765,7 +767,7 @@
         o = ['a', 'b', 'c'];
 
     var result = Benchmark.map(o, function(value, index) {
-      args || (args = [].slice.call(arguments));
+      args || (args = slice.call(arguments));
       return index;
     });
 
@@ -775,8 +777,11 @@
 
   test('array-like-object', function() {
     var expected = [0],
-        o = { '0': 'a', '2': 'c', 'length': 4 },
-        result = Benchmark.map(o, function(value, index) { return index; });
+        o = { '0': 'a', '2': 'c', 'length': 4 };
+
+    var result = Benchmark.map(o, function(value, index) {
+      return index;
+    });
 
     expected[2] = 2;
     expected.length = 4;
@@ -813,7 +818,6 @@
 
   test('basic', function() {
     var args,
-        slice = [].slice,
         o = ['a', 'b', 'c'];
 
     var result = Benchmark.reduce(o, function(string, value, index) {
@@ -840,7 +844,7 @@
     equal(result, 'ac', 'sparse check');
   });
 
- /*--------------------------------------------------------------------------*/
+  /*--------------------------------------------------------------------------*/
 
   QUnit.module('Benchmark#clone');
 
@@ -849,7 +853,7 @@
         options = Benchmark.options,
         maxTime = options.maxTime;
 
-    options.minTime && (options.maxTime = options.minTime * 5);
+    options.maxTime = options.minTime * 5;
     var bench = Benchmark(function() { i++; }).run();
     options.maxTime = maxTime;
 
@@ -864,30 +868,37 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark#addListener');
+
+  test('basic', function() {
+
+  });
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark#removeListener');
+
+  test('basic', function() {
+
+  });
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark#emit');
 
-  test('event object', function() {
+  test('basic', function() {
     var args = [],
-        bench = Benchmark(function() {}),
-        event = Benchmark.Event('custom'),
-        listener2 = function(event) { event.listener2 = 1 };
+        bench = Benchmark(),
+        event = {},
+        listener2 = function(eventObject) { eventObject.listener2 = 1 };
 
-    bench.on('custom', function(event) { event.touched = 1; });
-    bench.emit(event);
-    bench.events = {};
-    ok(event.touched, 'emit custom event object');
-
-    bench.on('type', function(eventObj) { event = eventObj; });
-    bench.emit('type');
-    bench.events = {};
-    equal(event.type, 'type', 'emit event.type');
-
-    bench.on('args', function() { args = args.slice.call(arguments, 1); });
+    bench.on('args', function() { args = slice.call(arguments, 1); });
     bench.emit('args', 'a', 'b', 'c');
     bench.events = {};
-    deepEqual(args, ['a', 'b', 'c'], 'emit curried arguments');
+    deepEqual(args, ['a', 'b', 'c'], 'emit passed arguments');
 
     ok(bench.emit('empty'), 'emit empty successful');
+    ok(bench.emit('constructor'), 'emit with name of property on Object.prototype');
 
     bench.on('success', function() { return 'bogus'; });
     ok(bench.emit('success'), 'emit successful');
@@ -906,13 +917,27 @@
     ok(event.listener2, 'emit shallow cloned listeners');
   });
 
+  test('event object', function() {
+    var bench = Benchmark(),
+        event = Benchmark.Event('custom');
+
+    bench.on('custom', function(eventObject) { eventObject.touched = 1; });
+    bench.emit(event);
+    bench.events = {};
+    ok(event.touched, 'emit custom event object');
+
+    bench.on('type', function(eventObj) { event = eventObj; });
+    bench.emit('type');
+    bench.events = {};
+    equal(event.type, 'type', 'emit event.type');
+  });
+
   /*--------------------------------------------------------------------------*/
 
   QUnit.module('Benchmark.Suite#abort');
 
   test('basic', function() {
     var fired = false;
-
     var suite = Benchmark.Suite('suite', {
       'onAbort': function() { fired = true }
     })
@@ -934,7 +959,6 @@
     var args,
         pair,
         thisBinding,
-        slice = [].slice,
         callbacks = [],
         callback = function() { callbacks.push([arguments, this]); };
 
@@ -965,67 +989,78 @@
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onAdd');
+    ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'suite' && args[1].name == 'foo',
+      'passed arguments to Suite#onAdd');
 
     // next we start the Suite because no reset was needed
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'start' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onStart');
+    ok(args.length == 2 && args[0].type == 'start' && thisBinding.name == 'suite' && args[1].name == 'foo',
+      'passed arguments to Suite#onStart');
 
     // and so start the first benchmark
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onStart');
+    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onStart');
 
     // after starting we reset the benchmark
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onReset');
+    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onReset');
 
     // oh no! we abort because of an error
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'abort' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onAbort');
+    ok(args.length == 1 && args[0].type == 'abort' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onAbort');
 
     // benchmark error triggered
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'error' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onError');
+    ok(args.length == 1 && args[0].type == 'error' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onError');
 
     // benchmark is cycle is finished
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'cycle' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onCycle');
+    ok(args.length == 1 && args[0].type == 'cycle' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onCycle');
 
     // benchmark is complete
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'foo', 'passed arguments to Benchmark#onComplete');
+    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'foo',
+      'passed arguments to Benchmark#onComplete');
 
     // the benchmark error triggers a Suite error
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'error' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onError');
+    ok(args.length == 2 && args[0].type == 'error' && thisBinding.name == 'suite' && args[1].name == 'foo',
+      'passed arguments to Suite#onError');
 
     // the Suite cycle finishes
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'cycle' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onCycle');
+    ok(args.length == 2 && args[0].type == 'cycle' && thisBinding.name == 'suite' && args[1].name == 'foo',
+      'passed arguments to Suite#onCycle');
 
     // the Suite completes
     pair = callbacks.shift();
     args = pair[0];
     thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'complete' && thisBinding.name == 'suite' && args[1].name == 'foo', 'passed arguments to Suite#onComplete');
+    ok(args.length == 2 && args[0].type == 'complete' && thisBinding.name == 'suite' && args[1].name == 'foo',
+      'passed arguments to Suite#onComplete');
 
     ok(callbacks.length == 0, 'all callbacks executed');
   });
@@ -1038,7 +1073,7 @@
     var options = Benchmark.options,
         maxTime = options.maxTime;
 
-    options.minTime && (options.maxTime = options.minTime * 5);
+    options.maxTime = options.minTime * 5;
 
     Benchmark(function(deferred) {
       setTimeout(function() { deferred.resolve(); }, 10);
@@ -1059,7 +1094,7 @@
         maxTime = options.maxTime,
         suite = new Benchmark.Suite;
 
-    options.minTime && (options.maxTime = options.minTime * 5);
+    options.maxTime = options.minTime * 5;
 
     suite.add('a', function() {
       count++;
