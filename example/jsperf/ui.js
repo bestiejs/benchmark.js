@@ -706,11 +706,11 @@
   else {
     // short circuit unusable methods
     ui.render = function() { };
-    ui.removeAllListeners('start cycle complete');
+    ui.removeListener('start cycle complete');
     setTimeout(function() {
-      ui.removeAllListeners();
+      ui.removeListener();
       ui.browserscope.post = function() { };
-      invoke(ui.benchmarks, 'removeAllListeners');
+      invoke(ui.benchmarks, 'removeListener');
     }, 1);
   }
 

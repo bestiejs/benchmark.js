@@ -21,6 +21,7 @@
   // generate Markdown
   $markdown = docdown(array(
     'path' => '../' . $file,
+    'title' => 'Benchmark.js <sup>v1.0.0-pre</sup>',
     'url'  => 'https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js'
   ));
 

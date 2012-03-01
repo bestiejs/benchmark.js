@@ -1,5 +1,5 @@
 /*!
- * Benchmark.js <http://benchmarkjs.com/>
+ * Benchmark.js v1.0.0-pre <http://benchmarkjs.com/>
  * Copyright 2010-2012 Mathias Bynens <http://mths.be/>
  * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
  * Modified by John-David Dalton <http://allyoucanleet.com/>
@@ -77,64 +77,66 @@
   };
 
   /** Used to flag environments/features */
-  var has = {
+  var has = {};
+
+  (function() {
 
     /** Detect Adobe AIR */
-    'air': isClassOf(window.runtime, 'ScriptBridgingProxyObject'),
+    has.air = isClassOf(window.runtime, 'ScriptBridgingProxyObject');
 
     /** Detect if `arguments` objects have the correct internal [[Class]] value */
-    'argumentsClass': isClassOf(arguments, 'Arguments'),
+    has.argumentsClass = isClassOf(arguments, 'Arguments');
 
     /** Detect if in a browser environment */
-    'browser': document && isHostType(window, 'navigator'),
+    has.browser = document && isHostType(window, 'navigator');
 
     /** Detect if strings support accessing characters by index */
-    'charByIndex':
+    has.charByIndex =
       // IE 8 supports indexes on string literals but not string objects
-     ('x'[0] + Object('x')[0]) == 'xx',
+      ('x'[0] + Object('x')[0]) == 'xx';
 
     /** Detect if strings have indexes as own properties */
-    'charByOwnIndex':
-      // Narwhal, Rhino, RingoJS, IE 8*, and Opera < 10.52 support indexes on
+    has.charByOwnIndex =
+      // Narwhal, Rhino, RingoJS, IE 8, and Opera < 10.52 support indexes on
       // strings but don't detect them as own properties
-      'x'[0] == 'x' && hasKey('x', '0'),
-
-    /** Detect if functions support decompilation */
-    'decompilation': !!(function() {
-      try {
-        // Safari 2.x removes commas in object literals
-        // from Function#toString results
-        // http://webk.it/11609
-        // Firefox 3.6 and Opera 9.25 strip grouping
-        // parentheses from Function#toString results
-        // http://bugzil.la/559438
-        return Function(
-          'return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')'
-        )()(0).x === '1';
-      } catch(e) { }
-    }()),
-
-    /** Detect ES5+ property descriptor API */
-    'descriptors' : !!(function() {
-      try {
-        var o = {};
-        return (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
-      } catch(e) { }
-    }()),
-
-    /** Detect ES5+ Object.getOwnPropertyNames() */
-    'getAllKeys': !!(function() {
-      try {
-        return /\bvalueOf\b/.test(getAllKeys(Object.prototype));
-      } catch(e) { }
-    }()),
+      has.charByIndex && hasKey('x', '0');
 
     /** Detect if Java is enabled/exposed */
-    'java': isClassOf(window.java, 'JavaPackage'),
+    has.java = isClassOf(window.java, 'JavaPackage');
 
     /** Detect if the Timers API exists */
-    'timeout': isHostType(window, 'setTimeout') && isHostType(window, 'clearTimeout')
-  };
+    has.timeout = isHostType(window, 'setTimeout') && isHostType(window, 'clearTimeout');
+
+    /** Detect if functions support decompilation */
+    try {
+      // Safari 2.x removes commas in object literals
+      // from Function#toString results
+      // http://webk.it/11609
+      // Firefox 3.6 and Opera 9.25 strip grouping
+      // parentheses from Function#toString results
+      // http://bugzil.la/559438
+      has.decompilation = Function(
+        'return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')'
+      )()(0).x === '1';
+    } catch(e) {
+      has.decompilation = false;
+    }
+
+    /** Detect ES5+ property descriptor API */
+    try {
+      var o = {};
+      has.descriptors = (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
+    } catch(e) {
+      has.descriptors = false;
+    }
+
+    /** Detect ES5+ Object.getOwnPropertyNames() */
+    try {
+      has.getAllKeys = /\bvalueOf\b/.test(getAllKeys(Object.prototype));
+    } catch(e) {
+      has.getAllKeys = false;
+    }
+  }());
 
   /**
    * Timer utility object used by `clock()` and `Deferred#resolve`.
@@ -1821,10 +1823,10 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Registers a single listener for the specified event type(s).
+   * Registers a listener for the specified event type(s).
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
-   * @param {Function} listener The function called when the event occurs.
+   * @param {Function} listener The function to register.
    * @returns {Object} The benchmark instance.
    * @example
    *
@@ -1839,7 +1841,10 @@
         events = me.events || (me.events = {});
 
     forEach(type.split(' '), function(type) {
-      (events[type] || (events[type] = [])).push(listener);
+      (isClassOf(events[type], 'Array')
+        ? events[type]
+        : (events[type] = [])
+      ).push(listener);
     });
     return me;
   }
@@ -1851,24 +1856,28 @@
    * @returns {Boolean} Returns `true` if all listeners were executed, else `false`.
    */
   function emit(type) {
-    var me = this,
+    var listeners,
+        me = this,
         event = Event(type),
         args = (arguments[0] = event, arguments),
         events = me.events,
-        listeners = events && events[event.type] || [],
         result = true;
 
-    forEach(listeners.slice(), function(listener) {
-      return (result = listener.apply(me, args) !== false);
-    });
+    if (events && (listeners = events[event.type]) && listeners[0]) {
+      forEach(listeners.slice(), function(listener) {
+        return (result = listener.apply(me, args) !== false);
+      });
+    }
     return result;
   }
 
   /**
-   * Unregisters a single listener for the specified event type(s).
+   * Unregisters a listener for the specified event type(s),
+   * or unregisters all listeners for the specified event type(s),
+   * or unregisters all listeners for all event types.
    * @memberOf Benchmark, Benchmark.Suite
-   * @param {String} type The event type.
-   * @param {Function} listener The function to unregister.
+   * @param {String} [type] The event type.
+   * @param {Function} [listener] The function to unregister.
    * @returns {Object} The benchmark instance.
    * @example
    *
@@ -1877,43 +1886,34 @@
    *
    * // unregister a listener for multiple event types
    * bench.removeListener('start cycle', listener);
+   *
+   * // unregister all listeners for an event type
+   * bench.removeListener('cycle');
+   *
+   * // unregister all listeners for multiple event types
+   * bench.removeListener('start cycle complete');
+   *
+   * // unregister all listeners for all event types
+   * bench.removeListener();
    */
   function removeListener(type, listener) {
     var me = this,
         events = me.events;
 
-    forEach(type.split(' '), function(type) {
-      var listeners = events && events[type] || [],
+    events && each(type ? type.split(' ') : events, function(type) {
+      var index,
+          listeners = events[type];
+
+      if (listeners && listeners[0]) {
+        if (listener) {
           index = indexOf(listeners, listener);
-      if (index > -1) {
-        listeners.splice(index, 1);
+          if (index > -1) {
+            listeners.splice(index, 1);
+          }
+        } else {
+          listeners.length = 0;
+        }
       }
-    });
-    return me;
-  }
-
-  /**
-   * Unregisters all listeners or those for the specified event type(s).
-   * @memberOf Benchmark, Benchmark.Suite
-   * @param {String} type The event type.
-   * @returns {Object} The benchmark instance.
-   * @example
-   *
-   * // unregister all listeners
-   * bench.removeAllListeners();
-   *
-   * // unregister all listeners for an event type
-   * bench.removeAllListeners('cycle');
-   *
-   * // unregister all listeners for multiple event types
-   * bench.removeAllListeners('start cycle complete');
-   */
-  function removeAllListeners(type) {
-    var me = this,
-        events = me.events;
-
-    forEach(type ? type.split(' ') : events, function(type) {
-      (events && events[type] || []).length = 0;
     });
     return me;
   }
@@ -2735,7 +2735,7 @@
      * @memberOf Benchmark
      * @type String
      */
-    'version': '0.3.0',
+    'version': '1.0.0-pre',
 
     // clone objects
     'deepClone': deepClone,
@@ -3016,7 +3016,7 @@
     // aborts benchmark (does not record times)
     'abort': abort,
 
-    // registers a single listener
+    // registers a listener
     'addListener': addListener,
 
     // creates a new benchmark using the same test and options
@@ -3028,10 +3028,7 @@
     // executes listeners of a specified type
     'emit': emit,
 
-    // removes all listeners of a specified type
-    'removeAllListeners': removeAllListeners,
-
-    // removes a single listener
+    // removes listener(s)
     'removeListener': removeListener,
 
     // reset benchmark properties
@@ -3174,7 +3171,7 @@
     // adds a benchmark to the suite
     'add': add,
 
-    // registers a single listener
+    // registers a listener
     'addListener': addListener,
 
     // creates a new suite with cloned benchmarks
@@ -3189,10 +3186,7 @@
     // alias of addListener
     'on': addListener,
 
-    // removes all listeners of a specified type
-    'removeAllListeners': removeAllListeners,
-
-    // removes a single listener
+    // removes listener(s)
     'removeListener': removeListener,
 
     // resets all benchmarks in the suite
