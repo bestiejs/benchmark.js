@@ -2107,13 +2107,14 @@
         }
       }
 
-      if(!compiled) {
+      if (!compiled) {
         // compile in setup/teardown functions and the test loop
         compiled = host.compiled = createFunction(preprocess('t$'), interpolate(
           preprocess(deferred
             ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=(m$=d$.benchmark)._host||m$,f$=m$.fn;' +
               'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
-              'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}#{fn}\nreturn{}'
+              'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}' +
+              'try{#{fn}}catch(e$){f$(d$)}return{}'
             : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count,n$=t$.ns;#{setup}\n#{begin};' +
               'while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{elapsed:r$,uid:"#{uid}"}'),
           source
@@ -2123,7 +2124,7 @@
           if (isEmpty) {
             // Firefox may remove dead code from Function#toString results
             // http://bugzil.la/536085
-            throw new Error('The test, ' + name + ', is empty. This may be the result of dead code removal.');
+            throw new Error('The test "' + name + '" is empty. This may be the result of dead code removal.');
           }
           else if (!deferred) {
             // pretest to determine if compiled code is exits early, usually by a
