@@ -344,14 +344,15 @@
    * Deferred constructor.
    * @constructor
    * @memberOf Benchmark
-   * @param {Object} bench The benchmark instance.
+   * @param {Object} clone The cloned benchmark instance.
    */
-  function Deferred(bench) {
+  function Deferred(clone) {
     var me = this;
     if (me && me.constructor != Deferred) {
-      return new Deferred(bench);
+      return new Deferred(clone);
     }
-    me.benchmark = bench;
+    me.benchmark = clone;
+    me._original = clone._original;
     clock(me);
   }
 
@@ -631,29 +632,6 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Executes a function, associated with a benchmark, synchronously or asynchronously.
-   * @private
-   * @param {Object} options The options object.
-   */
-  function call(options) {
-    options || (options = {});
-    var fn = options.fn;
-
-    (!options.async && fn || function() {
-      var bench = options.benchmark,
-          ids = bench._timerIds || (bench._timerIds = []),
-          index = ids.length;
-
-      // under normal use there should only be one id at any time per benchmark
-      ids.push(setTimeout(function() {
-        ids.splice(index, 1);
-        ids.length || delete bench._timerIds;
-        fn();
-      }, bench.delay * 1e3));
-    })();
-  }
-
-  /**
    * Creates a function from the given arguments string and body.
    * @private
    * @param {String} args The comma separated function arguments.
@@ -673,6 +651,16 @@
     // http://bugzil.la/639720
     createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
     return createFunction.apply(null, arguments);
+  }
+
+  /**
+   * Delay the execution of a function based on the benchmark's `delay` property.
+   * @private
+   * @param {Object} bench The benchmark instance.
+   * @param {Object} fn The function to execute.
+   */
+  function delay(bench, fn) {
+    bench._timerId = setTimeout(fn, bench.delay * 1e3);
   }
 
   /**
@@ -821,12 +809,11 @@
    * Gets the name of the first argument from a function's source.
    * @private
    * @param {Function} fn The function.
-   * @param {String} altName A string used when the name of the first argument is unretrievable.
    * @returns {String} The argument name.
    */
-  function getFirstArgument(fn, altName) {
+  function getFirstArgument(fn) {
     return (!hasKey(fn, 'toString') &&
-      (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || altName || '';
+      (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || '';
   }
 
   /**
@@ -906,7 +893,9 @@
   }
 
   /**
-   * Checks if the specified `value` is an object created by the `Object` constructor.
+   * Checks if the specified `value` is an object created by the `Object` constructor
+   * assuming objects created by the `Object` constructor have no inherited
+   * enumerable properties and assuming there are no `Object.prototype` extensions.
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
@@ -926,14 +915,10 @@
       ctor = value.constructor;
       // check if the constructor is `Object` as `Object instanceof Object` is `true`
       if ((result = isClassOf(ctor, 'Function') && ctor instanceof ctor)) {
-        // assume objects created by the `Object` constructor have no inherited enumerable properties
-        // (we assume there are no `Object.prototype` extensions)
-        forProps(value, function(subValue, subKey) {
-          result = subKey;
-        });
         // An object's own properties are iterated before inherited properties.
         // If the last iterated key belongs to an object's own property then
         // there are no inherited enumerable properties.
+        forProps(value, function(subValue, subKey) { result = subKey; });
         result = result === true || hasKey(value, result);
       }
     }
@@ -980,9 +965,9 @@
    */
   function req(id) {
     try {
-      return freeExports && freeRequire(id);
+      var result = freeExports && freeRequire(id);
     } catch(e) { }
-    return null;
+    return result || null;
   }
 
   /**
@@ -1045,20 +1030,14 @@
    */
   function resolve() {
     var me = this,
-        bench = me.benchmark;
+        clone = me.benchmark;
 
-    if (++me.cycles < bench.count) {
+    if (++me.cycles < clone.count) {
       // continue the test loop
-      (bench._host || bench).compiled.call(me, timer);
+      clone.compiled.call(me, timer);
     } else {
       timer.stop(me);
-      call({
-        'async': true,
-        'benchmark': bench,
-        'fn': function() {
-          cycle({ 'benchmark': bench, 'deferred': me });
-        }
-      });
+      delay(clone, function() { cycle(me); });
     }
   }
 
@@ -1099,21 +1078,9 @@
     }
 
     /**
-     * Gets an available marker key for the given object.
-     */
-    function getMarkerKey(object) {
-      // avoid collisions with existing keys
-      var result = uid;
-      while (object[result] && object[result].constructor != Marker) {
-        result += 1;
-      }
-      return result;
-    }
-
-    /**
      * The callback used by `forProps()`.
      */
-    function propCallback(subValue, subKey) {
+    function forPropsCallback(subValue, subKey) {
       // exit early to avoid cloning the marker
       if (subValue && subValue.constructor == Marker) {
         return;
@@ -1126,6 +1093,18 @@
       else {
         clone[subKey] = subValue;
       }
+    }
+
+    /**
+     * Gets an available marker key for the given object.
+     */
+    function getMarkerKey(object) {
+      // avoid collisions with existing keys
+      var result = uid;
+      while (object[result] && object[result].constructor != Marker) {
+        result += 1;
+      }
+      return result;
     }
 
     do {
@@ -1203,7 +1182,7 @@
               unmarked.push({ 'clone': clone, 'object': value });
             }
             // iterate over object properties
-            forProps(value, propCallback, { 'which': 'all' });
+            forProps(value, forPropsCallback, { 'which': 'all' });
           }
         }
       }
@@ -1242,14 +1221,14 @@
    * @returns {Array|Object} Returns the object iterated over.
    */
   function each(object, callback, thisArg) {
-    var fn = callback,
+    var result = [object, object = Object(object)][0],
+        fn = callback,
         index = -1,
-        result = [object, object = Object(object)][0],
-        origObject = object,
         length = object.length,
         isSnapshot = !!(object.snapshotItem && (length = object.snapshotLength)),
         isSplittable = (noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String'),
-        isConvertable = isSnapshot || isSplittable || 'item' in object;
+        isConvertable = isSnapshot || isSplittable || 'item' in object,
+        origObject = object;
 
     // in Opera < 10.5 `hasKey(object, 'length')` returns `false` for NodeLists
     if (length === length >>> 0) {
@@ -1517,37 +1496,13 @@
         result = map(benches, function(bench) { return bench; });
 
     /**
-     * Checks if invoking `run` with asynchronous cycles.
-     */
-    function isAsync(object) {
-      var async = args[0] && args[0].async;
-      return isRun(object) && (async == null ? object.options.async : async) && support.timeout;
-    }
-
-    /**
-     * Checks if invoking `run` on a benchmark instance.
-     */
-    function isRun(object) {
-      // avoid using `instanceof` here because of IE memory leak issues with host objects
-      return Object(object).constructor == Benchmark && name == 'run';
-    }
-
-    /**
-     * Checks if invoking `run` with synchronous cycles.
-     */
-    function isSync(object) {
-      // if not asynchronous or deferred
-      return !isAsync(object) && !(isRun(object) && object.defer);
-    }
-
-    /**
-     * Executes the method and if synchronous, fetches the next bench.
+     * Invokes the method of the current object and if synchronous, fetches the next.
      */
     function execute() {
       var listeners,
-          sync = isSync(bench);
+          async = isAsync(bench);
 
-      if (!sync) {
+      if (async) {
         // use `getNext` as the first listener
         bench.on('complete', getNext);
         listeners = bench.events.complete;
@@ -1556,7 +1511,7 @@
       // execute method
       result[index] = isClassOf(bench && bench[name], 'Function') ? bench[name].apply(bench, args) : undefined;
       // if synchronous return true until finished
-      return sync && getNext();
+      return !async && getNext();
     }
 
     /**
@@ -1565,13 +1520,13 @@
     function getNext(event) {
       var cycleEvent,
           last = bench,
-          sync = isSync(last);
+          async = isAsync(last);
 
-      if (!sync) {
+      if (async) {
         last.off('complete', getNext);
         last.emit('complete');
       }
-      // simulate emitting the "cycle" event
+      // emit "cycle" event
       eventProps.type = 'cycle';
       eventProps.target = last;
       cycleEvent = Event(eventProps);
@@ -1580,11 +1535,11 @@
       // choose next benchmark if not exiting early
       if (!cycleEvent.aborted && raiseIndex() !== false) {
         bench = queued ? benches[0] : result[index];
-        if (!isSync(bench)) {
-          call({ 'async': isAsync(bench), 'benchmark': bench, 'fn': execute });
+        if (isAsync(bench)) {
+          delay(bench, execute);
         }
-        else if (!sync) {
-          // resume synchronous execution
+        else if (async) {
+          // resume execution if previously asynchronous but now synchronous
           while (execute()) { }
         }
         else {
@@ -1592,15 +1547,28 @@
           return true;
         }
       } else {
-        // simulate emitting the "complete" event
+        // emit "complete" event
         eventProps.type = 'complete';
         options.onComplete.call(benches, Event(eventProps));
       }
-      // when async the `event.aborted = true` will cancel the rest of the "complete"
-      // listeners because they were already called above and when synchronous
-      // the `return false` will exit the while-loop
-      event && (event.aborted = true);
-      return false;
+      // When used as a listener `event.aborted = true` will cancel the rest of
+      // the "complete" listeners because they were already called above and when
+      // used as part of `getNext` the `return false` will exit the execution while-loop.
+      if (event) {
+        event.aborted = true;
+      } else {
+        return false;
+      }
+    }
+
+    /**
+     * Checks if invoking `Benchmark#run` with asynchronous cycles.
+     */
+    function isAsync(object) {
+      // avoid using `instanceof` here because of IE memory leak issues with host objects
+      var async = args[0] && args[0].async;
+      return Object(object).constructor == Benchmark && name == 'run' &&
+        ((async == null ? object.options.async : async) && support.timeout || object.defer);
     }
 
     /**
@@ -1608,8 +1576,8 @@
      */
     function raiseIndex() {
       var length = result.length;
-      // if queued then remove the previous bench and subsequent skipped non-entries
       if (queued) {
+        // if queued remove the previous bench and subsequent skipped non-entries
         do {
           ++index > 0 && shift.call(benches);
         } while ((length = benches.length) && !('0' in benches));
@@ -1632,9 +1600,10 @@
       args = isClassOf(args = 'args' in options ? options.args : [], 'Array') ? args : [args];
       queued = options.queued;
     }
+
     // start iterating over the array
     if (raiseIndex() !== false) {
-      // simulate emitting the "start" event
+      // emit "start" event
       bench = result[index];
       eventProps.type = 'start';
       eventProps.target = bench;
@@ -1642,17 +1611,17 @@
 
       // end early if the suite was aborted in an "onStart" listener
       if (benches.aborted && benches.constructor == Suite && name == 'run') {
-        // simulate emitting the "cycle" event
+        // emit "cycle" event
         eventProps.type = 'cycle';
         options.onCycle.call(benches, Event(eventProps));
-        // simulate emitting the "complete" event
+        // emit "complete" event
         eventProps.type = 'complete';
         options.onComplete.call(benches, Event(eventProps));
       }
       // else start
       else {
         if (isAsync(bench)) {
-          call({ 'benchmark': bench, 'fn': execute, 'async': true });
+          delay(bench, execute);
         } else {
           while (execute()) { }
         }
@@ -2027,8 +1996,8 @@
         delete calledBy.abort;
 
         if (support.timeout) {
-          forEach(me._timerIds || [], clearTimeout);
-          delete me._timerIds;
+          clearTimeout(me._timerId);
+          delete me._timerId;
         }
         if (!resetting) {
           me.aborted = true;
@@ -2175,29 +2144,31 @@
         timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }];
 
     // lazy define for hi-res timers
-    clock = function(bench) {
-      var deferred = bench instanceof Deferred && [bench, bench = bench.benchmark][0],
-          host = bench._host || bench,
-          fn = host.fn,
-          fnArg = deferred ? getFirstArgument(fn, 'deferred') : '',
-          stringable = isStringable(fn),
+    clock = function(clone) {
+      var deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
+          bench = clone._original || clone,
+          fn = bench.fn,
+          fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '',
+          stringable = isStringable(fn);
+
+      var source = {
+        'setup': getSource(bench.setup, preprocess('m$.setup()')),
+        'fn': getSource(fn, preprocess('f$(' + fnArg + ')')),
+        'fnArg': fnArg,
+        'teardown': getSource(bench.teardown, preprocess('m$.teardown()'))
+      };
+
+      var compiled = bench.compiled,
+          count = bench.count = clone.count,
           decompilable = support.decompilation || stringable,
-          source = {
-            'setup': getSource(host.setup, preprocess('m$.setup()')),
-            'fn': getSource(fn, preprocess('f$(' + fnArg + ')')),
-            'fnArg': fnArg,
-            'teardown': getSource(host.teardown, preprocess('m$.teardown()'))
-          },
-          compiled = host.compiled,
-          count = host.count = bench.count,
-          id = host.id,
+          id = bench.id,
           isEmpty = !(source.fn || stringable),
-          name = host.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
+          name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
           ns = timer.ns,
           result = 0;
 
       // init `minTime` if needed
-      bench.minTime = host.minTime || (host.minTime = host.options.minTime = options.minTime);
+      clone.minTime = bench.minTime || (bench.minTime = bench.options.minTime = options.minTime);
 
       // repair nanosecond timer
       // (some Chrome builds erase the `ns` variable after millions of executions)
@@ -2212,9 +2183,9 @@
 
       if (!compiled) {
         // compile in setup/teardown functions and the test loop
-        compiled = host.compiled = createFunction(preprocess('t$'), interpolate(
+        compiled = bench.compiled = createFunction(preprocess('t$'), interpolate(
           preprocess(deferred
-            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=(m$=d$.benchmark)._host||m$,f$=m$.fn;' +
+            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$._original,f$=m$.fn;' +
               'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
               'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}' +
               'try{#{fn}}catch(e$){f$(d$)}return{}'
@@ -2232,19 +2203,19 @@
           else if (!deferred) {
             // pretest to determine if compiled code is exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
-            host.count = 1;
-            compiled = (compiled.call(host, timer) || {}).uid == uid && compiled;
-            host.count = count;
+            bench.count = 1;
+            compiled = (compiled.call(bench, timer) || {}).uid == uid && compiled;
+            bench.count = count;
           }
         } catch(e) {
           compiled = false;
-          bench.error = e || new Error(String(e));
-          host.count = count;
+          clone.error = e || new Error(String(e));
+          bench.count = count;
         }
         // fallback when a test exits early or errors during pretest
         if (decompilable && !compiled && !deferred && !isEmpty) {
           compiled = createFunction(preprocess('t$'), interpolate(
-            preprocess((bench.error && !stringable
+            preprocess((clone.error && !stringable
               ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count'
               : 'function f$(){#{fn}\n}var r$,s$,i$=this.count'
             ) + ',n$=t$.ns;#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{elapsed:r$}'),
@@ -2253,25 +2224,28 @@
 
           try {
             // pretest one more time to check for errors
-            host.count = 1;
-            compiled.call(host, timer);
-            host.compiled = compiled;
-            host.count = count;
-            delete bench.error;
+            bench.count = 1;
+            compiled.call(bench, timer);
+            bench.compiled = compiled;
+            bench.count = count;
+            delete clone.error;
           }
           catch(e) {
-            host.count = count;
-            if (!bench.error) {
-              host.compiled = compiled;
-              bench.error = e || new Error(String(e));
+            bench.count = count;
+            if (clone.error) {
+              compiled = false;
+            } else {
+              bench.compiled = compiled;
+              clone.error = e || new Error(String(e));
             }
           }
         }
       }
       // if no errors run the full test loop
-      if (!bench.error) {
-        result = compiled.call(deferred || host, timer).elapsed;
+      if (!clone.error) {
+        result = compiled.call(deferred || bench, timer).elapsed;
       }
+      clone.compiled = compiled;
       return result;
     };
 
@@ -2405,13 +2379,13 @@
   /**
    * Computes stats on benchmark results.
    * @private
+   * @param {Object} bench The benchmark instance.
    * @param {Object} options The options object.
    */
-  function compute(options) {
+  function compute(bench, options) {
     options || (options = {});
 
     var async = options.async,
-        bench = options.benchmark,
         elapsed = 0,
         initCount = bench.initCount,
         queue = [],
@@ -2423,7 +2397,7 @@
     function enqueue(count) {
       while (count--) {
         queue.push(bench.clone({
-          '_host': bench,
+          '_original': bench,
           'events': { 'start': [update], 'cycle': [update] }
         }));
       }
@@ -2476,18 +2450,18 @@
           sem,
           variance,
           clone = event.target,
-          now = +new Date,
-          times = bench.times,
           done = bench.aborted,
+          now = +new Date,
           maxedOut = (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
           size = sample.push(clone.times.period),
+          times = bench.times,
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
       // exit early for aborted or unclockable tests
       if (done || clone.hz == Infinity) {
         maxedOut = !(size = sample.length = queue.length = 0);
       }
-      // set host values
+
       if (!done) {
         // sample mean (estimate of the population mean)
         mean = getMean(sample);
@@ -2503,11 +2477,11 @@
         rme = (moe / mean) * 100 || 0;
 
         extend(bench.stats, {
+          'deviation': sd,
+          'mean': mean,
           'moe': moe,
           'rme': rme,
           'sem': sem,
-          'deviation': sd,
-          'mean': mean,
           'size': size,
           'variance': variance
         });
@@ -2520,21 +2494,21 @@
         // https://developer.mozilla.org/en/window.setTimeout#Inactive_tabs
         if (maxedOut) {
           done = true;
-          bench.running = false;
           bench.initCount = initCount;
+          bench.running = false;
           times.elapsed = (now - times.timeStamp) / 1e3;
         }
         if (bench.hz != Infinity) {
-          times.period = mean;
-          times.cycle = mean * bench.count;
           bench.hz = 1 / mean;
+          times.cycle = mean * bench.count;
+          times.period = mean;
         }
       }
       // if time permits, increase sample size to reduce the margin of error
       if (queue.length < 2 && !maxedOut) {
         enqueue(1);
       }
-      // stop the invoke cycle when done
+      // abort the invoke cycle when done
       event.aborted = done;
     }
 
@@ -2545,95 +2519,90 @@
       'args': { 'async': async },
       'queued': true,
       'onCycle': evaluate,
-      'onComplete': function() {
-        bench.emit('complete');
-      }
+      'onComplete': function() { bench.emit('complete'); }
     });
   }
 
   /**
    * Cycles a benchmark until a run `count` can be established.
    * @private
+   * @param {Object} clone The cloned benchmark instance.
    * @param {Object} options The options object.
    */
-  function cycle(options) {
+  function cycle(clone, options) {
     options || (options = {});
 
     var clocked,
         divisor,
         minTime,
         period,
+        deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
         async = options.async,
-        bench = options.benchmark,
-        count = bench.count,
-        deferred = options.deferred,
-        times = bench.times;
+        count = clone.count,
+        times = clone.times;
 
     // continue, if not aborted between cycles
-    if (bench.running) {
-      // host `minTime` is set to `Benchmark.options.minTime` in `clock()`
-      bench.cycles++;
-      clocked = deferred ? deferred.elapsed : clock(bench);
-      minTime = bench.minTime;
+    if (clone.running) {
+      // `minTime` is set to `Benchmark.options.minTime` in `clock()`
+      clone.cycles++;
+      clocked = deferred ? deferred.elapsed : clock(clone);
+      minTime = clone.minTime;
 
-      if (bench.error) {
-        bench.abort();
-        bench.emit('error');
+      if (clone.error) {
+        clone.abort();
+        clone.emit('error');
       }
     }
     // continue, if not errored
-    if (bench.running) {
+    if (clone.running) {
       // time taken to complete last test cycle
       times.cycle = clocked;
       // seconds per operation
       period = times.period = clocked / count;
       // ops per second
-      bench.hz = 1 / period;
+      clone.hz = 1 / period;
       // do we need to do another cycle?
-      bench.running = clocked < minTime;
+      clone.running = clocked < minTime;
       // avoid working our way up to this next time
-      bench.initCount = count;
+      clone.initCount = count;
 
-      if (bench.running) {
+      if (clone.running) {
         // tests may clock at `0` when `initCount` is a small number,
         // to avoid that we set its count to something a bit higher
-        if (!clocked && (divisor = divisors[bench.cycles]) != null) {
+        if (!clocked && (divisor = divisors[clone.cycles]) != null) {
           count = floor(4e6 / divisor);
         }
         // calculate how many more iterations it will take to achive the `minTime`
-        if (count <= bench.count) {
+        if (count <= clone.count) {
           count += Math.ceil((minTime - clocked) / period);
         }
-        bench.running = count != Infinity;
+        clone.running = count != Infinity;
       }
     }
     // should we exit early?
-    if (bench.emit('cycle') === false) {
-      bench.abort();
+    if (clone.emit('cycle') === false) {
+      clone.abort();
     }
     // figure out what to do next
-    if (bench.running) {
+    if (clone.running) {
       // start a new cycle
-      bench.count = count;
+      clone.count = count;
       if (deferred) {
-        (bench._host || bench).compiled.call(deferred, timer);
+        clone.compiled.call(deferred, timer);
+      } else if (async) {
+        delay(clone, function() { cycle(clone, options); });
       } else {
-        call({
-          'async': async,
-          'benchmark': bench,
-          'fn': function() {
-            cycle({ 'async': async, 'benchmark': bench });
-          }
-        });
+        cycle(clone);
       }
-    } else {
+    }
+    else {
       // fix TraceMonkey bug associated with clock fallbacks
       // http://bugzil.la/509069
       if (support.browser) {
         runScript(uid + '=1;delete ' + uid);
       }
       // done
-      bench.emit('complete');
+      clone.emit('complete');
     }
   }
 
@@ -2652,7 +2621,6 @@
    */
   function run(options) {
     var me = this,
-        async = ((async = options && options.async) == null ? me.async : async) && support.timeout,
         event = Event('start');
 
     // set `running` to `false` so `reset()` won't call `abort()`
@@ -2665,14 +2633,19 @@
     me.emit(event);
 
     if (!event.cancelled) {
-      if (me._host) {
+      options = { 'async': ((options = options && options.async) == null ? me.async : options) && support.timeout };
+
+      // for clones created within `compute()`
+      if (me._original) {
         if (me.defer) {
           Deferred(me);
         } else {
-          cycle({ 'async': async, 'benchmark': me });
+          cycle(me, options);
         }
-      } else {
-        compute({ 'async': async, 'benchmark': me });
+      }
+      // for original benchmarks
+      else {
+        compute(me, options);
       }
     }
     return me;
@@ -3291,10 +3264,10 @@
     'invoke': methodize(invoke),
 
     /**
-     * Converts the array to a string.
+     * Converts the suite of benchmarks to a string.
      * @memberOf Benchmark.Suite
      * @param {String} [separator=','] A string to separate each element of the array.
-     * @returns {String} The removed element.
+     * @returns {String} The string.
      */
     'join': [].join,
 
@@ -3315,24 +3288,24 @@
     'pluck': methodize(pluck),
 
     /**
-     * Removes the last element of the host array and returns it.
+     * Removes the last benchmark from the suite and returns it.
      * @memberOf Benchmark.Suite
-     * @returns {Mixed} The removed element.
+     * @returns {Mixed} The removed benchmark.
      */
     'pop': [].pop,
 
     /**
-     * Appends arguments to the end of the array.
+     * Appends benchmarks to the suite.
      * @memberOf Benchmark.Suite
-     * @returns {Number} The array length.
+     * @returns {Number} The suite's new length.
      */
     'push': [].push,
 
     /**
-     * Sorts the elements of the host array.
+     * Sorts the benchmarks of the suite.
      * @memberOf Benchmark.Suite
      * @param {Function} [compareFn=null] A function that defines the sort order.
-     * @returns {Array} The sorted host array.
+     * @returns {Object} The sorted suite.
      */
     'sort': [].sort,
 
