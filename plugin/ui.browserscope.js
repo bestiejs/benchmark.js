@@ -1025,10 +1025,10 @@
   });
 
   // hide the chart while benchmarks are running
-  ui.addListener('start', function() {
+  ui.on('start', function() {
     setMessage(ui.browserscope.texts.wait);
   })
-  .addListener('abort', function() {
+  .on('abort', function() {
     ui.browserscope.render({ 'force': true });
   });
 

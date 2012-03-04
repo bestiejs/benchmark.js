@@ -868,7 +868,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark#addListener');
+  QUnit.module('Benchmark#off');
 
   test('basic', function() {
 
@@ -876,7 +876,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark#removeListener');
+  QUnit.module('Benchmark#on');
 
   test('basic', function() {
 
@@ -887,9 +887,9 @@
   QUnit.module('Benchmark#emit');
 
   test('basic', function() {
-    var args = [],
+    var event,
+        args = [],
         bench = Benchmark(),
-        event = {},
         listener2 = function(eventObject) { eventObject.listener2 = 1 };
 
     bench.on('args', function() { args = slice.call(arguments, 1); });
@@ -897,19 +897,27 @@
     bench.events = {};
     deepEqual(args, ['a', 'b', 'c'], 'emit passed arguments');
 
-    ok(bench.emit('empty'), 'emit empty successful');
-    ok(bench.emit('constructor'), 'emit with name of property on Object.prototype');
+    event = Benchmark.Event('empty');
+    bench.emit(event);
+    ok(!event.cancelled, 'emit empty successful');
 
-    bench.on('success', function() { return 'bogus'; });
-    ok(bench.emit('success'), 'emit successful');
+    event = Benchmark.Event('constructor');
+    bench.emit(event);
+    ok(!event.cancelled, 'emit with name of property on Object.prototype');
 
+    event = Benchmark.Event('success');
+    bench.on('success', function() { return 'x'; });
+    ok(bench.emit(event) === 'x' && !event.cancelled, 'emit successful');
+
+    event = Benchmark.Event('success');
     bench.on('success', function() { return false; });
-    ok(!bench.emit('success'), 'emit unsuccessful');
+    bench.emit(event);
+    ok(event.cancelled, 'emit cancelled');
     bench.events = {};
 
     bench.on('shallowclone', function(eventObject) {
       event = eventObject;
-      bench.removeListener(event.type, listener2);
+      bench.off(event.type, listener2);
     })
     .on('shallowclone', listener2)
     .emit('shallowclone');
@@ -926,10 +934,16 @@
     bench.events = {};
     ok(event.touched, 'emit custom event object');
 
+    event = Benchmark.Event('result');
+    bench.on('result', function() { return 'x'; });
+    bench.emit(event);
+    equal(event.result, 'x', 'event.result');
+    bench.events = {};
+
     bench.on('type', function(eventObj) { event = eventObj; });
     bench.emit('type');
+    equal(event.type, 'type', 'event.type');
     bench.events = {};
-    equal(event.type, 'type', 'emit event.type');
   });
 
   /*--------------------------------------------------------------------------*/
@@ -956,11 +970,9 @@
   QUnit.module('Benchmark.Suite#add');
 
   test('event flow', function() {
-    var args,
-        pair,
-        thisBinding,
-        callbacks = [],
-        callback = function() { callbacks.push([arguments, this]); };
+    var event,
+        events = [],
+        callback = function(event) { events.push(event); };
 
     var suite = Benchmark.Suite('suite', {
       'onAdd': callback,
@@ -986,83 +998,61 @@
     .run({ 'async': false });
 
     // first Suite#onAdd
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'add' && thisBinding.name == 'suite' && args[1].name == 'foo',
+    event = events.shift();
+    ok(event.type == 'add' && event.currentTarget.name == 'suite' && event.target.name == 'foo',
       'passed arguments to Suite#onAdd');
 
     // next we start the Suite because no reset was needed
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'start' && thisBinding.name == 'suite' && args[1].name == 'foo',
+    event = events.shift();
+    ok(event.type == 'start' && event.currentTarget.name == 'suite' && event.target.name == 'foo',
       'passed arguments to Suite#onStart');
 
     // and so start the first benchmark
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'start' && thisBinding.name == 'foo',
+    event = events.shift();
+    ok(event.type == 'start' && event.currentTarget.name == 'foo',
       'passed arguments to Benchmark#onStart');
 
-    // after starting we reset the benchmark
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'reset' && thisBinding.name == 'foo',
-      'passed arguments to Benchmark#onReset');
-
     // oh no! we abort because of an error
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'abort' && thisBinding.name == 'foo',
+    event = events.shift();
+    ok(event.type == 'abort' && event.currentTarget.name == 'foo',
       'passed arguments to Benchmark#onAbort');
 
+    // we reset the benchmark as part of the abort
+    event = events.shift();
+    ok(event.type == 'reset' && event.currentTarget.name == 'foo',
+      'passed arguments to Benchmark#onReset');
+
     // benchmark error triggered
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'error' && thisBinding.name == 'foo',
+    event = events.shift();
+    ok(event.type == 'error' && event.currentTarget.name == 'foo',
       'passed arguments to Benchmark#onError');
 
     // benchmark is cycle is finished
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'cycle' && thisBinding.name == 'foo',
+    event = events.shift();
+    ok(event.type == 'cycle' && event.currentTarget.name == 'foo',
       'passed arguments to Benchmark#onCycle');
 
     // benchmark is complete
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 1 && args[0].type == 'complete' && thisBinding.name == 'foo',
+    event = events.shift();
+    ok(event.type == 'complete' && event.currentTarget.name == 'foo',
       'passed arguments to Benchmark#onComplete');
 
     // the benchmark error triggers a Suite error
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'error' && thisBinding.name == 'suite' && args[1].name == 'foo',
+    event = events.shift();
+    ok(event.type == 'error' && event.currentTarget.name == 'suite' && event.target.name == 'foo',
       'passed arguments to Suite#onError');
 
     // the Suite cycle finishes
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'cycle' && thisBinding.name == 'suite' && args[1].name == 'foo',
+    event = events.shift();
+    ok(event.type == 'cycle' && event.currentTarget.name == 'suite' && event.target.name == 'foo',
       'passed arguments to Suite#onCycle');
 
     // the Suite completes
-    pair = callbacks.shift();
-    args = pair[0];
-    thisBinding = pair[1];
-    ok(args.length == 2 && args[0].type == 'complete' && thisBinding.name == 'suite' && args[1].name == 'foo',
+    event = events.shift();
+    ok(event.type == 'complete' && event.currentTarget.name == 'suite' && event.target.name == 'foo',
       'passed arguments to Suite#onComplete');
 
-    ok(callbacks.length == 0, 'all callbacks executed');
+    ok(events.length == 0, 'all callbacks executed');
   });
 
   /*--------------------------------------------------------------------------*/

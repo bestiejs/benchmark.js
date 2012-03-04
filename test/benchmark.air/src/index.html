@@ -22,8 +22,8 @@
 					'Hello World!'.indexOf('o') > -1;
 				})
 				// add listeners
-				.on('cycle', function(event, bench) {
-					console.log(bench);
+				.on('cycle', function(event) {
+					console.log(event.target);
 				})
 				.on('complete', function() {
 					console.log('Fastest is ' + this.filter('fastest').pluck('name'));

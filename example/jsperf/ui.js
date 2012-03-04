@@ -514,8 +514,9 @@
 
   /*--------------------------------------------------------------------------*/
 
-  ui.on('add', function(event, bench) {
-    var index = ui.benchmarks.length,
+  ui.on('add', function(event) {
+    var bench = event.target,
+        index = ui.benchmarks.length,
         id = index + 1,
         title = $('title-' + id);
 
