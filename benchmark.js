@@ -2495,7 +2495,7 @@
         // per benchmark. To prevent massive wait times, we do this even if the
         // minimum sample size has not been reached. We don't count cycle delays
         // toward the max time because delays may be increased by browsers that
-        // clamp timeouts in inactive tabs.
+        // clamp timeouts for inactive tabs.
         // https://developer.mozilla.org/en/window.setTimeout#Inactive_tabs
         if (maxedOut) {
           done = true;
