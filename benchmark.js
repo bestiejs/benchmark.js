@@ -632,6 +632,17 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * A generic `Function#bind` like method.
+   * @private
+   * @param {Function} fn The function to be bound to `thisArg`.
+   * @param {Mixed} thisArg The `this` binding for the given function.
+   * @returns {Function} The bound function.
+   */
+  function bind(fn, thisArg) {
+    return function() { fn.apply(thisArg, arguments); };
+  }
+
+  /**
    * Creates a function from the given arguments string and body.
    * @private
    * @param {String} args The comma separated function arguments.
@@ -720,7 +731,6 @@
           result = [object, object = Object(object)][0],
           which = options.which,
           allFlag = which == 'all',
-          fn = callback,
           index = -1,
           iteratee = object,
           length = object.length,
@@ -732,9 +742,7 @@
       object = Object(object);
 
       if (thisArg !== undefined) {
-        callback = function(value, key, object) {
-          return fn.call(thisArg, value, key, object);
-        };
+        callback = bind(callback, thisArg);
       }
       // iterate all properties
       if (allFlag && support.getAllKeys) {
@@ -1217,7 +1225,7 @@
    * @memberOf Benchmark
    * @param {Array|Object} object The object to iterate over.
    * @param {Function} callback The function called per iteration.
-   * @param {Object} thisArg The `this` binding for the callback function.
+   * @param {Mixed} thisArg The `this` binding for the callback.
    * @returns {Array|Object} Returns the object iterated over.
    */
   function each(object, callback, thisArg) {
@@ -1281,7 +1289,7 @@
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function|String} callback The function/alias called per iteration.
-   * @param {Object} thisArg The `this` binding for the callback function.
+   * @param {Mixed} thisArg The `this` binding for the callback.
    * @returns {Array} A new array of values that passed callback filter.
    * @example
    *
@@ -1328,18 +1336,15 @@
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
-   * @param {Object} thisArg The `this` binding for the callback function.
+   * @param {Mixed} thisArg The `this` binding for the callback.
    * @returns {Array} Returns the array iterated over.
    */
   function forEach(array, callback, thisArg) {
-    var fn = callback,
-        index = -1,
+    var index = -1,
         length = (array = Object(array)).length >>> 0;
 
     if (thisArg !== undefined) {
-      callback = function(value, index, array) {
-        return fn.call(thisArg, value, index, array);
-      };
+      callback = bind(callback, thisArg);
     }
     while (++index < length) {
       if (index in array &&
@@ -1357,7 +1362,7 @@
    * @memberOf Benchmark
    * @param {Object} object The object to iterate over.
    * @param {Function} callback The function executed per own property.
-   * @param {Object} thisArg The `this` binding for the callback function.
+   * @param {Mixed} thisArg The `this` binding for the callback.
    * @returns {Object} Returns the object iterated over.
    */
   function forOwn(object, callback, thisArg) {
@@ -1657,7 +1662,7 @@
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
    * @param {Function} callback The function called per iteration.
-   * @param {Object} thisArg The `this` binding for the callback function.
+   * @param {Mixed} thisArg The `this` binding for the callback.
    * @returns {Array} A new array of values returned by the callback.
    */
   function map(array, callback, thisArg) {
