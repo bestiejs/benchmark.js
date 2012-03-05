@@ -101,7 +101,7 @@
      */
     'cycle': function() {
       var bench = this,
-          size = bench.stats.size;
+          size = bench.stats.sample.length;
 
       if (!bench.aborted && !has.operaMini) {
         setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +

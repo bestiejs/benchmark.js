@@ -369,8 +369,8 @@
     setOptions(me, options);
     me.id || (me.id = ++counter);
     me.fn == null && (me.fn = fn);
-    me.stats = extend({}, me.stats);
-    me.times = extend({}, me.times);
+    me.stats = deepClone(me.stats);
+    me.times = deepClone(me.times);
   }
 
   /**
@@ -3110,7 +3110,7 @@
        * @memberOf Benchmark#stats
        * @type Array
        */
-      'sample': null,
+      'sample': [],
 
       /**
        * The sample variance.
