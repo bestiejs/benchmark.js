@@ -11,7 +11,7 @@
   var counter = 0;
 
   /** Detect DOM document object */
-  var document = isHostType(window, 'document') && document;
+  var document = isHostType(window, 'document') && window.document;
 
   /** Detect free variable `define` */
   var freeDefine = typeof define == 'function' &&
