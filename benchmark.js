@@ -2887,6 +2887,9 @@
      */
     'version': '1.0.0-pre',
 
+    // an object of environment/feature detection flags
+    'support': support,
+
     // clone objects
     'deepClone': deepClone,
 
@@ -3155,9 +3158,6 @@
        */
       'timeStamp': 0
     },
-
-    // an object of environment/feature detection flags
-    'support': support,
 
     // aborts benchmark (does not record times)
     'abort': abort,

@@ -638,7 +638,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2988" title="View in source">`Benchmark#aborted`</a>
+### <a id="Benchmark:aborted" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2991" title="View in source">`Benchmark#aborted`</a>
 *(Boolean)*: A flag to indicate if the benchmark is aborted.
 [&#9650;][1]
 
@@ -647,7 +647,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:compiled" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2967" title="View in source">`Benchmark#compiled`</a>
+### <a id="Benchmark:compiled" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2970" title="View in source">`Benchmark#compiled`</a>
 *(Function, String)*: The compiled test function.
 [&#9650;][1]
 
@@ -656,7 +656,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:count" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2946" title="View in source">`Benchmark#count`</a>
+### <a id="Benchmark:count" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2949" title="View in source">`Benchmark#count`</a>
 *(Number)*: The number of times a test was executed.
 [&#9650;][1]
 
@@ -665,7 +665,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2953" title="View in source">`Benchmark#cycles`</a>
+### <a id="Benchmark:cycles" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2956" title="View in source">`Benchmark#cycles`</a>
 *(Number)*: The number of cycles performed while benchmarking.
 [&#9650;][1]
 
@@ -674,7 +674,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:error" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2974" title="View in source">`Benchmark#error`</a>
+### <a id="Benchmark:error" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2977" title="View in source">`Benchmark#error`</a>
 *(Object, Null)*: The error object if the test failed.
 [&#9650;][1]
 
@@ -683,7 +683,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:fn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2981" title="View in source">`Benchmark#fn`</a>
+### <a id="Benchmark:fn" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2984" title="View in source">`Benchmark#fn`</a>
 *(Function, String)*: The test to benchmark.
 [&#9650;][1]
 
@@ -692,7 +692,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:hz" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2960" title="View in source">`Benchmark#hz`</a>
+### <a id="Benchmark:hz" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2963" title="View in source">`Benchmark#hz`</a>
 *(Number)*: The number of executions per second.
 [&#9650;][1]
 
@@ -701,7 +701,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2995" title="View in source">`Benchmark#running`</a>
+### <a id="Benchmark:running" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2998" title="View in source">`Benchmark#running`</a>
 *(Boolean)*: A flag to indicate if the benchmark is running.
 [&#9650;][1]
 
@@ -710,7 +710,7 @@ Benchmark constructor.
 
 <!-- div -->
 
-### <a id="Benchmark:setup" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3057" title="View in source">`Benchmark#setup`</a>
+### <a id="Benchmark:setup" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3060" title="View in source">`Benchmark#setup`</a>
 *(Function, String)*: Compiled into the test and executed immediately **before** the test loop.
 [&#9650;][1]
 
@@ -776,7 +776,7 @@ var a = 0;
 
 <!-- div -->
 
-### <a id="Benchmark:teardown" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3064" title="View in source">`Benchmark#teardown`</a>
+### <a id="Benchmark:teardown" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3067" title="View in source">`Benchmark#teardown`</a>
 *(Function, String)*: Compiled into the test and executed immediately **after** the test loop.
 [&#9650;][1]
 
@@ -1266,7 +1266,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3071" title="View in source">`Benchmark#stats`</a>
+### <a id="Benchmark:stats" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3074" title="View in source">`Benchmark#stats`</a>
 *(Object)*: An object of stats including mean, margin or error, and standard deviation.
 [&#9650;][1]
 
@@ -1275,7 +1275,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.deviation" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3099" title="View in source">`Benchmark#stats.deviation`</a>
+### <a id="Benchmark:stats.deviation" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3102" title="View in source">`Benchmark#stats.deviation`</a>
 *(Number)*: The sample standard deviation.
 [&#9650;][1]
 
@@ -1284,7 +1284,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.mean" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3106" title="View in source">`Benchmark#stats.mean`</a>
+### <a id="Benchmark:stats.mean" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3109" title="View in source">`Benchmark#stats.mean`</a>
 *(Number)*: The sample arithmetic mean.
 [&#9650;][1]
 
@@ -1293,7 +1293,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.moe" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3078" title="View in source">`Benchmark#stats.moe`</a>
+### <a id="Benchmark:stats.moe" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3081" title="View in source">`Benchmark#stats.moe`</a>
 *(Number)*: The margin of error.
 [&#9650;][1]
 
@@ -1302,7 +1302,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.rme" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3085" title="View in source">`Benchmark#stats.rme`</a>
+### <a id="Benchmark:stats.rme" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3088" title="View in source">`Benchmark#stats.rme`</a>
 *(Number)*: The relative margin of error *(expressed as a percentage of the mean)*.
 [&#9650;][1]
 
@@ -1311,7 +1311,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.sample" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3113" title="View in source">`Benchmark#stats.sample`</a>
+### <a id="Benchmark:stats.sample" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3116" title="View in source">`Benchmark#stats.sample`</a>
 *(Array)*: The array of sampled periods.
 [&#9650;][1]
 
@@ -1320,7 +1320,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.sem" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3092" title="View in source">`Benchmark#stats.sem`</a>
+### <a id="Benchmark:stats.sem" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3095" title="View in source">`Benchmark#stats.sem`</a>
 *(Number)*: The standard error of the mean.
 [&#9650;][1]
 
@@ -1329,7 +1329,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:stats.variance" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3120" title="View in source">`Benchmark#stats.variance`</a>
+### <a id="Benchmark:stats.variance" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3123" title="View in source">`Benchmark#stats.variance`</a>
 *(Number)*: The sample variance.
 [&#9650;][1]
 
@@ -1345,7 +1345,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3128" title="View in source">`Benchmark#times`</a>
+### <a id="Benchmark:times" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3131" title="View in source">`Benchmark#times`</a>
 *(Object)*: An object of timing data including cycle, elapsed, period, start, and stop.
 [&#9650;][1]
 
@@ -1354,7 +1354,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.cycle" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3135" title="View in source">`Benchmark#times.cycle`</a>
+### <a id="Benchmark:times.cycle" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3138" title="View in source">`Benchmark#times.cycle`</a>
 *(Number)*: The time taken to complete the last cycle *(secs)*.
 [&#9650;][1]
 
@@ -1363,7 +1363,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3142" title="View in source">`Benchmark#times.elapsed`</a>
+### <a id="Benchmark:times.elapsed" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3145" title="View in source">`Benchmark#times.elapsed`</a>
 *(Number)*: The time taken to complete the benchmark *(secs)*.
 [&#9650;][1]
 
@@ -1372,7 +1372,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.period" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3149" title="View in source">`Benchmark#times.period`</a>
+### <a id="Benchmark:times.period" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3152" title="View in source">`Benchmark#times.period`</a>
 *(Number)*: The time taken to execute the test once *(secs)*.
 [&#9650;][1]
 
@@ -1381,7 +1381,7 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-### <a id="Benchmark:times.timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3156" title="View in source">`Benchmark#times.timeStamp`</a>
+### <a id="Benchmark:times.timeStamp" href="https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3159" title="View in source">`Benchmark#times.timeStamp`</a>
 *(Number)*: A timestamp of when the benchmark started *(ms)*.
 [&#9650;][1]
 
