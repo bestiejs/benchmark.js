@@ -67,13 +67,46 @@
    * T-Distribution two-tailed critical values for 95% confidence
    * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm
    */
-  var distribution = {
+  var tTable = {
     '1':  12.706,'2':  4.303, '3':  3.182, '4':  2.776, '5':  2.571, '6':  2.447,
     '7':  2.365, '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
     '13': 2.16,  '14': 2.145, '15': 2.131, '16': 2.12,  '17': 2.11,  '18': 2.101,
     '19': 2.093, '20': 2.086, '21': 2.08,  '22': 2.074, '23': 2.069, '24': 2.064,
     '25': 2.06,  '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
     'infinity': 1.96
+  };
+
+  /**
+   * Critical Mann-Whitney U-values for 95% confidence
+   * http://www.saburchill.com/IBbiology/stats/003.html
+   */
+  var uTable = {
+    '5':  [0, 1, 2],
+    '6':  [1, 2, 3, 5],
+    '7':  [1, 3, 5, 6, 8],
+    '8':  [2, 4, 6, 8, 10, 13],
+    '9':  [2, 4, 7, 10, 12, 15, 17],
+    '10': [3, 5, 8, 11, 14, 17, 20, 23],
+    '11': [3, 6, 9, 13, 16, 19, 23, 26, 30],
+    '12': [4, 7, 11, 14, 18, 22, 26, 29, 33, 37],
+    '13': [4, 8, 12, 16, 20, 24, 28, 33, 37, 41, 45],
+    '14': [5, 9, 13, 17, 22, 26, 31, 36, 40, 45, 50, 55],
+    '15': [5, 10, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64],
+    '16': [6, 11, 15, 21, 26, 31, 37, 42, 47, 53, 59, 64, 70, 75],
+    '17': [6, 11, 17, 22, 28, 34, 39, 45, 51, 57, 63, 67, 75, 81, 87],
+    '18': [7, 12, 18, 24, 30, 36, 42, 48, 55, 61, 67, 74, 80, 86, 93, 99],
+    '19': [7, 13, 19, 25, 32, 38, 45, 52, 58, 65, 72, 78, 85, 92, 99, 106, 113],
+    '20': [8, 14, 20, 27, 34, 41, 48, 55, 62, 69, 76, 83, 90, 98, 105, 112, 119, 127],
+    '21': [8, 15, 22, 29, 36, 43, 50, 58, 65, 73, 80, 88, 96, 103, 111, 119, 126, 134, 142],
+    '22': [9, 16, 23, 30, 38, 45, 53, 61, 69, 77, 85, 93, 101, 109, 117, 125, 133, 141, 150, 158],
+    '23': [9, 17, 24, 32, 40, 48, 56, 64, 73, 81, 89, 98, 106, 115, 123, 132, 140, 149, 157, 166, 175],
+    '24': [10, 17, 25, 33, 42, 50, 59, 67, 76, 85, 94, 102, 111, 120, 129, 138, 147, 156, 165, 174, 183, 192],
+    '25': [10, 18, 27, 35, 44, 53, 62, 71, 80, 89, 98, 107, 117, 126, 135, 145, 154, 163, 173, 182, 192, 201, 211],
+    '26': [11, 19, 28, 37, 46, 55, 64, 74, 83, 93, 102, 112, 122, 132, 141, 151, 161, 171, 181, 191, 200, 210, 220, 230],
+    '27': [11, 20, 29, 38, 48, 57, 67, 77, 87, 97, 107, 118, 125, 138, 147, 158, 168, 178, 188, 199, 209, 219, 230, 240, 250],
+    '28': [12, 21, 30, 40, 50, 60, 70, 80, 90, 101, 111, 122, 132, 143, 154, 164, 175, 186, 196, 207, 218, 228, 239, 250, 261, 272],
+    '29': [13, 22, 32, 42, 52, 62, 73, 83, 94, 105, 116, 127, 138, 149, 160, 171, 182, 193, 204, 215, 226, 238, 249, 260, 271, 282, 294],
+    '30': [13, 23, 33, 43, 54, 65, 76, 87, 98, 109, 120, 131, 143, 154, 166, 177, 189, 200, 212, 223, 235, 247, 258, 270, 282, 293, 305, 317]
   };
 
   /**
@@ -352,7 +385,6 @@
       return new Deferred(clone);
     }
     me.benchmark = clone;
-    me._original = clone._original;
     clock(me);
   }
 
@@ -801,16 +833,6 @@
       return result;
     };
     return forProps.apply(null, arguments);
-  }
-
-  /**
-   * Gets the critical value for the specified degrees of freedom.
-   * @private
-   * @param {Number} df The degrees of freedom.
-   * @returns {Number} The critical value.
-   */
-  function getCriticalValue(df) {
-    return distribution[Math.round(df) || 1] || distribution.infinity;
   }
 
   /**
@@ -2047,19 +2069,48 @@
    * @returns {Number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
    */
   function compare(other) {
-    // unpaired two-sample t-test assuming equal variance
-    // http://en.wikipedia.org/wiki/Student's_t-test
-    // http://www.chem.utoronto.ca/coursenotes/analsci/StatsTutorial/12tailed.html
-    var a = this.stats,
-        b = other.stats,
-        df = a.size + b.size - 2,
-        near = abs(1 - a.mean / b.mean) < 0.055 && a.rme < 3 && b.rme < 3,
-        pooled = (((a.size - 1) * a.variance) + ((b.size - 1) * b.variance)) / df,
-        tstat = (a.mean - b.mean) / sqrt(pooled * (1 / a.size + 1 / b.size));
+    var critical,
+        zStat,
+        sample1 = this.stats.sample,
+        sample2 = other.stats.sample,
+        size1 = sample1.length,
+        size2 = sample2.length,
+        maxSize = max(size1, size2),
+        minSize = min(size1, size2),
+        u1 = getU(sample1, sample2),
+        u2 = getU(sample2, sample1),
+        u = min(u1, u2);
 
-    // check if the means aren't close and the t-statistic is significant
-    // (a larger `mean` indicates a slower benchmark)
-    return !near && abs(tstat) > getCriticalValue(df) ? (tstat > 0 ? -1 : 1) : 0;
+    function getScore(xA, sampleB) {
+      return reduce(sampleB, function(total, xB) {
+        return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
+      }, 0);
+    }
+
+    function getU(sampleA, sampleB) {
+      return reduce(sampleA, function(total, xA) {
+        return total + getScore(xA, sampleB);
+      }, 0);
+    }
+
+    function getZ(u) {
+      return (u - ((size1 * size2) / 2)) / sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
+    }
+
+    // reject the null hyphothesis the two samples come from the
+    // same population (i.e. have the same median) if...
+    if (size1 + size2 > 30) {
+      // ...the z-stat is greater than 1.96 or less than -1.96
+      // http://www.statisticslectures.com/topics/mannwhitneyu/
+      zStat = getZ(u);
+      return abs(zStat) > 1.96 ? (zStat > 0 ? -1 : 1) : 0;
+    }
+    else {
+      // ...the U value is less than or equal the critical U value
+      // http://www.geoib.com/mann-whitney-u-test.html
+      critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
+      return u <= critical ? (u == u1 ? -1 : 1) : 0;
+    }
   }
 
   /**
@@ -2121,7 +2172,7 @@
         hz = me.hz,
         id = me.id,
         stats = me.stats,
-        size = stats.size,
+        size = stats.sample.length,
         pm = support.java ? '+/-' : '\xb1',
         result = me.name || (typeof id == 'number' ? '<Test #' + id + '>' : id);
 
@@ -2190,7 +2241,7 @@
         // compile in setup/teardown functions and the test loop
         compiled = bench.compiled = createFunction(preprocess('t$'), interpolate(
           preprocess(deferred
-            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$._original,f$=m$.fn;' +
+            ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$.benchmark._original,f$=m$.fn;' +
               'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
               'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}' +
               'try{#{fn}}catch(e$){f$(d$)}return{}'
@@ -2213,7 +2264,7 @@
             bench.count = count;
           }
         } catch(e) {
-          compiled = false;
+          compiled = null;
           clone.error = e || new Error(String(e));
           bench.count = count;
         }
@@ -2238,7 +2289,7 @@
           catch(e) {
             bench.count = count;
             if (clone.error) {
-              compiled = false;
+              compiled = null;
             } else {
               bench.compiled = compiled;
               clone.error = e || new Error(String(e));
@@ -2381,6 +2432,8 @@
     return clock.apply(null, arguments);
   }
 
+  /*--------------------------------------------------------------------------*/
+
   /**
    * Computes stats on benchmark results.
    * @private
@@ -2393,6 +2446,7 @@
     var async = options.async,
         elapsed = 0,
         initCount = bench.initCount,
+        minSamples = bench.minSamples,
         queue = [],
         sample = [];
 
@@ -2448,7 +2502,9 @@
      * Determines if more clones should be queued or if cycling should stop.
      */
     function evaluate(event) {
-      var mean,
+      var critical,
+          df,
+          mean,
           moe,
           rme,
           sd,
@@ -2457,8 +2513,8 @@
           clone = event.target,
           done = bench.aborted,
           now = +new Date,
-          maxedOut = (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
           size = sample.push(clone.times.period),
+          maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
           times = bench.times,
           varOf = function(sum, x) { return sum + pow(x - mean, 2); };
 
@@ -2476,8 +2532,12 @@
         sd = sqrt(variance);
         // standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean)
         sem = sd / sqrt(size);
+        // degrees of freedom
+        df = size - 1;
+        // critical value
+        critical = tTable[Math.round(df) || 1] || tTable.infinity;
         // margin of error
-        moe = sem * getCriticalValue(size - 1);
+        moe = sem * critical;
         // relative margin of error
         rme = (moe / mean) * 100 || 0;
 
@@ -2486,8 +2546,8 @@
           'mean': mean,
           'moe': moe,
           'rme': rme,
+          'sample': sample,
           'sem': sem,
-          'size': size,
           'variance': variance
         });
 
@@ -2518,7 +2578,7 @@
     }
 
     // init queue and begin
-    enqueue(bench.minSamples);
+    enqueue(minSamples);
     invoke(queue, {
       'name': 'run',
       'args': { 'async': async },
@@ -2527,6 +2587,8 @@
       'onComplete': function() { bench.emit('complete'); }
     });
   }
+
+  /*--------------------------------------------------------------------------*/
 
   /**
    * Cycles a benchmark until a run `count` can be established.
@@ -2610,6 +2672,8 @@
       clone.emit('complete');
     }
   }
+
+  /*--------------------------------------------------------------------------*/
 
   /**
    * Runs the benchmark.
@@ -3042,11 +3106,11 @@
       'mean': 0,
 
       /**
-       * The sample size.
+       * The array of sampled periods.
        * @memberOf Benchmark#stats
-       * @type Number
+       * @type Array
        */
-      'size': 0,
+      'sample': null,
 
       /**
        * The sample variance.
@@ -3164,7 +3228,7 @@
   extend(Event.prototype, {
 
     /**
-     * The object the event was register to.
+     * The object whose listeners are currently being processed.
      * @memberOf Benchmark.Event
      * @type Object|Null
      */
@@ -3178,7 +3242,7 @@
     'result': undefined,
 
     /**
-     * The object on which the event occurred.
+     * The object to which the event was originally emitted.
      * @memberOf Benchmark.Event
      * @type Object|Null
      */
