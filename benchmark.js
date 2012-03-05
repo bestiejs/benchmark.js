@@ -2109,7 +2109,7 @@
       // ...the U value is less than or equal the critical U value
       // http://www.geoib.com/mann-whitney-u-test.html
       critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
-      return u <= critical ? (u == u1 ? -1 : 1) : 0;
+      return u <= critical ? (u == u1 ? 1 : -1) : 0;
     }
   }
 
