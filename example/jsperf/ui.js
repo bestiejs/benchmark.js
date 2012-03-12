@@ -707,11 +707,11 @@
   else {
     // short circuit unusable methods
     ui.render = function() { };
-    ui.removeListener('start cycle complete');
+    ui.off('start cycle complete');
     setTimeout(function() {
-      ui.removeListener();
+      ui.off();
       ui.browserscope.post = function() { };
-      invoke(ui.benchmarks, 'removeListener');
+      invoke(ui.benchmarks, 'off');
     }, 1);
   }
 
