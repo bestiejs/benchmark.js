@@ -2357,7 +2357,7 @@
      * template tokens with content.
      */
     function preprocess(code) {
-      return interpolate(code, template).replace(/\$/g, /\d+/.exec(uid));
+      return interpolate(code, template).replace(/\$/g, /\d+/.exec(uid).join());
     }
 
     /*------------------------------------------------------------------------*/
