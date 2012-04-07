@@ -11,7 +11,7 @@
   var counter = 0;
 
   /** Detect DOM document object */
-  var document = isHostType(window, 'document') && window.document;
+  var doc = isHostType(window, 'document') && document;
 
   /** Detect free variable `define` */
   var freeDefine = typeof define == 'function' &&
@@ -46,7 +46,7 @@
   var toString = {}.toString;
 
   /** Used to prevent a `removeChild` memory leak in IE < 9 */
-  var trash = document && document.createElement('div');
+  var trash = doc && doc.createElement('div');
 
   /** Used to integrity check compiled tests */
   var uid = 'uid' + (+new Date);
@@ -138,7 +138,7 @@
      * @memberOf Benchmark.support
      * @type Boolean
      */
-    support.browser = document && isHostType(window, 'navigator');
+    support.browser = doc && isHostType(window, 'navigator');
 
     /**
      * Detect if strings support accessing characters by index.
@@ -220,7 +220,7 @@
   }());
 
   /**
-   * Timer utility object used by `clock()` and `Deferred#resolve`.
+   * Timer object used by `clock()` and `Deferred#resolve`.
    * @private
    * @type Object
    */
@@ -1007,8 +1007,8 @@
    */
   function runScript(code) {
     var anchor = freeDefine ? define.amd : Benchmark,
-        script = document.createElement('script'),
-        sibling = document.getElementsByTagName('script')[0],
+        script = doc.createElement('script'),
+        sibling = doc.getElementsByTagName('script')[0],
         parent = sibling.parentNode,
         prop = uid + 'runScript',
         prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
@@ -1019,7 +1019,7 @@
     try {
       // remove the inserted script *before* running the code to avoid differences
       // in the expected script element count/order of the document.
-      script.appendChild(document.createTextNode(prefix + code));
+      script.appendChild(doc.createTextNode(prefix + code));
       anchor[prop] = function() { destroyElement(script); };
     } catch(e) {
       parent = parent.cloneNode(false);
@@ -1045,7 +1045,7 @@
           forEach(key.split(' '), function(key) {
             bench.on(key.slice(2).toLowerCase(), value);
           });
-        } else {
+        } else if (!hasKey(bench, key)) {
           bench[key] = deepClone(value);
         }
       }
@@ -1470,7 +1470,8 @@
    */
   function interpolate(string, object) {
     forOwn(object, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
+      // escape regexp special characters in `key`
+      string = string.replace(RegExp('#\\{' + key.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1') + '\\}', 'g'), value);
     });
     return string;
   }
@@ -1634,7 +1635,7 @@
       bench = result[index];
       eventProps.type = 'start';
       eventProps.target = bench;
-      options.onStart.call(benches, Event(eventProps), bench);
+      options.onStart.call(benches, Event(eventProps));
 
       // end early if the suite was aborted in an "onStart" listener
       if (benches.aborted && benches.constructor == Suite && name == 'run') {
@@ -1720,7 +1721,7 @@
   function reduce(array, callback, accumulator) {
     var noaccum = arguments.length < 3;
     forEach(array, function(value, index) {
-      accumulator = noaccum ? (noaccum = 0, value) : callback(accumulator, value, index, array);
+      accumulator = noaccum ? (noaccum = false, value) : callback(accumulator, value, index, array);
     });
     return accumulator;
   }
@@ -1739,7 +1740,8 @@
         resetting = calledBy.resetSuite;
 
     if (me.running) {
-      me.emit(event = Event('abort'));
+      event = Event('abort');
+      me.emit(event);
       if (!event.cancelled || resetting) {
         // avoid infinite recursion
         calledBy.abortSuite = true;
@@ -1929,6 +1931,21 @@
   }
 
   /**
+   * Returns an array of event listeners for a given type that can be manipulated
+   * to add or remove listeners.
+   *
+   * @memberOf Benchmark, Benchmark.Suite
+   * @param {String} type The event type.
+   * @returns {Array} The listeners array.
+   */
+  function listeners(type) {
+    var me = this,
+        events = me.events || (me.events = {});
+
+    return hasKey(events, type) ? events[type] : (events[type] = []);
+  }
+
+  /**
    * Unregisters a listener for the specified event type(s),
    * or unregisters all listeners for the specified event type(s),
    * or unregisters all listeners for all event types.
@@ -2015,7 +2032,8 @@
         resetting = calledBy.reset;
 
     if (me.running) {
-      me.emit(event = Event('abort'));
+      event = Event('abort');
+      me.emit(event);
       if (!event.cancelled || resetting) {
         // avoid infinite recursion
         calledBy.abort = true;
@@ -2071,7 +2089,8 @@
   function compare(other) {
     var critical,
         zStat,
-        sample1 = this.stats.sample,
+        me = this,
+        sample1 = me.stats.sample,
         sample2 = other.stats.sample,
         size1 = sample1.length,
         size2 = sample2.length,
@@ -2097,6 +2116,10 @@
       return (u - ((size1 * size2) / 2)) / sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
     }
 
+    // exit early if comparing the same benchmark
+    if (me == other) {
+      return 0;
+    }
     // reject the null hyphothesis the two samples come from the
     // same population (i.e. have the same median) if...
     if (size1 + size2 > 30) {
@@ -2105,12 +2128,10 @@
       zStat = getZ(u);
       return abs(zStat) > 1.96 ? (zStat > 0 ? -1 : 1) : 0;
     }
-    else {
-      // ...the U value is less than or equal the critical U value
-      // http://www.geoib.com/mann-whitney-u-test.html
-      critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
-      return u <= critical ? (u == u1 ? 1 : -1) : 0;
-    }
+    // ...the U value is less than or equal the critical U value
+    // http://www.geoib.com/mann-whitney-u-test.html
+    critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
+    return u <= critical ? (u == u1 ? 1 : -1) : 0;
   }
 
   /**
@@ -2123,7 +2144,7 @@
         event,
         me = this,
         index = 0,
-        changed = { 'length': 0 },
+        changes = { 'length': 0 },
         queue = { 'length': 0 };
 
     if (me.running && !calledBy.abort) {
@@ -2138,21 +2159,43 @@
       data = { 'destination': me, 'source': extend({}, me.constructor.prototype, me.options) };
       do {
         forOwn(data.source, function(value, key) {
-          var destination = data.destination,
+          var changed,
+              destination = data.destination,
               currValue = destination[key];
 
-          if (value && isClassOf(value, 'Object')) {
+          if (value && typeof value == 'object') {
+            if (isClassOf(value, 'Array')) {
+              // check if an array value has changed to a non-array value
+              if (!isClassOf(currValue, 'Array')) {
+                changed = currValue = [];
+              }
+              // or has changed its length
+              if (currValue.length != value.length) {
+                changed = currValue = currValue.slice(0, value.length);
+                currValue.length = value.length;
+              }
+            }
+            // check if an object has changed to a non-object value
+            else if (!currValue || typeof currValue != 'object') {
+              changed = currValue = {};
+            }
+            // register a changed object
+            if (changed) {
+              changes[changes.length++] = { 'destination': destination, 'key': key, 'value': currValue };
+            }
             queue[queue.length++] = { 'destination': currValue, 'source': value };
           }
+          // register a changed primitive
           else if (value !== currValue && !(value == null || isClassOf(value, 'Function'))) {
-            changed[changed.length++] = { 'destination': destination, 'key': key, 'value': value };
+            changes[changes.length++] = { 'destination': destination, 'key': key, 'value': value };
           }
         });
       }
       while ((data = queue[index++]));
 
-      if (changed.length && (me.emit(event = Event('reset')), !event.cancelled)) {
-        forEach(changed, function(data) {
+      // if changed emit the `reset` event and if it isn't cancelled reset the benchmark
+      if (changes.length && (me.emit(event = Event('reset')), !event.cancelled)) {
+        forEach(changes, function(data) {
           data.destination[data.key] = data.value;
         });
       }
@@ -2174,7 +2217,7 @@
         stats = me.stats,
         size = stats.sample.length,
         pm = support.java ? '+/-' : '\xb1',
-        result = me.name || (typeof id == 'number' ? '<Test #' + id + '>' : id);
+        result = me.name || (isNaN(id) ? id : '<Test #' + id + '>');
 
     if (error) {
       result += ': ' + join(error);
@@ -2202,7 +2245,7 @@
     // lazy define for hi-res timers
     clock = function(clone) {
       var deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
-          bench = clone._original || clone,
+          bench = clone._original,
           fn = bench.fn,
           fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '',
           stringable = isStringable(fn);
@@ -2242,9 +2285,11 @@
         compiled = bench.compiled = createFunction(preprocess('t$'), interpolate(
           preprocess(deferred
             ? 'var d$=this,#{fnArg}=d$,r$=d$.resolve,m$=d$.benchmark._original,f$=m$.fn;' +
-              'if(!d$.cycles){d$.resolve=function(){d$.resolve=r$;r$.call(d$);' +
-              'if(d$.cycles==m$.count){#{teardown}\n}};#{setup}\nt$.start(d$);}' +
-              'try{#{fn}}catch(e$){f$(d$)}return{}'
+              'if(!d$.cycles){' +
+              'd$.fn=function(){var #{fnArg}=d$;if(typeof f$=="function"){try{#{fn}}catch(e$){f$(d$)}}else{#{fn}}};' +
+              'd$.resolve=function(){d$.resolve=r$;r$.call(d$);if(d$.cycles==m$.count){#{teardown}\n}};' +
+              '#{setup}\nt$.start(d$);}' +
+              'd$.fn();return{}'
             : 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count,n$=t$.ns;#{setup}\n#{begin};' +
               'while(i$--){#{fn}\n}#{end};#{teardown}\nreturn{elapsed:r$,uid:"#{uid}"}'),
           source
@@ -2363,7 +2408,7 @@
     /*------------------------------------------------------------------------*/
 
     // detect nanosecond support from a Java applet
-    each(document && document.applets || [], function(element) {
+    each(doc && doc.applets || [], function(element) {
       return !(timer.ns = applet = 'nanoTime' in element && element);
     });
 
@@ -2457,13 +2502,13 @@
       while (count--) {
         queue.push(bench.clone({
           '_original': bench,
-          'events': { 'start': [update], 'cycle': [update] }
+          'events': { 'abort': [update], 'cycle': [update], 'error': [update], 'start': [update] }
         }));
       }
     }
 
     /**
-     * Updates the clone/host benchmarks to keep their data in sync.
+     * Updates the clone/original benchmarks to keep their data in sync.
      */
     function update(event) {
       var clone = this,
@@ -2471,29 +2516,24 @@
           type = event.type;
 
       if (bench.running) {
-        if (type == 'cycle') {
-          if (clone.error) {
-            bench.abort();
-            bench.error = clone.error;
-            bench.emit('error');
-          }
-          else {
-            // Note: the host's bench.count prop is updated in `clock()`
-            bench.hz = clone.hz;
-            bench.initCount = clone.initCount;
-            bench.times.period = clone.times.period;
-            if (cycles > bench.cycles) {
-              bench.cycles = cycles;
-            }
-          }
-          bench.emit(type);
-        }
-        else {
-          // reached in clone's onStart
-          // Note: clone.minTime prop is inited in `clock()`
+        if (type == 'start') {
+          // Note: `clone.minTime` prop is inited in `clock()`
           clone.count = bench.initCount;
         }
+        else {
+          if (type == 'error') {
+            bench.error = clone.error;
+          }
+          if (type == 'abort') {
+            bench.abort();
+            bench.emit('cycle');
+          } else {
+            event.currentTarget = event.target = bench;
+            bench.emit(event);
+          }
+        }
       } else if (bench.aborted) {
+        clone.events.abort.length = 0;
         clone.abort();
       }
     }
@@ -2551,16 +2591,16 @@
           'variance': variance
         });
 
-        // Exit early when the elapsed time exceeds the maximum time allowed
-        // per benchmark. To prevent massive wait times, we do this even if the
-        // minimum sample size has not been reached. We don't count cycle delays
-        // toward the max time because delays may be increased by browsers that
-        // clamp timeouts for inactive tabs.
+        // Abort the cycle loop when the minimum sample size has been collected
+        // and the elapsed time exceeds the maximum time allowed per benchmark.
+        // We don't count cycle delays toward the max time because delays may be
+        // increased by browsers that clamp timeouts for inactive tabs.
         // https://developer.mozilla.org/en/window.setTimeout#Inactive_tabs
         if (maxedOut) {
-          done = true;
+          // reset the `initCount` in case the benchmark is rerun
           bench.initCount = initCount;
           bench.running = false;
+          done = true;
           times.elapsed = (now - times.timeStamp) / 1e3;
         }
         if (bench.hz != Infinity) {
@@ -2600,38 +2640,49 @@
     options || (options = {});
 
     var clocked,
+        cycles,
         divisor,
+        event,
         minTime,
         period,
         deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
         async = options.async,
+        bench = clone._original,
         count = clone.count,
         times = clone.times;
 
     // continue, if not aborted between cycles
     if (clone.running) {
       // `minTime` is set to `Benchmark.options.minTime` in `clock()`
-      clone.cycles++;
+      cycles = clone.cycles++;
       clocked = deferred ? deferred.elapsed : clock(clone);
       minTime = clone.minTime;
 
+      if (cycles > bench.cycles) {
+        bench.cycles = cycles;
+      }
       if (clone.error) {
-        clone.abort();
-        clone.emit('error');
+        event = Event('error');
+        event.message = clone.error;
+        clone.emit(event);
+        if (!event.cancelled) {
+          clone.abort();
+        }
       }
     }
+
     // continue, if not errored
     if (clone.running) {
       // time taken to complete last test cycle
-      times.cycle = clocked;
+      bench.times.cycle = times.cycle = clocked;
       // seconds per operation
-      period = times.period = clocked / count;
+      period = bench.times.period = times.period = clocked / count;
       // ops per second
-      clone.hz = 1 / period;
+      bench.hz = clone.hz = 1 / period;
+      // avoid working our way up to this next time
+      bench.initCount = clone.initCount = count;
       // do we need to do another cycle?
       clone.running = clocked < minTime;
-      // avoid working our way up to this next time
-      clone.initCount = count;
 
       if (clone.running) {
         // tests may clock at `0` when `initCount` is a small number,
@@ -2647,7 +2698,8 @@
       }
     }
     // should we exit early?
-    if (clone.emit('cycle') === false) {
+    event = Event('cycle');
+    if (event.aborted) {
       clone.abort();
     }
     // figure out what to do next
@@ -2760,11 +2812,11 @@
       'delay': 0.005,
 
       /**
-       * Displayed by Benchmark#toString when a `name` is not available (auto-generated if `null`).
+       * Displayed by Benchmark#toString when a `name` is not available (auto-generated if absent).
        * @memberOf Benchmark.options
-       * @type String|Null
+       * @type String
        */
-      'id': null,
+      'id': undefined,
 
       /**
        * The default number of times to execute a test on a benchmark's first cycle.
@@ -2798,9 +2850,51 @@
       /**
        * The name of the benchmark.
        * @memberOf Benchmark.options
-       * @type String|Null
+       * @type String
        */
-      'name': null
+      'name': undefined,
+
+      /**
+       * An event listener called when the benchmark is aborted.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onAbort': undefined,
+
+      /**
+       * An event listener called when the benchmark completes running.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onComplete': undefined,
+
+      /**
+       * An event listener called after each run cycle.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onCycle': undefined,
+
+      /**
+       * An event listener called when a test errors.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onError': undefined,
+
+      /**
+       * An event listener called when the benchmark is reset.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onReset': undefined,
+
+      /**
+       * An event listener called when the benchmark starts running.
+       * @memberOf Benchmark.options
+       * @type Function
+       */
+      'onStart': undefined
     },
 
     /**
@@ -2967,21 +3061,21 @@
      * @memberOf Benchmark
      * @type Function|String
      */
-    'compiled': null,
+    'compiled': undefined,
 
     /**
      * The error object if the test failed.
      * @memberOf Benchmark
-     * @type Object|Null
+     * @type Object
      */
-    'error': null,
+    'error': undefined,
 
     /**
      * The test to benchmark.
      * @memberOf Benchmark
      * @type Function|String
      */
-    'fn': null,
+    'fn': undefined,
 
     /**
      * A flag to indicate if the benchmark is aborted.
@@ -3168,13 +3262,16 @@
     // compares benchmark's hertz with another
     'compare': compare,
 
-    // executes listeners of a specified type
+    // executes listeners
     'emit': emit,
+
+    // get listeners
+    'listeners': listeners,
 
     // unregister listeners
     'off': off,
 
-    // register isteners
+    // register listeners
     'on': on,
 
     // reset benchmark properties
@@ -3230,9 +3327,9 @@
     /**
      * The object whose listeners are currently being processed.
      * @memberOf Benchmark.Event
-     * @type Object|Null
+     * @type Object
      */
-    'currentTarget': null,
+    'currentTarget': undefined,
 
     /**
      * The return value of the last executed listener.
@@ -3244,9 +3341,9 @@
     /**
      * The object to which the event was originally emitted.
      * @memberOf Benchmark.Event
-     * @type Object|Null
+     * @type Object
      */
-    'target': null,
+    'target': undefined,
 
     /**
      * A timestamp of when the event was created (ms).
@@ -3276,9 +3373,9 @@
     /**
      * The name of the suite.
      * @memberOf Benchmark.Suite.options
-     * @type String|Null
+     * @type String
      */
-    'name': null
+    'name': undefined
   };
 
   /*--------------------------------------------------------------------------*/
@@ -3402,6 +3499,9 @@
     // creates a new suite of filtered benchmarks
     'filter': filterSuite,
 
+    // get listeners
+    'listeners': listeners,
+
     // unregister listeners
     'off': off,
 
@@ -3463,6 +3563,6 @@
 
   // trigger clock's lazy define early to avoid a security error
   if (support.air) {
-    clock({ 'fn': noop, 'count': 1, 'options': {} });
+    clock({ '_original': { 'fn': noop, 'count': 1, 'options': {} } });
   }
 }(this));
