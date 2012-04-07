@@ -9,40 +9,38 @@
   /** Java applet archive path */
   var archive = '../../nano.jar';
 
+  /** Cache of error messages */
+  var errors = [];
+
   /** Google Analytics account id */
   var gaId = '';
+
+  /** Cache of event handlers */
+  var handlers = {};
+
+  /** A flag to indicate that the page has loaded */
+  var pageLoaded = false;
 
   /** Benchmark results element id prefix (e.g. `results-1`) */
   var prefix = 'results-';
 
-  /** Object containing various css class names */
+  /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
+  var scrollEl = document.body;
+
+  /** Used to resolve a value's internal [[Class]] */
+  var toString = {}.toString;
+
+  /** Namespace */
+  var ui = new Benchmark.Suite;
+
+  /** Object containing various CSS class names */
   var classNames = {
-
-    /** CSS class name used for error styles */
+    // used for error styles
     'error': 'error',
-
-    /** CSS class name used to make content visible */
+    // used to make content visible
     'show': 'show',
-
-    /** CSS class name used to reset result styles */
+    // used to reset result styles
     'results': 'results'
-  };
-
-  /** Object containing various text messages */
-  var texts = {
-
-    /** Inner text for the various run button states */
-    'run': {
-      'ready': 'Run tests',
-      'again': 'Run again',
-      'running': 'Stop running'
-    },
-
-    /** Common status values */
-    'status': {
-      'ready': 'Ready to run.',
-      'again': 'Done. Ready to run again.'
-    }
   };
 
   /** Used to flag environments/features */
@@ -53,34 +51,32 @@
         return !localStorage.getItem(+new Date);
       } catch(e) { }
     }(),
-
     // detects Opera Mini
     'operaMini': platform.name == 'Opera Mini',
-
     // used to distinguish between a regular test page and an embedded chart
     'runner': !!$('runner')
   };
 
-  /** Cache of error messages */
-  var errors = [];
-
-  /** Cache of event handlers */
-  var handlers = {};
-
-  /** A flag to indicate that the page has loaded */
-  var pageLoaded = false;
+  /** Object containing various text messages */
+  var texts = {
+    // inner text for the various run button states
+    'run': {
+      'again': 'Run again',
+      'ready': 'Run tests',
+      'running': 'Stop running'
+    },
+    // common status values
+    'status': {
+      'again': 'Done. Ready to run again.',
+      'ready': 'Ready to run.'
+    }
+  };
 
   /** The options object for Benchmark.Suite#run */
-  var runOptions = { 'async': !has.operaMini, 'queued': true };
-
-  /** The element responsible for scrolling the page (assumes ui.js is just before </body>) */
-  var scrollEl = document.body;
-
-  /** Used to resolve a value's internal [[Class]] */
-  var toString = {}.toString;
-
-  /** Namespace */
-  var ui = new Benchmark.Suite;
+  var runOptions = {
+    'async': !has.operaMini,
+    'queued': true
+  };
 
   /** API Shortcuts */
   var each = Benchmark.each,
@@ -97,6 +93,7 @@
 
     /**
      * The onCycle callback, used for onStart as well, assigned to new benchmarks.
+     *
      * @private
      */
     'cycle': function() {
@@ -111,6 +108,7 @@
 
     /**
      * The onStart callback assigned to new benchmarks.
+     *
      * @private
      */
     'start': function() {
@@ -125,6 +123,7 @@
 
     /**
      * The "run" button click event handler used to run or abort the benchmarks.
+     *
      * @private
      */
     'run': function() {
@@ -146,6 +145,7 @@
 
     /**
      * The title table cell click event handler used to run the corresponding benchmark.
+     *
      * @private
      * @param {Object} event The event object.
      */
@@ -166,6 +166,7 @@
 
     /**
      * The title cell keyup event handler used to simulate a mouse click when hitting the ENTER key.
+     *
      * @private
      * @param {Object} event The event object.
      */
@@ -180,6 +181,7 @@
 
     /**
      * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
+     *
      * @private
      */
     'hashchange': function() {
@@ -219,6 +221,7 @@
 
     /**
      * The window load event handler used to initialize the UI.
+     *
      * @private
      */
     'load': function() {
@@ -266,6 +269,7 @@
 
   /**
    * Shortcut for document.getElementById().
+   *
    * @private
    * @param {Element|String} id The id of the element to retrieve.
    * @returns {Element} The element, if found, or null.
@@ -276,6 +280,7 @@
 
   /**
    * Adds a CSS class name to an element's className property.
+   *
    * @private
    * @param {Element|String} element The element or id of the element.
    * @param {String} className The class name.
@@ -290,6 +295,7 @@
 
   /**
    * Registers an event listener on an element.
+   *
    * @private
    * @param {Element|String} element The element or id of the element.
    * @param {String} eventName The name of the event.
@@ -309,6 +315,7 @@
 
   /**
    * Appends to an element's innerHTML property.
+   *
    * @private
    * @param {Element|String} element The element or id of the element.
    * @param {String} html The HTML to append.
@@ -323,6 +330,7 @@
 
   /**
    * Shortcut for document.createElement().
+   *
    * @private
    * @param {String} tag The tag name of the element to create.
    * @returns {Element} A new element of the given tag name.
@@ -333,6 +341,7 @@
 
   /**
    * Checks if an element is assigned the given class name.
+   *
    * @private
    * @param {Element|String} element The element or id of the element.
    * @param {String} className The class name.
@@ -345,6 +354,7 @@
 
   /**
    * Set an element's innerHTML property.
+   *
    * @private
    * @param {Element|String} element The element or id of the element.
    * @param {String} html The HTML to set.
@@ -361,6 +371,7 @@
 
   /**
    * Copies own/inherited properties of a source object to the destination object.
+   *
    * @private
    * @param {Object} destination The destination object.
    * @param {Object} [source={}] The source object.
@@ -376,6 +387,7 @@
 
   /**
    * Checks if a value has an internal [[Class]] of Function.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if the value is a function, else `false`.
@@ -386,6 +398,7 @@
 
   /**
    * Appends to or clears the error log.
+   *
    * @private
    * @param {String|Object} text The text to append or options object.
    */
@@ -421,6 +434,7 @@
 
   /**
    * Sets the status text.
+   *
    * @private
    * @param {String} text The text to write to the status.
    */
@@ -432,6 +446,7 @@
 
   /**
    * Parses the window.location.hash value into an object assigned to `ui.params`.
+   *
    * @static
    * @memberOf ui
    * @returns {Object} The suite instance.
@@ -456,6 +471,7 @@
 
   /**
    * Renders the results table cell of the corresponding benchmark(s).
+   *
    * @static
    * @memberOf ui
    * @param {Number} [index] The index of the benchmark to render.
@@ -586,6 +602,7 @@
 
   /**
    * An array of benchmarks created from test cases.
+   *
    * @memberOf ui
    * @type Array
    */
@@ -593,6 +610,7 @@
 
   /**
    * The parsed query parameters of the pages url hash.
+   *
    * @memberOf ui
    * @type Object
    */

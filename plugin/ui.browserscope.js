@@ -13,6 +13,7 @@
 
   /**
    * Used to filter Browserscope results by browser category.
+   *
    * @see http://www.browserscope.org/user/tests/howto#urlparams
    */
   var filterMap = {
@@ -58,6 +59,7 @@
 
   /**
    * Registers an event listener.
+   *
    * @private
    * @param {Element} element The element.
    * @param {String} eventName The name of the event to listen to.
@@ -77,6 +79,7 @@
 
   /**
    * Shortcut for `document.createElement()`.
+   *
    * @private
    * @param {String} tagName The tag name of the element to create.
    * @param {String} name A name to assign to the element.
@@ -100,6 +103,7 @@
 
   /**
    * Creates a new style element.
+   *
    * @private
    * @param {String} cssText The css text of the style element.
    * @param {Document|Element} context The document object used to create the element.
@@ -115,6 +119,7 @@
 
   /**
    * Copies own/inherited properties of a source object to the destination object.
+   *
    * @private
    * @param {Object} destination The destination object.
    * @param {Object} [source={}] The source object.
@@ -130,6 +135,7 @@
 
   /**
    * Gets the text content of an element.
+   *
    * @private
    * @param {Element} element The element.
    * @returns {String} The text content of the element.
@@ -141,6 +147,7 @@
 
   /**
    * Injects a script into the document.
+   *
    * @private
    * @param {String} src The external script source.
    * @param {Object} sibling The element to inject the script after.
@@ -158,6 +165,7 @@
 
   /**
    * Queries the document for elements by id or tagName.
+   *
    * @private
    * @param {String} selector The css selector to match.
    * @param {Document|Element} context The element whose descendants are queried.
@@ -185,6 +193,7 @@
 
   /**
    * Set an element's innerHTML property.
+   *
    * @private
    * @param {Element} element The element.
    * @param {String} html The HTML to set.
@@ -200,6 +209,7 @@
 
   /**
    * Displays a message in the "results" element.
+   *
    * @private
    * @param {String} text The text to display.
    * @param {Object} object The template object used to modify the text.
@@ -219,6 +229,7 @@
   /**
    * Adds a style sheet to the current chart and assigns the `ui.browserscope.uaClass`
    * class name to the chart element containing the user's browser name.
+   *
    * @private
    * @returns {Boolean} Returns `true` if the operation succeeded, else `false`.
    */
@@ -273,6 +284,7 @@
 
   /**
    * Periodically executed callback that removes injected script and iframe elements.
+   *
    * @private
    */
   function cleanup() {
@@ -300,6 +312,7 @@
 
   /**
    * A simple data object cloning utility.
+   *
    * @private
    * @param {Mixed} data The data object to clone.
    * @returns {Mixed} The cloned data object.
@@ -324,6 +337,7 @@
 
   /**
    * Creates a Browserscope results object.
+   *
    * @private
    * @returns {Object|Null} Browserscope results object or null.
    */
@@ -379,6 +393,7 @@
 
   /**
    * Retrieves the "cells" array from a given Google visualization data row object.
+   *
    * @private
    * @param {Object} object The data row object.
    * @returns {Array} An array of cell objects.
@@ -395,6 +410,7 @@
 
   /**
    * Retrieves the "labels" array from a given Google visualization data table object.
+   *
    * @private
    * @param {Object} object The data table object.
    * @returns {Array} An array of label objects.
@@ -421,6 +437,7 @@
 
   /**
    * Retrieves the "rows" array from a given Google visualization data table object.
+   *
    * @private
    * @param {Object} object The data table object.
    * @returns {Array} An array of row objects.
@@ -460,9 +477,11 @@
 
   /**
    * Checks if a value has an internal [[Class]] of Array.
+   *
    * @private
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if the value has an internal [[Class]] of Array, else `false`.
+   * @returns {Boolean} Returns `true` if the value has an internal [[Class]] of
+   *  Array, else `false`.
    */
   function isArray(value) {
     return toString.call(value) == '[object Array]';
@@ -470,6 +489,7 @@
 
   /**
    * Modify a string by replacing named tokens with matching object property values.
+   *
    * @private
    * @param {String} string The string to modify.
    * @param {Object} object The template object.
@@ -484,6 +504,7 @@
 
   /**
    * Executes a callback at a given delay interval until it returns `false`.
+   *
    * @private
    * @param {Function} callback The function called every poll interval.
    * @param {Number} delay The delay between callback calls (secs).
@@ -499,6 +520,7 @@
 
   /**
    * Cleans up the last action and sets the current action.
+   *
    * @private
    * @param {String} action The current action.
    */
@@ -508,7 +530,9 @@
   }
 
   /**
-   * Converts the browser name version number to the format allowed by the specified filter.
+   * Converts the browser name version number to the format allowed by the
+   * specified filter.
+   *
    * @private
    * @param {String} name The full browser name .
    * @param {String} filterBy The filter formating rules to apply.
@@ -538,6 +562,7 @@
   /**
    * Replaces non-alphanumeric characters with spaces because Browserscope labels
    * can only contain alphanumeric characters and spaces.
+   *
    * @private
    * @param {String} text The text to be converted.
    * @returns {String} The Browserscope safe label text.
@@ -551,6 +576,7 @@
 
   /**
    * Loads Browserscope's cumulative results table.
+   *
    * @static
    * @memberOf ui.browserscope
    * @param {Object} options The options object.
@@ -604,6 +630,7 @@
 
   /**
    * Creates a Browserscope beacon and posts the benchmark results.
+   *
    * @static
    * @memberOf ui.browserscope
    */
@@ -662,6 +689,7 @@
 
   /**
    * Purges the Browserscope response cache.
+   *
    * @static
    * @memberOf ui.browserscope
    * @param {String} key The key of a single cache entry to clear.
@@ -681,6 +709,7 @@
   /**
    * Renders the cumulative results table.
    * (tweak the dimensions and styles to best fit your environment)
+   *
    * @static
    * @memberOf ui.browserscope
    * @param {Object} options The options object.
@@ -869,6 +898,7 @@
 
     /**
      * Your Browserscope API key.
+     *
      * @memberOf ui.browserscope
      * @type String
      */
@@ -876,6 +906,7 @@
 
     /**
      * A flag to indicate if posting is enabled or disabled.
+     *
      * @memberOf ui.browserscope
      * @type Boolean
      */
@@ -883,13 +914,16 @@
 
     /**
      * The selector of the element to contain the entire Browserscope UI.
+     *
      * @memberOf ui.browserscope
      * @type String
      */
     'selector': '',
 
     /**
-     * The class name used to style the user's browser name when it appears in charts.
+     * The class name used to style the user's browser name when it appears
+     * in charts.
+     *
      * @memberOf ui.browserscope
      * @type String
      */
@@ -897,6 +931,7 @@
 
     /**
      * Object containing various timings settings.
+     *
      * @memberOf ui.browserscope
      * @type Object
      */
@@ -904,6 +939,7 @@
 
       /**
        * The delay between removing abandoned script and iframe elements (secs).
+       *
        * @memberOf ui.browserscope.timings
        * @type Number
        */
@@ -911,6 +947,7 @@
 
       /**
        * The delay before refreshing the cumulative results after posting (secs).
+       *
        * @memberOf ui.browserscope.timings
        * @type Number
        */
@@ -918,6 +955,7 @@
 
       /**
        * The delay between load attempts (secs).
+       *
        * @memberOf ui.browserscope.timings
        * @type Number
        */
@@ -925,6 +963,7 @@
 
       /**
        * The time to wait for a request to finish (secs).
+       *
        * @memberOf ui.browserscope.timings
        * @type Number
        */
@@ -933,6 +972,7 @@
 
     /**
      * Object containing various text messages.
+     *
      * @memberOf ui.browserscope
      * @type Object
      */
@@ -940,6 +980,7 @@
 
       /**
        * The text shown when their is no recorded data available to report.
+       *
        * @memberOf ui.browserscope.texts
        * @type String
        */
@@ -947,6 +988,7 @@
 
       /**
        * The text shown when the cumulative results data cannot be retrieved.
+       *
        * @memberOf ui.browserscope.texts
        * @type String
        */
@@ -954,6 +996,7 @@
 
       /**
        * The text shown while waiting for the cumulative results data to load.
+       *
        * @memberOf ui.browserscope.texts
        * @type String
        */
@@ -961,6 +1004,7 @@
 
       /**
        * The text shown while posting the results snapshot to Browserscope.
+       *
        * @memberOf ui.browserscope.texts
        * @type String
        */
@@ -968,6 +1012,7 @@
 
       /**
        * The text shown while benchmarks are running.
+       *
        * @memberOf ui.browserscope.texts
        * @type String
        */
