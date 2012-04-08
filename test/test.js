@@ -35,6 +35,17 @@
   /** Used to resolve a value's internal [[Class]] */
   var toString = {}.toString;
 
+  /** Used to check problem JScript properties (a.k.a. the [[DontEnum]] bug) */
+  var shadowed = {
+    'constructor': 1,
+    'hasOwnProperty': 2,
+    'isPrototypeOf': 3,
+    'propertyIsEnumerable': 4,
+    'toLocaleString': 5,
+    'toString': 6,
+    'valueOf': 7
+  };
+
   /** Used to flag environments/features */
   var support = {
     'descriptors': !!function() {
@@ -269,16 +280,6 @@
     });
 
     test('clones problem JScript properties', function() {
-      var shadowed = {
-        'constructor': 1,
-        'hasOwnProperty': 2,
-        'isPrototypeOf': 3,
-        'propertyIsEnumerable': 4,
-        'toLocaleString': 5,
-        'toString': 6,
-        'valueOf': 7
-      };
-
       var clone = Benchmark.deepClone(shadowed);
       deepEqual(clone, shadowed);
     });
@@ -427,12 +428,12 @@
           });
 
           if (key == 'xpath snapshot') {
-            ok(args[0] == xpathResult[0]);
+            ok(args[0] === xpathResult[0]);
           } else {
             equal(args[0], 'a');
           }
           equal(args[1], 0);
-          ok(args[2] == object);
+          ok(args[2] === object);
         }
         else {
           skipTest(3);
@@ -441,8 +442,8 @@
 
       test('returns the passed object when passing an ' + key, function() {
         if (object) {
-          var result = Benchmark.each(object, function() { });
-          ok(result == object);
+          var actual = Benchmark.each(object, function() { });
+          ok(actual === object);
         }
         else {
           skipTest(1);
@@ -500,6 +501,42 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark.extend');
+
+  (function() {
+    test('allows no source argument', function() {
+      var object = {};
+      equal(Benchmark.extend(object), object);
+    });
+
+    test('allows a single source argument', function() {
+      var source = { 'x': 1, 'y': 1 },
+          actual = Benchmark.extend({}, source);
+
+      deepEqual(Benchmark.extend({}, source), { 'x': 1, 'y': 1 });
+    });
+
+    test('allows multiple source arguments', function() {
+      var source1 = { 'x': 1, 'y': 1 },
+          source2 = { 'y': 2, 'z': 2 },
+          actual = Benchmark.extend({}, source1, source2);
+
+      deepEqual(actual, { 'x': 1, 'y': 2, 'z': 2 });
+    });
+
+    test('will add inherited source properties', function() {
+      function Source() { }
+      Source.prototype.x = 1;
+      deepEqual(Benchmark.extend({}, new Source), { 'x': 1 });
+    });
+
+    test('will add problem JScript properties', function() {
+      deepEqual(Benchmark.extend({}, shadowed), shadowed);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.filter');
 
   (function() {
@@ -521,19 +558,19 @@
       });
 
       test('produces the correct result when passing an ' + key, function() {
-        var result = Benchmark.filter(object, function(value, index) {
+        var actual = Benchmark.filter(object, function(value, index) {
           return index > 0;
         });
 
-        deepEqual(result, ['b', 'c', '']);
+        deepEqual(actual, ['b', 'c', '']);
       });
 
       test('iterates over sparse ' + key + 's correctly', function() {
-        var result = Benchmark.filter(object, function(value) {
+        var actual = Benchmark.filter(object, function(value) {
           return value === undefined;
         });
 
-        deepEqual(result, []);
+        deepEqual(actual, []);
       });
     });
   }());
@@ -598,8 +635,8 @@
       });
 
       test('returns the passed object when passing ' + key, function() {
-        var result = Benchmark.forOwn(object, function() { });
-        deepEqual(result, object);
+        var actual = Benchmark.forOwn(object, function() { });
+        deepEqual(actual, object);
       });
 
       test('iterates over own properties when passing ' + key, function() {
@@ -660,6 +697,26 @@
 
     test('formats negative numbers correctly', function() {
       equal(Benchmark.formatNumber(-1234.56), '-1,234.56');
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.hasKey');
+
+  (function() {
+    test('returns `true` for own properties', function() {
+      var object = { 'x': 1 };
+      equal(Benchmark.hasKey(object, 'x'), true);
+    });
+
+    test('returns `false` for inherited properties', function() {
+      equal(Benchmark.hasKey({}, 'toString'), false);
+    });
+
+    test('doesn\'t use an object\'s `hasOwnProperty` method', function() {
+      var object = { 'hasOwnProperty': function() { return true; } };
+      equal(Benchmark.hasKey(object, 'x'), false);
     });
   }());
 
@@ -755,15 +812,15 @@
 
     forOwn(objects, function(object, key) {
       test('produces the correct result when passing an ' + key, function() {
-        var result = Benchmark.invoke(object, 'concat');
-        deepEqual(result, ['a', ['b'], 'c', undefined, undefined]);
-        ok(!('4' in result));
+        var actual = Benchmark.invoke(object, 'concat');
+        deepEqual(actual, ['a', ['b'], 'c', undefined, undefined]);
+        equal('4' in actual, false);
       });
 
       test('passes the correct arguments to the invoked method when passing an ' + key, function() {
-        var result = Benchmark.invoke(object, 'concat', 'x', 'y', 'z');
-        deepEqual(result, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
-        ok(!('4' in result));
+        var actual = Benchmark.invoke(object, 'concat', 'x', 'y', 'z');
+        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
+        equal('4' in actual, false);
       });
 
       test('handles options object with callbacks correctly when passing an ' + key, function() {
@@ -772,7 +829,7 @@
         }
 
         var callbacks = [];
-        var result = Benchmark.invoke(object, {
+        var actual = Benchmark.invoke(object, {
           'name': 'concat',
           'args': ['x', 'y', 'z'],
           'onStart': callback,
@@ -780,8 +837,8 @@
           'onComplete': callback
         });
 
-        deepEqual(result, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
-        ok(!('4' in result));
+        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
+        equal('4' in actual, false);
 
         equal(callbacks[0].length, 1);
         equal(callbacks[0][0].target, 'a');
@@ -793,7 +850,7 @@
 
       test('supports queuing when passing an ' + key, function() {
         var lengths = [];
-        var result = Benchmark.invoke(object, {
+        var actual = Benchmark.invoke(object, {
           'name': 'concat',
           'queued': true,
           'args': 'x',
@@ -803,7 +860,7 @@
         });
 
         deepEqual(lengths, [5, 4, 3, 2]);
-        deepEqual(result, ['ax', ['b', 'x'], 'cx', undefined, undefined]);
+        deepEqual(actual, ['ax', ['b', 'x'], 'cx', undefined, undefined]);
       });
     });
   }());
@@ -855,12 +912,12 @@
       });
 
       test('produces the correct result when passing an ' + key, function() {
-        var result = Benchmark.map(object, function(value, index) {
+        var actual = Benchmark.map(object, function(value, index) {
           return value + index;
         });
 
-        deepEqual(result, ['a0', 'b1', 'c2', '3', undefined]);
-        ok(!('4' in result));
+        deepEqual(actual, ['a0', 'b1', 'c2', '3', undefined]);
+        equal('4' in actual, false);
       });
 
       test('produces an array of the correct length for sparse ' + key + 's', function() {
@@ -883,15 +940,15 @@
 
     forOwn(objects, function(object, key) {
       test('produces the correct result when passing an ' + key, function() {
-        var result = Benchmark.pluck(object, '_');
-        deepEqual(result, ['a', 'b', 'c', undefined, undefined]);
-        ok(!('4' in result));
+        var actual = Benchmark.pluck(object, '_');
+        deepEqual(actual, ['a', 'b', 'c', undefined, undefined]);
+        equal('4' in actual, false);
       });
 
       test('produces the correct result for non-existent keys when passing an ' + key, function() {
-        var result = Benchmark.pluck(object, 'non-existent');
-        deepEqual(result, [undefined, undefined, undefined, undefined, undefined]);
-        ok(!('4' in result));
+        var actual = Benchmark.pluck(object, 'non-existent');
+        deepEqual(actual, [undefined, undefined, undefined, undefined, undefined]);
+        equal('4' in actual, false);
       });
     });
   }());
@@ -919,11 +976,11 @@
       });
 
       test('accumulates correctly when passing an ' + key, function() {
-        var result = Benchmark.reduce(object, function(string, value) {
+        var actual = Benchmark.reduce(object, function(string, value) {
           return string + value;
         }, 'a');
 
-        deepEqual(result, 'abc');
+        equal(actual, 'abc');
       });
 
       test('handles arguments with no initial value correctly when passing an ' + key, function() {
@@ -982,7 +1039,7 @@
             object = Constructor();
 
         object.emit(event);
-        ok(!event.cancelled);
+        equal(event.cancelled, false);
       });
 
       test('emits with an event type of "toString"', function() {
@@ -990,7 +1047,7 @@
             object = Constructor();
 
         object.emit(event);
-        ok(!event.cancelled);
+        equal(event.cancelled, false);
       });
 
       test('returns the last listeners returned value', function() {
@@ -999,7 +1056,26 @@
 
         object.on('result', function() { return 'x'; });
         object.on('result', function() { return 'y'; });
-        ok(object.emit(event) === 'y');
+        equal(object.emit(event), 'y');
+      });
+
+      test('aborts the emitters listener iteration when `event.aborted` is `true`', function() {
+        var event = Benchmark.Event('aborted'),
+            object = Constructor();
+
+        object.on('aborted', function(event) {
+          event.aborted = true;
+          return false;
+        });
+
+        object.on('aborted', function(event) {
+          // should not get here
+          event.aborted = false;
+          return true;
+        });
+
+        equal(object.emit(event), false);
+        equal(event.aborted, true);
       });
 
       test('cancels the event if a listener explicitly returns `false`', function() {
@@ -1009,7 +1085,7 @@
         object.on('cancel', function() { return false; });
         object.on('cancel', function() { return true; });
         object.emit(event);
-        ok(event.cancelled);
+        equal(event.cancelled, true);
       });
 
       test('uses a shallow clone of the listeners when emitting', function() {
@@ -1031,7 +1107,7 @@
         var event = Benchmark.Event('custom'),
             object = Constructor();
 
-        object.on('custom', function(eventObject) { eventObject.touched = 1; });
+        object.on('custom', function(eventObject) { eventObject.touched = true; });
         object.emit(event);
         ok(event.touched);
       });
@@ -1088,7 +1164,7 @@
             object = Constructor();
 
         object.on('x', listener);
-        ok(object.off('x', listener) === object);
+        equal(object.off('x', listener), object);
       });
 
       test('will ignore inherited properties of the event cache', function() {
@@ -1187,7 +1263,7 @@
         var listener = function() { },
             object = Constructor();
 
-        ok(object.on('x', listener) === object);
+        equal(object.on('x', listener), object);
       });
 
       test('will ignore inherited properties of the event cache', function() {
@@ -1246,7 +1322,7 @@
 
       suite.add('foo', function() { });
       suite.abort();
-      ok(fired == false);
+      equal(fired, false);
     });
 
     test('ignores abort calls from `Benchmark.Suite#reset` when the suite isn\'t running', function() {
@@ -1257,7 +1333,306 @@
 
       suite.add('foo', function() { });
       suite.reset();
-      ok(fired == false);
+      equal(fired, false);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#concat');
+
+  (function() {
+    var args = arguments;
+
+    test('doesn\'t treat an arguments object like an array', function() {
+      var suite = Benchmark.Suite();
+      deepEqual(suite.concat(args), [args]);
+    });
+
+    test('flattens array arguments', function() {
+      var suite = Benchmark.Suite();
+      deepEqual(suite.concat([1, 2], 3, [4, 5]), [1, 2, 3, 4, 5]);
+    });
+
+    test('supports concating sparse arrays', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[2] = 2;
+      suite.length = 3;
+
+      var actual = suite.concat(3);
+      deepEqual(actual, [0, undefined, 2, 3]);
+      equal('1' in actual, false);
+    });
+
+    test('supports sparse arrays as arguments', function() {
+      var suite = Benchmark.Suite(),
+          sparse = [];
+
+      sparse[0] = 0;
+      sparse[2] = 2;
+      sparse.length = 3;
+
+      var actual = suite.concat(sparse);
+      deepEqual(actual, [0, undefined, 2]);
+      equal('1' in actual, false);
+    });
+
+    test('creates a new array', function() {
+      var suite = Benchmark.Suite();
+      ok(suite.concat(1) !== suite);
+    });
+  }(1, 2, 3));
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#reverse');
+
+  (function() {
+    test('reverses the element order', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 1;
+      suite.length = 2;
+
+      var actual = suite.reverse();
+      equal(actual, suite);
+      deepEqual(slice.call(actual), [1, 0]);
+    });
+
+    test('supports reversing sparse arrays', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[2] = 2;
+      suite.length = 3;
+
+      var actual = suite.reverse();
+      equal(actual, suite);
+      deepEqual(slice.call(actual), [2, undefined, 0]);
+      equal('1' in actual, false);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#shift');
+
+  (function() {
+    test('removes the first element', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 1;
+      suite.length = 2;
+
+      var actual = suite.shift();
+      equal(actual, 0);
+      deepEqual(slice.call(suite), [1]);
+    });
+
+    test('shifts an object with no elements', function() {
+      var suite = Benchmark.Suite(),
+          actual = suite.shift();
+
+      equal(actual, undefined);
+      deepEqual(slice.call(suite), []);
+    });
+
+    test('supports shifting sparse arrays', function() {
+      var suite = Benchmark.Suite();
+      suite[1] = 1;
+      suite[3] = 3;
+      suite.length = 4;
+
+      var actual = suite.shift();
+      equal(actual, undefined);
+      deepEqual(slice.call(suite), [1, undefined, 3]);
+      equal('1' in suite, false);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#slice');
+
+  (function() {
+    var suite = Benchmark.Suite();
+    suite[0] = 0;
+    suite[1] = 1;
+    suite[2] = 2;
+    suite[3] = 3;
+    suite.length = 4;
+
+    test('works with no arguments', function() {
+      var actual = suite.slice();
+      deepEqual(actual, [0, 1, 2, 3]);
+      ok(suite !== actual);
+    });
+
+    test('works with positive `start` argument', function() {
+      var actual = suite.slice(2);
+      deepEqual(actual, [2, 3]);
+      ok(suite !== actual);
+    });
+
+    test('works with positive `start` and `end` arguments', function() {
+      var actual = suite.slice(1, 3);
+      deepEqual(actual, [1, 2]);
+      ok(suite !== actual);
+    });
+
+    test('works with `end` values exceeding length', function() {
+      var actual = suite.slice(1, 10);
+      deepEqual(actual, [1, 2, 3]);
+      ok(suite !== actual);
+    });
+
+    test('works with negative `start` and `end` arguments', function() {
+      var actual = suite.slice(-3, -1);
+      deepEqual(actual, [1, 2]);
+      ok(suite !== actual);
+    });
+
+    test('works with an extreme negative `end` value', function() {
+      var actual = suite.slice(1, -10);
+      deepEqual(actual, []);
+      equal('-1' in actual, false);
+      ok(suite !== actual);
+    });
+
+    test('supports slicing sparse arrays', function() {
+      var sparse = Benchmark.Suite();
+      sparse[1] = 1;
+      sparse[3] = 3;
+      sparse.length = 4;
+
+      var actual = sparse.slice(0, 2);
+      deepEqual(actual, [undefined, 1]);
+      equal('0' in actual, false);
+
+      actual = sparse.slice(1);
+      deepEqual(actual, [1, undefined, 3]);
+      equal('1' in actual, false);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#splice');
+
+  (function() {
+    test('works with no arguments', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite.length = 1;
+
+      var actual = suite.splice();
+      deepEqual(actual, []);
+      deepEqual(slice.call(suite), [0]);
+    });
+
+    test('works with positive `start` argument', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 3;
+      suite.length = 2;
+
+      var actual = suite.splice(1, 0, 1, 2);
+      deepEqual(actual, []);
+      deepEqual(slice.call(suite), [0, 1, 2, 3]);
+    });
+
+    test('works with positive `start` and `deleteCount` arguments', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 3;
+      suite.length = 2;
+
+      var actual = suite.splice(1, 1, 1, 2);
+      deepEqual(actual, [3]);
+      deepEqual(slice.call(suite), [0, 1, 2]);
+    });
+
+    test('works with `deleteCount` values exceeding length', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 3;
+      suite.length = 2;
+
+      var actual = suite.splice(1, 10, 1, 2);
+      deepEqual(actual, [3]);
+      deepEqual(slice.call(suite), [0, 1, 2]);
+    });
+
+    test('works with negative `start` and `deleteCount` arguments', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 3;
+      suite.length = 2;
+
+      var actual = suite.splice(-1, -1, 1, 2);
+      deepEqual(actual, []);
+      deepEqual(slice.call(suite), [0, 1, 2, 3]);
+    });
+
+    test('works with an extreme negative `deleteCount` value', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite[1] = 3;
+      suite.length = 2;
+
+      var actual = suite.splice(0, -10, 1, 2);
+      deepEqual(actual, []);
+      deepEqual(slice.call(suite), [1, 2, 0, 3]);
+    });
+
+    test('supports splicing sparse arrays', function() {
+      var suite = Benchmark.Suite();
+      suite[1] = 1;
+      suite[3] = 3;
+      suite.length = 4;
+
+      var actual = suite.splice(1, 2, 1, 2);
+      deepEqual(actual, [1]);
+      equal(actual.length, 1);
+      deepEqual(slice.call(suite), [undefined, 1, 2, 3]);
+      equal('0' in suite, false);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Suite#unshift');
+
+  (function() {
+    test('adds a first element', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 1;
+      suite.length = 1;
+
+      var actual = suite.unshift(0);
+      equal(actual, 2);
+      deepEqual(slice.call(suite), [0, 1]);
+    });
+
+    test('adds multiple elements to the front', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 3;
+      suite.length = 1;
+
+      var actual = suite.unshift(0, 1, 2);
+      equal(actual, 4);
+      deepEqual(slice.call(suite), [0, 1, 2, 3]);
+    });
+
+    test('supports unshifting sparse arrays', function() {
+      var suite = Benchmark.Suite();
+      suite[1] = 2;
+      suite.length = 2;
+
+      var actual = suite.unshift(0);
+      equal(actual, 3);
+      deepEqual(slice.call(suite), [0, undefined, 2]);
+      equal('1' in suite, false);
     });
   }());
 
@@ -1448,7 +1823,7 @@
         this.abort();
       })
       .on('complete', function() {
-        ok(fired == true);
+        ok(fired);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -1467,7 +1842,7 @@
         this.reset();
       })
       .on('complete', function() {
-        ok(fired == true);
+        ok(fired);
         QUnit.start();
       })
       .run({ 'async': true });

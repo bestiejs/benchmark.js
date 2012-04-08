@@ -523,7 +523,7 @@
           }
         }
       } else {
-        result[index] = value;
+        result[index++] = value;
       }
     }
     return result;
@@ -2575,7 +2575,7 @@
         initCount = bench.initCount,
         minSamples = bench.minSamples,
         queue = [],
-        sample = [];
+        sample = bench.stats.sample;
 
     /**
      * Adds a number of clones to the queue.
@@ -2668,7 +2668,6 @@
           'mean': mean,
           'moe': moe,
           'rme': rme,
-          'sample': sample,
           'sem': sem,
           'variance': variance
         });
@@ -2782,6 +2781,7 @@
     }
     // should we exit early?
     event = Event('cycle');
+    clone.emit(event);
     if (event.aborted) {
       clone.abort();
     }
@@ -3462,6 +3462,22 @@
   /*--------------------------------------------------------------------------*/
 
   extend(Event.prototype, {
+
+    /**
+     * A flag to indicate if the emitters listener iteration is aborted.
+     *
+     * @memberOf Benchmark.Event
+     * @type Boolean
+     */
+    'aborted': false,
+
+    /**
+     * A flag to indicate if the default action is cancelled.
+     *
+     * @memberOf Benchmark.Event
+     * @type Boolean
+     */
+    'cancelled': false,
 
     /**
      * The object whose listeners are currently being processed.
