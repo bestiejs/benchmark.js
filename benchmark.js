@@ -111,6 +111,7 @@
 
   /**
    * An object used to flag environments/features.
+   *
    * @static
    * @memberOf Benchmark
    * @type Object
@@ -121,6 +122,7 @@
 
     /**
      * Detect Adobe AIR.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -128,6 +130,7 @@
 
     /**
      * Detect if `arguments` objects have the correct internal [[Class]] value.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -135,6 +138,7 @@
 
     /**
      * Detect if in a browser environment.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -142,6 +146,7 @@
 
     /**
      * Detect if strings support accessing characters by index.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -151,6 +156,7 @@
 
     /**
      * Detect if strings have indexes as own properties.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -161,6 +167,7 @@
 
     /**
      * Detect if Java is enabled/exposed.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -168,6 +175,7 @@
 
     /**
      * Detect if the Timers API exists.
+     *
      * @memberOf Benchmark.support
      * @type Boolean
      */
@@ -175,6 +183,7 @@
 
     /**
      * Detect if functions support decompilation.
+     *
      * @name decompilation
      * @memberOf Benchmark.support
      * @type Boolean
@@ -195,6 +204,7 @@
 
     /**
      * Detect ES5+ property descriptor API.
+     *
      * @name descriptors
      * @memberOf Benchmark.support
      * @type Boolean
@@ -208,6 +218,7 @@
 
     /**
      * Detect ES5+ Object.getOwnPropertyNames().
+     *
      * @name getAllKeys
      * @memberOf Benchmark.support
      * @type Boolean
@@ -221,6 +232,7 @@
 
   /**
    * Timer object used by `clock()` and `Deferred#resolve`.
+   *
    * @private
    * @type Object
    */
@@ -228,6 +240,7 @@
 
    /**
     * The timer namespace object or constructor.
+    *
     * @private
     * @memberOf timer
     * @type Function|Object
@@ -236,6 +249,7 @@
 
    /**
     * Starts the deferred timer.
+    *
     * @private
     * @memberOf timer
     * @param {Object} deferred The deferred instance.
@@ -244,6 +258,7 @@
 
    /**
     * Stops the deferred timer.
+    *
     * @private
     * @memberOf timer
     * @param {Object} deferred The deferred instance.
@@ -267,7 +282,8 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Benchmark constructor.
+   * The Benchmark constructor.
+   *
    * @constructor
    * @param {String} name A name to identify the benchmark.
    * @param {Function|String} fn The test to benchmark.
@@ -374,7 +390,8 @@
   }
 
   /**
-   * Deferred constructor.
+   * The Deferred constructor.
+   *
    * @constructor
    * @memberOf Benchmark
    * @param {Object} clone The cloned benchmark instance.
@@ -389,7 +406,8 @@
   }
 
   /**
-   * Event constructor.
+   * The Event constructor.
+   *
    * @constructor
    * @memberOf Benchmark
    * @param {String|Object} type The event type.
@@ -404,7 +422,8 @@
   }
 
   /**
-   * Suite constructor.
+   * The Suite constructor.
+   *
    * @constructor
    * @memberOf Benchmark
    * @param {String} name A name to identify the suite.
@@ -484,6 +503,7 @@
   /**
    * Creates an array containing the elements of the host array followed by the
    * elements of each argument in order.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Array} The new array.
    */
@@ -511,6 +531,7 @@
 
   /**
    * Utility function used by `shift()`, `splice()`, and `unshift()`.
+   *
    * @private
    * @param {Number} start The index to start inserting elements.
    * @param {Number} deleteCount The number of elements to delete from the insert point.
@@ -559,6 +580,7 @@
 
   /**
    * Rearrange the host array's elements in reverse order.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Array} The reversed array.
    */
@@ -591,6 +613,7 @@
 
   /**
    * Removes the first element of the host array and returns it.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Mixed} The first element of the array.
    */
@@ -601,6 +624,7 @@
   /**
    * Creates an array of the host array's elements from the start index up to,
    * but not including, the end index.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Array} The new array.
    */
@@ -625,7 +649,9 @@
   }
 
   /**
-   * Allows removing a range of elements and/or inserting elements into the host array.
+   * Allows removing a range of elements and/or inserting elements into the
+   * host array.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Array} An array of removed elements.
    */
@@ -641,6 +667,7 @@
 
   /**
    * Converts the specified `value` to an integer.
+   *
    * @private
    * @param {Mixed} value The value to convert.
    * @returns {Number} The resulting integer.
@@ -652,6 +679,7 @@
 
   /**
    * Appends arguments to the host array.
+   *
    * @memberOf Benchmark.Suite
    * @returns {Number} The new length.
    */
@@ -665,6 +693,7 @@
 
   /**
    * A generic `Function#bind` like method.
+   *
    * @private
    * @param {Function} fn The function to be bound to `thisArg`.
    * @param {Mixed} thisArg The `this` binding for the given function.
@@ -676,6 +705,7 @@
 
   /**
    * Creates a function from the given arguments string and body.
+   *
    * @private
    * @param {String} args The comma separated function arguments.
    * @param {String} body The function body.
@@ -698,6 +728,7 @@
 
   /**
    * Delay the execution of a function based on the benchmark's `delay` property.
+   *
    * @private
    * @param {Object} bench The benchmark instance.
    * @param {Object} fn The function to execute.
@@ -708,6 +739,7 @@
 
   /**
    * Destroys the given element.
+   *
    * @private
    * @param {Element} element The element to destroy.
    */
@@ -719,6 +751,7 @@
   /**
    * Iterates over an object's properties, executing the `callback` for each.
    * Callbacks may terminate the loop by explicitly returning `false`.
+   *
    * @private
    * @param {Object} object The object to iterate over.
    * @param {Function} callback The function executed per own property.
@@ -837,6 +870,7 @@
 
   /**
    * Gets the name of the first argument from a function's source.
+   *
    * @private
    * @param {Function} fn The function.
    * @returns {String} The argument name.
@@ -848,6 +882,7 @@
 
   /**
    * Computes the arithmetic mean of a sample.
+   *
    * @private
    * @param {Array} sample The sample.
    * @returns {Number} The mean.
@@ -860,6 +895,7 @@
 
   /**
    * Gets the source code of a function.
+   *
    * @private
    * @param {Function} fn The function.
    * @param {String} altSource A string used when a function's source code is unretrievable.
@@ -878,6 +914,7 @@
 
   /**
    * Checks if a value is an `arguments` object.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if the value is an `arguments` object, else `false`.
@@ -898,6 +935,7 @@
 
   /**
    * Checks if an object is of the specified class.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @param {String} name The name of the class.
@@ -911,6 +949,7 @@
    * Host objects can return type values that are different from their actual
    * data type. The objects we are concerned with usually return non-primitive
    * types of object, function, or unknown.
+   *
    * @private
    * @param {Mixed} object The owner of the property.
    * @param {String} property The property to check.
@@ -923,9 +962,11 @@
   }
 
   /**
-   * Checks if the specified `value` is an object created by the `Object` constructor
-   * assuming objects created by the `Object` constructor have no inherited
-   * enumerable properties and assuming there are no `Object.prototype` extensions.
+   * Checks if the specified `value` is an object created by the `Object`
+   * constructor assuming objects created by the `Object` constructor have no
+   * inherited enumerable properties and assuming there are no `Object.prototype`
+   * extensions.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
@@ -957,6 +998,7 @@
 
   /**
    * Checks if a value can be safely coerced to a string.
+   *
    * @private
    * @param {Mixed} value The value to check.
    * @returns {Boolean} Returns `true` if the value can be coerced, else `false`.
@@ -966,7 +1008,9 @@
   }
 
   /**
-   * Wraps a function and passes `this` to the original function as the first argument.
+   * Wraps a function and passes `this` to the original function as the
+   * first argument.
+   *
    * @private
    * @param {Function} fn The function to be wrapped.
    * @returns {Function} The new function.
@@ -981,6 +1025,7 @@
 
   /**
    * A no-operation function.
+   *
    * @private
    */
   function noop() {
@@ -989,6 +1034,7 @@
 
   /**
    * A wrapper around require() to suppress `module missing` errors.
+   *
    * @private
    * @param {String} id The module id.
    * @returns {Mixed} The exported module or `null`.
@@ -1002,6 +1048,7 @@
 
   /**
    * Runs a snippet of JavaScript via script injection.
+   *
    * @private
    * @param {String} code The code to run.
    */
@@ -1032,6 +1079,7 @@
 
   /**
    * A helper function for setting options/event handlers.
+   *
    * @private
    * @param {Object} bench The benchmark instance.
    * @param {Object} [options={}] Options object.
@@ -1056,6 +1104,7 @@
 
   /**
    * Handles cycling/completing the deferred benchmark.
+   *
    * @memberOf Benchmark.Deferred
    */
   function resolve() {
@@ -1075,6 +1124,7 @@
 
   /**
    * A deep clone utility.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Mixed} value The value to clone.
@@ -1243,6 +1293,7 @@
   /**
    * An iteration utility for arrays and objects.
    * Callbacks may terminate the loop by explicitly returning `false`.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array|Object} object The object to iterate over.
@@ -1286,7 +1337,8 @@
   }
 
   /**
-   * Copies enumerable properties from the source object to the destination object.
+   * Copies enumerable properties from the source(s) object to the destination object.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Object} destination The destination object.
@@ -1307,6 +1359,7 @@
 
   /**
    * A generic `Array#filter` like method.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1354,6 +1407,7 @@
   /**
    * A generic `Array#forEach` like method.
    * Callbacks may terminate the loop by explicitly returning `false`.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1380,6 +1434,7 @@
   /**
    * Iterates over an object's own properties, executing the `callback` for each.
    * Callbacks may terminate the loop by explicitly returning `false`.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Object} object The object to iterate over.
@@ -1393,6 +1448,7 @@
 
   /**
    * Converts a number to a more readable comma-separated string representation.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Number} number The number to convert.
@@ -1406,6 +1462,7 @@
 
   /**
    * Checks if an object has the specified key as a direct property.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Object} object The object to check.
@@ -1440,6 +1497,7 @@
 
   /**
    * A generic `Array#indexOf` like method.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1462,6 +1520,7 @@
 
   /**
    * Modify a string by replacing named tokens with matching object property values.
+   *
    * @static
    * @memberOf Benchmark
    * @param {String} string The string to modify.
@@ -1478,6 +1537,7 @@
 
   /**
    * Invokes a method on all items in an array.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} benches Array of benchmarks to iterate over.
@@ -1660,6 +1720,7 @@
 
   /**
    * Creates a string of joined array values or object key-value pairs.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array|Object} object The object to operate on.
@@ -1681,6 +1742,7 @@
 
   /**
    * A generic `Array#map` like method.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1697,6 +1759,7 @@
 
   /**
    * Retrieves the value of a specified property from all items in an array.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1711,6 +1774,7 @@
 
   /**
    * A generic `Array#reduce` like method.
+   *
    * @static
    * @memberOf Benchmark
    * @param {Array} array The array to iterate over.
@@ -1730,6 +1794,7 @@
 
   /**
    * Aborts all benchmarks in the suite.
+   *
    * @name abort
    * @memberOf Benchmark.Suite
    * @returns {Object} The suite instance.
@@ -1760,6 +1825,7 @@
 
   /**
    * Adds a test to the benchmark suite.
+   *
    * @memberOf Benchmark.Suite
    * @param {String} name A name to identify the benchmark.
    * @param {Function|String} fn The test to benchmark.
@@ -1792,6 +1858,7 @@
 
   /**
    * Creates a new suite with cloned benchmarks.
+   *
    * @name clone
    * @memberOf Benchmark.Suite
    * @param {Object} options Options object to overwrite cloned options.
@@ -1814,6 +1881,7 @@
 
   /**
    * An `Array#filter` like method.
+   *
    * @name filter
    * @memberOf Benchmark.Suite
    * @param {Function|String} callback The function/alias called per iteration.
@@ -1829,6 +1897,7 @@
 
   /**
    * Resets all benchmarks in the suite.
+   *
    * @name reset
    * @memberOf Benchmark.Suite
    * @returns {Object} The suite instance.
@@ -1854,6 +1923,7 @@
 
   /**
    * Runs the suite.
+   *
    * @name run
    * @memberOf Benchmark.Suite
    * @param {Object} [options={}] Options object.
@@ -1904,6 +1974,7 @@
 
   /**
    * Executes all registered listeners of the specified event type.
+   *
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String|Object} type The event type or object.
    * @returns {Mixed} Returns the return value of the last listener executed.
@@ -1949,6 +2020,7 @@
    * Unregisters a listener for the specified event type(s),
    * or unregisters all listeners for the specified event type(s),
    * or unregisters all listeners for all event types.
+   *
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} [type] The event type.
    * @param {Function} [listener] The function to unregister.
@@ -1974,10 +2046,12 @@
     var me = this,
         events = me.events;
 
-    events && each(type ? type.split(' ') : events, function(type) {
-      var index,
-          listeners = hasKey(events, type) && events[type];
-
+    events && each(type ? type.split(' ') : events, function(listeners, type) {
+      var index;
+      if (typeof listeners == 'string') {
+        type = listeners;
+        listeners = hasKey(events, type) && events[type];
+      }
       if (listeners) {
         if (listener) {
           index = indexOf(listeners, listener);
@@ -1994,6 +2068,7 @@
 
   /**
    * Registers a listener for the specified event type(s).
+   *
    * @memberOf Benchmark, Benchmark.Suite
    * @param {String} type The event type.
    * @param {Function} listener The function to register.
@@ -2023,6 +2098,7 @@
 
   /**
    * Aborts the benchmark without recording times.
+   *
    * @memberOf Benchmark
    * @returns {Object} The benchmark instance.
    */
@@ -2055,6 +2131,7 @@
 
   /**
    * Creates a new benchmark using the same test and options.
+   *
    * @memberOf Benchmark
    * @param {Object} options Options object to overwrite cloned options.
    * @returns {Object} The new benchmark instance.
@@ -2082,6 +2159,7 @@
 
   /**
    * Determines if a benchmark is faster than another.
+   *
    * @memberOf Benchmark
    * @param {Object} other The benchmark to compare.
    * @returns {Number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
@@ -2136,6 +2214,7 @@
 
   /**
    * Reset properties and abort if running.
+   *
    * @memberOf Benchmark
    * @returns {Object} The benchmark instance.
    */
@@ -2205,6 +2284,7 @@
 
   /**
    * Displays relevant benchmark information when coerced to a string.
+   *
    * @name toString
    * @memberOf Benchmark
    * @returns {String} A string representation of the benchmark instance.
@@ -2232,6 +2312,7 @@
 
   /**
    * Clocks the time taken to execute a test per cycle (secs).
+   *
    * @private
    * @param {Object} bench The benchmark instance.
    * @returns {Number} The time taken.
@@ -2481,6 +2562,7 @@
 
   /**
    * Computes stats on benchmark results.
+   *
    * @private
    * @param {Object} bench The benchmark instance.
    * @param {Object} options The options object.
@@ -2632,6 +2714,7 @@
 
   /**
    * Cycles a benchmark until a run `count` can be established.
+   *
    * @private
    * @param {Object} clone The cloned benchmark instance.
    * @param {Object} options The options object.
@@ -2729,6 +2812,7 @@
 
   /**
    * Runs the benchmark.
+   *
    * @memberOf Benchmark
    * @param {Object} [options={}] Options object.
    * @returns {Object} The benchmark instance.
@@ -2784,6 +2868,7 @@
 
     /**
      * The default options copied by benchmark instances.
+     *
      * @static
      * @memberOf Benchmark
      * @type Object
@@ -2791,7 +2876,9 @@
     'options': {
 
       /**
-       * A flag to indicate that benchmark cycles will execute asynchronously by default.
+       * A flag to indicate that benchmark cycles will execute asynchronously
+       * by default.
+       *
        * @memberOf Benchmark.options
        * @type Boolean
        */
@@ -2799,6 +2886,7 @@
 
       /**
        * A flag to indicate that the benchmark clock is deferred.
+       *
        * @memberOf Benchmark.options
        * @type Boolean
        */
@@ -2812,7 +2900,9 @@
       'delay': 0.005,
 
       /**
-       * Displayed by Benchmark#toString when a `name` is not available (auto-generated if absent).
+       * Displayed by Benchmark#toString when a `name` is not available
+       * (auto-generated if absent).
+       *
        * @memberOf Benchmark.options
        * @type String
        */
@@ -2820,6 +2910,7 @@
 
       /**
        * The default number of times to execute a test on a benchmark's first cycle.
+       *
        * @memberOf Benchmark.options
        * @type Number
        */
@@ -2828,6 +2919,7 @@
       /**
        * The maximum time a benchmark is allowed to run before finishing (secs).
        * Note: Cycle delays aren't counted toward the maximum time.
+       *
        * @memberOf Benchmark.options
        * @type Number
        */
@@ -2835,6 +2927,7 @@
 
       /**
        * The minimum sample size required to perform statistical analysis.
+       *
        * @memberOf Benchmark.options
        * @type Number
        */
@@ -2842,6 +2935,7 @@
 
       /**
        * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+       *
        * @memberOf Benchmark.options
        * @type Number
        */
@@ -2849,6 +2943,7 @@
 
       /**
        * The name of the benchmark.
+       *
        * @memberOf Benchmark.options
        * @type String
        */
@@ -2856,6 +2951,7 @@
 
       /**
        * An event listener called when the benchmark is aborted.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2863,6 +2959,7 @@
 
       /**
        * An event listener called when the benchmark completes running.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2870,6 +2967,7 @@
 
       /**
        * An event listener called after each run cycle.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2877,6 +2975,7 @@
 
       /**
        * An event listener called when a test errors.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2884,6 +2983,7 @@
 
       /**
        * An event listener called when the benchmark is reset.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2891,6 +2991,7 @@
 
       /**
        * An event listener called when the benchmark starts running.
+       *
        * @memberOf Benchmark.options
        * @type Function
        */
@@ -2900,6 +3001,7 @@
     /**
      * Platform object with properties describing things like browser name,
      * version, and operating system.
+     *
      * @static
      * @memberOf Benchmark
      * @type Object
@@ -2908,6 +3010,7 @@
 
       /**
        * The platform description.
+       *
        * @memberOf Benchmark.platform
        * @type String
        */
@@ -2915,6 +3018,7 @@
 
       /**
        * The name of the browser layout engine.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2922,6 +3026,7 @@
 
       /**
        * The name of the product hosting the browser.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2929,6 +3034,7 @@
 
       /**
        * The name of the browser/environment.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2936,6 +3042,7 @@
 
       /**
        * The name of the product's manufacturer.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2943,6 +3050,7 @@
 
       /**
        * The name of the operating system.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2950,6 +3058,7 @@
 
       /**
        * The alpha/beta release indicator.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2957,6 +3066,7 @@
 
       /**
        * The browser/environment version.
+       *
        * @memberOf Benchmark.platform
        * @type String|Null
        */
@@ -2964,6 +3074,7 @@
 
       /**
        * Return platform description when the platform object is coerced to a string.
+       *
        * @memberOf Benchmark.platform
        * @type Function
        * @returns {String} The platform description.
@@ -2975,6 +3086,7 @@
 
     /**
      * The semantic version number.
+     *
      * @static
      * @memberOf Benchmark
      * @type String
@@ -3037,6 +3149,7 @@
 
     /**
      * The number of times a test was executed.
+     *
      * @memberOf Benchmark
      * @type Number
      */
@@ -3044,6 +3157,7 @@
 
     /**
      * The number of cycles performed while benchmarking.
+     *
      * @memberOf Benchmark
      * @type Number
      */
@@ -3051,6 +3165,7 @@
 
     /**
      * The number of executions per second.
+     *
      * @memberOf Benchmark
      * @type Number
      */
@@ -3058,6 +3173,7 @@
 
     /**
      * The compiled test function.
+     *
      * @memberOf Benchmark
      * @type Function|String
      */
@@ -3065,6 +3181,7 @@
 
     /**
      * The error object if the test failed.
+     *
      * @memberOf Benchmark
      * @type Object
      */
@@ -3072,6 +3189,7 @@
 
     /**
      * The test to benchmark.
+     *
      * @memberOf Benchmark
      * @type Function|String
      */
@@ -3079,6 +3197,7 @@
 
     /**
      * A flag to indicate if the benchmark is aborted.
+     *
      * @memberOf Benchmark
      * @type Boolean
      */
@@ -3086,6 +3205,7 @@
 
     /**
      * A flag to indicate if the benchmark is running.
+     *
      * @memberOf Benchmark
      * @type Boolean
      */
@@ -3093,6 +3213,7 @@
 
     /**
      * Compiled into the test and executed immediately **before** the test loop.
+     *
      * @memberOf Benchmark
      * @type Function|String
      * @example
@@ -3155,6 +3276,7 @@
 
     /**
      * Compiled into the test and executed immediately **after** the test loop.
+     *
      * @memberOf Benchmark
      * @type Function|String
      */
@@ -3162,6 +3284,7 @@
 
     /**
      * An object of stats including mean, margin or error, and standard deviation.
+     *
      * @memberOf Benchmark
      * @type Object
      */
@@ -3169,6 +3292,7 @@
 
       /**
        * The margin of error.
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3176,6 +3300,7 @@
 
       /**
        * The relative margin of error (expressed as a percentage of the mean).
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3183,6 +3308,7 @@
 
       /**
        * The standard error of the mean.
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3190,6 +3316,7 @@
 
       /**
        * The sample standard deviation.
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3197,6 +3324,7 @@
 
       /**
        * The sample arithmetic mean.
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3204,6 +3332,7 @@
 
       /**
        * The array of sampled periods.
+       *
        * @memberOf Benchmark#stats
        * @type Array
        */
@@ -3211,6 +3340,7 @@
 
       /**
        * The sample variance.
+       *
        * @memberOf Benchmark#stats
        * @type Number
        */
@@ -3219,6 +3349,7 @@
 
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
+     *
      * @memberOf Benchmark
      * @type Object
      */
@@ -3226,6 +3357,7 @@
 
       /**
        * The time taken to complete the last cycle (secs).
+       *
        * @memberOf Benchmark#times
        * @type Number
        */
@@ -3233,6 +3365,7 @@
 
       /**
        * The time taken to complete the benchmark (secs).
+       *
        * @memberOf Benchmark#times
        * @type Number
        */
@@ -3240,6 +3373,7 @@
 
       /**
        * The time taken to execute the test once (secs).
+       *
        * @memberOf Benchmark#times
        * @type Number
        */
@@ -3247,6 +3381,7 @@
 
       /**
        * A timestamp of when the benchmark started (ms).
+       *
        * @memberOf Benchmark#times
        * @type Number
        */
@@ -3290,6 +3425,7 @@
 
     /**
      * The deferred benchmark instance.
+     *
      * @memberOf Benchmark.Deferred
      * @type Object
      */
@@ -3297,6 +3433,7 @@
 
     /**
      * The number of deferred cycles performed while benchmarking.
+     *
      * @memberOf Benchmark.Deferred
      * @type Number
      */
@@ -3304,6 +3441,7 @@
 
     /**
      * The time taken to complete the deferred benchmark (secs).
+     *
      * @memberOf Benchmark.Deferred
      * @type Number
      */
@@ -3311,6 +3449,7 @@
 
     /**
      * A timestamp of when the deferred benchmark started (ms).
+     *
      * @memberOf Benchmark.Deferred
      * @type Number
      */
@@ -3326,6 +3465,7 @@
 
     /**
      * The object whose listeners are currently being processed.
+     *
      * @memberOf Benchmark.Event
      * @type Object
      */
@@ -3333,6 +3473,7 @@
 
     /**
      * The return value of the last executed listener.
+     *
      * @memberOf Benchmark.Event
      * @type Mixed
      */
@@ -3340,6 +3481,7 @@
 
     /**
      * The object to which the event was originally emitted.
+     *
      * @memberOf Benchmark.Event
      * @type Object
      */
@@ -3347,6 +3489,7 @@
 
     /**
      * A timestamp of when the event was created (ms).
+     *
      * @memberOf Benchmark.Event
      * @type Number
      */
@@ -3354,6 +3497,7 @@
 
     /**
      * The event type.
+     *
      * @memberOf Benchmark.Event
      * @type String
      */
@@ -3364,6 +3508,7 @@
 
   /**
    * The default options copied by suite instances.
+   *
    * @static
    * @memberOf Benchmark.Suite
    * @type Object
@@ -3372,6 +3517,7 @@
 
     /**
      * The name of the suite.
+     *
      * @memberOf Benchmark.Suite.options
      * @type String
      */
@@ -3384,6 +3530,7 @@
 
     /**
      * The number of benchmarks in the suite.
+     *
      * @memberOf Benchmark.Suite
      * @type Number
      */
@@ -3391,6 +3538,7 @@
 
     /**
      * A flag to indicate if the suite is aborted.
+     *
      * @memberOf Benchmark.Suite
      * @type Boolean
      */
@@ -3398,6 +3546,7 @@
 
     /**
      * A flag to indicate if the suite is running.
+     *
      * @memberOf Benchmark.Suite
      * @type Boolean
      */
@@ -3406,6 +3555,7 @@
     /**
      * An `Array#forEach` like method.
      * Callbacks may terminate the loop by explicitly returning `false`.
+     *
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @returns {Object} The suite iterated over.
@@ -3414,6 +3564,7 @@
 
     /**
      * An `Array#indexOf` like method.
+     *
      * @memberOf Benchmark.Suite
      * @param {Mixed} value The value to search for.
      * @returns {Number} The index of the matched value or `-1`.
@@ -3422,6 +3573,7 @@
 
     /**
      * Invokes a method on all benchmarks in the suite.
+     *
      * @memberOf Benchmark.Suite
      * @param {String|Object} name The name of the method to invoke OR options object.
      * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
@@ -3431,6 +3583,7 @@
 
     /**
      * Converts the suite of benchmarks to a string.
+     *
      * @memberOf Benchmark.Suite
      * @param {String} [separator=','] A string to separate each element of the array.
      * @returns {String} The string.
@@ -3439,6 +3592,7 @@
 
     /**
      * An `Array#map` like method.
+     *
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @returns {Array} A new array of values returned by the callback.
@@ -3447,6 +3601,7 @@
 
     /**
      * Retrieves the value of a specified property from all benchmarks in the suite.
+     *
      * @memberOf Benchmark.Suite
      * @param {String} property The property to pluck.
      * @returns {Array} A new array of property values.
@@ -3455,6 +3610,7 @@
 
     /**
      * Removes the last benchmark from the suite and returns it.
+     *
      * @memberOf Benchmark.Suite
      * @returns {Mixed} The removed benchmark.
      */
@@ -3462,6 +3618,7 @@
 
     /**
      * Appends benchmarks to the suite.
+     *
      * @memberOf Benchmark.Suite
      * @returns {Number} The suite's new length.
      */
@@ -3469,6 +3626,7 @@
 
     /**
      * Sorts the benchmarks of the suite.
+     *
      * @memberOf Benchmark.Suite
      * @param {Function} [compareFn=null] A function that defines the sort order.
      * @returns {Object} The sorted suite.
@@ -3477,6 +3635,7 @@
 
     /**
      * An `Array#reduce` like method.
+     *
      * @memberOf Benchmark.Suite
      * @param {Function} callback The function called per iteration.
      * @param {Mixed} accumulator Initial value of the accumulator.
