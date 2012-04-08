@@ -46,11 +46,13 @@
 
   /** Utility shortcuts */
   var each = Benchmark.each,
+      extend = Benchmark.extend,
       filter = Benchmark.filter,
       forOwn = Benchmark.forOwn,
       formatNumber = Benchmark.formatNumber,
       hasKey = Benchmark.hasKey,
       indexOf = Benchmark.indexOf,
+      interpolate = Benchmark.interpolate,
       invoke = Benchmark.invoke,
       map = Benchmark.map,
       reduce = Benchmark.reduce;
@@ -115,22 +117,6 @@
     var div = createElement('div', context);
     div.innerHTML = 'x<style>' + cssText + '</style>';
     return div.lastChild;
-  }
-
-  /**
-   * Copies own/inherited properties of a source object to the destination object.
-   *
-   * @private
-   * @param {Object} destination The destination object.
-   * @param {Object} [source={}] The source object.
-   * @returns {Object} The destination object.
-   */
-  function extend(destination, source) {
-    source || (source = {});
-    for (var key in source) {
-      destination[key] = source[key];
-    }
-    return destination;
   }
 
   /**
@@ -485,21 +471,6 @@
    */
   function isArray(value) {
     return toString.call(value) == '[object Array]';
-  }
-
-  /**
-   * Modify a string by replacing named tokens with matching object property values.
-   *
-   * @private
-   * @param {String} string The string to modify.
-   * @param {Object} object The template object.
-   * @returns {String} The modified string.
-   */
-  function interpolate(string, object) {
-    forOwn(object, function(value, key) {
-      string = string.replace(RegExp('#\\{' + key + '\\}', 'g'), value);
-    });
-    return string;
   }
 
   /**

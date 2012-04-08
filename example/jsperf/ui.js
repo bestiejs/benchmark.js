@@ -78,7 +78,7 @@
     'queued': true
   };
 
-  /** API Shortcuts */
+  /** API shortcuts */
   var each = Benchmark.each,
       filter = Benchmark.filter,
       forOwn = Benchmark.forOwn,
