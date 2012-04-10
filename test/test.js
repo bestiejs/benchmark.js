@@ -1729,7 +1729,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.Suite filter results onComplete');
+  QUnit.module('Benchmark.Suite filtered results onComplete');
 
   (function() {
     var count = 0,
@@ -1906,7 +1906,31 @@
           QUnit.start();
         }
       })
-      .run({ 'async': true });
+      .run();
+    });
+
+    asyncTest('should execute "setup", "fn", and "teardown" in correct order', function() {
+      var fired = [];
+
+      Benchmark({
+        'defer': true,
+        'setup': function() {
+          fired.push('setup');
+        },
+        'fn': function(deferred) {
+          fired.push('fn');
+          setTimeout(function() { deferred.resolve(); }, 10);
+        },
+        'teardown': function() {
+          fired.push('teardown');
+        },
+        'onComplete': function() {
+          var actual = fired.join().replace(/(fn,)+/g, '$1').replace(/(setup,fn,teardown(?:,|$))+/, '$1');
+          equal(actual, 'setup,fn,teardown');
+          QUnit.start();
+        }
+      })
+      .run();
     });
   }());
 
