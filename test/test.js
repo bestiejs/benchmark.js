@@ -1335,6 +1335,75 @@
       suite.reset();
       equal(fired, false);
     });
+
+    asyncTest('emits an abort event when running', function() {
+      var fired = false;
+
+      Benchmark.Suite({
+        'onAbort': function() { fired = true; }
+      })
+      .on('start', function() {
+        this.abort();
+      })
+      .on('complete', function() {
+        ok(fired);
+        QUnit.start();
+      })
+      .add(function(){ })
+      .run({ 'async': true });
+    });
+
+    asyncTest('emits an abort event after calling `Benchmark.Suite#reset`', function() {
+      var fired = false;
+
+      Benchmark.Suite({
+        'onAbort': function() { fired = true; }
+      })
+      .on('start', function() {
+        this.reset();
+      })
+      .on('complete', function() {
+        ok(fired);
+        QUnit.start();
+      })
+      .add(function(){ })
+      .run({ 'async': true });
+    });
+
+    asyncTest('should abort deferred benchmark', function() {
+      var fired = false,
+          suite = Benchmark.Suite();
+
+      suite.on('complete', function() {
+        equal(fired, false);
+        QUnit.start();
+      })
+      .add('a', {
+        'defer': true,
+        'fn': function(deferred) {
+          // avoid test inlining
+          suite.name;
+          // delay resolve
+          setTimeout(function() {
+            deferred.resolve();
+            suite.abort();
+          }, 10);
+        }
+      })
+      .add('b', {
+        'defer': true,
+        'fn': function(deferred) {
+          // avoid test inlining
+          suite.name;
+          // delay resolve
+          setTimeout(function() {
+            deferred.resolve();
+            fired = true;
+          }, 10);
+        }
+      })
+      .run();
+    });
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -1437,6 +1506,17 @@
       deepEqual(slice.call(suite), []);
     });
 
+    test('should have no elements when length is 0 after shift', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite.length = 1;
+      suite.shift();
+
+      // ensure element is removed
+      equal('0' in suite, false);
+      equal(suite.length, 0);
+    });
+
     test('supports shifting sparse arrays', function() {
       var suite = Benchmark.Suite();
       suite[1] = 1;
@@ -1530,6 +1610,17 @@
       deepEqual(slice.call(suite), [0]);
     });
 
+    test('should have no elements when length is 0 after splice', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite.length = 1
+      suite.splice(0, 1);
+
+      // ensure element is removed
+      equal('0' in suite, false);
+      equal(suite.length, 0);
+    });
+
     test('works with positive `start` argument', function() {
       var suite = Benchmark.Suite();
       suite[0] = 0;
@@ -1592,8 +1683,8 @@
       suite.length = 4;
 
       var actual = suite.splice(1, 2, 1, 2);
-      deepEqual(actual, [1]);
-      equal(actual.length, 1);
+      deepEqual(actual, [1, undefined]);
+      equal(actual.length, 2);
       deepEqual(slice.call(suite), [undefined, 1, 2, 3]);
       equal('0' in suite, false);
     });
@@ -1638,132 +1729,11 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark event flow');
-
-  (function() {
-    var events = [],
-        callback = function(event) { events.push(event); };
-
-    var suite = Benchmark.Suite('suite', {
-      'onAdd': callback,
-      'onAbort': callback,
-      'onClone': callback,
-      'onError': callback,
-      'onStart': callback,
-      'onCycle': callback,
-      'onComplete': callback,
-      'onReset': callback
-    })
-    .add('foo', function() {
-      throw null;
-    }, {
-      'onAbort': callback,
-      'onClone': callback,
-      'onError': callback,
-      'onStart': callback,
-      'onCycle': callback,
-      'onComplete': callback,
-      'onReset': callback
-    })
-    .run({ 'async': false });
-
-    // first Suite#onAdd
-    test('should emit the suite "add" event first', function() {
-      var event = events[0];
-      ok(event.type == 'add' && event.currentTarget.name == 'suite' && event.target.name == 'foo');
-    });
-
-    // next we start the Suite because no reset was needed
-    test('should emit the suite "start" event', function() {
-      var event = events[1];
-      ok(event.type == 'start' && event.currentTarget.name == 'suite' && event.target.name == 'foo');
-    });
-
-    // and so start the first benchmark
-    test('should emit the benchmark "start" event', function() {
-      var event = events[2];
-      ok(event.type == 'start' && event.currentTarget.name == 'foo');
-    });
-
-    // oh no! we abort because of an error
-    test('should emit the benchmark "error" event', function() {
-      var event = events[3];
-      ok(event.type == 'error' && event.currentTarget.name == 'foo');
-    });
-
-    // benchmark error triggered
-    test('should emit the benchmark "abort" event', function() {
-      var event = events[4];
-      ok(event.type == 'abort' && event.currentTarget.name == 'foo');
-    });
-
-    // we reset the benchmark as part of the abort
-    test('should emit the benchmark "reset" event', function() {
-      var event = events[5];
-      ok(event.type == 'reset' && event.currentTarget.name == 'foo');
-    });
-
-    // benchmark is cycle is finished
-    test('should emit the benchmark "cycle" event', function() {
-      var event = events[6];
-      ok(event.type == 'cycle' && event.currentTarget.name == 'foo');
-    });
-
-    // benchmark is complete
-    test('should emit the benchmark "complete" event', function() {
-      var event = events[7];
-      ok(event.type == 'complete' && event.currentTarget.name == 'foo');
-    });
-
-    // the benchmark error triggers a Suite error
-    test('should emit the suite "error" event', function() {
-      var event = events[8];
-      ok(event.type == 'error' && event.currentTarget.name == 'suite' && event.target.name == 'foo');
-    });
-
-    // the Suite cycle finishes
-    test('should emit the suite "cycle" event', function() {
-      var event = events[9];
-      ok(event.type == 'cycle' && event.currentTarget.name == 'suite' && event.target.name == 'foo');
-    });
-
-    // the Suite completes
-    test('finally it should emit the suite "complete" event', function() {
-      var event = events[10];
-      ok(event.type == 'complete' && event.currentTarget.name == 'suite' && event.target.name == 'foo');
-    });
-
-    test('emitted all expected events', function() {
-      ok(events.length == 11);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Deferred benchmarks');
-
-  (function() {
-    asyncTest('should run a deferred benchmark correctly', function() {
-      Benchmark(function(deferred) {
-        setTimeout(function() { deferred.resolve(); }, 10);
-      }, {
-        'defer': true,
-        'onComplete': function() {
-          ok(this.cycles);
-          QUnit.start();
-        }
-      })
-      .run();
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Filter suite results on complete');
+  QUnit.module('Benchmark.Suite filter results onComplete');
 
   (function() {
     var count = 0,
-        suite = new Benchmark.Suite;
+        suite = Benchmark.Suite();
 
     suite.add('a', function() {
       count++;
@@ -1807,43 +1777,134 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.Suite#abort while running');
+  QUnit.module('Benchmark.Suite event flow');
 
   (function() {
-    asyncTest('emits an abort event when running', function() {
-      var fired = false;
+    var events = [],
+        callback = function(event) { events.push(event); };
 
-      Benchmark.Suite('foo', {
-        'onAbort': function() { fired = true; }
-      })
-      .add('a', function() {
-        // empty
-      })
-      .on('start', function() {
-        this.abort();
-      })
-      .on('complete', function() {
-        ok(fired);
-        QUnit.start();
-      })
-      .run({ 'async': true });
+    var suite = Benchmark.Suite('suite', {
+      'onAdd': callback,
+      'onAbort': callback,
+      'onClone': callback,
+      'onError': callback,
+      'onStart': callback,
+      'onCycle': callback,
+      'onComplete': callback,
+      'onReset': callback
+    })
+    .add('bench', function() {
+      throw null;
+    }, {
+      'onAbort': callback,
+      'onClone': callback,
+      'onError': callback,
+      'onStart': callback,
+      'onCycle': callback,
+      'onComplete': callback,
+      'onReset': callback
+    })
+    .run({ 'async': false });
+
+    // first Suite#onAdd
+    test('should emit the suite "add" event first', function() {
+      var event = events[0];
+      ok(event.type == 'add' && event.currentTarget.name == 'suite' && event.target.name == 'bench');
     });
 
-    asyncTest('emits an abort event after calling `Benchmark.Suite#reset` when running', function() {
-      var fired = false;
+    // next we start the Suite because no reset was needed
+    test('should emit the suite "start" event', function() {
+      var event = events[1];
+      ok(event.type == 'start' && event.currentTarget.name == 'suite' && event.target.name == 'bench');
+    });
 
-      Benchmark.Suite('foo', {
-        'onAbort': function() { fired = true; }
+    // and so start the first benchmark
+    test('should emit the benchmark "start" event', function() {
+      var event = events[2];
+      ok(event.type == 'start' && event.currentTarget.name == 'bench');
+    });
+
+    // oh no! we abort because of an error
+    test('should emit the benchmark "error" event', function() {
+      var event = events[3];
+      ok(event.type == 'error' && event.currentTarget.name == 'bench');
+    });
+
+    // benchmark error triggered
+    test('should emit the benchmark "abort" event', function() {
+      var event = events[4];
+      ok(event.type == 'abort' && event.currentTarget.name == 'bench');
+    });
+
+    // we reset the benchmark as part of the abort
+    test('should emit the benchmark "reset" event', function() {
+      var event = events[5];
+      ok(event.type == 'reset' && event.currentTarget.name == 'bench');
+    });
+
+    // benchmark is cycle is finished
+    test('should emit the benchmark "cycle" event', function() {
+      var event = events[6];
+      ok(event.type == 'cycle' && event.currentTarget.name == 'bench');
+    });
+
+    // benchmark is complete
+    test('should emit the benchmark "complete" event', function() {
+      var event = events[7];
+      ok(event.type == 'complete' && event.currentTarget.name == 'bench');
+    });
+
+    // the benchmark error triggers a Suite error
+    test('should emit the suite "error" event', function() {
+      var event = events[8];
+      ok(event.type == 'error' && event.currentTarget.name == 'suite' && event.target.name == 'bench');
+    });
+
+    // the Suite cycle finishes
+    test('should emit the suite "cycle" event', function() {
+      var event = events[9];
+      ok(event.type == 'cycle' && event.currentTarget.name == 'suite' && event.target.name == 'bench');
+    });
+
+    // the Suite completes
+    test('finally it should emit the suite "complete" event', function() {
+      var event = events[10];
+      ok(event.type == 'complete' && event.currentTarget.name == 'suite' && event.target.name == 'bench');
+    });
+
+    test('emitted all expected events', function() {
+      ok(events.length == 11);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Deferred benchmarks');
+
+  (function() {
+    asyncTest('should run a deferred benchmark correctly', function() {
+      Benchmark(function(deferred) {
+        setTimeout(function() { deferred.resolve(); }, 10);
+      }, {
+        'defer': true,
+        'onComplete': function() {
+          ok(this.cycles);
+          QUnit.start();
+        }
       })
-      .add('a', function() {
-        // empty
-      })
-      .on('start', function() {
-        this.reset();
-      })
-      .on('complete', function() {
-        ok(fired);
-        QUnit.start();
+      .run();
+    });
+
+    asyncTest('works with string values for "fn", "setup", and "teardown"', function() {
+      Benchmark({
+        'defer': true,
+        'setup': 'var x = [3, 2, 1];',
+        'fn': 'x.sort(); deferred.resolve();',
+        'teardown': 'x.length = 0;',
+        'onComplete': function() {
+          ok(true);
+          QUnit.start();
+        }
       })
       .run({ 'async': true });
     });

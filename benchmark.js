@@ -539,12 +539,14 @@
    * @returns {Array} An array of deleted elements.
    */
   function insert(start, deleteCount, elements) {
+    // `result` should have its length set to the `deleteCount`
+    // see https://bugs.ecmascript.org/show_bug.cgi?id=332
     var deleteEnd = start + deleteCount,
         elementCount = elements ? elements.length : 0,
         index = start - 1,
         length = start + elementCount,
         object = this,
-        result = [],
+        result = Array(deleteCount),
         tail = slice.call(object, deleteEnd);
 
     // delete elements from the array
@@ -1109,12 +1111,19 @@
    */
   function resolve() {
     var me = this,
-        clone = me.benchmark;
+        clone = me.benchmark,
+        bench = clone._original;
 
-    if (++me.cycles < clone.count) {
+    if (bench.aborted) {
+      // cycle() -> clone cycle/complete event -> compute()'s invoked bench.run() cycle/complete
+      clone.running = false;
+      cycle(me);
+    }
+    else if (++me.cycles < clone.count) {
       // continue the test loop
-      clone.compiled.call(me, timer);
-    } else {
+      delay(clone, function() { clone.compiled.call(me, timer); });
+    }
+    else {
       timer.stop(me);
       delay(clone, function() { cycle(me); });
     }
@@ -1815,7 +1824,6 @@
 
         if (!resetting) {
           me.aborted = true;
-          me.running = false;
           invoke(me, 'abort');
         }
       }
@@ -1904,9 +1912,10 @@
    */
   function resetSuite() {
     var event,
-        me = this;
+        me = this,
+        aborting = calledBy.abortSuite;
 
-    if (me.running && !calledBy.abortSuite) {
+    if (me.running && !aborting) {
       // no worries, `resetSuite()` is called within `abortSuite()`
       calledBy.resetSuite = true;
       me.abort();
@@ -1916,7 +1925,9 @@
     else if ((me.aborted || me.running) &&
         (me.emit(event = Event('reset')), !event.cancelled)) {
       me.running = false;
-      invoke(me, 'reset');
+      if (!aborting) {
+        invoke(me, 'reset');
+      }
     }
     return me;
   }
@@ -1937,8 +1948,7 @@
    * suite.run({ 'async': true, 'queued': true });
    */
   function runSuite(options) {
-    var me = this,
-        benches = [];
+    var me = this;
 
     me.reset();
     me.running = true;
@@ -1955,12 +1965,9 @@
         var bench = event.target;
         if (bench.error) {
           me.emit({ 'type': 'error', 'target': bench });
-        } else if (bench.cycles) {
-          benches.push(bench);
         }
-        if (!me.aborted) {
-          me.emit(event);
-        }
+        me.emit(event);
+        event.aborted = me.aborted;
       },
       'onComplete': function(event) {
         me.running = false;
@@ -2423,11 +2430,13 @@
           }
         }
       }
+      // assign `compiled` to `clone` before calling in case a deferred benchmark
+      // immediately calls `deferred.resolve()`
+      clone.compiled = compiled;
       // if no errors run the full test loop
       if (!clone.error) {
         result = compiled.call(deferred || bench, timer).elapsed;
       }
-      clone.compiled = compiled;
       return result;
     };
 
@@ -2615,6 +2624,7 @@
           }
         }
       } else if (bench.aborted) {
+        // clear abort listeners to avoid triggering bench's abort/cycle again
         clone.events.abort.length = 0;
         clone.abort();
       }
