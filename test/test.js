@@ -161,10 +161,13 @@
         'teardown': function() { a = 2; }
       }).run();
 
-      var compiled = bench.compiled,
-          result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
-
-      ok(/setup\(\)/.test(compiled) ? true : result);
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest(1);
+      }
+      else {
+        ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
+      }
     });
 
     test('compiles using a custom "toString" method', function() {
@@ -179,10 +182,13 @@
       bench.teardown.toString = function() { return 'a = 2;' };
       bench.run();
 
-      var compiled = bench.compiled,
-          result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
-
-      ok(/setup\(\)/.test(compiled) ? true : result);
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest(1);
+      }
+      else {
+        ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
+      }
     });
 
     test('compiles using a string value', function() {
@@ -192,10 +198,13 @@
         'teardown': 'a = 2;'
       }).run();
 
-      var compiled = bench.compiled,
-          result = /var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled);
-
-      ok(/setup\(\)/.test(compiled) ? true : result);
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest(1);
+      }
+      else {
+        ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
+      }
     });
   }());
 
@@ -214,9 +223,15 @@
         }
       }).run();
 
-      ok(bench._setup, 'correct binding for "setup"');
-      ok(bench._fn, 'correct binding for "fn"');
-      ok(bench._teardown, 'correct binding for "teardown"');
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest(3);
+      }
+      else {
+        ok(bench._setup, 'correct binding for "setup"');
+        ok(bench._fn, 'correct binding for "fn"');
+        ok(bench._teardown, 'correct binding for "teardown"');
+      }
     });
 
     test('has correct binding for called "fn" and inlined "setup"/"teardown"', function() {
@@ -236,9 +251,15 @@
         }
       }).run();
 
-      ok(bench._setup, 'correct binding for "setup"');
-      ok(bench._fn, 'correct binding for "fn"');
-      ok(bench._teardown, 'correct binding for "teardown"');
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest(3);
+      }
+      else {
+        ok(bench._setup, 'correct binding for "setup"');
+        ok(bench._fn, 'correct binding for "fn"');
+        ok(bench._teardown, 'correct binding for "teardown"');
+      }
     });
   }());
 
