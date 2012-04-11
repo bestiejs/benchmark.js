@@ -213,53 +213,45 @@
   QUnit.module('Benchmark test binding');
 
   (function() {
-    test('has correct binding for inlined "setup", "fn", and "teardown"', function() {
-      var bench = Benchmark({
-        'setup': 'if(this instanceof Benchmark)this._setup=true;',
-        'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
-        'fn': 'if(this instanceof Benchmark)this._fn=true;',
-        'onCycle': function() {
-          this.abort();
+    var count = 0;
+
+    var tests = {
+      'inlined "setup", "fn", and "teardown"': (
+        'if(this instanceof Benchmark)this._fn=true;'
+      ),
+      'called "fn" and inlined "setup"/"teardown" reached by error': function() {
+        count++;
+        if (this instanceof Benchmark) {
+          this._fn = true;
         }
-      }).run();
-
-      var compiled = bench.compiled;
-      if (/setup\(\)/.test(compiled)) {
-        skipTest(3);
-      }
-      else {
-        ok(bench._setup, 'correct binding for "setup"');
-        ok(bench._fn, 'correct binding for "fn"');
-        ok(bench._teardown, 'correct binding for "teardown"');
-      }
-    });
-
-    test('has correct binding for called "fn" and inlined "setup"/"teardown"', function() {
-      var count = 0;
-
-      var bench = Benchmark({
-        'setup': 'if(this instanceof Benchmark)this._setup=true;',
-        'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
-        'fn': function() {
-          count++;
-          if (this instanceof Benchmark) {
-            this._fn = true;
-          }
-        },
-        'onCycle': function() {
-          this.abort();
+      },
+      'called "fn" and inlined "setup"/"teardown" reached by `return` statement': function() {
+        if (this instanceof Benchmark) {
+          this._fn = true;
         }
-      }).run();
+        return;
+      }
+    };
 
-      var compiled = bench.compiled;
-      if (/setup\(\)/.test(compiled)) {
-        skipTest(3);
-      }
-      else {
-        ok(bench._setup, 'correct binding for "setup"');
-        ok(bench._fn, 'correct binding for "fn"');
-        ok(bench._teardown, 'correct binding for "teardown"');
-      }
+    forOwn(tests, function(fn, title) {
+      test('has correct binding for ' + title, function() {
+        var bench = Benchmark({
+          'setup': 'if(this instanceof Benchmark)this._setup=true;',
+          'fn': fn,
+          'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
+          'onCycle': function() { this.abort(); }
+        }).run();
+
+        var compiled = bench.compiled;
+        if (/setup\(\)/.test(compiled)) {
+          skipTest(3);
+        }
+        else {
+          ok(bench._setup, 'correct binding for "setup"');
+          ok(bench._fn, 'correct binding for "fn"');
+          ok(bench._teardown, 'correct binding for "teardown"');
+        }
+      });
     });
   }());
 
