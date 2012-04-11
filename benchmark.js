@@ -2417,7 +2417,7 @@
             preprocess(
               (clone.error && !stringable
                 ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count'
-                : 'function f$(){#{fn}\n}var r$,s$,i$=this.count'
+                : 'function f$(){#{fn}\n}var r$,s$,m$=this,i$=m$.count'
               ) +
               ',n$=t$.ns;#{setup}\n#{begin};m$.f$=f$;while(i$--){m$.f$()}#{end};' +
               'delete m$.f$;#{teardown}\nreturn{elapsed:r$}'
