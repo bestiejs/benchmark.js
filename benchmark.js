@@ -2414,10 +2414,14 @@
         // fallback when a test exits early or errors during pretest
         if (decompilable && !compiled && !deferred && !isEmpty) {
           compiled = createFunction(preprocess('t$'), interpolate(
-            preprocess((clone.error && !stringable
-              ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count'
-              : 'function f$(){#{fn}\n}var r$,s$,i$=this.count'
-            ) + ',n$=t$.ns;#{setup}\n#{begin};while(i$--){f$()}#{end};#{teardown}\nreturn{elapsed:r$}'),
+            preprocess(
+              (clone.error && !stringable
+                ? 'var r$,s$,m$=this,f$=m$.fn,i$=m$.count'
+                : 'function f$(){#{fn}\n}var r$,s$,i$=this.count'
+              ) +
+              ',n$=t$.ns;#{setup}\n#{begin};m$.f$=f$;while(i$--){m$.f$()}#{end};' +
+              'delete m$.f$;#{teardown}\nreturn{elapsed:r$}'
+            ),
             source
           ));
 
@@ -2566,7 +2570,7 @@
 
     // define `timer` methods
     timer.start = createFunction(preprocess('o$'),
-      preprocess('var n$=this.ns,#{begin};o$.timeStamp=s$'));
+      preprocess('var n$=this.ns,#{begin};o$.elapsed=0;o$.timeStamp=s$'));
 
     timer.stop = createFunction(preprocess('o$'),
       preprocess('var n$=this.ns,s$=o$.timeStamp,#{end};o$.elapsed=r$'));
@@ -2613,7 +2617,6 @@
      */
     function update(event) {
       var clone = this,
-          cycles = clone.cycles,
           type = event.type;
 
       if (bench.running) {
@@ -2756,7 +2759,7 @@
     // continue, if not aborted between cycles
     if (clone.running) {
       // `minTime` is set to `Benchmark.options.minTime` in `clock()`
-      cycles = clone.cycles++;
+      cycles = ++clone.cycles;
       clocked = deferred ? deferred.elapsed : clock(clone);
       minTime = clone.minTime;
 

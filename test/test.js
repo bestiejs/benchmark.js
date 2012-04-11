@@ -201,6 +201,49 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark test binding');
+
+  (function() {
+    test('has correct binding for inlined "setup", "fn", and "teardown"', function() {
+      var bench = Benchmark({
+        'setup': 'if(this instanceof Benchmark)this._setup=true;',
+        'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
+        'fn': 'if(this instanceof Benchmark)this._fn=true;',
+        'onCycle': function() {
+          this.abort();
+        }
+      }).run();
+
+      ok(bench._setup, 'correct binding for "setup"');
+      ok(bench._fn, 'correct binding for "fn"');
+      ok(bench._teardown, 'correct binding for "teardown"');
+    });
+
+    test('has correct binding for called "fn" and inlined "setup"/"teardown"', function() {
+      var count = 0;
+
+      var bench = Benchmark({
+        'setup': 'if(this instanceof Benchmark)this._setup=true;',
+        'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
+        'fn': function() {
+          count++;
+          if (this instanceof Benchmark) {
+            this._fn = true;
+          }
+        },
+        'onCycle': function() {
+          this.abort();
+        }
+      }).run();
+
+      ok(bench._setup, 'correct binding for "setup"');
+      ok(bench._fn, 'correct binding for "fn"');
+      ok(bench._teardown, 'correct binding for "teardown"');
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.deepClone');
 
   (function() {
@@ -407,13 +450,16 @@
   QUnit.module('Benchmark.each');
 
   (function() {
+    var xpathResult;
+
     var objects = {
       'array': ['a', 'b', 'c', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 }
+      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 },
+      'xpath snapshot': null
     };
 
     if (window.document && document.evaluate) {
-      var xpathResult = [document.documentElement, document.getElementsByTagName('head')[0], document.body];
+      xpathResult = [document.documentElement, document.getElementsByTagName('head')[0], document.body];
       objects['xpath snapshot'] = document.evaluate('//*[self::html or self::head or self::body]', document, null, 7, null);
     }
 
