@@ -6,6 +6,7 @@
  * Available under MIT license <http://mths.be/mit>
  */
 ;(function(window, undefined) {
+  'use strict';
 
   /** Used to assign each benchmark an incrimented id */
   var counter = 0;
@@ -359,7 +360,7 @@
     var me = this;
 
     // allow instance creation without the `new` operator
-    if (me && me.constructor != Benchmark) {
+    if (me == null || me.constructor != Benchmark) {
       return new Benchmark(name, fn, options);
     }
     // juggle arguments
@@ -398,7 +399,7 @@
    */
   function Deferred(clone) {
     var me = this;
-    if (me && me.constructor != Deferred) {
+    if (me == null || me.constructor != Deferred) {
       return new Deferred(clone);
     }
     me.benchmark = clone;
@@ -414,7 +415,7 @@
    */
   function Event(type) {
     var me = this;
-    return (me && me.constructor != Event)
+    return (me == null || me.constructor != Event)
       ? new Event(type)
       : (type instanceof Event)
           ? type
@@ -462,7 +463,7 @@
     var me = this;
 
     // allow instance creation without the `new` operator
-    if (me && me.constructor != Suite) {
+    if (me == null || me.constructor != Suite) {
       return new Suite(name, options);
     }
     // juggle arguments
@@ -837,8 +838,7 @@
           }
         }
         // in IE < 9 strings don't support accessing characters by index
-        if (!done && (
-            forArgs && isArguments(object) ||
+        if (!done && (forArgs && isArguments(object) ||
             ((noCharByIndex || noCharByOwnIndex) && isClassOf(object, 'String') &&
               (iteratee = noCharByIndex ? object.split('') : object)))) {
           while (++index < length) {
@@ -1182,7 +1182,10 @@
       }
       // assign non-objects
       else {
-        clone[subKey] = subValue;
+        try {
+          // will throw an error in strict mode if the property is read-only
+          clone[subKey] = subValue;
+        } catch(e) { }
       }
     }
 
@@ -1279,9 +1282,10 @@
       }
       if (parent) {
         // for custom property descriptors
-        if (accessor || (descriptor &&
-            !(descriptor.configurable && descriptor.enumerable && descriptor.writable))) {
-          descriptor.value && (descriptor.value = clone);
+        if (accessor || (descriptor && !(descriptor.configurable && descriptor.enumerable && descriptor.writable))) {
+          if ('value' in descriptor) {
+            descriptor.value = clone;
+          }
           setDescriptor(parent, key, descriptor);
         }
         // for default property descriptors
