@@ -6,8 +6,8 @@
   "main": "benchmark",
   "keywords": [
     "benchmark",
-    "node",
     "narwhal",
+    "node",
     "performance",
     "ringo",
     "speed"
