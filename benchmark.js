@@ -629,6 +629,8 @@
    * but not including, the end index.
    *
    * @memberOf Benchmark.Suite
+   * @param {Number} start The starting index.
+   * @param {Number} end The end index.
    * @returns {Array} The new array.
    */
   function slice(start, end) {
@@ -656,6 +658,9 @@
    * host array.
    *
    * @memberOf Benchmark.Suite
+   * @param {Number} start The start index.
+   * @param {Number} deleteCount The number of elements to delete.
+   * @param {Mixed} [val1, val2, ...] values to insert at the `start` index.
    * @returns {Array} An array of removed elements.
    */
   function splice(start, deleteCount) {
