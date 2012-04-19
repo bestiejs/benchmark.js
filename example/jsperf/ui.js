@@ -80,6 +80,7 @@
 
   /** API shortcuts */
   var each = Benchmark.each,
+      extend = Benchmark.extend,
       filter = Benchmark.filter,
       forOwn = Benchmark.forOwn,
       formatNumber = Benchmark.formatNumber,
@@ -368,22 +369,6 @@
   }
 
   /*--------------------------------------------------------------------------*/
-
-  /**
-   * Copies own/inherited properties of a source object to the destination object.
-   *
-   * @private
-   * @param {Object} destination The destination object.
-   * @param {Object} [source={}] The source object.
-   * @returns {Object} The destination object.
-   */
-  function extend(destination, source) {
-    source || (source = {});
-    for (var key in source) {
-      destination[key] = source[key];
-    }
-    return destination;
-  }
 
   /**
    * Checks if a value has an internal [[Class]] of Function.
