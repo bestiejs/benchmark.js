@@ -722,11 +722,14 @@
   function createFunction() {
     // lazy define
     createFunction = function(args, body) {
-      var anchor = freeDefine ? define.amd : Benchmark,
+      var result,
+          anchor = freeDefine ? define.amd : Benchmark,
           prop = uid + 'createFunction';
 
       runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '=function(' + args + '){' + body + '}');
-      return [anchor[prop], delete anchor[prop]][0];
+      result = anchor[prop];
+      delete anchor[prop];
+      return result;
     };
     // fix JaegerMonkey bug
     // http://bugzil.la/639720
@@ -796,12 +799,14 @@
     forProps = function(object, callback, options) {
       options || (options = {});
 
+      var result = object;
+      object = Object(object);
+
       var ctor,
           key,
           keys,
           skipCtor,
-          done = !object,
-          result = [object, object = Object(object)][0],
+          done = !result,
           which = options.which,
           allFlag = which == 'all',
           index = -1,
@@ -811,8 +816,6 @@
           seen = {},
           skipProto = isClassOf(object, 'Function'),
           thisArg = options.bind;
-
-      object = Object(object);
 
       if (thisArg !== undefined) {
         callback = bind(callback, thisArg);
@@ -1322,8 +1325,10 @@
    * @returns {Array|Object} Returns the object iterated over.
    */
   function each(object, callback, thisArg) {
-    var result = [object, object = Object(object)][0],
-        fn = callback,
+    var result = object;
+    object = Object(object);
+
+    var fn = callback,
         index = -1,
         length = object.length,
         isSnapshot = !!(object.snapshotItem && (length = object.snapshotLength)),
@@ -1368,13 +1373,15 @@
   function extend(destination, source) {
     // Chrome < 14 incorrectly sets `destination` to `undefined` when we `delete arguments[0]`
     // http://code.google.com/p/v8/issues/detail?id=839
-    destination = [destination, delete arguments[0]][0];
+    var result = destination;
+    delete arguments[0];
+
     forEach(arguments, function(source) {
       forProps(source, function(value, key) {
-        destination[key] = value;
+        result[key] = value;
       });
     });
-    return destination;
+    return result;
   }
 
   /**
@@ -2343,8 +2350,13 @@
 
     // lazy define for hi-res timers
     clock = function(clone) {
-      var deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
-          bench = clone._original,
+      var deferred;
+      if (clone instanceof Deferred) {
+        deferred = clone;
+        clone = deferred.benchmark;
+      }
+
+      var bench = clone._original,
           fn = bench.fn,
           fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '',
           stringable = isStringable(fn);
@@ -2753,13 +2765,18 @@
   function cycle(clone, options) {
     options || (options = {});
 
+    var deferred;
+    if (clone instanceof Deferred) {
+      deferred = clone;
+      clone = clone.benchmark;
+    }
+
     var clocked,
         cycles,
         divisor,
         event,
         minTime,
         period,
-        deferred = clone instanceof Deferred && [clone, clone = clone.benchmark][0],
         async = options.async,
         bench = clone._original,
         count = clone.count,
