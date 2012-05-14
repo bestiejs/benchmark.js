@@ -1954,7 +1954,21 @@
       .run();
     });
 
-    asyncTest('works with string values for "fn", "setup", and "teardown"', function() {
+    asyncTest('should run with string values for "fn", "setup", and "teardown"', function() {
+      Benchmark({
+        'defer': true,
+        'setup': 'var x = [3, 2, 1];',
+        'fn': 'setTimeout(function() { x.sort(); deferred.resolve(); }, 10);',
+        'teardown': 'x.length = 0;',
+        'onComplete': function() {
+          ok(true);
+          QUnit.start();
+        }
+      })
+      .run();
+    });
+
+    asyncTest('should run recursively', function() {
       Benchmark({
         'defer': true,
         'setup': 'var x = [3, 2, 1];',

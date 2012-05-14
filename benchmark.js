@@ -1130,7 +1130,12 @@
     }
     else if (++me.cycles < clone.count) {
       // continue the test loop
-      delay(clone, function() { clone.compiled.call(me, timer); });
+      if (support.timeout) {
+        // use setTimeout to avoid a call stack overflow if called recursively
+        setTimeout(function() { clone.compiled.call(me, timer); }, 0);
+      } else {
+        clone.compiled.call(me, timer);
+      }
     }
     else {
       timer.stop(me);
