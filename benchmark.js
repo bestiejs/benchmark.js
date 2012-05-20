@@ -2633,7 +2633,12 @@
       while (count--) {
         queue.push(bench.clone({
           '_original': bench,
-          'events': { 'abort': [update], 'cycle': [update], 'error': [update], 'start': [update] }
+          'events': {
+            'abort': [update],
+            'cycle': [update],
+            'error': [update],
+            'start': [update]
+          }
         }));
       }
     }
