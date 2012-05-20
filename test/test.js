@@ -78,7 +78,7 @@
   // set a shorter max time
   Benchmark.options.maxTime = Benchmark.options.minTime * 5;
 
-  // must explicitly use `QUnit.module` instead of `module()`
+  // explicitly call `QUnit.module()` instead of `module()`
   // in case we are in a CLI environment
   QUnit.module('Benchmark');
 
@@ -2032,5 +2032,10 @@
       .run();
     });
   }());
+
+  /*--------------------------------------------------------------------------*/
+
+  // explicitly call `QUnit.start()` for Narwhal, Rhino, and RingoJS
+  QUnit.start();
 
 }(typeof global == 'object' && global || this));
