@@ -217,16 +217,16 @@
 
     var tests = {
       'inlined "setup", "fn", and "teardown"': (
-        'if(this instanceof Benchmark)this._fn=true;'
+        'if(/ops/.test(this))this._fn=true;'
       ),
       'called "fn" and inlined "setup"/"teardown" reached by error': function() {
         count++;
-        if (this instanceof Benchmark) {
+        if (/ops/.test(this)) {
           this._fn = true;
         }
       },
       'called "fn" and inlined "setup"/"teardown" reached by `return` statement': function() {
-        if (this instanceof Benchmark) {
+        if (/ops/.test(this)) {
           this._fn = true;
         }
         return;
@@ -236,9 +236,9 @@
     forOwn(tests, function(fn, title) {
       test('has correct binding for ' + title, function() {
         var bench = Benchmark({
-          'setup': 'if(this instanceof Benchmark)this._setup=true;',
+          'setup': 'if(/ops/.test(this))this._setup=true;',
           'fn': fn,
-          'teardown': 'if(this instanceof Benchmark)this._teardown=true;',
+          'teardown': 'if(/ops/.test(this))this._teardown=true;',
           'onCycle': function() { this.abort(); }
         }).run();
 
@@ -1070,6 +1070,32 @@
       var clone = bench.clone({ 'fn': '', 'name': 'foo' });
       ok(clone.fn === '' && clone.options.fn === '');
       ok(clone.name == 'foo' && clone.options.name == 'foo');
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark#run');
+
+  (function() {
+    var data = { 'onComplete': 0, 'onCycle': 0, 'onStart': 0 };
+
+    var bench = Benchmark({
+      'fn': function() {
+        this.count += 0;
+      },
+      'onStart': function() {
+        data.onStart++;
+      },
+      'onComplete': function() {
+        data.onComplete++;
+      }
+    })
+    .run();
+
+    test('onXYZ callbacks should not be triggered by internal benchmark clones', function() {
+      equal(data.onStart, 1);
+      equal(data.onComplete, 1);
     });
   }());
 
@@ -2007,10 +2033,4 @@
     });
   }());
 
-  /*--------------------------------------------------------------------------*/
-
-  // explicitly call `QUnit.start()` in a CLI environment
-  if (!window.document) {
-    QUnit.start();
-  }
 }(typeof global == 'object' && global || this));
