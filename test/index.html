@@ -54,7 +54,6 @@
 				['benchmark', 'platform'], function(Benchmark, platform) {
 					Benchmark2 = Benchmark;
 					Benchmark2.platform = platform;
-					document.getElementById('qunit-userAgent').innerHTML = platform;
 					require(['test.js']);
 				});
 			}
@@ -62,9 +61,12 @@
 				document.write('<applet code="nano" archive="../nano.jar"></applet>');
 			}
 			window.onload = function() {
-				setTimeout(function() {
-					document.getElementById('qunit-userAgent').innerHTML =
-						platform || (Benchmark2 || 0).platform || Benchmark.platform;
+				var timeoutId = setInterval(function() {
+					var ua = document.getElementById('qunit-userAgent');
+					if (ua) {
+						ua.innerHTML = platform || (Benchmark2 || 0).platform || Benchmark.platform;
+						clearInterval(timeoutId);
+					}
 				}, 15);
 			};
 		</script>
