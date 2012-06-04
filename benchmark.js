@@ -37,6 +37,18 @@
   /** Used to check if an object is extensible */
   var isExtensible = Object.isExtensible || function() { return true; };
 
+  /** Used to access the browser's high resolution timer */
+  var perfObject = isHostType(window, 'performance') && performance;
+
+  /** Used to call the browser's high resolution timer */
+  var perfName = perfObject && (
+    perfObject.now && 'now' ||
+    perfObject.mozNow && 'mozNow' ||
+    perfObject.msNow && 'msNow' ||
+    perfObject.oNow && 'oNow' ||
+    perfObject.webkitNow && 'webkitNow'
+  );
+
   /** Used to check if an own property is enumerable */
   var propertyIsEnumerable = {}.propertyIsEnumerable;
 
@@ -2500,8 +2512,11 @@
           if (ns.stop) {
             ns.start();
             while (!(measured = ns.microseconds())) { }
+          } else if (perfName) {
+            divisor = 1e3;
+            measured = Function('n', 'var r,s=n.' + perfName + '();while(!(r=n.' + perfName + '()-s)){};return r')(ns);
           } else {
-            begin = timer.ns();
+            begin = ns();
             while (!(measured = ns() - begin)) { }
           }
         }
@@ -2558,6 +2573,11 @@
       }
     } catch(e) { }
 
+    // detect `performance.now` microsecond resolution timer
+    if ((timer.ns = perfName && perfObject)) {
+      timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
+    }
+
     // detect Node's microtime module:
     // npm install microtime
     if ((timer.ns = (req('microtime') || { 'now': 0 }).now)) {
@@ -2585,13 +2605,22 @@
       });
     }
     else if (timer.unit == 'us') {
-      extend(template, timer.ns.stop ? {
-        'begin': 's$=n$.start()',
-        'end': 'r$=n$.microseconds()/1e6'
-      } : {
-        'begin': 's$=n$()',
-        'end': 'r$=(n$()-s$)/1e6'
-      });
+      if (timer.ns.stop) {
+        extend(template, {
+          'begin': 's$=n$.start()',
+          'end': 'r$=n$.microseconds()/1e6'
+        });
+      } else if (perfName) {
+        extend(template, {
+          'begin': 's$=n$.' + perfName + '()',
+          'end': 'r$=(n$.' + perfName + '()-s$)/1e3'
+        });
+      } else {
+        extend(template, {
+          'begin': 's$=n$()',
+          'end': 'r$=(n$()-s$)/1e6'
+        });
+      }
     }
 
     // define `timer` methods
