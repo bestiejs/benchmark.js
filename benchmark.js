@@ -3801,7 +3801,15 @@
   });
 
   // expose Benchmark
-  if (freeExports) {
+  // some AMD build optimizers, like r.js, check for specific condition patterns like the following:
+  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+    // define as an anonymous module so, through path mapping, it can be aliased
+    define(function() {
+      return Benchmark;
+    });
+  }
+  // check for `exports` after `define` in case a build optimizer adds an `exports` object
+  else if (freeExports) {
     // in Node.js or RingoJS v0.8.0+
     if (typeof module == 'object' && module && module.exports == freeExports) {
       (module.exports = Benchmark).Benchmark = Benchmark;
@@ -3810,12 +3818,6 @@
     else {
       freeExports.Benchmark = Benchmark;
     }
-  }
-  // via an AMD loader
-  else if (freeDefine) {
-    define('benchmark', function() {
-      return Benchmark;
-    });
   }
   // in a browser or Rhino
   else {
