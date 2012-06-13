@@ -2036,6 +2036,7 @@
   /*--------------------------------------------------------------------------*/
 
   // explicitly call `QUnit.start()` for Narwhal, Rhino, and RingoJS
-  QUnit.start();
-
+  if (!window.document) {
+    QUnit.start();
+  }
 }(typeof global == 'object' && global || this));
