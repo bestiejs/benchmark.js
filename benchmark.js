@@ -43,7 +43,6 @@
   /** Used to call the browser's high resolution timer */
   var perfName = perfObject && (
     perfObject.now && 'now' ||
-    perfObject.oNow && 'oNow' ||
     perfObject.webkitNow && 'webkitNow'
   );
 
