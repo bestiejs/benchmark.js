@@ -1884,6 +1884,21 @@
    *   'onCycle': onCycle,
    *   'onComplete': onComplete
    * });
+   *
+   * // or name and options
+   * suite.add('foo', {
+   *   'fn': fn,
+   *   'onCycle': onCycle,
+   *   'onComplete': onComplete
+   * });
+   *
+   * // or options only
+   * suite.add({
+   *   'name': 'foo',
+   *   'fn': fn,
+   *   'onCycle': onCycle,
+   *   'onComplete': onComplete
+   * });
    */
   function add(name, fn, options) {
     var me = this,
