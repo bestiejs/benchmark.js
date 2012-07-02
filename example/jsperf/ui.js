@@ -371,6 +371,18 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * Gets the Hz, i.e. operations per second, of `bench` adjusted for the
+   * margin of error.
+   *
+   * @private
+   * @param {Object} bench The benchmark object.
+   * @returns {Number} Returns the adjusted Hz.
+   */
+  function getHz(bench) {
+    return 1 / (bench.stats.mean + bench.stats.moe);
+  }
+
+  /**
    * Checks if a value has an internal [[Class]] of Function.
    *
    * @private
@@ -545,6 +557,7 @@
   .on('complete', function() {
     var benches = filter(ui.benchmarks, 'successful'),
         fastest = filter(benches, 'fastest'),
+        fastestHz = getHz(fastest[0]),
         slowest = filter(benches, 'slowest');
 
     ui.render();
@@ -553,9 +566,9 @@
 
     // highlight result cells
     each(benches, function(bench) {
-      var percent,
-          cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
-          hz = bench.hz,
+      var cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
+          hz = getHz(bench),
+          percent = (1 - (hz / fastestHz)) * 100,
           span = cell.getElementsByTagName('span')[0],
           text = 'fastest';
 
@@ -564,8 +577,9 @@
         addClass(cell, text);
       }
       else {
-        percent = Math.round((1 - hz / fastest[0].hz) * 100);
-        text = isFinite(hz) ? percent + '% slower' : '';
+        text = isFinite(hz)
+          ? formatNumber(percent < 1 ? percent.toFixed(2) : Math.round(percent)) + '% slower'
+          : '';
 
         // mark slowest
         if (indexOf(slowest, bench) > -1) {
