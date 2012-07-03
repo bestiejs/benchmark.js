@@ -846,6 +846,7 @@
 
       if (rowCount && visualization[chart]) {
          new visualization[chart](cont).draw(data, {
+          'colors': ui.browserscope.colors,
           'fontSize': fontSize,
           'is3D': true,
           'legend': legend,
