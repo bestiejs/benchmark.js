@@ -114,23 +114,6 @@ suite.add('RegExp#test', function() {
 // > Fastest is String#indexOf
 ~~~
 
-## Cloning this repo
-
-To clone this repository including all submodules, using Git 1.6.5 or later:
-
-~~~ bash
-git clone --recursive https://github.com/bestiejs/benchmark.js.git
-cd benchmark.js
-~~~
-
-For older Git versions, just use:
-
-~~~ bash
-git clone https://github.com/bestiejs/benchmark.js.git
-cd benchmark.js
-git submodule update --init
-~~~
-
 Feel free to fork and send pull requests if you see improvements!
 
 ## Footnotes
