@@ -557,7 +557,6 @@
   .on('complete', function() {
     var benches = filter(ui.benchmarks, 'successful'),
         fastest = filter(benches, 'fastest'),
-        fastestHz = getHz(fastest[0]),
         slowest = filter(benches, 'slowest');
 
     ui.render();
@@ -567,6 +566,7 @@
     // highlight result cells
     each(benches, function(bench) {
       var cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
+          fastestHz = getHz(fastest[0]),
           hz = getHz(bench),
           percent = (1 - (hz / fastestHz)) * 100,
           span = cell.getElementsByTagName('span')[0],
