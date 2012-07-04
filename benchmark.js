@@ -37,6 +37,9 @@
   /** Used to check if an object is extensible */
   var isExtensible = Object.isExtensible || function() { return true; };
 
+  /** Used to access Node's high resolution timer */
+  var processObject = isHostType(window, 'process') && process;
+
   /** Used to access the browser's high resolution timer */
   var perfObject = isHostType(window, 'performance') && performance;
 
@@ -2541,8 +2544,13 @@
         }
         else if (unit == 'ns') {
           divisor = 1e9;
-          begin = ns.nanoTime();
-          while (!(measured = ns.nanoTime() - begin)) { }
+          if (processObject) {
+            begin = (begin = ns())[0] * divisor + begin[1];
+            while (!(measured = ((measured = ns())[0] * divisor + measured[1]) - begin)) { }
+          } else {
+            begin = ns.nanoTime();
+            while (!(measured = ns.nanoTime() - begin)) { }
+          }
         }
         else {
           begin = new ns;
@@ -2597,6 +2605,12 @@
       timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
     }
 
+    // detect Node's nanosecond resolution timer
+    // available in Node >= 0.8
+    if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
+      timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
+    }
+
     // detect Node's microtime module:
     // npm install microtime
     if ((timer.ns = (req('microtime') || { 'now': 0 }).now)) {
@@ -2618,10 +2632,17 @@
     }
     // use API of chosen timer
     if (timer.unit == 'ns') {
-      extend(template, {
-        'begin': 's$=n$.nanoTime()',
-        'end': 'r$=(n$.nanoTime()-s$)/1e9'
-      });
+      if (processObject) {
+        extend(template, {
+          'begin': 's$=n$()',
+          'end': 'r$=n$(s$);r$=r$[0]+r$[1]'
+        });
+      } else {
+        extend(template, {
+          'begin': 's$=n$.nanoTime()',
+          'end': 'r$=(n$.nanoTime()-s$)/1e9'
+        });
+      }
     }
     else if (timer.unit == 'us') {
       if (timer.ns.stop) {
