@@ -37,8 +37,8 @@
   /** Used to check if an object is extensible */
   var isExtensible = Object.isExtensible || function() { return true; };
 
-  /** Used to access Node's high resolution timer */
-  var processObject = isHostType(window, 'process') && process;
+  /** Used to access Wade Simmons' Node microtime module */
+  var microtimeObject = req('microtime');
 
   /** Used to access the browser's high resolution timer */
   var perfObject = isHostType(window, 'performance') && performance;
@@ -48,6 +48,9 @@
     perfObject.now && 'now' ||
     perfObject.webkitNow && 'webkitNow'
   );
+
+  /** Used to access Node's high resolution timer */
+  var processObject = isHostType(window, 'process') && process;
 
   /** Used to check if an own property is enumerable */
   var propertyIsEnumerable = {}.propertyIsEnumerable;
@@ -2534,7 +2537,7 @@
           if (ns.stop) {
             ns.start();
             while (!(measured = ns.microseconds())) { }
-          } else if (perfName) {
+          } else if (ns[perfName]) {
             divisor = 1e3;
             measured = Function('n', 'var r,s=n.' + perfName + '();while(!(r=n.' + perfName + '()-s)){};return r')(ns);
           } else {
@@ -2544,12 +2547,13 @@
         }
         else if (unit == 'ns') {
           divisor = 1e9;
-          if (processObject) {
-            begin = (begin = ns())[0] * divisor + begin[1];
-            while (!(measured = ((measured = ns())[0] * divisor + measured[1]) - begin)) { }
-          } else {
+          if (ns.nanoTime) {
             begin = ns.nanoTime();
             while (!(measured = ns.nanoTime() - begin)) { }
+          } else {
+            divisor = 1;
+            begin = (begin = ns())[0] + (begin[1] / divisor);
+            while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) { }
           }
         }
         else {
@@ -2605,15 +2609,13 @@
       timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
     }
 
-    // detect Node's nanosecond resolution timer
-    // available in Node >= 0.8
+    // detect Node's nanosecond resolution timer available in Node >= 0.8
     if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
       timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
     }
 
-    // detect Node's microtime module:
-    // npm install microtime
-    if ((timer.ns = (req('microtime') || { 'now': 0 }).now)) {
+    // detect Wade Simmons' Node microtime module
+    if (microtimeObject && typeof (timer.ns = microtimeObject.now) == 'function') {
       timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
     }
 
@@ -2632,15 +2634,15 @@
     }
     // use API of chosen timer
     if (timer.unit == 'ns') {
-      if (processObject) {
-        extend(template, {
-          'begin': 's$=n$()',
-          'end': 'r$=n$(s$);r$=r$[0]+r$[1]'
-        });
-      } else {
+      if (timer.ns.nanoTime) {
         extend(template, {
           'begin': 's$=n$.nanoTime()',
           'end': 'r$=(n$.nanoTime()-s$)/1e9'
+        });
+      } else {
+        extend(template, {
+          'begin': 's$=n$()',
+          'end': 'r$=n$(s$);r$=r$[0]+(r$[1])/1e9)'
         });
       }
     }

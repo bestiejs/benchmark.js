@@ -1980,11 +1980,11 @@
   (function() {
     asyncTest('should run a deferred benchmark correctly', function() {
       Benchmark(function(deferred) {
-        setTimeout(function() { deferred.resolve(); }, 10);
+        setTimeout(function() { deferred.resolve(); }, 1e3);
       }, {
         'defer': true,
         'onComplete': function() {
-          ok(this.cycles);
+          equal(this.hz.toFixed(0), 1);
           QUnit.start();
         }
       })
