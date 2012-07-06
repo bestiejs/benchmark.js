@@ -2551,9 +2551,9 @@
             begin = ns.nanoTime();
             while (!(measured = ns.nanoTime() - begin)) { }
           } else {
-            divisor = 1;
             begin = (begin = ns())[0] + (begin[1] / divisor);
             while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) { }
+            divisor = 1;
           }
         }
         else {
@@ -2642,7 +2642,7 @@
       } else {
         extend(template, {
           'begin': 's$=n$()',
-          'end': 'r$=n$(s$);r$=r$[0]+(r$[1])/1e9)'
+          'end': 'r$=n$(s$);r$=r$[0]+(r$[1]/1e9)'
         });
       }
     }
