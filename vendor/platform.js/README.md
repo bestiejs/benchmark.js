@@ -83,25 +83,6 @@ info.os; // 'Mac OS X 10.7.2'
 info.description; // 'Opera 11.52 (identifying as Firefox 4.0) on Mac OS X 10.7.2'
 ~~~
 
-## Cloning this repo
-
-To clone this repository including all submodules, using Git 1.6.5 or later:
-
-~~~ bash
-git clone --recursive https://github.com/bestiejs/platform.js.git
-cd platform.js
-~~~
-
-For older Git versions, just use:
-
-~~~ bash
-git clone https://github.com/bestiejs/platform.js.git
-cd platform.js
-git submodule update --init
-~~~
-
-Feel free to fork and send pull requests if you see improvements!
-
 ## Footnotes
 
   1. Platform.js has been tested in at least Adobe AIR 2.6, Chrome 5-15, Firefox 1.5-8, IE 6-10, Opera 9.25-11.52, Safari 2-5.1.1, Node.js 0.4.8-0.6.1, Narwhal 0.3.2, RingoJS 0.7-0.8, and Rhino 1.7RC3.
