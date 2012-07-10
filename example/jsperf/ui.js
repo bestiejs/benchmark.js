@@ -51,8 +51,6 @@
         return !localStorage.getItem(+new Date);
       } catch(e) { }
     }(),
-    // detects Opera Mini
-    'operaMini': platform.name == 'Opera Mini',
     // used to distinguish between a regular test page and an embedded chart
     'runner': !!$('runner')
   };
@@ -74,7 +72,7 @@
 
   /** The options object for Benchmark.Suite#run */
   var runOptions = {
-    'async': !has.operaMini,
+    'async': true,
     'queued': true
   };
 
@@ -101,7 +99,7 @@
       var bench = this,
           size = bench.stats.sample.length;
 
-      if (!bench.aborted && !has.operaMini) {
+      if (!bench.aborted) {
         setStatus(bench.name + ' &times; ' + formatNumber(bench.count) + ' (' +
           size + ' sample' + (size == 1 ? '' : 's') + ')');
       }
@@ -549,10 +547,8 @@
     }
   })
   .on('start cycle', function() {
-    if (!has.operaMini) {
-      ui.render();
-      setHTML('run', texts.run.running);
-    }
+    ui.render();
+    setHTML('run', texts.run.running);
   })
   .on('complete', function() {
     var benches = filter(ui.benchmarks, 'successful'),
