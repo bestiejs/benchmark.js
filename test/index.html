@@ -13,6 +13,8 @@
 	</head>
 	<body>
 		<div id="qunit"></div>
+		<script src="../benchmark.js"></script>
+		<script src="../vendor/platform.js/platform.js"></script>
 		<script>
 			(function() {
 				var hasOwnProperty = function hasOwnProperty(key) {
@@ -31,40 +33,49 @@
 					Object.prototype.hasOwnProperty = hasOwnProperty;
 				}
 			}());
-		</script>
-		<script src="../vendor/qunit/qunit/qunit.js"></script>
-		<script>var Benchmark2, platform;</script>
-		<script src="../benchmark.js"></script>
-		<script src="../vendor/requirejs/require.js"></script>
-		<script>
-			if (/[?&]norequire=true(?:&|$)/.test(location.search)) {
-				require = define = null;
-				document.write('<script src="test.js"><\/script>');
-				document.write('<script src="../vendor/platform.js/platform.js"><\/script>');
-			}
-			else {
-				require({
-					'baseUrl': '../vendor/requirejs/',
-					'urlArgs': 't=' + (+new Date),
-					'paths': {
-						'benchmark': '../../benchmark',
-						'platform': '../platform.js/platform'
-					}
-				},
-				['benchmark', 'platform'], function(Benchmark, platform) {
-					Benchmark2 = Benchmark;
-					Benchmark2.platform = platform;
-					require(['test.js']);
-				});
-			}
+
+			// load the nanosecond timer
 			if (!/[?&]nojava=true(?:&|$)/.test(location.search)) {
 				document.write('<applet code="nano" archive="../nano.jar"></applet>');
 			}
+
+			// avoid syntax errors for `QUnit.throws` in older Firefoxes
+			document.write(platform.name == 'Firefox' && /^1\b/.test(platform.version)
+				? '<script src="../vendor/qunit/qunit/qunit-1.8.0.js"><\/script>'
+				: '<script src="../vendor/qunit/qunit/qunit.js"><\/script>'
+			);
+		</script>
+		<script>
+			// load test.js if not using require.js
+			document.write(/[?&]norequire=true(?:&|$)/.test(location.search)
+				? '<script src="test.js"><\/script>'
+				: '<script src="../vendor/requirejs/require.js"><\/script>'
+			);
+		</script>
+		<script>
+			// load Benchmark as a module
+			var Benchmark2;
+
+			window.require && require({
+				'baseUrl': '../vendor/requirejs/',
+				'urlArgs': 't=' + (+new Date),
+				'paths': {
+					'benchmark': '../../benchmark',
+					'platform': '../platform.js/platform'
+				}
+			},
+			['benchmark', 'platform'], function(Benchmark, platform) {
+				Benchmark2 = Benchmark;
+				Benchmark2.platform = platform;
+				require(['test.js']);
+			});
+
+			// set a more readable browser name
 			window.onload = function() {
 				var timeoutId = setInterval(function() {
 					var ua = document.getElementById('qunit-userAgent');
 					if (ua) {
-						ua.innerHTML = platform || (Benchmark2 || 0).platform || Benchmark.platform;
+						ua.innerHTML = platform;
 						clearInterval(timeoutId);
 					}
 				}, 15);
