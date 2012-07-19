@@ -1,4 +1,5 @@
-(function(window, undefined) {
+;(function(window, undefined) {
+  'use strict';
 
   /** Use a single load function */
   var load = typeof require == 'function' ? require : window.load;
@@ -68,9 +69,10 @@
    * Skips a given number of tests with a passing result.
    *
    * @private
-   * @param {Number} count The number of tests to skip.
+   * @param {Number} [count=1] The number of tests to skip.
    */
   function skipTest(count) {
+    count || (count = 1);
     while (count--) {
       ok(true, 'test skipped');
     }
@@ -169,7 +171,7 @@
 
       var compiled = bench.compiled;
       if (/setup\(\)/.test(compiled)) {
-        skipTest(1);
+        skipTest();
       }
       else {
         ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
@@ -190,7 +192,7 @@
 
       var compiled = bench.compiled;
       if (/setup\(\)/.test(compiled)) {
-        skipTest(1);
+        skipTest();
       }
       else {
         ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
@@ -206,7 +208,7 @@
 
       var compiled = bench.compiled;
       if (/setup\(\)/.test(compiled)) {
-        skipTest(1);
+        skipTest();
       }
       else {
         ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
@@ -321,7 +323,7 @@
         if (object === Object(object)) {
           ok(clone !== object);
         } else {
-          skipTest(1);
+          skipTest();
         }
       });
     });
@@ -438,7 +440,8 @@
     });
 
     test('avoids call stack limits', function() {
-      var count = 0,
+      var result,
+          count = 0,
           object = {},
           recurse = function() { count++; recurse(); };
 
@@ -511,7 +514,7 @@
           ok(actual === object);
         }
         else {
-          skipTest(1);
+          skipTest();
         }
       });
 
@@ -525,7 +528,7 @@
           deepEqual(values, key == 'xpath snapshot' ? xpathResult : ['a', 'b', 'c', '']);
         }
         else {
-          skipTest(1);
+          skipTest();
         }
       });
 
@@ -540,7 +543,7 @@
           deepEqual(values, key == 'xpath snapshot' ? xpathResult.slice(0, 2) : ['a', 'b']);
         }
         else {
-          skipTest(1);
+          skipTest();
         }
       });
     });
