@@ -2018,7 +2018,7 @@
       Benchmark({
         'defer': true,
         'setup': 'var x = [3, 2, 1];',
-        'fn': 'x.sort(); deferred.resolve();',
+        'fn': 'for (var i = 0; i < 1e3; i++) x[i % 2 ? "sort" : "reverse"](); deferred.resolve();',
         'teardown': 'x.length = 0;',
         'onComplete': function() {
           ok(true);
