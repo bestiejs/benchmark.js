@@ -244,6 +244,36 @@
     } catch(e) {
       support.getAllKeys = false;
     }
+
+    /**
+     * Detect if own properties are iterated before inherited properties (all but IE < 9).
+     *
+     * @name iteratesOwnLast
+     * @memberOf Benchmark.support
+     * @type Boolean
+     */
+    support.iteratesOwnFirst = (function() {
+      var props = [];
+      function ctor() { this.x = 1; }
+      ctor.prototype = { 'y': 1 };
+      for (var prop in new ctor) { props.push(prop); }
+      return props[0] == 'x';
+    }());
+
+    /**
+     * Detect if a node's [[Class]] is resolvable (all but IE < 9)
+     * and that the JS engine errors when attempting to coerce an object to a
+     * string without a `toString` property value of `typeof` "function".
+     *
+     * @name nodeClass
+     * @memberOf Benchmark.support
+     * @type Boolean
+     */
+    try {
+      support.nodeClass = ({ 'toString': 0 } + '', toString.call(doc || 0) != '[object Object]');
+    } catch(e) {
+      support.nodeClass = true;
+    }
   }());
 
   /**
@@ -994,36 +1024,43 @@
   }
 
   /**
-   * Checks if the specified `value` is an object created by the `Object`
-   * constructor assuming objects created by the `Object` constructor have no
-   * inherited enumerable properties and assuming there are no `Object.prototype`
-   * extensions.
+   * Checks if a given `value` is an object created by the `Object` constructor
+   * assuming objects created by the `Object` constructor have no inherited
+   * enumerable properties and that there are no `Object.prototype` extensions.
    *
    * @private
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if `value` is an object, else `false`.
+   * @returns {Boolean} Returns `true` if the `value` is a plain `Object` object, else `false`.
    */
-  function isObject(value) {
-    var ctor,
-        result = !!value && toString.call(value) == '[object Object]';
-
-    if (result && noArgumentsClass) {
-      // avoid false positives for `arguments` objects in IE < 9
-      result = !isArguments(value);
+  function isPlainObject(value) {
+    // avoid non-objects and false positives for `arguments` objects in IE < 9
+    var result = false;
+    if (!(value && typeof value == 'object') || (noArgumentsClass && isArguments(value))) {
+      return result;
     }
-    if (result) {
-      // IE < 9 presents nodes like `Object` objects:
-      // IE < 8 are missing the node's constructor property
-      // IE 8 node constructors are typeof "object"
-      ctor = value.constructor;
-      // check if the constructor is `Object` as `Object instanceof Object` is `true`
-      if ((result = isClassOf(ctor, 'Function') && ctor instanceof ctor)) {
-        // An object's own properties are iterated before inherited properties.
-        // If the last iterated key belongs to an object's own property then
-        // there are no inherited enumerable properties.
-        forProps(value, function(subValue, subKey) { result = subKey; });
-        result = result === true || hasKey(value, result);
+    // IE < 9 presents DOM nodes as `Object` objects except they have `toString`
+    // methods that are `typeof` "string" and still can coerce nodes to strings.
+    // Also check that the constructor is `Object` (i.e. `Object instanceof Object`)
+    var ctor = value.constructor;
+    if ((support.nodeClass || !(typeof value.toString != 'function' && typeof (value + '') == 'string')) &&
+        (!isClassOf(ctor, 'Function') || ctor instanceof ctor)) {
+      // In most environments an object's own properties are iterated before
+      // its inherited properties. If the last iterated property is an object's
+      // own property then there are no inherited enumerable properties.
+      if (support.iteratesOwnFirst) {
+        forProps(value, function(subValue, subKey) {
+          result = subKey;
+        });
+        return result === false || hasKey(value, result);
       }
+      // IE < 9 iterates inherited properties before own properties. If the first
+      // iterated property is an object's own property then there are no inherited
+      // enumerable properties.
+      forProps(value, function(subValue, subKey) {
+        result = !hasKey(value, subKey);
+        return false;
+      });
+      return result === false;
     }
     return result;
   }
@@ -1265,7 +1302,7 @@
               break;
 
             case '[object Object]':
-              isObject(value) && (clone = new ctor);
+              isPlainObject(value) && (clone = {});
               break;
 
             case '[object Number]':

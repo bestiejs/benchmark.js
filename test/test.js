@@ -280,8 +280,10 @@
     }
 
     function Klass() {
-      // no-op
+      this.a = 1;
     }
+
+    Klass.prototype = { 'b': 1 };
 
     var notCloneable = {
       'an arguments object': arguments,
@@ -308,8 +310,6 @@
 
     objects['an array'].length = 5;
 
-    Klass.prototype = { 'x': 1 };
-
     forOwn(objects, function(object, key) {
       test('clones ' + key + ' correctly', function() {
         var kind = toString.call(object),
@@ -334,13 +334,14 @@
       });
     });
 
-    Klass.prototype.deepClone = function() { return new Klass; };
-
     test('clones using Klass#deepClone', function() {
-      var object = new Klass,
-          clone = Benchmark.deepClone(object);
+      var object = new Klass;
+      Klass.prototype.deepClone = function() { return new Klass; };
 
+      var clone = Benchmark.deepClone(object);
       ok(clone !== object && clone instanceof Klass);
+
+      delete Klass.prototype.clone;
     });
 
     test('clones problem JScript properties', function() {
@@ -2018,7 +2019,7 @@
       Benchmark({
         'defer': true,
         'setup': 'var x = [3, 2, 1];',
-        'fn': 'for (var i = 0; i < 1e3; i++) x[i % 2 ? "sort" : "reverse"](); deferred.resolve();',
+        'fn': 'for (var i = 0; i < 100; i++) x[ i % 2 ? "sort" : "reverse" ](); deferred.resolve();',
         'teardown': 'x.length = 0;',
         'onComplete': function() {
           ok(true);
