@@ -439,33 +439,6 @@
         skipTest(1)
       }
     });
-
-    test('avoids call stack limits', function() {
-      var result,
-          count = 0,
-          object = {},
-          recurse = function() { count++; recurse(); };
-
-      if (toString.call(window.java) == '[object JavaPackage]') {
-        // Java throws uncatchable errors on call stack overflows, so to avoid
-        // them I chose a number higher than Rhino's call stack limit without
-        // dynamically testing for the actual limit
-        count = 3e3;
-      } else {
-        try { recurse(); } catch(e) { }
-      }
-      // exceed limit
-      count++;
-      for (var i = 0, sub = object; i <= count; i++) {
-        sub = sub[i] = {};
-      }
-      try {
-        for (var i = 0, sub = Benchmark.deepClone(object); sub = sub[i]; i++) { }
-        result = --i == count;
-      } catch(e) { }
-
-      ok(result, 'avoids call stack limits (stack limit is ' + (count - 1) + ')');
-    });
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -2051,6 +2024,44 @@
         }
       })
       .run();
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.deepClone');
+
+  (function() {
+    asyncTest('avoids call stack limits', function() {
+      var result,
+          count = 0,
+          object = {},
+          recurse = function() { count++; recurse(); };
+
+      setTimeout(function() {
+        ok(result, 'avoids call stack limits (stack limit is ' + (count - 1) + ')');
+        QUnit.start();
+      }, 15);
+
+      if (toString.call(window.java) == '[object JavaPackage]') {
+        // Java throws uncatchable errors on call stack overflows, so to avoid
+        // them I chose a number higher than Rhino's call stack limit without
+        // dynamically testing for the actual limit
+        count = 3e3;
+      } else {
+        try { recurse(); } catch(e) { }
+      }
+
+      // exceed limit
+      count++;
+      for (var i = 0, sub = object; i <= count; i++) {
+        sub = sub[i] = {};
+      }
+
+      try {
+        for (var i = 0, sub = Benchmark.deepClone(object); sub = sub[i]; i++) { }
+        result = --i == count;
+      } catch(e) { }
     });
   }());
 

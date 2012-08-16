@@ -613,14 +613,17 @@
     while (++index < length) {
       if ((index - start) in tail) {
         object[index] = tail[index - start];
-      } else {
+      } else if (index in object) {
         delete object[index];
       }
     }
     // delete excess elements
     deleteCount = deleteCount > elementCount ? deleteCount - elementCount : 0;
     while (deleteCount--) {
-      delete object[length + deleteCount];
+      index = length + deleteCount;
+      if (index in object) {
+        delete object[index];
+      }
     }
     object.length = length;
     return result;
@@ -971,7 +974,13 @@
       // escape the `{` for Firefox 1
       result = (/^[^{]+\{([\s\S]*)}\s*$/.exec(fn) || 0)[1];
     }
-    return (result || '').replace(/^\s+|\s+$/g, '');
+    // trim string
+    result = (result || '').replace(/^\s+|\s+$/g, '');
+
+    // detect strings containing only the "use strict" directive
+    return /^(?:\/\*+[\w|\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
+      ? ''
+      : result;
   }
 
   /**
@@ -2442,7 +2451,7 @@
 
       var source = {
         'setup': getSource(bench.setup, preprocess('m$.setup()')),
-        'fn': getSource(fn, preprocess('f$(' + fnArg + ')')),
+        'fn': getSource(fn, preprocess('m$.fn(' + fnArg + ')')),
         'fnArg': fnArg,
         'teardown': getSource(bench.teardown, preprocess('m$.teardown()'))
       };
