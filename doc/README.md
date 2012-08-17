@@ -279,7 +279,7 @@ The Benchmark constructor.
 3. `[options={}]` *(Object)*: Options object.
 
 #### Example
-~~~ js
+```js
 // basic usage (the `new` operator is optional)
 var bench = new Benchmark(fn);
 
@@ -344,7 +344,7 @@ var bench = new Benchmark({
 var bench = new Benchmark('foo', function() {
   'My name is '.concat(this.name); // My name is foo
 });
-~~~
+```
 
 * * *
 
@@ -436,7 +436,7 @@ A generic `Array#filter` like method.
 *(Array)*: A new array of values that passed callback filter.
 
 #### Example
-~~~ js
+```js
 // get odd numbers
 Benchmark.filter([1, 2, 3, 4, 5], function(n) {
   return n % 2;
@@ -450,7 +450,7 @@ Benchmark.filter(benches, 'slowest');
 
 // get benchmarks that completed without erroring
 Benchmark.filter(benches, 'successful');
-~~~
+```
 
 * * *
 
@@ -589,7 +589,7 @@ Invokes a method on all items in an array.
 *(Array)*: A new array of values returned from each method invoked.
 
 #### Example
-~~~ js
+```js
 // invoke `reset` on all benchmarks
 Benchmark.invoke(benches, 'reset');
 
@@ -617,7 +617,7 @@ Benchmark.invoke(benches, {
   // called after all benchmarks have been invoked.
   'onComplete': onComplete
 });
-~~~
+```
 
 * * *
 
@@ -802,7 +802,7 @@ A generic `Array#reduce` like method.
 *(Function, String)*: Compiled into the test and executed immediately **before** the test loop.
 
 #### Example
-~~~ js
+```js
 // basic usage
 var bench = Benchmark({
   'setup': function() {
@@ -856,7 +856,7 @@ var a = 0;
     }())
   }())
 }())
-~~~
+```
 
 * * *
 
@@ -904,11 +904,11 @@ Creates a new benchmark using the same test and options.
 *(Object)*: The new benchmark instance.
 
 #### Example
-~~~ js
+```js
 var bizarro = bench.clone({
   'name': 'doppelganger'
 });
-~~~
+```
 
 * * *
 
@@ -984,7 +984,7 @@ Unregisters a listener for the specified event type(s), or unregisters all liste
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // unregister a listener for an event type
 bench.off('cycle', listener);
 
@@ -999,7 +999,7 @@ bench.off('start cycle complete');
 
 // unregister all listeners for all event types
 bench.off();
-~~~
+```
 
 * * *
 
@@ -1021,13 +1021,13 @@ Registers a listener for the specified event type(s).
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // register a listener for an event type
 bench.on('cycle', listener);
 
 // register a listener for multiple event types
 bench.on('start cycle', listener);
-~~~
+```
 
 * * *
 
@@ -1063,13 +1063,13 @@ Runs the benchmark.
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // basic usage
 bench.run();
 
 // or with options
 bench.run({ 'async': true });
-~~~
+```
 
 * * *
 
@@ -2007,7 +2007,7 @@ The Suite constructor.
 2. `[options={}]` *(Object)*: Options object.
 
 #### Example
-~~~ js
+```js
 // basic usage (the `new` operator is optional)
 var suite = new Benchmark.Suite;
 
@@ -2035,7 +2035,7 @@ var suite = new Benchmark.Suite('foo', {
   // called when the suite completes running
   'onComplete': onComplete
 });
-~~~
+```
 
 * * *
 
@@ -2116,7 +2116,7 @@ Adds a test to the benchmark suite.
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // basic usage
 suite.add(fn);
 
@@ -2143,7 +2143,7 @@ suite.add({
   'onCycle': onCycle,
   'onComplete': onComplete
 });
-~~~
+```
 
 * * *
 
@@ -2328,7 +2328,7 @@ Unregisters a listener for the specified event type(s), or unregisters all liste
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // unregister a listener for an event type
 bench.off('cycle', listener);
 
@@ -2343,7 +2343,7 @@ bench.off('start cycle complete');
 
 // unregister all listeners for all event types
 bench.off();
-~~~
+```
 
 * * *
 
@@ -2365,13 +2365,13 @@ Registers a listener for the specified event type(s).
 *(Object)*: The benchmark instance.
 
 #### Example
-~~~ js
+```js
 // register a listener for an event type
 bench.on('cycle', listener);
 
 // register a listener for multiple event types
 bench.on('start cycle', listener);
-~~~
+```
 
 * * *
 
@@ -2489,13 +2489,13 @@ Runs the suite.
 *(Object)*: The suite instance.
 
 #### Example
-~~~ js
+```js
 // basic usage
 suite.run();
 
 // or with options
 suite.run({ 'async': true, 'queued': true });
-~~~
+```
 
 * * *
 
