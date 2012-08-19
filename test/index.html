@@ -34,11 +34,6 @@
 				}
 			}());
 
-			// load the nanosecond timer
-			if (!/[?&]nojava=true(?:&|$)/.test(location.search)) {
-				document.write('<applet code="nano" archive="../nano.jar"></applet>');
-			}
-
 			// avoid syntax errors for `QUnit.throws` in older Firefoxes
 			document.write(platform.name == 'Firefox' && /^1\b/.test(platform.version)
 				? '<script src="../vendor/qunit/qunit/qunit-1.8.0.js"><\/script>'
@@ -46,11 +41,18 @@
 			);
 		</script>
 		<script>
-			// load test.js if not using require.js
-			document.write(/[?&]norequire=true(?:&|$)/.test(location.search)
-				? '<script src="test.js"><\/script>'
-				: '<script src="../vendor/requirejs/require.js"><\/script>'
-			);
+			// populate `QUnit.urlParams`
+			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
+			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
+
+			// load the nanosecond timer
+			if (!QUnit.urlParams.nojava) {
+				document.write('<applet code="nano" archive="../nano.jar"></applet>');
+			}
+			// load require.js
+			if (!QUnit.urlParams.norequire) {
+				document.write('<script src="../vendor/requirejs/require.js"><\/script>');
+			}
 		</script>
 		<script>
 			// load Benchmark as a module
@@ -67,16 +69,22 @@
 			['benchmark', 'platform'], function(Benchmark, platform) {
 				Benchmark2 = Benchmark;
 				Benchmark2.platform = platform;
-				require(['test.js']);
 			});
 
-			// set a more readable browser name
 			window.onload = function() {
 				var timeoutId = setInterval(function() {
 					var ua = document.getElementById('qunit-userAgent');
-					if (ua) {
+					if (ua && (Benchmark2 || !window.require)) {
+						var sibling = document.getElementsByTagName('script')[0],
+						    script = document.createElement('script');
+
+						// set a more readable browser name
 						ua.innerHTML = platform;
 						clearInterval(timeoutId);
+
+						// load test.js
+						script.src = 'test.js?t=' + (+new Date);
+						sibling.parentNode.insertBefore(script, sibling);
 					}
 				}, 15);
 			};

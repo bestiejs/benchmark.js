@@ -95,7 +95,7 @@
       if (window.document) {
         equal(String(Benchmark.platform), navigator.userAgent);
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
 
@@ -103,7 +103,7 @@
       if (window.document && window.require) {
         equal((Benchmark2 || {}).version, Benchmark.version);
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
 
@@ -112,7 +112,7 @@
         var platform = (Benchmark2 || {}).platform || {};
         equal(typeof platform.name, 'string');
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
   }());
@@ -372,7 +372,7 @@
         var clone = Benchmark.deepClone(object);
         ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
 
@@ -384,7 +384,7 @@
         var clone = Benchmark.deepClone(object);
         ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
 
@@ -396,7 +396,7 @@
         var clone = Benchmark.deepClone(object);
         ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
       } else {
-        skipTest(1)
+        skipTest(1);
       }
     });
 
@@ -436,7 +436,7 @@
           !(descriptor.configurable && descriptor.enumerable && descriptor.writable));
       }
       else {
-        skipTest(1)
+        skipTest(1);
       }
     });
   }());
