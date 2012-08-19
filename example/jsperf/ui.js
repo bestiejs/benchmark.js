@@ -698,6 +698,25 @@
       html.scrollTop = scrollTop;
     }());
 
+    // inject nano applet
+    // (assumes ui.js is just before </body>)
+    (function() {
+      var measured,
+          perfNow,
+          begin = new Date;
+
+      if ('nojava' in ui.params) {
+        return addClass('java', classNames.show);
+      }
+      // is the applet really needed?
+      while (!(measured = new Date - begin)) { }
+      if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.webkitNow || perfNow.now) == 'function')) {
+        // load applet using innerHTML to avoid an alert in some versions of IE6
+        document.body.insertBefore(setHTML(createElement('div'),
+          '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
+      }
+    }());
+
     // catch and display errors from the "preparation code"
     window.onerror = function(message, fileName, lineNumber) {
       logError('<p>' + message + '.</p><ul><li>' + join({
@@ -707,15 +726,6 @@
       }, '</li><li>') + '</li></ul>');
       scrollEl.scrollTop = $('error-info').offsetTop;
     };
-    // inject nano applet
-    // (assumes ui.js is just before </body>)
-    if ('nojava' in ui.params) {
-      addClass('java', classNames.show);
-    } else {
-      // using innerHTML avoids an alert in some versions of IE6
-      document.body.insertBefore(setHTML(createElement('div'),
-        '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
-    }
   }
   else {
     // short circuit unusable methods

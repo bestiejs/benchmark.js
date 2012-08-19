@@ -45,10 +45,22 @@
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
 			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
-			// load the nanosecond timer
-			if (!QUnit.urlParams.nojava) {
-				document.write('<applet code="nano" archive="../nano.jar"></applet>');
-			}
+			(function() {
+				if (QUnit.urlParams.nojava) {
+					return;
+				}
+				var measured,
+				    perfNow,
+				    begin = new Date;
+
+				// is the applet really needed?
+				while (!(measured = new Date - begin)) { }
+				if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.webkitNow || perfNow.now) == 'function')) {
+					// load applet
+					document.write('<applet code="nano" archive="../nano.jar"></applet>');
+				}
+			}());
+
 			// load require.js
 			if (!QUnit.urlParams.norequire) {
 				document.write('<script src="../vendor/requirejs/require.js"><\/script>');
