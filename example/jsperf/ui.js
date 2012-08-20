@@ -710,7 +710,7 @@
       }
       // is the applet really needed?
       while (!(measured = new Date - begin)) { }
-      if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.webkitNow || perfNow.now) == 'function')) {
+      if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.now || perfNow.webkitNow) == 'function')) {
         // load applet using innerHTML to avoid an alert in some versions of IE6
         document.body.insertBefore(setHTML(createElement('div'),
           '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
