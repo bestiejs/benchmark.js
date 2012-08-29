@@ -34,6 +34,7 @@
 * [`Benchmark.prototype.compiled`](#benchmarkprototypecompiled)
 * [`Benchmark.prototype.count`](#benchmarkprototypecount)
 * [`Benchmark.prototype.cycles`](#benchmarkprototypecycles)
+* [`Benchmark.prototype.error`](#benchmarkprototypeerror)
 * [`Benchmark.prototype.fn`](#benchmarkprototypefn)
 * [`Benchmark.prototype.hz`](#benchmarkprototypehz)
 * [`Benchmark.prototype.running`](#benchmarkprototyperunning)
@@ -115,14 +116,6 @@
 
 <!-- div -->
 
-## `Benchmark.prototype.error`
-* [`Benchmark.prototype.error`](#benchmarkprototypeerror)
-
-<!-- /div -->
-
-
-<!-- div -->
-
 ## `Benchmark.prototype.stats`
 * [`Benchmark.prototype.stats`](#benchmarkprototypestats)
 * [`Benchmark.prototype.stats.deviation`](#benchmark-statsdeviation)
@@ -162,7 +155,6 @@
 * [`Benchmark.Deferred.prototype.benchmark`](#benchmarkdeferredprototypebenchmark)
 * [`Benchmark.Deferred.prototype.cycles`](#benchmarkdeferredprototypecycles)
 * [`Benchmark.Deferred.prototype.elapsed`](#benchmarkdeferredprototypeelapsed)
-* [`Benchmark.Deferred.prototype.resolve`](#benchmarkdeferredprototyperesolve)
 * [`Benchmark.Deferred.prototype.timeStamp`](#benchmarkdeferredprototypetimestamp)
 
 <!-- /div -->
@@ -181,25 +173,11 @@
 ## `Benchmark.Event.prototype`
 * [`Benchmark.Event.prototype.aborted`](#benchmarkeventprototypeaborted)
 * [`Benchmark.Event.prototype.cancelled`](#benchmarkeventprototypecancelled)
+* [`Benchmark.Event.prototype.currentTarget`](#benchmarkeventprototypecurrenttarget)
 * [`Benchmark.Event.prototype.result`](#benchmarkeventprototyperesult)
+* [`Benchmark.Event.prototype.target`](#benchmarkeventprototypetarget)
 * [`Benchmark.Event.prototype.timeStamp`](#benchmarkeventprototypetimestamp)
 * [`Benchmark.Event.prototype.type`](#benchmarkeventprototypetype)
-
-<!-- /div -->
-
-
-<!-- div -->
-
-## `Benchmark.Event.prototype.currentTarget`
-* [`Benchmark.Event.prototype.currentTarget`](#benchmarkeventprototypecurrenttarget)
-
-<!-- /div -->
-
-
-<!-- div -->
-
-## `Benchmark.Event.prototype.target`
-* [`Benchmark.Event.prototype.target`](#benchmarkeventprototypetarget)
 
 <!-- /div -->
 
@@ -752,6 +730,18 @@ A generic `Array#reduce` like method.
 <a href="#benchmarkprototypecycles">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3338 "View in source") [&#x24C9;][1]
 
 *(Number)*: The number of cycles performed while benchmarking.
+
+* * *
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="benchmarkprototypeerror"></a>`Benchmark.prototype.error`
+<a href="#benchmarkprototypeerror">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3362 "View in source") [&#x24C9;][1]
+
+*(Object)*: The error object if the test failed.
 
 * * *
 
@@ -1588,25 +1578,6 @@ Return platform description when the platform object is coerced to a string.
 
 <!-- div -->
 
-## `Benchmark.prototype.error`
-
-<!-- div -->
-
-### <a id="benchmarkprototypeerror"></a>`Benchmark.prototype.error`
-<a href="#benchmarkprototypeerror">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3362 "View in source") [&#x24C9;][1]
-
-*(Object)*: The error object if the test failed.
-
-* * *
-
-<!-- /div -->
-
-
-<!-- /div -->
-
-
-<!-- div -->
-
 ## `Benchmark.prototype.stats`
 
 <!-- div -->
@@ -1839,18 +1810,6 @@ The Deferred constructor.
 
 <!-- div -->
 
-### <a id="benchmarkdeferredprototyperesolve"></a>`Benchmark.Deferred.prototype.resolve`
-<a href="#benchmarkdeferredprototyperesolve">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1188 "View in source") [&#x24C9;][1]
-
-*(Unknown)*: Handles cycling/completing the deferred benchmark.
-
-* * *
-
-<!-- /div -->
-
-
-<!-- div -->
-
 ### <a id="benchmarkdeferredprototypetimestamp"></a>`Benchmark.Deferred.prototype.timeStamp`
 <a href="#benchmarkdeferredprototypetimestamp">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3630 "View in source") [&#x24C9;][1]
 
@@ -1916,10 +1875,34 @@ The Event constructor.
 
 <!-- div -->
 
+### <a id="benchmarkeventprototypecurrenttarget"></a>`Benchmark.Event.prototype.currentTarget`
+<a href="#benchmarkeventprototypecurrenttarget">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3662 "View in source") [&#x24C9;][1]
+
+*(Object)*: The object whose listeners are currently being processed.
+
+* * *
+
+<!-- /div -->
+
+
+<!-- div -->
+
 ### <a id="benchmarkeventprototyperesult"></a>`Benchmark.Event.prototype.result`
 <a href="#benchmarkeventprototyperesult">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3670 "View in source") [&#x24C9;][1]
 
 *(Mixed)*: The return value of the last executed listener.
+
+* * *
+
+<!-- /div -->
+
+
+<!-- div -->
+
+### <a id="benchmarkeventprototypetarget"></a>`Benchmark.Event.prototype.target`
+<a href="#benchmarkeventprototypetarget">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3678 "View in source") [&#x24C9;][1]
+
+*(Object)*: The object to which the event was originally emitted.
 
 * * *
 
@@ -1944,44 +1927,6 @@ The Event constructor.
 <a href="#benchmarkeventprototypetype">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3694 "View in source") [&#x24C9;][1]
 
 *(String)*: The event type.
-
-* * *
-
-<!-- /div -->
-
-
-<!-- /div -->
-
-
-<!-- div -->
-
-## `Benchmark.Event.prototype.currentTarget`
-
-<!-- div -->
-
-### <a id="benchmarkeventprototypecurrenttarget"></a>`Benchmark.Event.prototype.currentTarget`
-<a href="#benchmarkeventprototypecurrenttarget">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3662 "View in source") [&#x24C9;][1]
-
-*(Object)*: The object whose listeners are currently being processed.
-
-* * *
-
-<!-- /div -->
-
-
-<!-- /div -->
-
-
-<!-- div -->
-
-## `Benchmark.Event.prototype.target`
-
-<!-- div -->
-
-### <a id="benchmarkeventprototypetarget"></a>`Benchmark.Event.prototype.target`
-<a href="#benchmarkeventprototypetarget">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L3678 "View in source") [&#x24C9;][1]
-
-*(Object)*: The object to which the event was originally emitted.
 
 * * *
 
