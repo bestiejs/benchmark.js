@@ -222,12 +222,19 @@
   function addChartStyle() {
     var me = ui.browserscope,
         cssText = [],
-        context = frames[query('iframe', me.container)[0].name].document,
-        chartNodes = query('text,textpath', context),
-        uaClass = me.uaClass,
+        iframe = query('iframe', me.container)[0],
+        uaClass = me.uaClass;
+
+    // the chart container may be an iframe in older browsers
+    var chartContainer = iframe
+      ? frames[iframe.name].document
+      : query('#bs-chart')[0];
+
+    var chartNodes = query('text,textpath', chartContainer),
+        context = iframe ? chartContainer : document,
         result = false;
 
-    if (chartNodes.length) {
+    if (iframe && chartNodes.length) {
       // extract CSS rules for `uaClass`
       each(query('link,style'), function(node) {
         // avoid access denied errors on external style sheets
@@ -241,30 +248,30 @@
           });
         } catch(e) { }
       });
-
       // insert custom style sheet
       query('head', context)[0].appendChild(
         createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context));
-
-      // scan chart elements for a match
-      each(chartNodes, function(node) {
-        var nextSibling;
-        if ((node.string || getText(node)).charAt(0) == uaToken) {
-          // for VML
-          if (node.string) {
-            // IE requires reinserting the element to render correctly
-            node.className = uaClass;
-            nextSibling = node.nextSibling;
-            node.parentNode.insertBefore(node.removeNode(), nextSibling);
-          }
-          // for SVG
-          else {
-            node.setAttribute('class', uaClass);
-          }
-          result = true;
-        }
-      });
     }
+    // scan chart elements for a match
+    each(chartNodes, function(node) {
+      var nextSibling;
+      if ((node.string || getText(node)).charAt(0) != uaToken) {
+        return;
+      }
+      // for VML
+      if (node.string) {
+        // IE requires reinserting the element to render correctly
+        node.className = uaClass;
+        nextSibling = node.nextSibling;
+        node.parentNode.insertBefore(node.removeNode(), nextSibling);
+      }
+      // for SVG
+      else {
+        node.setAttribute('class', uaClass);
+      }
+      return !(result = true);
+    });
+
     return result;
   }
 
