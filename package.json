@@ -50,5 +50,8 @@
   "directories": {
     "doc": "./doc",
     "test": "./test"
+  },
+  "scripts": {
+    "test": "node test/test"
   }
 }
