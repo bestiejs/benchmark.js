@@ -22,10 +22,11 @@ class Alias {
    * @param {String} $name The alias name.
    * @param {Object} $owner The alias owner.
    */
-  public function __construct($name, $owner) {
+  public function __construct( $name, $owner ) {
     $this->owner = $owner;
     $this->_name = $name;
     $this->_call = $owner->getCall();
+    $this->_category = $owner->getCategory();
     $this->_desc = $owner->getDesc();
     $this->_example = $owner->getExample();
     $this->_lineNumber = $owner->getLineNumber();
@@ -63,6 +64,16 @@ class Alias {
    */
   public function getCall() {
     return $this->_call;
+  }
+
+  /**
+   * Extracts the owner entry's `category` data.
+   *
+   * @memberOf Alias
+   * @returns {String} The owner entry's `category` data.
+   */
+  public function getCategory() {
+    return $this->_category;
   }
 
   /**
