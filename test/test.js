@@ -1476,6 +1476,49 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark.Suite#score');
+
+  (function() {
+    asyncTest('should compute a score', function() {
+      Benchmark.Suite()
+        .add('a', {
+          'reference': 120.35,
+          'fn': function() {
+            var array = [];
+            for (var index = 0; index < 1e3; index++) {
+              array.push(index % 2 ? String(index) : index);
+            }
+          }
+        })
+        .add('b', {
+          'reference': 360.95,
+          'fn': function() {
+            var array = [];
+            for (var index = 0; index < 3e3; index++) {
+              array.push(index % 2 ? String(index) : index);
+            }
+          }
+        })
+        .add('c', {
+          'reference': 720.10,
+          'fn': function() {
+            var array = [];
+            for (var index = 0; index < 6e3; index++) {
+              array.push(index % 2 ? String(index) : index);
+            }
+          }
+        })
+        .on('complete', function() {
+          var score = this.score;
+          ok(score && typeof score == 'number');
+          QUnit.start();
+        })
+        .run({ 'async': true });
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark.Suite#concat');
 
   (function() {
