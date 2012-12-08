@@ -8,6 +8,9 @@
 ;(function(window, undefined) {
   'use strict';
 
+  /** Save a copy of the Object built-in in case someone overrides it later */
+  var Object = window.Object;
+
   /** Used to assign each benchmark an incrimented id */
   var counter = 0;
 
