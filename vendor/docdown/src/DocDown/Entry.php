@@ -187,7 +187,10 @@ class Entry {
     preg_match('#/\*\*(?:\s*\*)?([\s\S]*?)(?=\*\s\@[a-z]|\*/)#', $this->entry, $result);
     if (count($result)) {
       $type = $this->getType();
-      $result = trim(preg_replace('/(?:^|\n)\s*\* ?/', ' ', $result[1]));
+      $result = preg_replace('/:\n *\* */', ":<br>\n", $result[1]);
+      $result = preg_replace('/(?:^|\n) *\*\n *\* */', "\n\n", $result);
+      $result = preg_replace('/(?:^|\n) *\* ?/', ' ', $result);
+      $result = trim($result);
       $result = ($type == 'Function' ? '' : '(' . str_replace('|', ', ', trim($type, '{}')) . '): ') . $result;
     }
     $this->_desc = $result;
@@ -211,6 +214,100 @@ class Entry {
       $result = '```' . $this->lang . "\n" . $result . "\n```";
     }
     $this->_example = $result;
+    return $result;
+  }
+
+  /**
+   * Checks if the entry is an alias.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `false`.
+   */
+  public function isAlias() {
+    return false;
+  }
+
+  /**
+   * Checks if the entry is a constructor.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `true` if a constructor, else `false`.
+   */
+  public function isCtor() {
+    if (!isset($this->_isCtor)) {
+      $this->_isCtor = !!preg_match('/\* *@constructor\b/', $this->entry);
+    }
+    return $this->_isCtor;
+  }
+
+  /**
+   * Checks if the entry is a license.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `true` if a license, else `false`.
+   */
+  public function isLicense() {
+    if (!isset($this->_isLicense)) {
+      $this->_isLicense = !!preg_match('/\* *@license\b/', $this->entry);
+    }
+    return $this->_isLicense;
+  }
+
+  /**
+   * Checks if the entry *is* assigned to a prototype.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `true` if assigned to a prototype, else `false`.
+   */
+  public function isPlugin() {
+    if (!isset($this->_isPlugin)) {
+      $this->_isPlugin = !$this->isCtor() && !$this->isPrivate() && !$this->isStatic();
+    }
+    return $this->_isPlugin;
+  }
+
+  /**
+   * Checks if the entry is private.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `true` if private, else `false`.
+   */
+  public function isPrivate() {
+    if (!isset($this->_isPrivate)) {
+      $this->_isPrivate = $this->isLicense() || !!preg_match('/\* *@private\b/', $this->entry) || !preg_match('/\* *@[a-z]+\b/', $this->entry);
+    }
+    return $this->_isPrivate;
+  }
+
+  /**
+   * Checks if the entry is *not* assigned to a prototype.
+   *
+   * @memberOf Entry
+   * @returns {Boolean} Returns `true` if not assigned to a prototype, else `false`.
+   */
+  public function isStatic() {
+    if (isset($this->_isStatic)) {
+      return $this->_isStatic;
+    }
+
+    $public = !$this->isPrivate();
+    $result = $public && !!preg_match('/\* *@static\b/', $this->entry);
+
+    // set in cases where it isn't explicitly stated
+    if ($public && !$result) {
+      if ($parent = array_pop(preg_split('/[#.]/', $this->getMembers(0)))) {
+        foreach (Entry::getEntries($this->source) as $entry) {
+          $entry = new Entry($entry, $this->source);
+          if ($entry->getName() == $parent) {
+            $result = !$entry->isCtor();
+            break;
+          }
+        }
+      } else {
+        $result = true;
+      }
+    }
+    $this->_isStatic = $result;
     return $result;
   }
 
@@ -339,87 +436,6 @@ class Entry {
       $result = $this->isFunction() ? 'Function' : 'Unknown';
     }
     $this->_type = $result;
-    return $result;
-  }
-
-  /**
-   * Checks if the entry is an alias.
-   *
-   * @memberOf Entry
-   * @returns {Boolean} Returns `false`.
-   */
-  public function isAlias() {
-    return false;
-  }
-
-  /**
-   * Checks if the entry is a constructor.
-   *
-   * @memberOf Entry
-   * @returns {Boolean} Returns `true` if a constructor, else `false`.
-   */
-  public function isCtor() {
-    if (!isset($this->_isCtor)) {
-      $this->_isCtor = !!preg_match('/\* *@constructor\b/', $this->entry);
-    }
-    return $this->_isCtor;
-  }
-
-  /**
-   * Checks if the entry *is* assigned to a prototype.
-   *
-   * @memberOf Entry
-   * @returns {Boolean} Returns `true` if assigned to a prototype, else `false`.
-   */
-  public function isPlugin() {
-    if (!isset($this->_isPlugin)) {
-      $this->_isPlugin = !$this->isCtor() && !$this->isPrivate() && !$this->isStatic();
-    }
-    return $this->_isPlugin;
-  }
-
-  /**
-   * Checks if the entry is private.
-   *
-   * @memberOf Entry
-   * @returns {Boolean} Returns `true` if private, else `false`.
-   */
-  public function isPrivate() {
-    if (!isset($this->_isPrivate)) {
-      $this->_isPrivate = !!preg_match('/\* *@private\b/', $this->entry) || !preg_match('/\* *@[a-z]+\b/', $this->entry);
-    }
-    return $this->_isPrivate;
-  }
-
-  /**
-   * Checks if the entry is *not* assigned to a prototype.
-   *
-   * @memberOf Entry
-   * @returns {Boolean} Returns `true` if not assigned to a prototype, else `false`.
-   */
-  public function isStatic() {
-    if (isset($this->_isStatic)) {
-      return $this->_isStatic;
-    }
-
-    $public = !$this->isPrivate();
-    $result = $public && !!preg_match('/\* *@static\b/', $this->entry);
-
-    // set in cases where it isn't explicitly stated
-    if ($public && !$result) {
-      if ($parent = array_pop(preg_split('/[#.]/', $this->getMembers(0)))) {
-        foreach (Entry::getEntries($this->source) as $entry) {
-          $entry = new Entry($entry, $this->source);
-          if ($entry->getName() == $parent) {
-            $result = !$entry->isCtor();
-            break;
-          }
-        }
-      } else {
-        $result = true;
-      }
-    }
-    $this->_isStatic = $result;
     return $result;
   }
 }
