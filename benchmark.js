@@ -8,9 +8,6 @@
 ;(function(window, undefined) {
   'use strict';
 
-  /** Used to store the `Object` built-in in case it's overwritten later */
-  var Object = window.Object;
-
   /** Used to assign each benchmark an incrimented id */
   var counter = 0;
 
@@ -27,6 +24,9 @@
 
   /** Detect free variable `require` */
   var freeRequire = typeof require == 'function' && require;
+
+  /** Used to store the `Object` built-in in case it's overwritten later */
+  var Object = window.Object;
 
   /** Used to crawl all properties regardless of enumerability */
   var getAllKeys = Object.getOwnPropertyNames;
