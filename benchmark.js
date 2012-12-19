@@ -1469,7 +1469,18 @@
 
     forEach(arguments, function(source) {
       forProps(source, function(value, key) {
-        result[key] = value;
+        try {
+          // in ES5 this could throw for inherited props
+          destination[key] = value;
+        } catch(e) {
+          // but in ES5 we might be able to redefine them
+          Object.defineProperty(destination, key, Object.create(null, {
+            enumerable: true,
+            writable: true,
+            configurable: true,
+            value: value
+          }));
+        }
       });
     });
     return result;
