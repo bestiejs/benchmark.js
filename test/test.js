@@ -838,6 +838,13 @@
       var actual = Benchmark.interpolate('#{.*+?^=!:${}()|[]\\/}', { '.*+?^=!:${}()|[]\\/': 'x' });
       equal(actual, 'x');
     });
+
+    test('handles values containing `$` patterns', function() {
+      var expected = "$$,$&,$`,$',$0",
+          actual = Benchmark.interpolate('#{x}', { 'x': expected });
+
+      equal(actual, expected);
+    });
   }());
 
   /*--------------------------------------------------------------------------*/
