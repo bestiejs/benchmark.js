@@ -1,7 +1,7 @@
 ;(function(window, undefined) {
   'use strict';
 
-  /** Use a single load function */
+  /** Use a single "load" function */
   var load = typeof require == 'function' ? require : window.load;
 
   /** The `platform` object to check */
@@ -13,10 +13,11 @@
   /** The unit testing framework */
   var QUnit =
     window.QUnit || (
-      window.setTimeout || (window.addEventListener = window.setTimeout = / /),
-      window.QUnit = load('../vendor/qunit/qunit/qunit' + (platform.name == 'Narwhal' ? '-1.8.0' : '') + '.js') || window.QUnit,
+      window.addEventListener || (window.addEventListener = Function.prototype),
+      window.setTimeout || (window.setTimeout = Function.prototype),
+      window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit,
       load('../vendor/qunit-clib/qunit-clib.js'),
-      (window.addEventListener || 0).test && delete window.addEventListener,
+      window.addEventListener === Function.prototype && delete window.addEventListener,
       window.QUnit
     );
 
@@ -100,7 +101,7 @@
     });
 
     test('supports loading Benchmark.js as a module', function() {
-      if (window.document && window.require) {
+      if (window.define && define.amd) {
         equal((Benchmark2 || {}).version, Benchmark.version);
       } else {
         skipTest(1);
@@ -108,7 +109,7 @@
     });
 
     test('supports loading Platform.js as a module', function() {
-      if (window.document && window.require) {
+      if (window.define && define.amd) {
         var platform = (Benchmark2 || {}).platform || {};
         equal(typeof platform.name, 'string');
       } else {
@@ -2117,8 +2118,9 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // explicitly call `QUnit.start()` for Narwhal, Rhino, and RingoJS
-  if (!window.document) {
+  // configure QUnit and call `QUnit.start()` for Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
+  if (!window.document || window.phantom) {
+    QUnit.config.noglobals = true;
     QUnit.start();
   }
 }(typeof global == 'object' && global || this));

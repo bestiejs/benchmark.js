@@ -1,5 +1,5 @@
 cd "$(dirname "$0")"
-for cmd in rhino ringo narwhal node; do
+for cmd in rhino narwhal ringo phantomjs node; do
 	echo ""
 	echo "Testing in $cmd..."
 	$cmd test.js
