@@ -33,13 +33,8 @@
 					Object.prototype.hasOwnProperty = hasOwnProperty;
 				}
 			}());
-
-			// avoid syntax errors for `QUnit.throws` in older Firefoxes
-			document.write(platform.name == 'Firefox' && /^1\b/.test(platform.version)
-				? '<script src="../vendor/qunit/qunit/qunit-1.8.0.js"><\/script>'
-				: '<script src="../vendor/qunit/qunit/qunit.js"><\/script>'
-			);
 		</script>
+		<script src="../vendor/qunit/qunit/qunit.js"></script>
 		<script>
 			// populate `QUnit.urlParams`
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
