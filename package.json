@@ -53,5 +53,9 @@
   },
   "scripts": {
     "test": "node test/test"
+  },
+  "dependencies": {
+    "lodash": "~1.1.0",
+    "platform": "~1.0.0"
   }
 }

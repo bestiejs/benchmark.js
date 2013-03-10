@@ -8,7 +8,7 @@ Platform.js is for informational purposes only and **not** intended as a substit
 
 ## BestieJS
 
-Platform.js is part of the BestieJS *"Best in Class"* module collection. This means we promote solid browser/environment support, ES5 precedents, unit testing, and plenty of documentation.
+Platform.js is part of the BestieJS *"Best in Class"* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, and plenty of documentation.
 
 ## Documentation
 

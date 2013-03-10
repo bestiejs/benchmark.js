@@ -7,6 +7,7 @@
 		<script>
 			var console = air.Introspector.Console;
 		</script>
+		<script src="lodash.js"></script>
 		<script src="benchmark.js"></script>
 	</head>
 	<body>
@@ -26,7 +27,7 @@
 					console.log(event.target);
 				})
 				.on('complete', function() {
-					console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+					console.log('Fastest is ' + _.pluck(this.filter('fastest'), 'name'));
 				})
 				// don't run async to avoid JavaScript security errors
 				// http://help.adobe.com/en_US/AIR/1.5/devappshtml/WS5b3ccc516d4fbf351e63e3d118666ade46-7f0e.html

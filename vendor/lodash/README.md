@@ -263,7 +263,7 @@ The full changelog is available [here](https://github.com/bestiejs/lodash/wiki/C
 
 ## BestieJS
 
-Lo-Dash is part of the BestieJS *“Best in Class”* module collection. This means we promote solid browser/environment support, ES5 precedents, unit testing, and plenty of documentation.
+Lo-Dash is part of the BestieJS *“Best in Class”* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, and plenty of documentation.
 
 ## Author
 
