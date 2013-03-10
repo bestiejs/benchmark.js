@@ -13,28 +13,10 @@
 	</head>
 	<body>
 		<div id="qunit"></div>
+		<script src="../vendor/qunit/qunit/qunit.js"></script>
+		<script src="../vendor/lodash/lodash.js"></script>
 		<script src="../benchmark.js"></script>
 		<script src="../vendor/platform.js/platform.js"></script>
-		<script>
-			(function() {
-				var hasOwnProperty = function hasOwnProperty(key) {
-					var parent = (this.constructor || Object).prototype;
-					return key in this && !(key in parent && this[key] === parent[key]);
-				};
-				if (typeof {}.hasOwnProperty != 'function') {
-					// redefine for Safari 2, else use the less accurate fallback for others
-					if ({}.__proto__ == Object.prototype) {
-						hasOwnProperty = function hasOwnProperty(key) {
-							var result;
-							this.__proto__ = [this.__proto__, this.__proto__ = null, result = key in this][0];
-							return result;
-						};
-					}
-					Object.prototype.hasOwnProperty = hasOwnProperty;
-				}
-			}());
-		</script>
-		<script src="../vendor/qunit/qunit/qunit.js"></script>
 		<script>
 			// populate `QUnit.urlParams`
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
@@ -70,12 +52,12 @@
 				'urlArgs': 't=' + (+new Date),
 				'paths': {
 					'benchmark': '../../benchmark',
+					'lodash': '../lodash/lodash',
 					'platform': '../platform.js/platform'
 				}
 			},
-			['benchmark', 'platform'], function(Benchmark, platform) {
+			['benchmark'], function(Benchmark) {
 				Benchmark2 = Benchmark;
-				Benchmark2.platform = platform;
 			});
 
 			window.onload = function() {

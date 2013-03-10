@@ -4,65 +4,35 @@
   /** Use a single "load" function */
   var load = typeof require == 'function' ? require : window.load;
 
-  /** The `platform` object to check */
-  var platform =
-    window.platform ||
-    load('../vendor/platform.js/platform.js') ||
-    window.platform;
-
   /** The unit testing framework */
-  var QUnit =
-    window.QUnit || (
-      window.addEventListener || (window.addEventListener = Function.prototype),
-      window.setTimeout || (window.setTimeout = Function.prototype),
+  var QUnit = (function() {
+    var noop = Function.prototype;
+    return  window.QUnit || (
+      window.addEventListener || (window.addEventListener = noop),
+      window.setTimeout || (window.setTimeout = noop),
       window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit,
-      load('../vendor/qunit-clib/qunit-clib.js'),
-      window.addEventListener === Function.prototype && delete window.addEventListener,
+      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(window),
+      addEventListener === noop && delete window.addEventListener,
       window.QUnit
     );
+  }());
+
+  /** The `lodash` utility function */
+  var _ = window._ || (window._ = (
+    _ = load('../vendor/lodash/lodash.js') || window._,
+    _ = _._ || _,
+    _.runInContext(window)
+  ));
 
   /** The `Benchmark` constructor to test */
-  var Benchmark =
-    window.Benchmark || (
-      Benchmark = load('../benchmark.js') || window.Benchmark,
-      Benchmark.Benchmark || Benchmark
-    );
-
-  /** API shortcut */
-  var forOwn = Benchmark.forOwn;
-
-  /** Used to get property descriptors */
-  var getDescriptor = Object.getOwnPropertyDescriptor;
-
-  /** Used to set property descriptors */
-  var setDescriptor = Object.defineProperty;
+  var Benchmark = window.Benchmark || (window.Benchmark = (
+    Benchmark = load('../benchmark.js') || window.Benchmark,
+    Benchmark = Benchmark.Benchmark || Benchmark,
+    Benchmark.runInContext(window)
+  ));
 
   /** Shortcut used to convert array-like objects to arrays */
-  var slice = [].slice;
-
-  /** Used to resolve a value's internal [[Class]] */
-  var toString = {}.toString;
-
-  /** Used to check problem JScript properties (a.k.a. the [[DontEnum]] bug) */
-  var shadowed = {
-    'constructor': 1,
-    'hasOwnProperty': 2,
-    'isPrototypeOf': 3,
-    'propertyIsEnumerable': 4,
-    'toLocaleString': 5,
-    'toString': 6,
-    'valueOf': 7
-  };
-
-  /** Used to flag environments/features */
-  var support = {
-    'descriptors': !!function() {
-      try {
-        var o = {};
-        return (setDescriptor(o, o, o), 'value' in getDescriptor(o, o));
-      } catch(e) { }
-    }()
-  };
+  var slice = Array.prototype.slice;
 
   /*--------------------------------------------------------------------------*/
 
@@ -93,7 +63,7 @@
 
   (function() {
     test('has the default `Benchmark.platform` value', function() {
-      if (window.document) {
+      if (window.navigator) {
         equal(String(Benchmark.platform), navigator.userAgent);
       } else {
         skipTest(1);
@@ -242,7 +212,7 @@
       }
     };
 
-    forOwn(tests, function(fn, title) {
+    _.forOwn(tests, function(fn, title) {
       test('has correct binding for ' + title, function() {
         var bench = Benchmark({
           'setup': 'if(/ops/.test(this))this._setup=true;',
@@ -266,331 +236,15 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.deepClone');
-
-  (function() {
-    function createCircularObject() {
-      var result = {
-        'foo': { 'b': { 'foo': { 'c': { } } } },
-        'bar': { }
-      };
-
-      result.foo.b.foo.c.foo = result;
-      result.bar.b = result.foo.b;
-      return result;
-    }
-
-    function Klass() {
-      this.a = 1;
-    }
-
-    Klass.prototype = { 'b': 1 };
-
-    var notCloneable = {
-      'an arguments object': arguments,
-      'an element': window.document && document.body,
-      'a function': Klass,
-      'a Klass instance': new Klass
-    };
-
-    var objects = {
-      'an array': ['a', 'b', 'c', ''],
-      'an array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 },
-      'boolean': false,
-      'boolean object': Object(false),
-      'an object': { 'a': 0, 'b': 1, 'c': 3 },
-      'an object with object values': { 'a': /a/, 'b': ['B'], 'c': { 'C': 1 } },
-      'null': null,
-      'a number': 3,
-      'a number object': Object(3),
-      'a regexp': /x/gim,
-      'a string': 'x',
-      'a string object': Object('x'),
-      'undefined': undefined
-    };
-
-    objects['an array'].length = 5;
-
-    forOwn(objects, function(object, key) {
-      test('clones ' + key + ' correctly', function() {
-        var kind = toString.call(object),
-            clone = Benchmark.deepClone(object);
-
-        if (object == null) {
-          equal(clone, object);
-        } else {
-          deepEqual(clone.valueOf(), object.valueOf());
-        }
-        if (object === Object(object)) {
-          ok(clone !== object);
-        } else {
-          skipTest();
-        }
-      });
-    });
-
-    forOwn(notCloneable, function(object, key) {
-      test('does not clone ' + key, function() {
-        ok(Benchmark.deepClone(object) === object);
-      });
-    });
-
-    test('clones using Klass#deepClone', function() {
-      var object = new Klass;
-      Klass.prototype.deepClone = function() { return new Klass; };
-
-      var clone = Benchmark.deepClone(object);
-      ok(clone !== object && clone instanceof Klass);
-
-      delete Klass.prototype.clone;
-    });
-
-    test('clones problem JScript properties', function() {
-      var clone = Benchmark.deepClone(shadowed);
-      deepEqual(clone, shadowed);
-    });
-
-    test('clones string object with custom property', function() {
-      var object = new String('x');
-      object.x = 1;
-
-      var clone = Benchmark.deepClone(object);
-      ok(clone == 'x' && typeof clone == 'object' && clone.x === 1 && toString.call(clone) == '[object String]');
-    });
-
-    test('clones objects with circular references', function() {
-      var object = createCircularObject(),
-          clone = Benchmark.deepClone(object);
-
-      ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
-    });
-
-    test('clones non-extensible objects with circular references', function() {
-      if (Object.preventExtensions) {
-        var object = Object.preventExtensions(createCircularObject());
-        Object.preventExtensions(object.bar.b);
-
-        var clone = Benchmark.deepClone(object);
-        ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
-      } else {
-        skipTest(1);
-      }
-    });
-
-    test('clones sealed objects with circular references', function() {
-      if (Object.seal) {
-        var object = Object.seal(createCircularObject());
-        Object.seal(object.bar.b);
-
-        var clone = Benchmark.deepClone(object);
-        ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
-      } else {
-        skipTest(1);
-      }
-    });
-
-    test('clones frozen objects with circular references', function() {
-      if (Object.freeze) {
-        var object = Object.freeze(createCircularObject());
-        Object.freeze(object.bar.b);
-
-        var clone = Benchmark.deepClone(object);
-        ok(clone.bar.b === clone.foo.b && clone === clone.foo.b.foo.c.foo && clone !== object);
-      } else {
-        skipTest(1);
-      }
-    });
-
-    test('clones objects with custom descriptors and circular references', function() {
-      var accessor,
-          descriptor;
-
-      if (support.descriptors) {
-        var object = setDescriptor({}, 'foo', {
-          'configurable': true,
-          'value': setDescriptor({}, 'b', {
-            'writable': true,
-            'value': setDescriptor({}, 'foo', {
-              'get': function() { return accessor; },
-              'set': function(value) { accessor = value; }
-            })
-          })
-        });
-
-        setDescriptor(object, 'bar', { 'value': {} });
-        object.foo.b.foo = { 'c': object };
-        object.bar.b = object.foo.b;
-
-        var clone = Benchmark.deepClone(object);
-        ok(clone !== object &&
-          clone.bar.b === clone.foo.b &&
-          clone !== clone.foo.b.foo.c.foo &&
-          (descriptor = getDescriptor(clone, 'foo')) &&
-          descriptor.configurable && !(descriptor.enumerable && descriptor.writable) &&
-          (descriptor = getDescriptor(clone.foo, 'b')) &&
-          descriptor.writable && !(descriptor.configurable && descriptor.enumerable) &&
-          (descriptor = getDescriptor(clone.foo.b, 'foo')) &&
-          descriptor.get && descriptor.set &&
-          (descriptor = getDescriptor(clone.foo.b, 'foo')) &&
-          !(descriptor.configurable && descriptor.enumerable && descriptor.writable) &&
-          (descriptor = getDescriptor(clone, 'bar')) &&
-          !(descriptor.configurable && descriptor.enumerable && descriptor.writable));
-      }
-      else {
-        skipTest(1);
-      }
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.each');
-
-  (function() {
-    var xpathResult;
-
-    var objects = {
-      'array': ['a', 'b', 'c', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 },
-      'xpath snapshot': null
-    };
-
-    if (window.document && document.evaluate) {
-      xpathResult = [document.documentElement, document.getElementsByTagName('head')[0], document.body];
-      objects['xpath snapshot'] = document.evaluate('//*[self::html or self::head or self::body]', document, null, 7, null);
-    }
-
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
-      test('passes the correct arguments when passing an ' + key, function() {
-        if (object) {
-          var args
-          Benchmark.each(object, function() {
-            args || (args = slice.call(arguments));
-          });
-
-          if (key == 'xpath snapshot') {
-            ok(args[0] === xpathResult[0]);
-          } else {
-            equal(args[0], 'a');
-          }
-          equal(args[1], 0);
-          ok(args[2] === object);
-        }
-        else {
-          skipTest(3);
-        }
-      });
-
-      test('returns the passed object when passing an ' + key, function() {
-        if (object) {
-          var actual = Benchmark.each(object, function() { });
-          ok(actual === object);
-        }
-        else {
-          skipTest();
-        }
-      });
-
-      test('iterates over all indexes when passing an ' + key, function() {
-        if (object) {
-          var values = [];
-          Benchmark.each(object, function(value) {
-            values.push(value);
-          });
-
-          deepEqual(values, key == 'xpath snapshot' ? xpathResult : ['a', 'b', 'c', '']);
-        }
-        else {
-          skipTest();
-        }
-      });
-
-      test('exits early when returning `false` when passing an ' + key, function() {
-        if (object) {
-          var values = [];
-          Benchmark.each(object, function(value) {
-            values.push(value);
-            return values.length < 2;
-          });
-
-          deepEqual(values, key == 'xpath snapshot' ? xpathResult.slice(0, 2) : ['a', 'b']);
-        }
-        else {
-          skipTest();
-        }
-      });
-    });
-
-    test('passes the third callback argument as an object', function() {
-      var thirdArg;
-      Benchmark.each('hello', function(value, index, object) {
-        thirdArg = object;
-      });
-
-      ok(thirdArg && typeof thirdArg == 'object');
-    });
-
-    test('iterates over strings by index', function() {
-      var values = [];
-      Benchmark.each('hello', function(value) {
-        values.push(value)
-      });
-
-      deepEqual(values, ['h', 'e', 'l', 'l', 'o']);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.extend');
-
-  (function() {
-    test('allows no source argument', function() {
-      var object = {};
-      equal(Benchmark.extend(object), object);
-    });
-
-    test('allows a single source argument', function() {
-      var source = { 'x': 1, 'y': 1 },
-          actual = Benchmark.extend({}, source);
-
-      deepEqual(Benchmark.extend({}, source), { 'x': 1, 'y': 1 });
-    });
-
-    test('allows multiple source arguments', function() {
-      var source1 = { 'x': 1, 'y': 1 },
-          source2 = { 'y': 2, 'z': 2 },
-          actual = Benchmark.extend({}, source1, source2);
-
-      deepEqual(actual, { 'x': 1, 'y': 2, 'z': 2 });
-    });
-
-    test('will add inherited source properties', function() {
-      function Source() { }
-      Source.prototype.x = 1;
-      deepEqual(Benchmark.extend({}, new Source), { 'x': 1 });
-    });
-
-    test('will add problem JScript properties', function() {
-      deepEqual(Benchmark.extend({}, shadowed), shadowed);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
   QUnit.module('Benchmark.filter');
 
   (function() {
     var objects = {
       'array': ['a', 'b', 'c', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 }
+      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 4 }
     };
 
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
+    _.forOwn(objects, function(object, key) {
       test('passes the correct arguments when passing an ' + key, function() {
         var args;
         Benchmark.filter(object, function() {
@@ -607,119 +261,8 @@
 
         deepEqual(actual, ['b', 'c', '']);
       });
-
-      test('iterates over sparse ' + key + 's correctly', function() {
-        var actual = Benchmark.filter(object, function(value) {
-          return value === undefined;
-        });
-
-        deepEqual(actual, []);
-      });
     });
   }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.forOwn');
-
-  (function() {
-    function fn() {
-      // no-op
-    }
-
-    function KlassA() {
-      this.a = 1;
-      this.b = 2;
-      this.c = 3;
-    }
-
-    function KlassB() {
-      this.a = 1;
-      this.constructor = 2;
-      this.hasOwnProperty = 3;
-      this.isPrototypeOf = 4;
-      this.propertyIsEnumerable = 5;
-      this.toLocaleString = 6;
-      this.toString = 7;
-      this.valueOf = 8;
-    }
-
-    function KlassC() {
-      // no-op
-    }
-
-    fn.a = 1;
-    fn.b = 2;
-    fn.c = 3;
-
-    KlassC.prototype.a = 1;
-    KlassC.prototype.b = 2;
-    KlassC.prototype.c = 3;
-
-    var objects = {
-      'an arguments object': arguments,
-      'a function': fn,
-      'an object': new KlassA,
-      'an object shadowing properties on Object.prototype': new KlassB,
-      'a prototype object': KlassC.prototype,
-      'a string': 'abc'
-    };
-
-    forOwn(objects, function(object, key) {
-      test('passes the correct arguments when passing ' + key, function() {
-        var args;
-        Benchmark.forOwn(object, function() {
-          args || (args = slice.call(arguments));
-        });
-
-        equal(typeof args[0], key == 'a string' ? 'string' : 'number');
-        equal(typeof args[1], 'string');
-        equal(args[2] && typeof args[2], key == 'a function' ? 'function' : 'object');
-      });
-
-      test('returns the passed object when passing ' + key, function() {
-        var actual = Benchmark.forOwn(object, function() { });
-        deepEqual(actual, object);
-      });
-
-      test('iterates over own properties when passing ' + key, function() {
-        var values = [];
-        Benchmark.forOwn(object, function(value) {
-          values.push(value);
-        });
-
-        if (object instanceof KlassB) {
-          deepEqual(values.sort(), [1, 2, 3, 4, 5, 6, 7, 8]);
-        } else if (key == 'a string') {
-          deepEqual(values, ['a', 'b', 'c']);
-        } else {
-          deepEqual(values.sort(), [1, 2, 3]);
-        }
-      });
-
-      test('exits early when returning `false` when passing ' + key, function() {
-        var values = [];
-        Benchmark.forOwn(object, function(value) {
-          values.push(value);
-          return false;
-        });
-
-        equal(values.length, 1);
-      });
-
-      if (object instanceof KlassB) {
-        test('exits correctly when transitioning to the JScript [[DontEnum]] fix', function() {
-          var values = [];
-          Benchmark.forOwn(object, function(value) {
-            values.push(value);
-            return values.length < 2;
-          });
-
-          equal(values.length, 2);
-        });
-      }
-    });
-  }(1, 2, 3));
 
   /*--------------------------------------------------------------------------*/
 
@@ -745,132 +288,23 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.hasKey');
-
-  (function() {
-    test('returns `true` for own properties', function() {
-      var object = { 'x': 1 };
-      equal(Benchmark.hasKey(object, 'x'), true);
-    });
-
-    test('returns `false` for inherited properties', function() {
-      equal(Benchmark.hasKey({}, 'toString'), false);
-    });
-
-    test('doesn\'t use an object\'s `hasOwnProperty` method', function() {
-      var object = { 'hasOwnProperty': function() { return true; } };
-      equal(Benchmark.hasKey(object, 'x'), false);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.indexOf');
-
-  (function() {
-    var objects = {
-      'array': ['a', 'b', 'c', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 }
-    };
-
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
-      test('produces the correct result when passing an ' + key, function() {
-        equal(Benchmark.indexOf(object, 'b'), 1);
-      });
-
-      test('matches values by strict equality when passing an ' + key, function() {
-        equal(Benchmark.indexOf(object, new String('b')), -1);
-      });
-
-      test('iterates over sparse ' + key + 's correctly', function() {
-        equal(Benchmark.indexOf(object, undefined), -1);
-      });
-    });
-
-    test('searches from the given `fromIndex`', function() {
-      var array = ['a', 'b', 'c', 'a'];
-      equal(Benchmark.indexOf(array, 'a', 1), 3);
-    });
-
-    test('handles extreme negative `fromIndex` values correctly', function() {
-      var array = ['a'];
-      array['-1'] = 'z';
-      equal(Benchmark.indexOf(array, 'z', -2), -1);
-    });
-
-    test('handles extreme positive `fromIndex` values correctly', function() {
-      var object = { '0': 'a', '1': 'b', '2': 'c', 'length': 2 };
-      equal(Benchmark.indexOf(object, 'c', 2), -1);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.interpolate');
-
-  (function() {
-    test('replaces tokens correctly', function() {
-      var actual = Benchmark.interpolate('#{greeting} #{location}.', {
-        'greeting': 'Hello',
-        'location': 'world'
-      });
-
-      equal(actual, 'Hello world.');
-    });
-
-    test('ignores inherited object properties', function() {
-      var actual = Benchmark.interpolate('x#{toString}', {});
-      equal(actual, 'x#{toString}');
-    });
-
-    test('allows for no template object', function() {
-      var actual = Benchmark.interpolate('x');
-      equal(actual, 'x');
-    });
-
-    test('replaces duplicate tokens', function() {
-      var actual = Benchmark.interpolate('#{x}#{x}#{x}', { 'x': 'a' });
-      equal(actual, 'aaa');
-    });
-
-    test('handles keys containing RegExp special characters', function() {
-      var actual = Benchmark.interpolate('#{.*+?^=!:${}()|[]\\/}', { '.*+?^=!:${}()|[]\\/': 'x' });
-      equal(actual, 'x');
-    });
-
-    test('handles values containing `$` patterns', function() {
-      var expected = "$$,$&,$`,$',$0",
-          actual = Benchmark.interpolate('#{x}', { 'x': expected });
-
-      equal(actual, expected);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
   QUnit.module('Benchmark.invoke');
 
   (function() {
     var objects = {
       'array': ['a', ['b'], 'c', null],
-      'array-like-object': { '0': 'a', '1': ['b'], '2': 'c',  '3': null, 'length': 5 }
+      'array-like-object': { '0': 'a', '1': ['b'], '2': 'c',  '3': null, 'length': 4 }
     };
 
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
+    _.forOwn(objects, function(object, key) {
       test('produces the correct result when passing an ' + key, function() {
         var actual = Benchmark.invoke(object, 'concat');
-        deepEqual(actual, ['a', ['b'], 'c', undefined, undefined]);
-        equal('4' in actual, false);
+        deepEqual(actual, ['a', ['b'], 'c', undefined]);
       });
 
       test('passes the correct arguments to the invoked method when passing an ' + key, function() {
         var actual = Benchmark.invoke(object, 'concat', 'x', 'y', 'z');
-        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
-        equal('4' in actual, false);
+        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined]);
       });
 
       test('handles options object with callbacks correctly when passing an ' + key, function() {
@@ -887,8 +321,7 @@
           'onComplete': callback
         });
 
-        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined, undefined]);
-        equal('4' in actual, false);
+        deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined]);
 
         equal(callbacks[0].length, 1);
         equal(callbacks[0][0].target, 'a');
@@ -909,8 +342,8 @@
           }
         });
 
-        deepEqual(lengths, [5, 4, 3, 2]);
-        deepEqual(actual, ['ax', ['b', 'x'], 'cx', undefined, undefined]);
+        deepEqual(lengths, [4, 3, 2, 1]);
+        deepEqual(actual, ['ax', ['b', 'x'], 'cx', undefined]);
       });
     });
   }());
@@ -922,124 +355,17 @@
   (function() {
     var objects = {
       'array': ['a', 'b', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': '', 'length': 4 },
+      'array-like-object': { '0': 'a', '1': 'b', '2': '', 'length': 3 },
       'object': { 'a': '0', 'b': '1', '': '2' }
     };
 
-    objects.array.length = 4;
-
-    forOwn(objects, function(object, key) {
+    _.forOwn(objects, function(object, key) {
       test('joins correctly using the default separator when passing an ' + key, function() {
         equal(Benchmark.join(object), key == 'object' ? 'a: 0,b: 1,: 2' : 'a,b,');
       });
 
       test('joins correctly using a custom separator when passing an ' + key, function() {
         equal(Benchmark.join(object, '+', '@'), key == 'object' ? 'a@0+b@1+@2' :  'a+b+');
-      });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.map');
-
-  (function() {
-    var objects = {
-      'array': ['a', 'b', 'c', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 5 }
-    };
-
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
-      test('passes the correct arguments when passing an ' + key, function() {
-        var args;
-        Benchmark.map(object, function() {
-          args || (args = slice.call(arguments));
-        });
-
-        deepEqual(args, ['a', 0, object]);
-      });
-
-      test('produces the correct result when passing an ' + key, function() {
-        var actual = Benchmark.map(object, function(value, index) {
-          return value + index;
-        });
-
-        deepEqual(actual, ['a0', 'b1', 'c2', '3', undefined]);
-        equal('4' in actual, false);
-      });
-
-      test('produces an array of the correct length for sparse ' + key + 's', function() {
-        equal(Benchmark.map(object, function() { }).length, 5);
-      });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.pluck');
-
-  (function() {
-    var objects = {
-      'array': [{ '_': 'a' }, { '_': 'b' }, { '_': 'c' }, null],
-      'array-like-object': { '0': { '_': 'a' }, '1': { '_': 'b' }, '2': { '_': 'c' },  '3': null, 'length': 5 }
-    };
-
-    objects.array.length = 5;
-
-    forOwn(objects, function(object, key) {
-      test('produces the correct result when passing an ' + key, function() {
-        var actual = Benchmark.pluck(object, '_');
-        deepEqual(actual, ['a', 'b', 'c', undefined, undefined]);
-        equal('4' in actual, false);
-      });
-
-      test('produces the correct result for non-existent keys when passing an ' + key, function() {
-        var actual = Benchmark.pluck(object, 'non-existent');
-        deepEqual(actual, [undefined, undefined, undefined, undefined, undefined]);
-        equal('4' in actual, false);
-      });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.reduce');
-
-  (function() {
-    var objects = {
-      'array': ['b', 'c', ''],
-      'array-like-object': { '0': 'b', '1': 'c',  '2': '', 'length': 4 }
-    };
-
-    objects.array.length = 4;
-
-    forOwn(objects, function(object, key) {
-      test('passes the correct arguments when passing an ' + key, function() {
-        var args;
-        Benchmark.reduce(object, function() {
-          args || (args = slice.call(arguments));
-        }, 'a');
-
-        deepEqual(args, ['a', 'b', 0, object]);
-      });
-
-      test('accumulates correctly when passing an ' + key, function() {
-        var actual = Benchmark.reduce(object, function(string, value) {
-          return string + value;
-        }, 'a');
-
-        equal(actual, 'abc');
-      });
-
-      test('handles arguments with no initial value correctly when passing an ' + key, function() {
-        var args;
-        Benchmark.reduce(object, function() {
-          args || (args = slice.call(arguments));
-        });
-
-        deepEqual(args, ['b', 'c', 1, object]);
       });
     });
   }());
@@ -1092,7 +418,7 @@
 
   /*--------------------------------------------------------------------------*/
 
-  forOwn({
+  _.forOwn({
     'Benchmark': Benchmark,
     'Benchmark.Suite': Benchmark.Suite
   },
@@ -1484,96 +810,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.Suite#score');
-
-  (function() {
-    asyncTest('should compute a score', function() {
-      Benchmark.Suite()
-        .add('a', {
-          'reference': 120.35,
-          'fn': function() {
-            var array = [];
-            for (var index = 0; index < 1e3; index++) {
-              array.push(index % 2 ? String(index) : index);
-            }
-          }
-        })
-        .add('b', {
-          'reference': 360.95,
-          'fn': function() {
-            var array = [];
-            for (var index = 0; index < 3e3; index++) {
-              array.push(index % 2 ? String(index) : index);
-            }
-          }
-        })
-        .add('c', {
-          'reference': 720.10,
-          'fn': function() {
-            var array = [];
-            for (var index = 0; index < 6e3; index++) {
-              array.push(index % 2 ? String(index) : index);
-            }
-          }
-        })
-        .on('complete', function() {
-          var score = this.score;
-          ok(score && typeof score == 'number');
-          QUnit.start();
-        })
-        .run({ 'async': true });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.Suite#concat');
-
-  (function() {
-    var args = arguments;
-
-    test('doesn\'t treat an arguments object like an array', function() {
-      var suite = Benchmark.Suite();
-      deepEqual(suite.concat(args), [args]);
-    });
-
-    test('flattens array arguments', function() {
-      var suite = Benchmark.Suite();
-      deepEqual(suite.concat([1, 2], 3, [4, 5]), [1, 2, 3, 4, 5]);
-    });
-
-    test('supports concating sparse arrays', function() {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[2] = 2;
-      suite.length = 3;
-
-      var actual = suite.concat(3);
-      deepEqual(actual, [0, undefined, 2, 3]);
-      equal('1' in actual, false);
-    });
-
-    test('supports sparse arrays as arguments', function() {
-      var suite = Benchmark.Suite(),
-          sparse = [];
-
-      sparse[0] = 0;
-      sparse[2] = 2;
-      sparse.length = 3;
-
-      var actual = suite.concat(sparse);
-      deepEqual(actual, [0, undefined, 2]);
-      equal('1' in actual, false);
-    });
-
-    test('creates a new array', function() {
-      var suite = Benchmark.Suite();
-      ok(suite.concat(1) !== suite);
-    });
-  }(1, 2, 3));
-
-  /*--------------------------------------------------------------------------*/
-
   QUnit.module('Benchmark.Suite#reverse');
 
   (function() {
@@ -1586,18 +822,6 @@
       var actual = suite.reverse();
       equal(actual, suite);
       deepEqual(slice.call(actual), [1, 0]);
-    });
-
-    test('supports reversing sparse arrays', function() {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[2] = 2;
-      suite.length = 3;
-
-      var actual = suite.reverse();
-      equal(actual, suite);
-      deepEqual(slice.call(actual), [2, undefined, 0]);
-      equal('1' in actual, false);
     });
   }());
 
@@ -1634,83 +858,6 @@
       // ensure element is removed
       equal('0' in suite, false);
       equal(suite.length, 0);
-    });
-
-    test('supports shifting sparse arrays', function() {
-      var suite = Benchmark.Suite();
-      suite[1] = 1;
-      suite[3] = 3;
-      suite.length = 4;
-
-      var actual = suite.shift();
-      equal(actual, undefined);
-      deepEqual(slice.call(suite), [1, undefined, 3]);
-      equal('1' in suite, false);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.Suite#slice');
-
-  (function() {
-    var suite = Benchmark.Suite();
-    suite[0] = 0;
-    suite[1] = 1;
-    suite[2] = 2;
-    suite[3] = 3;
-    suite.length = 4;
-
-    test('works with no arguments', function() {
-      var actual = suite.slice();
-      deepEqual(actual, [0, 1, 2, 3]);
-      ok(suite !== actual);
-    });
-
-    test('works with positive `start` argument', function() {
-      var actual = suite.slice(2);
-      deepEqual(actual, [2, 3]);
-      ok(suite !== actual);
-    });
-
-    test('works with positive `start` and `end` arguments', function() {
-      var actual = suite.slice(1, 3);
-      deepEqual(actual, [1, 2]);
-      ok(suite !== actual);
-    });
-
-    test('works with `end` values exceeding length', function() {
-      var actual = suite.slice(1, 10);
-      deepEqual(actual, [1, 2, 3]);
-      ok(suite !== actual);
-    });
-
-    test('works with negative `start` and `end` arguments', function() {
-      var actual = suite.slice(-3, -1);
-      deepEqual(actual, [1, 2]);
-      ok(suite !== actual);
-    });
-
-    test('works with an extreme negative `end` value', function() {
-      var actual = suite.slice(1, -10);
-      deepEqual(actual, []);
-      equal('-1' in actual, false);
-      ok(suite !== actual);
-    });
-
-    test('supports slicing sparse arrays', function() {
-      var sparse = Benchmark.Suite();
-      sparse[1] = 1;
-      sparse[3] = 3;
-      sparse.length = 4;
-
-      var actual = sparse.slice(0, 2);
-      deepEqual(actual, [undefined, 1]);
-      equal('0' in actual, false);
-
-      actual = sparse.slice(1);
-      deepEqual(actual, [1, undefined, 3]);
-      equal('1' in actual, false);
     });
   }());
 
@@ -1805,19 +952,6 @@
       deepEqual(actual, []);
       deepEqual(slice.call(suite), [1, 2, 0, 3]);
     });
-
-    test('supports splicing sparse arrays', function() {
-      var suite = Benchmark.Suite();
-      suite[1] = 1;
-      suite[3] = 3;
-      suite.length = 4;
-
-      var actual = suite.splice(1, 2, 1, 2);
-      deepEqual(actual, [1, undefined]);
-      equal(actual.length, 2);
-      deepEqual(slice.call(suite), [undefined, 1, 2, 3]);
-      equal('0' in suite, false);
-    });
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -1844,17 +978,6 @@
       equal(actual, 4);
       deepEqual(slice.call(suite), [0, 1, 2, 3]);
     });
-
-    test('supports unshifting sparse arrays', function() {
-      var suite = Benchmark.Suite();
-      suite[1] = 2;
-      suite.length = 2;
-
-      var actual = suite.unshift(0);
-      equal(actual, 3);
-      deepEqual(slice.call(suite), [0, undefined, 2]);
-      equal('1' in suite, false);
-    });
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -1880,7 +1003,7 @@
     asyncTest('should filter by fastest', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(this.filter('fastest').pluck('name'), ['a']);
+        deepEqual(_.pluck(this.filter('fastest'), 'name'), ['a']);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -1889,7 +1012,7 @@
     asyncTest('should filter by slowest', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(this.filter('slowest').pluck('name'), ['b']);
+        deepEqual(_.pluck(this.filter('slowest'), 'name'), ['b']);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -1898,7 +1021,7 @@
     asyncTest('should filter by successful', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(this.filter('successful').pluck('name'), ['a', 'b']);
+        deepEqual(_.pluck(this.filter('successful'), 'name'), ['a', 'b']);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -2080,45 +1203,8 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.deepClone');
-
-  (function() {
-    asyncTest('avoids call stack limits', function() {
-      var result,
-          count = 0,
-          object = {},
-          recurse = function() { count++; recurse(); };
-
-      setTimeout(function() {
-        ok(result, 'avoids call stack limits (stack limit is ' + (count - 1) + ')');
-        QUnit.start();
-      }, 15);
-
-      if (toString.call(window.java) == '[object JavaPackage]') {
-        // Java throws uncatchable errors on call stack overflows, so to avoid
-        // them I chose a number higher than Rhino's call stack limit without
-        // dynamically testing for the actual limit
-        count = 3e3;
-      } else {
-        try { recurse(); } catch(e) { }
-      }
-
-      // exceed limit
-      count++;
-      for (var i = 0, sub = object; i <= count; i++) {
-        sub = sub[i] = {};
-      }
-
-      try {
-        for (var i = 0, sub = Benchmark.deepClone(object); sub = sub[i]; i++) { }
-        result = --i == count;
-      } catch(e) { }
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  // configure QUnit and call `QUnit.start()` for Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
+  // configure QUnit and call `QUnit.start()` for
+  // Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
   if (!window.document || window.phantom) {
     QUnit.config.noglobals = true;
     QUnit.start();
