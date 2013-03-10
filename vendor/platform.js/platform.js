@@ -25,6 +25,9 @@
   /** Detect Java environment */
   var java = /Java/.test(getClassOf(window.java)) && window.java;
 
+  /** Detect Rhino */
+  var rhino = java && getClassOf(window.environment) == 'Environment';
+
   /** A character to represent alpha */
   var alpha = java ? 'a' : '\u03b1';
 
@@ -581,10 +584,11 @@
     // detect stubborn layout engines
     if (layout == 'iCab' && parseFloat(version) > 3) {
       layout = ['WebKit'];
-    } else if (data =
-        /Opera/.test(name) && 'Presto' ||
-        /\b(?:Midori|Nook|Safari)\b/i.test(ua) && 'WebKit' ||
-        !layout && /\bMSIE\b/i.test(ua) && (/^Mac/.test(os) ? 'Tasman' : 'Trident')) {
+    } else if ((data =
+          /Opera/.test(name) && 'Presto' ||
+          /\b(?:Midori|Nook|Safari)\b/i.test(ua) && 'WebKit' ||
+          !layout && /\bMSIE\b/i.test(ua) && (/^Mac/.test(os) ? 'Tasman' : 'Trident')
+        )) {
       layout = [data];
     }
     // leverage environment features
@@ -597,7 +601,7 @@
           arch = data.getProperty('os.arch');
           os = os || data.getProperty('os.name') + ' ' + data.getProperty('os.version');
         }
-        if (typeof exports == 'object' && exports) {
+        if (freeExports) {
           // if `thisBinding` is the [ModuleScope]
           if (thisBinding == oldWin && typeof system == 'object' && (data = [system])[0]) {
             os || (os = data[0].os || null);
@@ -610,23 +614,28 @@
                 name = 'Narwhal';
               }
             }
-          } else if (typeof process == 'object' && (data = process)) {
+          }
+          else if (typeof process == 'object' && (data = process)) {
             name = 'Node.js';
             arch = data.arch;
             os = data.platform;
             version = /[\d.]+/.exec(data.version)[0];
           }
-        } else if (getClassOf(window.environment) == 'Environment') {
+          else if (rhino) {
+            name = 'Rhino';
+          }
+        }
+        else if (rhino) {
           name = 'Rhino';
         }
       }
       // detect Adobe AIR
-      else if (getClassOf(data = window.runtime) == 'ScriptBridgingProxyObject') {
+      else if (getClassOf((data = window.runtime)) == 'ScriptBridgingProxyObject') {
         name = 'Adobe AIR';
         os = data.flash.system.Capabilities.os;
       }
       // detect PhantomJS
-      else if (getClassOf(data = window.phantom) == 'RuntimeObject') {
+      else if (getClassOf((data = window.phantom)) == 'RuntimeObject') {
         name = 'PhantomJS';
         version = (data = data.version || null) && (data.major + '.' + data.minor + '.' + data.patch);
       }
@@ -646,9 +655,10 @@
     }
     // detect prerelease phases
     if (version && (data =
-        /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) ||
-        /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + (useFeatures && nav.appMinorVersion)) ||
-        /\bMinefield\b/i.test(ua) && 'a')) {
+          /(?:[ab]|dp|pre|[ab]\d+pre)(?:\d+\+?)?$/i.exec(version) ||
+          /(?:alpha|beta)(?: ?\d)?/i.exec(ua + ';' + (useFeatures && nav.appMinorVersion)) ||
+          /\bMinefield\b/i.test(ua) && 'a'
+        )) {
       prerelease = /b/i.test(data) ? 'beta' : 'alpha';
       version = version.replace(RegExp(data + '\\+?$'), '') +
         (prerelease == 'beta' ? beta : alpha) + (/\d+\+?/.exec(data) || '');
@@ -689,8 +699,9 @@
     // detect BlackBerry OS version
     // http://docs.blackberry.com/en/developers/deliverables/18169/HTTP_headers_sent_by_BB_Browser_1234911_11.jsp
     else if (/BlackBerry/.test(product) && (data =
-        (RegExp(product.replace(/ +/g, ' *') + '/([.\\d]+)', 'i').exec(ua) || 0)[1] ||
-        version)) {
+          (RegExp(product.replace(/ +/g, ' *') + '/([.\\d]+)', 'i').exec(ua) || 0)[1] ||
+          version
+        )) {
       os = 'Device Software ' + data;
       version = null;
     }
@@ -705,7 +716,7 @@
             /Windows XP/.test(os) && version > 8 ||
             version == 8 && !/Trident/.test(ua)
           ))
-        ) && !reOpera.test(data = parse.call(forOwn, ua.replace(reOpera, '') + ';')) && data.name) {
+        ) && !reOpera.test((data = parse.call(forOwn, ua.replace(reOpera, '') + ';'))) && data.name) {
 
       // when "indentifying", the UA contains both Opera and the other browser's name
       data = 'ing as ' + data.name + ((data = data.version) ? ' ' + data : '');
@@ -793,7 +804,7 @@
       }
     }
     // strip incorrect OS versions
-    if (version && version.indexOf(data = /[\d.]+$/.exec(os)) == 0 &&
+    if (version && version.indexOf((data = /[\d.]+$/.exec(os))) == 0 &&
         ua.indexOf('/' + data + '-') > -1) {
       os = trim(os.replace(data, ''));
     }
