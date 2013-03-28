@@ -62,14 +62,6 @@
   QUnit.module('Benchmark');
 
   (function() {
-    test('has the default `Benchmark.platform` value', function() {
-      if (window.navigator) {
-        equal(String(Benchmark.platform), navigator.userAgent);
-      } else {
-        skipTest(1);
-      }
-    });
-
     test('supports loading Benchmark.js as a module', function() {
       if (window.define && define.amd) {
         equal((Benchmark2 || {}).version, Benchmark.version);
