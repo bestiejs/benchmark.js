@@ -1154,20 +1154,6 @@
       .run();
     });
 
-    asyncTest('should run recursively', function() {
-      Benchmark({
-        'defer': true,
-        'setup': 'var x = [3, 2, 1];',
-        'fn': 'for (var i = 0; i < 100; i++) x[ i % 2 ? "sort" : "reverse" ](); deferred.resolve();',
-        'teardown': 'x.length = 0;',
-        'onComplete': function() {
-          ok(true);
-          QUnit.start();
-        }
-      })
-      .run();
-    });
-
     asyncTest('should execute "setup", "fn", and "teardown" in correct order', function() {
       var fired = [];
 

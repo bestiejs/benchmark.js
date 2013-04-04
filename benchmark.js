@@ -738,13 +738,7 @@
         cycle(deferred);
       }
       else if (++deferred.cycles < clone.count) {
-        // continue the test loop
-        if (support.timeout) {
-          // use setTimeout to avoid a call stack overflow if called recursively
-          setTimeout(function() { clone.compiled.call(deferred, context, timer); }, 0);
-        } else {
-          clone.compiled.call(deferred, context, timer);
-        }
+        clone.compiled.call(deferred, context, timer);
       }
       else {
         timer.stop(deferred);
