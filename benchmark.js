@@ -142,6 +142,7 @@
         max = Math.max,
         min = Math.min,
         pow = Math.pow,
+        push = arrayRef.push,
         setTimeout = context.setTimeout,
         shift = arrayRef.shift,
         slice = arrayRef.slice,
@@ -2360,6 +2361,11 @@
       'support': support
     });
 
+    // Add Lo-Dash methods to Benchmark
+    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
+      Benchmark[methodName] = _[methodName];
+    });
+
     /*------------------------------------------------------------------------*/
 
     _.extend(Benchmark.prototype, {
@@ -2781,11 +2787,12 @@
       'off': off,
       'on': on,
       'pop': arrayRef.pop,
-      'push': arrayRef.push,
+      'push': push,
       'reset': resetSuite,
       'run': runSuite,
       'reverse': arrayRef.reverse,
       'shift': shift,
+      'slice': arrayRef.slice,
       'sort': arrayRef.sort,
       'splice': arrayRef.splice,
       'unshift': arrayRef.unshift
@@ -2801,6 +2808,16 @@
     });
 
     /*------------------------------------------------------------------------*/
+
+    // add Lo-Dash methods as Suite methods
+    _.each(['each', 'forEach', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
+      var func = _[methodName];
+      Suite.prototype[methodName] = function() {
+        var args = [this];
+        push.apply(args, arguments);
+        return func.apply(_, args);
+      };
+    });
 
     // avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9

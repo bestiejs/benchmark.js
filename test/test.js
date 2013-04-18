@@ -995,7 +995,7 @@
     asyncTest('should filter by fastest', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(_.pluck(this.filter('fastest'), 'name'), ['a']);
+        deepEqual(this.filter('fastest').pluck('name'), ['a']);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -1004,7 +1004,7 @@
     asyncTest('should filter by slowest', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(_.pluck(this.filter('slowest'), 'name'), ['b']);
+        deepEqual(this.filter('slowest').pluck('name'), ['b']);
         QUnit.start();
       })
       .run({ 'async': true });
@@ -1013,7 +1013,7 @@
     asyncTest('should filter by successful', function() {
       suite.on('complete', function() {
         suite.off();
-        deepEqual(_.pluck(this.filter('successful'), 'name'), ['a', 'b']);
+        deepEqual(this.filter('successful').pluck('name'), ['a', 'b']);
         QUnit.start();
       })
       .run({ 'async': true });
