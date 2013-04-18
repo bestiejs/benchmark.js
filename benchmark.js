@@ -1564,13 +1564,8 @@
     function clock() {
       var applet,
           options = Benchmark.options,
+          templateData = {},
           timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }];
-
-      var templateData = {
-        'begin': interpolate('s#=new n#'),
-        'end': interpolate('r#=(new n#-s#)/1e3'),
-        'uid': uid
-      };
 
       // lazy define for hi-res timers
       clock = function(clone) {
@@ -1624,6 +1619,12 @@
               'end': interpolate('r#=(n#()-s#)/1e6')
             });
           }
+        }
+        else {
+          _.extend(templateData, {
+            'begin': interpolate('s#=new n#'),
+            'end': interpolate('r#=(new n#-s#)/1e3')
+          });
         }
 
         var count = bench.count = clone.count,
@@ -1810,8 +1811,7 @@
        */
       function interpolate(string) {
         // replaces all occurrences of `#` with a unique number and template tokens with content
-        var data = templateData || { 'uid': uid };
-        return _.template(string.replace(/\#/g, /\d+/.exec(data.uid)), data);
+        return _.template(string.replace(/\#/g, /\d+/.exec(templateData.uid)), templateData);
       }
 
       /*----------------------------------------------------------------------*/
