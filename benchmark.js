@@ -30,6 +30,9 @@
   /** Used to assign each benchmark an incrimented id */
   var counter = 0;
 
+  /** Used to make every compiled test unique */
+  var uidCounter = 0;
+
   /** Used to detect primitive types */
   var rePrimitive = /^(?:boolean|number|string|undefined)$/;
 
@@ -1571,11 +1574,12 @@
       // lazy define for hi-res timers
       clock = function(clone) {
         var deferred;
+        templateData.uid = uid + uidCounter++;
+
         if (clone instanceof Deferred) {
           deferred = clone;
           clone = deferred.benchmark;
         }
-
         var bench = clone._original,
             fn = bench.fn,
             fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '',
@@ -1587,6 +1591,39 @@
           'fnArg': fnArg,
           'teardown': getSource(bench.teardown, interpolate('m#.teardown()'))
         });
+
+        // use API of chosen timer
+        if (timer.unit == 'ns') {
+          if (timer.ns.nanoTime) {
+            _.extend(templateData, {
+              'begin': interpolate('s#=n#.nanoTime()'),
+              'end': interpolate('r#=(n#.nanoTime()-s#)/1e9')
+            });
+          } else {
+            _.extend(templateData, {
+              'begin': interpolate('s#=n#()'),
+              'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
+            });
+          }
+        }
+        else if (timer.unit == 'us') {
+          if (timer.ns.stop) {
+            _.extend(templateData, {
+              'begin': interpolate('s#=n#.start()'),
+              'end': interpolate('r#=n#.microseconds()/1e6')
+            });
+          } else if (perfName) {
+            _.extend(templateData, {
+              'begin': interpolate('s#=n#.' + perfName + '()'),
+              'end': interpolate('r#=(n#.' + perfName + '()-s#)/1e3')
+            });
+          } else {
+            _.extend(templateData, {
+              'begin': interpolate('s#=n#()'),
+              'end': interpolate('r#=(n#()-s#)/1e6')
+            });
+          }
+        }
 
         var count = bench.count = clone.count,
             decompilable = support.decompilation || stringable,
@@ -1609,6 +1646,16 @@
             ns = timer.ns = new applet.Packages.nano;
           }
         }
+        // define `timer` methods
+        timer.start = createFunction(
+          interpolate('o#'),
+          interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
+        );
+
+        timer.stop = createFunction(
+          interpolate('o#'),
+          interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
+        );
 
         // Compile in setup/teardown functions and the test loop.
         // Create a new compiled test, instead of using the cached `bench.compiled`,
@@ -1643,7 +1690,7 @@
             // pretest to determine if compiled code is exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             bench.count = 1;
-            compiled = (compiled.call(bench, context, timer) || {}).uid == uid && compiled;
+            compiled = (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
             bench.count = count;
           }
         } catch(e) {
@@ -1762,7 +1809,8 @@
        */
       function interpolate(string) {
         // replaces all occurrences of `#` with a unique number and template tokens with content
-        return _.template(string.replace(/\#/g, /\d+/.exec(uid)), templateData || {});
+        var data = templateData || { 'uid': uid };
+        return _.template(string.replace(/\#/g, /\d+/.exec(data.uid)), data);
       }
 
       /*----------------------------------------------------------------------*/
@@ -1816,50 +1864,6 @@
       if (timer.res == Infinity) {
         throw new Error('Benchmark.js was unable to find a working timer.');
       }
-      // use API of chosen timer
-      if (timer.unit == 'ns') {
-        if (timer.ns.nanoTime) {
-          _.extend(templateData, {
-            'begin': interpolate('s#=n#.nanoTime()'),
-            'end': interpolate('r#=(n#.nanoTime()-s#)/1e9')
-          });
-        } else {
-          _.extend(templateData, {
-            'begin': interpolate('s#=n#()'),
-            'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
-          });
-        }
-      }
-      else if (timer.unit == 'us') {
-        if (timer.ns.stop) {
-          _.extend(templateData, {
-            'begin': interpolate('s#=n#.start()'),
-            'end': interpolate('r#=n#.microseconds()/1e6')
-          });
-        } else if (perfName) {
-          _.extend(templateData, {
-            'begin': interpolate('s#=n#.' + perfName + '()'),
-            'end': interpolate('r#=(n#.' + perfName + '()-s#)/1e3')
-          });
-        } else {
-          _.extend(templateData, {
-            'begin': interpolate('s#=n#()'),
-            'end': interpolate('r#=(n#()-s#)/1e6')
-          });
-        }
-      }
-
-      // define `timer` methods
-      timer.start = createFunction(
-        interpolate('o#'),
-        interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
-      );
-
-      timer.stop = createFunction(
-        interpolate('o#'),
-        interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
-      );
-
       // resolve time span required to achieve a percent uncertainty of at most 1%
       // http://spiff.rit.edu/classes/phys273/uncert/uncert.html
       options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
