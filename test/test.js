@@ -1181,6 +1181,79 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Comparing benchmarks');
+
+  (function() {
+    test('comparing a benchmark to itself should return 0', function() {
+      var bench = Benchmark();
+      equal(bench.compare(bench), 0);
+    });
+
+    test('benchmark with better hz value should be considered faster', function() {
+      var data = {
+        hz: 1000,
+        count: 5000,
+        stats: {
+          deviation: 0, // ideal samples
+          mean: 5,
+          moe: 0,       //   "      "
+          rme: 0,       //   "      "
+          sem: 0,       //   "      "
+          variance: 0,  //   "      "
+          sample: [
+            5, 5, 5, 5, 5
+          ]
+        }
+      };
+      var bench = Benchmark(data);
+
+      data.hz = 2000;
+      data.stats.sample = [10, 10, 10, 10, 10];
+
+      var other = Benchmark(data);
+
+      equal(bench.compare(other), 1);
+      equal(other.compare(bench), -1);
+    });
+
+    test('benchmark with better hz value should be considered faster, even when total sample size > 30', function() {
+      var data = {
+        hz: 1000,
+        count: 5000,
+        stats: {
+          deviation: 0, // ideal samples
+          mean: 5,
+          moe: 0,       //   "      "
+          rme: 0,       //   "      "
+          sem: 0,       //   "      "
+          variance: 0,  //   "      "
+          sample: [
+            5, 5, 5, 5, 5,
+            5, 5, 5, 5, 5,
+            5, 5, 5, 5, 5,
+            5
+          ]
+        }
+      };
+      var bench = Benchmark(data);
+
+      data.hz = 2000;
+      data.stats.sample = [
+        10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10,
+        10, 10, 10, 10, 10,
+        10
+      ];
+
+      var other = Benchmark(data);
+
+      equal(bench.compare(other), 1);
+      equal(other.compare(bench), -1);
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
   // configure QUnit and call `QUnit.start()` for
   // Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
   if (!window.document || window.phantom) {
