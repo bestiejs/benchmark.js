@@ -31,6 +31,22 @@
     Benchmark.runInContext(window)
   ));
 
+  /** Used to create dummy benchmarks for comparisons */
+  var benchData = {
+    'hz': 1000,
+    'count': 10,
+    'cycles': 1,
+    'stats': {
+      'deviation': 0,
+      'mean': 1,
+      'moe': 0,
+      'rme': 0,
+      'sample': [1, 1, 1, 1, 1],
+      'sem': 0,
+      'variance': 0
+    }
+  };
+
   /** Shortcut used to convert array-like objects to arrays */
   var slice = Array.prototype.slice;
 
@@ -254,6 +270,50 @@
         deepEqual(actual, ['b', 'c', '']);
       });
     });
+
+    test('should correctly detect the fastest/slowest benchmark for small sample sizes', function() {
+      var data = _.cloneDeep(benchData),
+          bench = Benchmark(data);
+
+      _.merge(data, {
+        'hz': 500,
+        'stats': {
+          'mean': 2,
+          'sample': [2, 2, 2, 2, 2]
+        }
+      });
+
+      var other = Benchmark(data);
+
+      var actual = Benchmark.filter([bench, other], 'fastest');
+      deepEqual(actual, [bench], 'correctly detects the fastest');
+
+      actual = Benchmark.filter([bench, other], 'slowest');
+      deepEqual(actual, [other], 'correctly detects the slowest');
+    });
+
+    test('should correctly detect the fastest/slowest benchmark for large sample sizes', function() {
+      var data = _.cloneDeep(benchData);
+
+      data.stats.sample = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      var bench = Benchmark(data);
+
+      _.merge(data, {
+        'hz': 500,
+        'stats': {
+          'mean': 2,
+          'sample': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        }
+      });
+
+      var other = Benchmark(data);
+
+      var actual = Benchmark.filter([bench, other], 'fastest');
+      deepEqual(actual, [bench], 'correctly detects the fastest');
+
+      actual = Benchmark.filter([bench, other], 'slowest');
+      deepEqual(actual, [other], 'correctly detects the slowest');
+    });
   }());
 
   /*--------------------------------------------------------------------------*/
@@ -379,6 +439,54 @@
       var clone = bench.clone({ 'fn': '', 'name': 'foo' });
       ok(clone.fn === '' && clone.options.fn === '');
       ok(clone.name == 'foo' && clone.options.name == 'foo');
+    });
+  }());
+
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark#compare');
+
+  (function() {
+    test('should return `0` when compared to itself', function() {
+      var bench = Benchmark(benchData);
+      strictEqual(bench.compare(bench), 0);
+    });
+
+    test('should correctly detect the faster benchmark for small sample sizes', function() {
+      var data = _.cloneDeep(benchData),
+          bench = Benchmark(data);
+
+      _.merge(data, {
+        'hz': 500,
+        'stats': {
+          'mean': 2,
+          'sample': [2, 2, 2, 2, 2]
+        }
+      });
+
+      var other = Benchmark(data);
+      strictEqual(bench.compare(other), 1);
+      strictEqual(other.compare(bench), -1);
+    });
+
+    test('should correctly detect the faster benchmark for large sample sizes', function() {
+      var data = _.cloneDeep(benchData);
+
+      data.stats.sample = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+      var bench = Benchmark(data);
+
+      _.merge(data, {
+        'hz': 500,
+        'stats': {
+          'mean': 2,
+          'sample': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+        }
+      });
+
+      var other = Benchmark(data);
+      strictEqual(bench.compare(other), 1);
+      strictEqual(other.compare(bench), -1);
     });
   }());
 
