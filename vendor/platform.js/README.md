@@ -18,7 +18,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/best
 
 ## Support
 
-Platform.js has been tested in at least Chrome 5~26, Firefox 1~19, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.4, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
+Platform.js has been tested in at least Chrome 5~26, Firefox 2~20, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.5, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
 
 ## Installation and usage
 
@@ -89,10 +89,12 @@ info.description; // 'Opera 11.52 (identifying as Firefox 4.0) on Mac OS X 10.7.
 
 ## Author
 
-* [John-David Dalton](http://allyoucanleet.com/)
-  [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](https://twitter.com/jdalton "Follow @jdalton on Twitter")
+| [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](http://twitter.com/jdalton "Follow @jdalton on Twitter") |
+|---|
+| [John-David Dalton](http://allyoucanleet.com/) |
 
 ## Contributors
 
-* [Mathias Bynens](http://mathiasbynens.be/)
-  [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter")
+| [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](http://twitter.com/mathias "Follow @mathias on Twitter") |
+|---|
+| [Mathias Bynens](http://mathiasbynens.be/) |

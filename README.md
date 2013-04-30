@@ -15,7 +15,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/best
 
 ## Support
 
-Benchmark.js has been tested in at least Chrome 5~26, Firefox 1~19, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.4, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
+Benchmark.js has been tested in at least Chrome 5~26, Firefox 2~20, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.5, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
 
 ## Installation and usage
 
@@ -117,12 +117,12 @@ Benchmark.js is part of the BestieJS *"Best in Class"* module collection. This m
 
 ## Authors
 
-* [Mathias Bynens](http://mathiasbynens.be/)
-  [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](https://twitter.com/mathias "Follow @mathias on Twitter")
-* [John-David Dalton](http://allyoucanleet.com/)
-  [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](https://twitter.com/jdalton "Follow @jdalton on Twitter")
+| [![twitter/mathias](http://gravatar.com/avatar/24e08a9ea84deb17ae121074d0f17125?s=70)](http://twitter.com/mathias "Follow @mathias on Twitter") | [![twitter/jdalton](http://gravatar.com/avatar/299a3d891ff1920b69c364d061007043?s=70)](http://twitter.com/jdalton "Follow @jdalton on Twitter") |
+|---|---|
+| [Mathias Bynens](http://mathiasbynens.be/) | [John-David Dalton](http://allyoucanleet.com/) |
 
 ## Contributors
 
-* [Kit Cambridge](http://kitcambridge.github.com/)
-  [![twitter/kitcambridge](http://gravatar.com/avatar/6662a1d02f351b5ef2f8b4d815804661?s=70)](https://twitter.com/kitcambridge "Follow @kitcambridge on Twitter")
+| [![twitter/kitcambridge](http://gravatar.com/avatar/6662a1d02f351b5ef2f8b4d815804661?s=70)](https://twitter.com/kitcambridge "Follow @kitcambridge on Twitter") |
+|---|
+| [Kit Cambridge](http://kitcambridge.github.io/) |
