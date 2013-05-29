@@ -2,3 +2,6 @@
 node_modules
 tests/benchmark.air/src/*.js
 tests/benchmark.air/bin-debug
+coverage/index.html
+coverage/*.json
+coverage/benchmark.js/vendor

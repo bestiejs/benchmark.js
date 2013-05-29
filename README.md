@@ -111,6 +111,14 @@ suite.add('RegExp#test', function() {
 // > Fastest is String#indexOf
 ```
 
+## Unit tests & code coverage
+
+After cloning this repository, run `npm install` to install the dependencies needed for Benchmark.js development and testing. You may want to install Istanbul _globally_ using `npm install istanbul -g`.
+
+Once that’s done, you can run the unit tests in Node using `npm test` or `node tests/tests.js`. To run the tests in Rhino, Ringo, Narwhal, PhantomJS, and web browsers as well, use `grunt test`.
+
+To generate [the code coverage report](http://rawgithub.com/bestiejs/benchmark.js/master/coverage/benchmark.js/benchmark.js.html), use `grunt cover`.
+
 ## BestieJS
 
 Benchmark.js is part of the BestieJS *"Best in Class"* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, and plenty of documentation.

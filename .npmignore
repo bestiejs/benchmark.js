@@ -1,8 +1,8 @@
 .*
 nano.*
+coverage
 doc
 example
-node_modules
 plugin
 test
 vendor

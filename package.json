@@ -52,5 +52,10 @@
   "dependencies": {
     "lodash": "~1.1.0",
     "platform": "~1.0.0"
+  },
+  "devDependencies": {
+    "istanbul": "~0.1.35",
+    "grunt": "~0.4.1",
+    "grunt-shell": "~0.2.2"
   }
 }
