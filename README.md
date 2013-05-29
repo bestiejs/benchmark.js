@@ -115,7 +115,7 @@ suite.add('RegExp#test', function() {
 
 After cloning this repository, run `npm install` to install the dependencies needed for Benchmark.js development and testing. You may want to install Istanbul _globally_ using `npm install istanbul -g`.
 
-Once that’s done, you can run the unit tests in Node using `npm test` or `node tests/tests.js`. To run the tests in Rhino, Ringo, Narwhal, PhantomJS, and web browsers as well, use `grunt test`.
+Once that’s done, you can run the unit tests in Node using `npm test` or `node test/test.js`. To run the tests in Rhino, Ringo, Narwhal, PhantomJS, and web browsers as well, use `grunt test`.
 
 To generate [the code coverage report](http://rawgithub.com/bestiejs/benchmark.js/master/coverage/benchmark.js/benchmark.js.html), use `grunt cover`.
 

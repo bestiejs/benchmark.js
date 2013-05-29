@@ -1,15 +1,6 @@
 module.exports = function(grunt) {
 
-  var commandOptions = {
-    'stdout': true,
-    'stderr': true,
-    'failOnError': true
-  };
-
   grunt.initConfig({
-    'meta': {
-      'testFile': 'test/test.js'
-    },
     'shell': {
       'options': {
         'stdout': true,
@@ -17,7 +8,7 @@ module.exports = function(grunt) {
         'failOnError': true
       },
       'cover': {
-        'command': 'istanbul cover --report "html" --verbose --dir "coverage" "<%= meta.testFile %>"'
+        'command': 'istanbul cover --report "html" --verbose --dir "coverage" "test/test.js"'
       },
       'test-rhino': {
         'command': 'echo "Testing in Rhino..."; rhino -opt -1 "test.js"',
@@ -36,16 +27,16 @@ module.exports = function(grunt) {
         }
       },
       'test-ringo': {
-        'command': 'echo "Testing in Ringo..."; ringo -o -1 "<%= meta.testFile %>"'
+        'command': 'echo "Testing in Ringo..."; ringo -o -1 "test/test.js"'
       },
       'test-phantomjs': {
-        'command': 'echo "Testing in PhantomJS..."; phantomjs "<%= meta.testFile %>"'
+        'command': 'echo "Testing in PhantomJS..."; phantomjs "test/test.js"'
       },
       'test-narwhal': {
-        'command': 'echo "Testing in Narwhal..."; export NARWHAL_OPTIMIZATION=-1; narwhal "<%= meta.testFile %>"'
+        'command': 'echo "Testing in Narwhal..."; export NARWHAL_OPTIMIZATION=-1; narwhal "test/test.js"'
       },
       'test-node': {
-        'command': 'echo "Testing in Node..."; node "<%= meta.testFile %>"'
+        'command': 'echo "Testing in Node..."; node "test/test.js"'
       },
       'test-browser': {
         'command': 'echo "Testing in a browser..."; open "test/index.html"'
