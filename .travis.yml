@@ -1,8 +1,10 @@
 language: node_js
 node_js:
   - 0.6
-  - 0.8
+  - 0.9
+  - 0.10
 env:
+  - TEST_COMMAND="istanbul cover ./test/test.js"
   - TEST_COMMAND="phantomjs ./test/test.js"
   - TEST_COMMAND="node ./test/test.js"
 git:
@@ -10,5 +12,7 @@ git:
 branches:
   only:
     - master
+before_script:
+  - "npm install -g istanbul"
 script:
   $TEST_COMMAND

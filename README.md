@@ -15,7 +15,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/best
 
 ## Support
 
-Benchmark.js has been tested in at least Chrome 5~26, Firefox 2~20, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.5, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
+Benchmark.js has been tested in at least Chrome 5~27, Firefox 2~21, IE 6-10, Opera 9.25-12, Safari 3-6, Node.js 0.4.8-0.10.7, Narwhal 0.3.2, PhantomJS 1.9.0, RingoJS 0.9, and Rhino 1.7RC5.
 
 ## Installation and usage
 
@@ -110,14 +110,6 @@ suite.add('RegExp#test', function() {
 // > String#indexOf x 6,139,623 +-1.00% (131 cycles)
 // > Fastest is String#indexOf
 ```
-
-## Unit tests & code coverage
-
-After cloning this repository, run `npm install` to install the dependencies needed for Benchmark.js development and testing. You may want to install Istanbul _globally_ using `npm install istanbul -g`.
-
-Once that’s done, you can run the unit tests in Node using `npm test` or `node test/test.js`. To run the tests in Rhino, Ringo, Narwhal, PhantomJS, and web browsers as well, use `grunt test`.
-
-To generate [the code coverage report](http://rawgithub.com/bestiejs/benchmark.js/master/coverage/benchmark.js/benchmark.js.html), use `grunt cover`.
 
 ## BestieJS
 
