@@ -3,5 +3,5 @@ nano.*
 doc
 example
 plugin
-test
+test/
 vendor
