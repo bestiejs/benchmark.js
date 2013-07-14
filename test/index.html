@@ -18,7 +18,6 @@
 		<script src="../benchmark.js"></script>
 		<script src="../vendor/platform.js/platform.js"></script>
 		<script>
-			// populate `QUnit.urlParams`
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
 			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
@@ -38,44 +37,45 @@
 				}
 			}());
 
-			// load require.js
-			if (!QUnit.urlParams.norequire) {
-				document.write('<script src="../vendor/requirejs/require.js"><\/script>');
-			}
+			// load test.js if not using require.js
+			document.write(QUnit.urlParams.norequire
+				? '<script src="test.js"><\/script>'
+				: '<script src="../vendor/requirejs/require.js"><\/script>'
+			);
 		</script>
 		<script>
-			// load Benchmark as a module
 			var Benchmark2;
 
-			window.require && require({
-				'baseUrl': '../vendor/requirejs/',
-				'urlArgs': 't=' + (+new Date),
-				'paths': {
-					'benchmark': '../../benchmark',
-					'lodash': '../lodash/lodash',
-					'platform': '../platform.js/platform'
-				}
-			},
-			['benchmark'], function(Benchmark) {
-				Benchmark2 = Benchmark;
-			});
+			if (window.require) {
+				QUnit.config.autostart = false;
+
+				// load Benchmark.js as a module
+				require({
+					'baseUrl': '../vendor/requirejs/',
+					'urlArgs': 't=' + (+new Date),
+					'paths': {
+						'benchmark': '../../benchmark',
+						'lodash': '../lodash/lodash',
+						'platform': '../platform.js/platform'
+					}
+				},
+				['benchmark'], function(Benchmark) {
+					Benchmark2 = Benchmark;
+					require(['test.js'], function() {
+						QUnit.start();
+					});
+				});
+			}
 
 			window.onload = function() {
 				var timeoutId = setInterval(function() {
 					var ua = document.getElementById('qunit-userAgent');
 					if (ua && (Benchmark2 || !window.require)) {
-						var sibling = document.getElementsByTagName('script')[0],
-						    script = document.createElement('script');
-
 						// set a more readable browser name
 						ua.innerHTML = platform;
 						clearInterval(timeoutId);
-
-						// load test.js
-						script.src = 'test.js?t=' + (+new Date);
-						sibling.parentNode.insertBefore(script, sibling);
 					}
-				}, 15);
+				}, 16);
 			};
 		</script>
 	</body>
