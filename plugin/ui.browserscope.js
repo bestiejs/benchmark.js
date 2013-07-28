@@ -46,16 +46,32 @@
 
   /** Utility shortcuts */
   var each = Benchmark.each,
-      extend = Benchmark.extend,
+      extend = _.extend,
       filter = Benchmark.filter,
       forOwn = Benchmark.forOwn,
       formatNumber = Benchmark.formatNumber,
-      hasKey = Benchmark.hasKey,
+      hasKey = _.has,
       indexOf = Benchmark.indexOf,
-      interpolate = Benchmark.interpolate,
       invoke = Benchmark.invoke,
       map = Benchmark.map,
       reduce = Benchmark.reduce;
+
+  /**
+   * Modify a string by replacing named tokens with matching object property values.
+   *
+   * @static
+   * @memberOf Benchmark
+   * @param {String} string The string to modify.
+   * @param {Object} object The template object.
+   * @returns {String} The modified string.
+   */
+  function interpolate(string, object) {
+    _.forOwn(object, function(value, key) {
+      // escape regexp special characters in `key`
+      string = string.replace(RegExp('#\\{' + key.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1') + '\\}', 'g'), value);
+    });
+    return string;
+  }
 
   /*--------------------------------------------------------------------------*/
 
