@@ -704,20 +704,20 @@
      * A helper function for setting options/event handlers.
      *
      * @private
-     * @param {Object} bench The benchmark instance.
+     * @param {Object} object The benchmark or suite instance.
      * @param {Object} [options={}] Options object.
      */
-    function setOptions(bench, options) {
-      options = _.extend({}, bench.constructor.options, options);
-      bench.options = _.forOwn(options, function(value, key) {
+    function setOptions(object, options) {
+      options = _.extend({}, object.constructor.options, options);
+      object.options = _.forOwn(options, function(value, key) {
         if (value != null) {
           // add event listeners
           if (/^on[A-Z]/.test(key)) {
             _.each(key.split(' '), function(key) {
-              bench.on(key.slice(2).toLowerCase(), value);
+              object.on(key.slice(2).toLowerCase(), value);
             });
-          } else if (!_.has(bench, key)) {
-            bench[key] = cloneDeep(value);
+          } else if (!_.has(object, key)) {
+            object[key] = cloneDeep(value);
           }
         }
       });
