@@ -118,7 +118,7 @@
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
-    // See http://es5.github.com/#x11.1.5.
+    // See http://es5.github.io/#x11.1.5.
     context = context ? _.defaults(window.Object(), context, _.pick(window, contextProps)) : window;
 
     /** Native constructor references */
@@ -131,8 +131,8 @@
         String = context.String;
 
     /** Used for `Array` and `Object` method references */
-    var arrayRef = Array(),
-        objectRef = Object();
+    var arrayRef = [],
+        objectProto = Object.prototype;
 
     /** Native method shortcuts */
     var abs = Math.abs,
@@ -147,7 +147,7 @@
         shift = arrayRef.shift,
         slice = arrayRef.slice,
         sqrt = Math.sqrt,
-        toString = objectRef.toString;
+        toString = objectProto.toString;
 
     /** Detect DOM document object */
     var doc = isHostType(context, 'document') && context.document;
