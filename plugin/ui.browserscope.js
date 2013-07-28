@@ -187,7 +187,7 @@
    */
   function setHTML(element, html, object) {
     if ((element = query(element)[0])) {
-      element.innerHTML = _.template(html, object);
+      element.innerHTML = _.template(html, object || {});
     }
     return element;
   }
