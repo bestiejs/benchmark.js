@@ -56,23 +56,6 @@
       map = Benchmark.map,
       reduce = Benchmark.reduce;
 
-  /**
-   * Modify a string by replacing named tokens with matching object property values.
-   *
-   * @static
-   * @memberOf Benchmark
-   * @param {String} string The string to modify.
-   * @param {Object} object The template object.
-   * @returns {String} The modified string.
-   */
-  function interpolate(string, object) {
-    _.forOwn(object, function(value, key) {
-      // escape regexp special characters in `key`
-      string = string.replace(RegExp('#\\{' + key.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1') + '\\}', 'g'), value);
-    });
-    return string;
-  }
-
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -204,7 +187,7 @@
    */
   function setHTML(element, html, object) {
     if ((element = query(element)[0])) {
-      element.innerHTML = interpolate(html, object);
+      element.innerHTML = _.template(html, object);
     }
     return element;
   }
@@ -656,15 +639,15 @@
       // Note: We originally created an iframe to avoid Browerscope's old limit
       // of one beacon per page load. It's currently used to implement custom
       // request timeout and retry routines.
-      idoc.write(interpolate(
+      idoc.write(_.template(
         // the doctype is required so Browserscope detects the correct IE compat mode
-        '#{doctype}<title></title><body><script>' +
+        '${doctype}<title></title><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
-        '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},#{refresh}*1e3)},' +
-        '_bT=setTimeout(function(){_bC=function(){};render()},#{timeout}*1e3)' +
+        '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},${refresh}*1e3)},' +
+        '_bT=setTimeout(function(){_bC=function(){};render()},${timeout}*1e3)' +
         '}<\/script>' +
-        '<script src=//www.browserscope.org/user/beacon/#{key}?callback=_bC><\/script>',
+        '<script src=//www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>',
         {
           'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
           'key': key,
@@ -1037,7 +1020,7 @@
     // create results html
     if (placeholder) {
       setHTML(placeholder,
-        '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/#{key}>' +
+        '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/${key}>' +
         '<span>Browserscope</span></a></h1>' +
         '<div class=bs-rt><div id=bs-chart></div></div>',
         { 'key': key });
