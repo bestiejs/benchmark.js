@@ -1661,25 +1661,25 @@
         // Compile in setup/teardown functions and the test loop.
         // Create a new compiled test, instead of using the cached `bench.compiled`,
         // to avoid potential engine optimizations enabled over the life of the test.
-        var compiled = bench.compiled = createCompiled(
-          deferred
-            ? 'var d#=this,${fnArg}=d#,m#=d#.benchmark._original,f#=m#.fn,su#=m#.setup,td#=m#.teardown;' +
-              // when `deferred.cycles` is `0` then...
-              'if(!d#.cycles){' +
-              // set `deferred.fn`
-              'd#.fn=function(){var ${fnArg}=d#;if(typeof f#=="function"){try{${fn}\n}catch(e#){f#(d#)}}else{${fn}\n}};' +
-              // set `deferred.teardown`
-              'd#.teardown=function(){d#.cycles=0;if(typeof td#=="function"){try{${teardown}\n}catch(e#){td#()}}else{${teardown}\n}};' +
-              // execute the benchmark's `setup`
-              'if(typeof su#=="function"){try{${setup}\n}catch(e#){su#()}}else{${setup}\n};' +
-              // start timer
-              't#.start(d#);' +
-              // execute `deferred.fn` and return a dummy object
-              '}d#.fn();return{uid:"${uid}"}'
+        var funcBody = deferred
+          ? 'var d#=this,${fnArg}=d#,m#=d#.benchmark._original,f#=m#.fn,su#=m#.setup,td#=m#.teardown;' +
+            // when `deferred.cycles` is `0` then...
+            'if(!d#.cycles){' +
+            // set `deferred.fn`
+            'd#.fn=function(){var ${fnArg}=d#;if(typeof f#=="function"){try{${fn}\n}catch(e#){f#(d#)}}else{${fn}\n}};' +
+            // set `deferred.teardown`
+            'd#.teardown=function(){d#.cycles=0;if(typeof td#=="function"){try{${teardown}\n}catch(e#){td#()}}else{${teardown}\n}};' +
+            // execute the benchmark's `setup`
+            'if(typeof su#=="function"){try{${setup}\n}catch(e#){su#()}}else{${setup}\n};' +
+            // start timer
+            't#.start(d#);' +
+            // execute `deferred.fn` and return a dummy object
+            '}d#.fn();return{uid:"${uid}"}'
 
-            : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count,n#=t#.ns;${setup}\n${begin};' +
-              'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}'
-        );
+          : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count,n#=t#.ns;${setup}\n${begin};' +
+            'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}';
+
+        var compiled = bench.compiled = clone.compiled = createCompiled(funcBody);
 
         try {
           if (isEmpty) {
@@ -1701,38 +1701,34 @@
         }
         // fallback when a test exits early or errors during pretest
         if (decompilable && !compiled && !deferred && !isEmpty) {
-          compiled = createCompiled(
-            (clone.error && !stringable
+          funcBody = (
+            clone.error && !stringable
               ? 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count'
               : 'function f#(){${fn}\n}var r#,s#,m#=this,i#=m#.count'
             ) +
             ',n#=t#.ns;${setup}\n${begin};m#.f#=f#;while(i#--){m#.f#()}${end};' +
-            'delete m#.f#;${teardown}\nreturn{elapsed:r#}'
-          );
+            'delete m#.f#;${teardown}\nreturn{elapsed:r#}';
+
+          compiled = createCompiled(funcBody);
 
           try {
             // pretest one more time to check for errors
             bench.count = 1;
             compiled.call(bench, context, timer);
-            bench.compiled = compiled;
             bench.count = count;
             delete clone.error;
           }
           catch(e) {
             bench.count = count;
-            if (clone.error) {
-              compiled = null;
-            } else {
-              bench.compiled = compiled;
+            if (!clone.error) {
               clone.error = e || new Error(String(e));
             }
           }
         }
-        // assign `compiled` to `clone` before calling in case a deferred benchmark
-        // immediately calls `deferred.resolve()`
-        clone.compiled = compiled;
+
         // if no errors run the full test loop
         if (!clone.error) {
+          compiled = bench.compiled = clone.compiled = createCompiled(funcBody);
           result = compiled.call(deferred || bench, context, timer).elapsed;
         }
         return result;
