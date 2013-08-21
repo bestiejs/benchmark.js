@@ -289,7 +289,6 @@
     // remove injected scripts and old iframes when benchmarks aren't running
     if (timers.cleanup && !ui.running) {
       // if expired, destroy the element to prevent pseudo memory leaks.
-      // http://dl.dropbox.com/u/513327/removechild_ie_leak.html
       each(query('iframe,script'), function(element) {
         var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + max(delay, timings.timeout * 1e3);
         if (new Date > expire || /browserscope\.org|google\.com/.test(element.src)) {
@@ -589,6 +588,7 @@
     // exit early if there is no container element or the response is cached
     // and retry if the visualization library hasn't loaded yet
     if (!cont || !visualization || !visualization.Query || response) {
+      setMessage('');
       cont && onComplete(response);
     }
     else if (!ui.running) {
@@ -876,6 +876,14 @@
   ui.browserscope = {
 
     /**
+     * A flag to indicate if charts are enabled or disabled.
+     *
+     * @memberOf ui.browserscope
+     * @type Boolean
+     */
+    'chartable': true,
+
+    /**
      * Your Browserscope API key.
      *
      * @memberOf ui.browserscope
@@ -1032,17 +1040,21 @@
       // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
       loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
 
-      // the "autoload" string can be created with
-      // http://code.google.com/apis/loader/autoloader-wizard.html
-      loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
-        'modules:[{' +
-          'name:"visualization",' +
-          'version:1,' +
-          'packages:["corechart","table"],' +
-          'callback:ui.browserscope.load' +
-        '}]' +
-      '}'));
-
+      if (me.chartable) {
+        // (delay in an attempt to ensure this is executed after all other window load handlers)
+        setTimeout(function() {
+          // the "autoload" string can be created with
+          // http://code.google.com/apis/loader/autoloader-wizard.html
+          loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
+            'modules:[{' +
+              'name:"visualization",' +
+              'version:1,' +
+              'packages:["corechart","table"],' +
+              'callback:ui.browserscope.load' +
+            '}]' +
+          '}'));
+        }, 1);
+      }
       // init garbage collector
       cleanup();
     }

@@ -192,7 +192,8 @@
           filterBy = params.filterby;
 
       if (pageLoaded) {
-        // configure posting
+        // configure browserscope
+        ui.browserscope.chartable = !('nochart' in params);
         ui.browserscope.postable = has.runner && !('nopost' in params);
 
         // configure chart renderer
@@ -256,11 +257,8 @@
         } catch(e) { }
       }
       // evaluate hash values
-      // (delay in an attempt to ensure this is executed after all other window load handlers)
-      setTimeout(function() {
-        pageLoaded = true;
-        handlers.window.hashchange();
-      }, 1);
+      pageLoaded = true;
+      handlers.window.hashchange();
     }
   };
 
