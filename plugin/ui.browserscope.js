@@ -854,9 +854,10 @@
          new visualization[chart](cont).draw(data, {
           'colors': ui.browserscope.colors,
           'fontSize': fontSize,
+          'forceIFrame': true,
+          'height': height,
           'is3D': true,
           'legend': legend,
-          'height': height,
           'title': title,
           'width': width,
           'chartArea': { 'height': areaHeight, 'left': left, 'top': top, 'width': areaWidth },
