@@ -255,6 +255,9 @@
           }
         } catch(e) { }
       }
+      // clear length so tests can be manually queued
+      ui.length = 0;
+
       // evaluate hash values
       pageLoaded = true;
       handlers.window.hashchange();
