@@ -334,9 +334,13 @@
   function createChartIframe() {
     var placeholder = query(ui.browserscope.selector)[0];
     if (placeholder) {
+      var src = location.hostname == 'localhost'
+        ? '//jsperf.com/benchmark-js-test-page'
+        : location.origin + location.pathname.replace(/\/$/, '');
+
       setHTML(placeholder.parentNode,
         '<iframe id=${id} src=${src} style="width:100%;height:600px;"></iframe>',
-        { 'id': placeholder.id, 'src': location.origin + location.pathname.replace(/\/$/, '') + '/embed' });
+        { 'id': placeholder.id, 'src': src + '/embed' });
     }
   }
 
@@ -1049,8 +1053,9 @@
       me.placeholder = placeholder;
 
       if (me.chartable) {
-        trash.appendChild(query('footer')[0]);
         trash.appendChild(query('hgroup')[0]);
+        trash.appendChild(query('#results')[0]);
+        trash.appendChild(query('footer')[0]);
         trash.innerHTML = '';
 
         setHTML(placeholder,
