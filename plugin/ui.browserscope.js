@@ -327,6 +327,20 @@
   }
 
   /**
+   * Creates the iframe for embedded Browserscope charts.
+   *
+   * @private
+   */
+  function createChartIframe() {
+    var placeholder = query(ui.browserscope.selector)[0];
+    if (placeholder) {
+      setHTML(placeholder.parentNode,
+        '<iframe id=${id} src=${src} style="width:100%;height:600px;"></iframe>',
+        { 'id': placeholder.id, 'src': location.origin + location.pathname.replace(/\/$/, '') + '/embed' });
+    }
+  }
+
+  /**
    * Creates a Browserscope results object.
    *
    * @private
@@ -581,13 +595,16 @@
         }
       }
     }
-
     // set last action in case the load fails and a retry is needed
     setAction('load');
 
-    // exit early if there is no container element or the response is cached
-    // and retry if the visualization library hasn't loaded yet
-    if (!cont || !visualization || !visualization.Query || response) {
+    if (!me.chartable) {
+      // create a fresh chart iframe
+      createChartIframe();
+    }
+    else if (!cont || !visualization || !visualization.Query || response) {
+      // exit early if there is no container element or the response is cached
+      // and retry if the visualization library hasn't loaded yet
       setMessage('');
       cont && onComplete(response);
     }
@@ -881,7 +898,7 @@
      * @memberOf ui.browserscope
      * @type Boolean
      */
-    'chartable': true,
+    'chartable': /\/embed$/.test(location.pathname),
 
     /**
      * Your Browserscope API key.
@@ -1024,36 +1041,43 @@
   addListener(window, 'load', function() {
     var me = ui.browserscope,
         key = me.key,
-        placeholder = key && query(me.selector)[0];
+        placeholder = key && query(me.selector)[0],
+        trash = cache.trash;
 
     // create results html
     if (placeholder) {
-      setHTML(placeholder,
-        '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/${key}>' +
-        '<span>Browserscope</span></a></h1>' +
-        '<div class=bs-rt><div id=bs-chart></div></div>',
-        { 'key': key });
-
-      // the element the charts are inserted into
-      me.container = query('#bs-chart')[0];
-
-      // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
-      loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
+      me.placeholder = placeholder;
 
       if (me.chartable) {
-        // (delay in an attempt to ensure this is executed after all other window load handlers)
-        setTimeout(function() {
-          // the "autoload" string can be created with
-          // http://code.google.com/apis/loader/autoloader-wizard.html
-          loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
-            'modules:[{' +
-              'name:"visualization",' +
-              'version:1,' +
-              'packages:["corechart","table"],' +
-              'callback:ui.browserscope.load' +
-            '}]' +
-          '}'));
-        }, 1);
+        trash.appendChild(query('footer')[0]);
+        trash.appendChild(query('hgroup')[0]);
+        trash.innerHTML = '';
+
+        setHTML(placeholder,
+          '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/${key}>' +
+          '<span>Browserscope</span></a></h1>' +
+          '<div class=bs-rt><div id=bs-chart></div></div>',
+          { 'key': key });
+
+        // the element the charts are inserted into
+        me.container = query('#bs-chart')[0];
+
+        // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
+        loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
+
+        // the "autoload" string can be created with
+        // http://code.google.com/apis/loader/autoloader-wizard.html
+        loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
+          'modules:[{' +
+            'name:"visualization",' +
+            'version:1,' +
+            'packages:["corechart","table"],' +
+            'callback:ui.browserscope.load' +
+          '}]' +
+        '}'));
+      }
+      else {
+        createChartIframe();
       }
       // init garbage collector
       cleanup();
