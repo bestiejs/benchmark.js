@@ -27,9 +27,6 @@
     'prerelease': 'top-d-e'
   };
 
-  /** Used to resolve a value's internal [[Class]] */
-  var toString = {}.toString;
-
   /**
    * The `uaToken` is prepended to the value of the data cell of the Google
    * visualization data table object that matches the user's browser name. After
@@ -45,16 +42,7 @@
       min = Math.min;
 
   /** Utility shortcuts */
-  var each = Benchmark.each,
-      extend = _.extend,
-      filter = Benchmark.filter,
-      forOwn = Benchmark.forOwn,
-      formatNumber = Benchmark.formatNumber,
-      hasKey = _.has,
-      indexOf = Benchmark.indexOf,
-      invoke = Benchmark.invoke,
-      map = Benchmark.map,
-      reduce = Benchmark.reduce;
+  var formatNumber = Benchmark.formatNumber;
 
   /*--------------------------------------------------------------------------*/
 
@@ -165,8 +153,8 @@
       result = [selector];
     }
     else if (context) {
-      each(selector.split(','), function(selector) {
-        each(/^#/.test(selector)
+      _.each(selector.split(','), function(selector) {
+        _.each(/^#/.test(selector)
             ? [context.getElementById(selector.slice(1))]
             : context.getElementsByTagName(selector), function(node) {
           result.push(node);
@@ -235,12 +223,12 @@
 
     if (iframe && chartNodes.length) {
       // extract CSS rules for `uaClass`
-      each(query('link,style'), function(node) {
+      _.each(query('link,style'), function(node) {
         // avoid access denied errors on external style sheets
         // outside the same origin policy
         try {
           var sheet = node.sheet || node.styleSheet;
-          each(sheet.cssRules || sheet.rules, function(rule) {
+          _.each(sheet.cssRules || sheet.rules, function(rule) {
             if ((rule.selectorText || rule.cssText).indexOf('.' + uaClass) > -1) {
               cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
             }
@@ -252,7 +240,7 @@
         createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context));
     }
     // scan chart elements for a match
-    each(chartNodes, function(node) {
+    _.each(chartNodes, function(node) {
       var nextSibling;
       if ((node.string || getText(node)).charAt(0) != uaToken) {
         return;
@@ -289,7 +277,7 @@
     // remove injected scripts and old iframes when benchmarks aren't running
     if (timers.cleanup && !ui.running) {
       // if expired, destroy the element to prevent pseudo memory leaks.
-      each(query('iframe,script'), function(element) {
+      _.each(query('iframe,script'), function(element) {
         var expire = +(/^browserscope-\d+-(\d+)$/.exec(element.name) || 0)[1] + max(delay, timings.timeout * 1e3);
         if (new Date > expire || /browserscope\.org|google\.com/.test(element.src)) {
           trash.appendChild(element);
@@ -313,13 +301,13 @@
         ctor,
         result = data;
 
-    if (isArray(data)) {
-      result = map(data, cloneData);
+    if (_.isArray(data)) {
+      result = _.map(data, cloneData);
     }
     else if (data === Object(data)) {
       ctor = data.constructor;
       result = ctor == Object ? {} : (fn = function(){}, fn.prototype = ctor.prototype, new fn);
-      forOwn(data, function(value, key) {
+      _.forOwn(data, function(value, key) {
         result[key] = cloneData(value);
       });
     }
@@ -352,11 +340,11 @@
    */
   function createSnapshot() {
     // clone benches, exclude those that are errored, unrun, or have hz of Infinity
-    var benches = invoke(filter(ui.benchmarks, 'successful'), 'clone'),
-        fastest = filter(benches, 'fastest'),
-        slowest = filter(benches, 'slowest'),
-        neither = filter(benches, function(bench) {
-          return indexOf(fastest, bench) + indexOf(slowest, bench) == -2;
+    var benches = _.invoke(_.filter(ui.benchmarks, 'successful'), 'clone'),
+        fastest = _.filter(benches, 'fastest'),
+        slowest = _.filter(benches, 'slowest'),
+        neither = _.filter(benches, function(bench) {
+          return _.indexOf(fastest, bench) + _.indexOf(slowest, bench) == -2;
         });
 
     function merge(destination, source) {
@@ -367,8 +355,8 @@
     }
 
     // normalize results on slowest in each category
-    each(fastest.concat(slowest), function(bench) {
-      merge(bench, indexOf(fastest, bench) > -1 ? fastest[fastest.length - 1] : slowest[0]);
+    _.each(fastest.concat(slowest), function(bench) {
+      merge(bench, _.indexOf(fastest, bench) > -1 ? fastest[fastest.length - 1] : slowest[0]);
     });
 
     // sort slowest to fastest
@@ -379,7 +367,7 @@
     });
 
     // normalize the leftover benchmarks
-    reduce(neither, function(prev, bench) {
+    _.reduce(neither, function(prev, bench) {
       // if the previous slower benchmark is indistinguishable from
       // the current then use the previous benchmark's values
       if (prev.compare(bench) == 0) {
@@ -391,11 +379,11 @@
     // append benchmark ids for duplicate names or names with no alphanumeric/space characters
     // and use the upper limit of the confidence interval to compute a lower hz
     // to avoid recording inflated results caused by a high margin or error
-    return reduce(benches, function(result, bench, key) {
+    return _.reduce(benches, function(result, bench, key) {
       var stats = bench.stats;
       result || (result = {});
       key = toLabel(bench.name);
-      result[key && !hasKey(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
+      result[key && !_.has(result, key) ? key : key + bench.id ] = floor(1 / (stats.mean + stats.moe));
       return result;
     }, null);
   }
@@ -410,11 +398,11 @@
   function getDataCells(object) {
     // resolve cells by duck typing because of munged property names
     var result = [];
-    forOwn(object, function(value) {
-      return !(isArray(value) && (result = value));
+    _.forOwn(object, function(value) {
+      return !(_.isArray(value) && (result = value));
     });
     // remove empty entries which occur when not all the tests are recorded
-    return filter(result, Boolean);
+    return _.filter(result, Boolean);
   }
 
   /**
@@ -429,16 +417,16 @@
         labelMap = {};
 
     // resolve labels by duck typing because of munged property names
-    forOwn(object, function(value) {
-      return !(isArray(value) && 0 in value && 'type' in value[0] && (result = value));
+    _.forOwn(object, function(value) {
+      return !(_.isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
     // create a data map of labels to names
-    each(ui.benchmarks, function(bench) {
+    _.each(ui.benchmarks, function(bench) {
       var key = toLabel(bench.name);
-      labelMap[key && !hasKey(labelMap, key) ? key : key + bench.id ] = bench.name;
+      labelMap[key && !_.has(labelMap, key) ? key : key + bench.id ] = bench.name;
     });
     // replace Browserscope's basic labels with benchmark names
-    return each(result, function(cell) {
+    return _.each(result, function(cell) {
       var name = labelMap[cell.label];
       name && (cell.label = name);
     });
@@ -459,13 +447,13 @@
         result = [];
 
     // resolve rows by duck typing because of munged property names
-    forOwn(object, function(value, key) {
-      return !(isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
+    _.forOwn(object, function(value, key) {
+      return !(_.isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
     // remove empty rows and set the `p.className` on the browser
     // name cell that matches the user's browser name
     if (result.length) {
-      result = object[name] = filter(result, function(value) {
+      result = object[name] = _.filter(result, function(value) {
         var cells = getDataCells(value),
             first = cells[0],
             second = cells[1];
@@ -482,18 +470,6 @@
       });
     }
     return result;
-  }
-
-  /**
-   * Checks if a value has an internal [[Class]] of Array.
-   *
-   * @private
-   * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if the value has an internal [[Class]] of
-   *  Array, else `false`.
-   */
-  function isArray(value) {
-    return toString.call(value) == '[object Array]';
   }
 
   /**
@@ -698,7 +674,7 @@
     if (key) {
       delete responses[key];
     } else {
-      forOwn(responses, function(value, key) {
+      _.forOwn(responses, function(value, key) {
         delete responses[key];
       });
     }
@@ -790,8 +766,8 @@
         labels.pop();
 
         // modify row data
-        each(rows, function(row) {
-          each(getDataCells(row), function(cell, index, cells) {
+        _.each(rows, function(row) {
+          _.each(getDataCells(row), function(cell, index, cells) {
             var lastIndex = cells.length - 1;
 
             // cells[1] through cells[lastIndex - 1] are ops/sec cells
