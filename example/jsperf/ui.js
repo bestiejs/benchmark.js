@@ -193,7 +193,6 @@
 
       if (pageLoaded) {
         // configure browserscope
-        ui.browserscope.chartable = !('nochart' in params);
         ui.browserscope.postable = has.runner && !('nopost' in params);
 
         // configure chart renderer
