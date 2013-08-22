@@ -1156,7 +1156,7 @@
       // reset if the state has changed
       else if ((suite.aborted || suite.running) &&
           (suite.emit(event = Event('reset')), !event.cancelled)) {
-        suite.running = false;
+        suite.aborted = suite.running = false;
         if (!aborting) {
           invoke(suite, 'reset');
         }

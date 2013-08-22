@@ -529,7 +529,6 @@
         id = index + 1,
         title = $('title-' + id);
 
-    delete ui[--ui.length];
     ui.benchmarks.push(bench);
 
     if (has.runner) {
