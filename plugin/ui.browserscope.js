@@ -27,6 +27,12 @@
   };
 
   /**
+   * The doctype used in the creation of iframes so Browserscope
+   * detects the correct IE compat mode.
+   */
+  var doctype = /css/i.test(document.compatMode) ? '<!doctype html>' : '';
+
+  /**
    * The `uaToken` is prepended to the value of the data cell of the Google
    * visualization data table object that matches the user's browser name. After
    * the chart is rendered the element containing the `uaToken` is assigned the
@@ -243,10 +249,10 @@
         createStyleSheet('.' + uaClass + '{' + cssText.join(';') + '}', context));
     }
     // scan chart elements for a match
-    _.each(chartNodes, function(node) {
+    _.some(chartNodes, function(node) {
       var nextSibling;
       if ((node.string || getText(node)).charAt(0) != uaToken) {
-        return;
+        return false;
       }
       // for VML
       if (node.string) {
@@ -259,7 +265,7 @@
       else {
         node.setAttribute('class', uaClass);
       }
-      return !(result = true);
+      return (result = true);
     });
 
     return result;
@@ -595,7 +601,6 @@
       // request timeout and retry routines.
       var idoc = frame.frames[name].document;
       idoc.write(_.template(
-        // the doctype is required so Browserscope detects the correct IE compat mode
         '${doctype}<title></title><body><script>' +
         'with(parent.ui.browserscope){' +
         'var _bTestResults=snapshot,' +
@@ -604,7 +609,7 @@
         '}<\/script>' +
         '<script src=//www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>',
         {
-          'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
+          'doctype': doctype,
           'key': me.key,
           'refresh': me.timings.refresh,
           'timeout': me.timings.timeout
@@ -979,15 +984,12 @@
         idoc = frame.document,
         href = 'main.css';
 
-    _.each(document.styleSheets, function(sheet) {
+    _.some(document.styleSheets, function(sheet) {
       var value = sheet.href;
-      if (value && value.indexOf(location.hostname) > -1) {
-        return !(href = value);
-      }
+      return value && value.indexOf(location.hostname) > -1 && (href = value);
     });
 
     idoc.write(_.template(
-      // the doctype is required so Browserscope detects the correct IE compat mode
       '${doctype}<html><head><meta charset="utf-8"><title></title>' +
       '<link rel="stylesheet" href="${href}">' +
       '<script>ui=parent.ui<\/script>' +
@@ -999,7 +1001,7 @@
       '</div>' +
       '</body></html>',
       {
-        'doctype': /css/i.test(document.compatMode) ? '<!doctype html>' : '',
+        'doctype': doctype,
         'href': href,
         'key': key
       }
