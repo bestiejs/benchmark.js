@@ -973,8 +973,6 @@
 
     iframe.id = name;
     iframe.frameBorder = 0;
-    iframe.scrolling = 'no';
-
     placeholder.parentNode.replaceChild(iframe, placeholder);
 
     var frame = frames[name],
