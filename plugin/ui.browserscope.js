@@ -226,7 +226,7 @@
 
     if (iframe && chartNodes.length) {
       // extract CSS rules for `uaClass`
-      _.each(query('link,style', context), function(node) {
+      _.each(query('link,style', chartDoc), function(node) {
         // avoid access denied errors on external style sheets
         // outside the same origin policy
         try {
