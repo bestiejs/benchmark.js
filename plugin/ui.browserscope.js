@@ -972,6 +972,7 @@
         iframe = createElement('iframe', name);
 
     iframe.frameBorder = 0;
+    iframe.scrolling = 'no';
     iframe.style.cssText = 'width:100%;height:600px;';
     placeholder.parentNode.replaceChild(iframe, placeholder);
 
