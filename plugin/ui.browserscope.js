@@ -218,21 +218,22 @@
         cssText = [],
         uaClass = me.uaClass;
 
-    var chartDoc = me.chartFrame.document,
+    var win = me.chartWindow,
+        doc = win.document,
         iframe = query('iframe', me.container)[0];
 
     // the chart container may be an iframe in older browsers
     var chartContainer = iframe
-      ? me.chartFrame.frames[iframe.name].document
-      : query('#bs-chart', chartDoc)[0];
+      ? win.frames[iframe.name].document
+      : query('#bs-chart', doc)[0];
 
     var chartNodes = query('text,textpath', chartContainer),
-        context = iframe ? chartContainer : chartDoc,
+        context = iframe ? chartContainer : doc,
         result = false;
 
     if (iframe && chartNodes.length) {
       // extract CSS rules for `uaClass`
-      _.each(query('link,style', chartDoc), function(node) {
+      _.each(query('link,style', doc), function(node) {
         // avoid access denied errors on external style sheets
         // outside the same origin policy
         try {
@@ -408,7 +409,7 @@
     var name,
         me = ui.browserscope,
         filterBy = cache.lastFilterBy,
-        bsUa = query('#bs-ua', me.chartFrame.document)[0],
+        bsUa = query('#bs-ua', me.chartWindow.document)[0],
         browserName = toBrowserName(getText(query('strong', bsUa)[0]), filterBy),
         uaClass = me.uaClass,
         result = [];
@@ -525,7 +526,7 @@
         me = ui.browserscope,
         cont = me.container,
         filterBy = cache.lastFilterBy = options.filterBy || cache.lastFilterBy,
-        google = me.chartFrame.google,
+        google = me.chartWindow.google,
         responses = cache.responses,
         response = cache.responses[filterBy],
         visualization = google && google.visualization;
@@ -581,8 +582,8 @@
     setAction('post');
 
     if (key && snapshot && me.postable && !ui.running && !/Simulator/i.test(Benchmark.platform)) {
-      var frame = me.chartFrame,
-          doc = frame.document,
+      var win = me.chartWindow,
+          doc = win.document,
           name = 'browserscope-' + cache.counter++,
           iframe = createElement('iframe', name, doc);
 
@@ -599,7 +600,7 @@
       // Note: We originally created an iframe to avoid Browerscope's old limit
       // of one beacon per page load. It's currently used to implement custom
       // request timeout and retry routines.
-      var idoc = frame.frames[name].document;
+      var idoc = win.frames[name].document;
       idoc.write(_.template(
         '${doctype}<title></title><body><script>' +
         'with(parent.ui.browserscope){' +
@@ -663,7 +664,7 @@
         rows,
         me = ui.browserscope,
         cont = me.container,
-        google = me.chartFrame.google,
+        google = me.chartWindow.google,
         responses = cache.responses,
         visualization = google && google.visualization,
         lastChart = cache.lastChart,
@@ -765,7 +766,7 @@
               // (IE may render a negligible space in the tooltip of browser names truncated with ellipsis)
               cell.f = uaToken + cell.f;
               // poll until the chart elements exist and are styled
-              poll(function() { return !addChartStyle(me.chartFrame.document); }, 0.01);
+              poll(function() { return !addChartStyle(me.chartWindow.document); }, 0.01);
             }
           });
         });
@@ -827,6 +828,7 @@
       } else {
         setMessage(me.texts.empty);
       }
+      me.chartFrame.style.height = typeof height == 'number' ? (height + 110) + 'px' : '';
     }
   }
 
@@ -978,10 +980,12 @@
 
     iframe.id = name;
     iframe.frameBorder = 0;
+    iframe.scrolling = 'no';
+
     placeholder.parentNode.replaceChild(iframe, placeholder);
 
-    var frame = frames[name],
-        idoc = frame.document,
+    var iwin = frames[name],
+        idoc = iwin.document,
         href = 'main.css';
 
     _.some(document.styleSheets, function(sheet) {
@@ -1010,8 +1014,11 @@
     // http://www.google.com/search?q=IE+throbber+of+doom
     idoc.close();
 
-    // the frame where the charts are created
-    me.chartFrame = frame;
+    // the frame element of the charts
+    me.chartFrame = iframe;
+
+    // the frame window of the charts
+    me.chartWindow = iwin;
 
     // the element the charts are inserted into
     me.container = query('#bs-chart', idoc)[0];
