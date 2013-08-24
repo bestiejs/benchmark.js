@@ -326,6 +326,11 @@ footer {
   overflow: auto;
 }
 
+#bs-chart-frame {
+  height: 600px;
+  width: 100%;
+}
+
 #bs-logo {
   margin: 0;
 }
