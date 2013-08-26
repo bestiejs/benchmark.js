@@ -191,7 +191,7 @@
        * Detect Adobe AIR.
        *
        * @memberOf Benchmark.support
-       * @type Boolean
+       * @type boolean
        */
       support.air = isClassOf(context.runtime, 'ScriptBridgingProxyObject');
 
@@ -199,7 +199,7 @@
        * Detect if in a browser environment.
        *
        * @memberOf Benchmark.support
-       * @type Boolean
+       * @type boolean
        */
       support.browser = doc && isHostType(context, 'navigator') && !isHostType(context, 'phantom');
 
@@ -207,7 +207,7 @@
        * Detect if Java is enabled/exposed.
        *
        * @memberOf Benchmark.support
-       * @type Boolean
+       * @type boolean
        */
       support.java = isClassOf(context.java, 'JavaPackage');
 
@@ -215,7 +215,7 @@
        * Detect if the Timers API exists.
        *
        * @memberOf Benchmark.support
-       * @type Boolean
+       * @type boolean
        */
       support.timeout = isHostType(context, 'setTimeout') && isHostType(context, 'clearTimeout');
 
@@ -224,7 +224,7 @@
        *
        * @name decompilation
        * @memberOf Benchmark.support
-       * @type Boolean
+       * @type boolean
        */
       try {
         // Safari 2.x removes commas in object literals
@@ -254,7 +254,7 @@
       *
       * @private
       * @memberOf timer
-      * @type Function|Object
+      * @type {Function|Object}
       */
       'ns': Date,
 
@@ -283,8 +283,8 @@
      * The Benchmark constructor.
      *
      * @constructor
-     * @param {String} name A name to identify the benchmark.
-     * @param {Function|String} fn The test to benchmark.
+     * @param {string} name A name to identify the benchmark.
+     * @param {Function|string} fn The test to benchmark.
      * @param {Object} [options={}] Options object.
      * @example
      *
@@ -410,7 +410,7 @@
      *
      * @constructor
      * @memberOf Benchmark
-     * @param {String|Object} type The event type.
+     * @param {Object|string} type The event type.
      */
     function Event(type) {
       var event = this;
@@ -427,7 +427,7 @@
      *
      * @constructor
      * @memberOf Benchmark
-     * @param {String} name A name to identify the suite.
+     * @param {string} name A name to identify the suite.
      * @param {Object} [options={}] Options object.
      * @example
      *
@@ -483,8 +483,8 @@
      * A deep clone utility.
      *
      * @private
-     * @param {Mixed} value The value to clone.
-     * @returns {Mixed} The cloned value.
+     * @param {*} value The value to clone.
+     * @returns {*} The cloned value.
      */
     var cloneDeep = _.partialRight(_.cloneDeep, function(value) {
       // do not clone non-Object objects
@@ -497,8 +497,8 @@
      * Creates a function from the given arguments string and body.
      *
      * @private
-     * @param {String} args The comma separated function arguments.
-     * @param {String} body The function body.
+     * @param {string} args The comma separated function arguments.
+     * @param {string} body The function body.
      * @returns {Function} The new function.
      */
     function createFunction() {
@@ -546,7 +546,7 @@
      *
      * @private
      * @param {Function} fn The function.
-     * @returns {String} The argument name.
+     * @returns {string} The argument name.
      */
     function getFirstArgument(fn) {
       return (!_.has(fn, 'toString') &&
@@ -559,7 +559,7 @@
      *
      * @private
      * @param {Array} sample The sample.
-     * @returns {Number} The geometric mean.
+     * @returns {number} The geometric mean.
      */
     function getGeometricMean(sample) {
       return pow(Math.E, _.reduce(sample, function(sum, x) {
@@ -572,7 +572,7 @@
      *
      * @private
      * @param {Array} sample The sample.
-     * @returns {Number} The mean.
+     * @returns {number} The mean.
      */
     function getMean(sample) {
       return (_.reduce(sample, function(sum, x) {
@@ -585,8 +585,8 @@
      *
      * @private
      * @param {Function} fn The function.
-     * @param {String} altSource A string used when a function's source code is unretrievable.
-     * @returns {String} The function's source code.
+     * @param {string} altSource A string used when a function's source code is unretrievable.
+     * @returns {string} The function's source code.
      */
     function getSource(fn, altSource) {
       var result = altSource;
@@ -609,9 +609,9 @@
      * Checks if an object is of the specified class.
      *
      * @private
-     * @param {Mixed} value The value to check.
-     * @param {String} name The name of the class.
-     * @returns {Boolean} Returns `true` if the value is of the specified class, else `false`.
+     * @param {*} value The value to check.
+     * @param {string} name The name of the class.
+     * @returns {boolean} Returns `true` if the value is of the specified class, else `false`.
      */
     function isClassOf(value, name) {
       return value != null && toString.call(value) == '[object ' + name + ']';
@@ -623,9 +623,9 @@
      * types of "object", "function", or "unknown".
      *
      * @private
-     * @param {Mixed} object The owner of the property.
-     * @param {String} property The property to check.
-     * @returns {Boolean} Returns `true` if the property value is a non-primitive, else `false`.
+     * @param {*} object The owner of the property.
+     * @param {string} property The property to check.
+     * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
      */
     function isHostType(object, property) {
       if (object == null) {
@@ -639,8 +639,8 @@
      * Checks if a value can be safely coerced to a string.
      *
      * @private
-     * @param {Mixed} value The value to check.
-     * @returns {Boolean} Returns `true` if the value can be coerced, else `false`.
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
       return _.has(value, 'toString') || isClassOf(value, 'String');
@@ -659,8 +659,8 @@
      * A wrapper around require() to suppress `module missing` errors.
      *
      * @private
-     * @param {String} id The module id.
-     * @returns {Mixed} The exported module or `null`.
+     * @param {string} id The module id.
+     * @returns {*} The exported module or `null`.
      */
     function req(id) {
       try {
@@ -673,7 +673,7 @@
      * Runs a snippet of JavaScript via script injection.
      *
      * @private
-     * @param {String} code The code to run.
+     * @param {string} code The code to run.
      */
     function runScript(code) {
       var anchor = freeDefine ? define.amd : Benchmark,
@@ -759,8 +759,8 @@
      * @static
      * @memberOf Benchmark
      * @param {Array} array The array to iterate over.
-     * @param {Function|String} callback The function/alias called per iteration.
-     * @param {Mixed} thisArg The `this` binding for the callback.
+     * @param {Function|string} callback The function/alias called per iteration.
+     * @param {*} thisArg The `this` binding for the callback.
      * @returns {Array} A new array of values that passed callback filter.
      * @example
      *
@@ -804,8 +804,8 @@
      *
      * @static
      * @memberOf Benchmark
-     * @param {Number} number The number to convert.
-     * @returns {String} The more readable string representation.
+     * @param {number} number The number to convert.
+     * @returns {string} The more readable string representation.
      */
     function formatNumber(number) {
       number = String(number).split('.');
@@ -819,8 +819,8 @@
      * @static
      * @memberOf Benchmark
      * @param {Array} benches Array of benchmarks to iterate over.
-     * @param {String|Object} name The name of the method to invoke OR options object.
-     * @param {Mixed} [arg1, arg2, ...] Arguments to invoke the method with.
+     * @param {Object|string} name The name of the method to invoke OR options object.
+     * @param {...*} [arg] Arguments to invoke the method with.
      * @returns {Array} A new array of values returned from each method invoked.
      * @example
      *
@@ -1000,9 +1000,9 @@
      * @static
      * @memberOf Benchmark
      * @param {Array|Object} object The object to operate on.
-     * @param {String} [separator1=','] The separator used between key-value pairs.
-     * @param {String} [separator2=': '] The separator used between keys and values.
-     * @returns {String} The joined result.
+     * @param {string} [separator1=','] The separator used between key-value pairs.
+     * @param {string} [separator2=': '] The separator used between keys and values.
+     * @returns {string} The joined result.
      */
     function join(object, separator1, separator2) {
       var result = [],
@@ -1052,8 +1052,8 @@
      * Adds a test to the benchmark suite.
      *
      * @memberOf Benchmark.Suite
-     * @param {String} name A name to identify the benchmark.
-     * @param {Function|String} fn The test to benchmark.
+     * @param {string} name A name to identify the benchmark.
+     * @param {Function|string} fn The test to benchmark.
      * @param {Object} [options={}] Options object.
      * @returns {Object} The benchmark instance.
      * @example
@@ -1124,7 +1124,7 @@
      *
      * @name filter
      * @memberOf Benchmark.Suite
-     * @param {Function|String} callback The function/alias called per iteration.
+     * @param {Function|string} callback The function/alias called per iteration.
      * @returns {Object} A new suite of benchmarks that passed callback filter.
      */
     function filterSuite(callback) {
@@ -1215,8 +1215,8 @@
      * Executes all registered listeners of the specified event type.
      *
      * @memberOf Benchmark, Benchmark.Suite
-     * @param {String|Object} type The event type or object.
-     * @returns {Mixed} Returns the return value of the last listener executed.
+     * @param {Object|string} type The event type or object.
+     * @returns {*} Returns the return value of the last listener executed.
      */
     function emit(type) {
       var listeners,
@@ -1245,7 +1245,7 @@
      * to add or remove listeners.
      *
      * @memberOf Benchmark, Benchmark.Suite
-     * @param {String} type The event type.
+     * @param {string} type The event type.
      * @returns {Array} The listeners array.
      */
     function listeners(type) {
@@ -1261,7 +1261,7 @@
      * or unregisters all listeners for all event types.
      *
      * @memberOf Benchmark, Benchmark.Suite
-     * @param {String} [type] The event type.
+     * @param {string} [type] The event type.
      * @param {Function} [listener] The function to unregister.
      * @returns {Object} The benchmark instance.
      * @example
@@ -1312,7 +1312,7 @@
      * Registers a listener for the specified event type(s).
      *
      * @memberOf Benchmark, Benchmark.Suite
-     * @param {String} type The event type.
+     * @param {string} type The event type.
      * @param {Function} listener The function to register.
      * @returns {Object} The benchmark instance.
      * @example
@@ -1406,7 +1406,7 @@
      *
      * @memberOf Benchmark
      * @param {Object} other The benchmark to compare.
-     * @returns {Number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
+     * @returns {number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
      */
     function compare(other) {
       var critical,
@@ -1530,7 +1530,7 @@
      *
      * @name toString
      * @memberOf Benchmark
-     * @returns {String} A string representation of the benchmark instance.
+     * @returns {string} A string representation of the benchmark instance.
      */
     function toStringBench() {
       var bench = this,
@@ -1558,7 +1558,7 @@
      *
      * @private
      * @param {Object} bench The benchmark instance.
-     * @returns {Number} The time taken.
+     * @returns {number} The time taken.
      */
     function clock() {
       var applet,
@@ -2196,7 +2196,7 @@
          * by default.
          *
          * @memberOf Benchmark.options
-         * @type Boolean
+         * @type boolean
          */
         'async': false,
 
@@ -2204,14 +2204,14 @@
          * A flag to indicate that the benchmark clock is deferred.
          *
          * @memberOf Benchmark.options
-         * @type Boolean
+         * @type boolean
          */
         'defer': false,
 
         /**
          * The delay between test cycles (secs).
          * @memberOf Benchmark.options
-         * @type Number
+         * @type number
          */
         'delay': 0.005,
 
@@ -2220,7 +2220,7 @@
          * (auto-generated if absent).
          *
          * @memberOf Benchmark.options
-         * @type String
+         * @type string
          */
         'id': undefined,
 
@@ -2228,7 +2228,7 @@
          * The default number of times to execute a test on a benchmark's first cycle.
          *
          * @memberOf Benchmark.options
-         * @type Number
+         * @type number
          */
         'initCount': 1,
 
@@ -2238,7 +2238,7 @@
          * Note: Cycle delays aren't counted toward the maximum time.
          *
          * @memberOf Benchmark.options
-         * @type Number
+         * @type number
          */
         'maxTime': 5,
 
@@ -2246,7 +2246,7 @@
          * The minimum sample size required to perform statistical analysis.
          *
          * @memberOf Benchmark.options
-         * @type Number
+         * @type number
          */
         'minSamples': 5,
 
@@ -2254,7 +2254,7 @@
          * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
          *
          * @memberOf Benchmark.options
-         * @type Number
+         * @type number
          */
         'minTime': 0,
 
@@ -2262,7 +2262,7 @@
          * The name of the benchmark.
          *
          * @memberOf Benchmark.options
-         * @type String
+         * @type string
          */
         'name': undefined,
 
@@ -2342,7 +2342,7 @@
        *
        * @static
        * @memberOf Benchmark
-       * @type String
+       * @type string
        */
       'version': '1.0.0'
     });
@@ -2369,7 +2369,7 @@
        * The number of times a test was executed.
        *
        * @memberOf Benchmark
-       * @type Number
+       * @type number
        */
       'count': 0,
 
@@ -2377,7 +2377,7 @@
        * The number of cycles performed while benchmarking.
        *
        * @memberOf Benchmark
-       * @type Number
+       * @type number
        */
       'cycles': 0,
 
@@ -2385,7 +2385,7 @@
        * The number of executions per second.
        *
        * @memberOf Benchmark
-       * @type Number
+       * @type number
        */
       'hz': 0,
 
@@ -2393,7 +2393,7 @@
        * The compiled test function.
        *
        * @memberOf Benchmark
-       * @type Function|String
+       * @type {Function|string}
        */
       'compiled': undefined,
 
@@ -2409,7 +2409,7 @@
        * The test to benchmark.
        *
        * @memberOf Benchmark
-       * @type Function|String
+       * @type {Function|string}
        */
       'fn': undefined,
 
@@ -2417,7 +2417,7 @@
        * A flag to indicate if the benchmark is aborted.
        *
        * @memberOf Benchmark
-       * @type Boolean
+       * @type boolean
        */
       'aborted': false,
 
@@ -2425,7 +2425,7 @@
        * A flag to indicate if the benchmark is running.
        *
        * @memberOf Benchmark
-       * @type Boolean
+       * @type boolean
        */
       'running': false,
 
@@ -2433,7 +2433,7 @@
        * Compiled into the test and executed immediately **before** the test loop.
        *
        * @memberOf Benchmark
-       * @type Function|String
+       * @type {Function|string}
        * @example
        *
        * // basic usage
@@ -2496,7 +2496,7 @@
        * Compiled into the test and executed immediately **after** the test loop.
        *
        * @memberOf Benchmark
-       * @type Function|String
+       * @type {Function|string}
        */
       'teardown': noop,
 
@@ -2512,7 +2512,7 @@
          * The margin of error.
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'moe': 0,
 
@@ -2520,7 +2520,7 @@
          * The relative margin of error (expressed as a percentage of the mean).
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'rme': 0,
 
@@ -2528,7 +2528,7 @@
          * The standard error of the mean.
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'sem': 0,
 
@@ -2536,7 +2536,7 @@
          * The sample standard deviation.
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'deviation': 0,
 
@@ -2544,7 +2544,7 @@
          * The sample arithmetic mean (secs).
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'mean': 0,
 
@@ -2560,7 +2560,7 @@
          * The sample variance.
          *
          * @memberOf Benchmark#stats
-         * @type Number
+         * @type number
          */
         'variance': 0
       },
@@ -2577,7 +2577,7 @@
          * The time taken to complete the last cycle (secs).
          *
          * @memberOf Benchmark#times
-         * @type Number
+         * @type number
          */
         'cycle': 0,
 
@@ -2585,7 +2585,7 @@
          * The time taken to complete the benchmark (secs).
          *
          * @memberOf Benchmark#times
-         * @type Number
+         * @type number
          */
         'elapsed': 0,
 
@@ -2593,7 +2593,7 @@
          * The time taken to execute the test once (secs).
          *
          * @memberOf Benchmark#times
-         * @type Number
+         * @type number
          */
         'period': 0,
 
@@ -2601,7 +2601,7 @@
          * A timestamp of when the benchmark started (ms).
          *
          * @memberOf Benchmark#times
-         * @type Number
+         * @type number
          */
         'timeStamp': 0
       }
@@ -2636,7 +2636,7 @@
        * The number of deferred cycles performed while benchmarking.
        *
        * @memberOf Benchmark.Deferred
-       * @type Number
+       * @type number
        */
       'cycles': 0,
 
@@ -2644,7 +2644,7 @@
        * The time taken to complete the deferred benchmark (secs).
        *
        * @memberOf Benchmark.Deferred
-       * @type Number
+       * @type number
        */
       'elapsed': 0,
 
@@ -2652,7 +2652,7 @@
        * A timestamp of when the deferred benchmark started (ms).
        *
        * @memberOf Benchmark.Deferred
-       * @type Number
+       * @type number
        */
       'timeStamp': 0
     });
@@ -2669,7 +2669,7 @@
        * A flag to indicate if the emitters listener iteration is aborted.
        *
        * @memberOf Benchmark.Event
-       * @type Boolean
+       * @type boolean
        */
       'aborted': false,
 
@@ -2677,7 +2677,7 @@
        * A flag to indicate if the default action is cancelled.
        *
        * @memberOf Benchmark.Event
-       * @type Boolean
+       * @type boolean
        */
       'cancelled': false,
 
@@ -2709,7 +2709,7 @@
        * A timestamp of when the event was created (ms).
        *
        * @memberOf Benchmark.Event
-       * @type Number
+       * @type number
        */
       'timeStamp': 0,
 
@@ -2717,7 +2717,7 @@
        * The event type.
        *
        * @memberOf Benchmark.Event
-       * @type String
+       * @type string
        */
       'type': ''
     });
@@ -2737,7 +2737,7 @@
        * The name of the suite.
        *
        * @memberOf Benchmark.Suite.options
-       * @type String
+       * @type string
        */
       'name': undefined
     };
@@ -2750,7 +2750,7 @@
        * The number of benchmarks in the suite.
        *
        * @memberOf Benchmark.Suite
-       * @type Number
+       * @type number
        */
       'length': 0,
 
@@ -2758,7 +2758,7 @@
        * A flag to indicate if the suite is aborted.
        *
        * @memberOf Benchmark.Suite
-       * @type Boolean
+       * @type boolean
        */
       'aborted': false,
 
@@ -2766,7 +2766,7 @@
        * A flag to indicate if the suite is running.
        *
        * @memberOf Benchmark.Suite
-       * @type Boolean
+       * @type boolean
        */
       'running': false
     });

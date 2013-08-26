@@ -34,11 +34,11 @@
      * Schedules timer-based callbacks.
      *
      * @private
-     * @param {Function|String} fn The function to call.
-     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+     * @param {Function|string} fn The function to call.
+     * @param {number} delay The number of milliseconds to delay the `fn` call.
      * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @param {Boolean} repeated A flag to specify whether `fn` is called repeatedly.
-     * @returns {Number} The the ID of the timeout.
+     * @param {boolean} repeated A flag to specify whether `fn` is called repeatedly.
+     * @returns {number} The the ID of the timeout.
      */
     function schedule(fn, delay, args, repeated) {
       // Rhino 1.7RC4 will error assigning `task` below
@@ -70,7 +70,7 @@
      * Clears the delay set by `setInterval` or `setTimeout`.
      *
      * @memberOf context
-     * @param {Number} id The ID of the timeout to be cleared.
+     * @param {number} id The ID of the timeout to be cleared.
      */
     function clearTimer(id) {
       if (ids[id]) {
@@ -84,10 +84,10 @@
      * Executes a code snippet or function repeatedly, with a delay between each call.
      *
      * @memberOf context
-     * @param {Function|String} fn The function to call or string to evaluate.
-     * @oaram {Number} delay The number of milliseconds to delay each `fn` call.
+     * @param {Function|string} fn The function to call or string to evaluate.
+     * @param {number} delay The number of milliseconds to delay each `fn` call.
      * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @returns {Number} The the ID of the timeout.
+     * @returns {number} The the ID of the timeout.
      */
     function setInterval(fn, delay) {
       return schedule(fn, delay, slice.call(arguments, 2), true);
@@ -97,10 +97,10 @@
      * Executes a code snippet or a function after specified delay.
      *
      * @memberOf context
-     * @param {Function|String} fn The function to call or string to evaluate.
-     * @oaram {Number} delay The number of milliseconds to delay the `fn` call.
+     * @param {Function|string} fn The function to call or string to evaluate.
+     * @param {number} delay The number of milliseconds to delay the `fn` call.
      * @param [arg1, arg2, ...] Arguments to invoke `fn` with.
-     * @returns {Number} The the ID of the timeout.
+     * @returns {number} The the ID of the timeout.
      */
     function setTimeout(fn, delay) {
       return schedule(fn, delay, slice.call(arguments, 2));
@@ -197,7 +197,7 @@
      * @memberOf QUnit
      * @type Function
      * @param {Object} object The object to stringify.
-     * @returns {String} The result string.
+     * @returns {string} The result string.
      */
     QUnit.jsDump.parsers.object = (function() {
       var func = QUnit.jsDump.parsers.object;
