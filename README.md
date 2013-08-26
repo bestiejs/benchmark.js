@@ -111,6 +111,43 @@ suite.add('RegExp#test', function() {
 // > Fastest is String#indexOf
 ```
 
+Async usage example:
+
+```javascript
+var suite = new Benchmark.Suite;
+
+// the first asynchronous function to benchmark
+suite.add('asyncFnOne', {
+  'defer': true,
+  'fn' : function() {
+    asyncFnOne(function() {
+      deferred.resolve();
+    });
+  }
+})
+
+// the second asynchronous function to benchmark
+.add('asyncFnTwo', {
+  'defer': true,
+  'fn' : function() {
+    asyncFnTwo(function() {
+      deferred.resolve();
+    });
+  }
+})
+
+// add listeners
+.on('cycle', function(event) {
+  console.log(String(event.target));
+})
+
+.on('complete', function() {
+  console.log('Fastest is ' + this.filter('fastest').pluck('name'));
+})
+
+.run();
+```
+
 ## BestieJS
 
 Benchmark.js is part of the BestieJS *"Best in Class"* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, and plenty of documentation.
