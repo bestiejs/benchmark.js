@@ -510,6 +510,24 @@
     return (text || '').replace(/[^a-z0-9]+/gi, ' ');
   }
 
+  /**
+   * Updates the `ui.browserscope.chartFrame` height based on the height of its content.
+   *
+   * @private
+   */
+  function updateChartFrameHeight() {
+    var me = ui.browserscope,
+        doc = me.chartWindow.document,
+        docEl = doc.documentElement,
+        body = doc.body;
+
+    me.chartFrame.style.height = max(
+      docEl.clientHeight,
+      docEl.offsetHeight, body.offsetHeight,
+      docEl.scrollHeight, body.scrollHeight
+    ) + 'px';
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -658,10 +676,6 @@
     // coordinates, dimensions, and sizes are in px
     var areaHeight,
         cellWidth,
-        data,
-        labels,
-        rowCount,
-        rows,
         me = ui.browserscope,
         cont = me.container,
         google = me.chartWindow.google,
@@ -718,12 +732,16 @@
     // visualization chart gallary
     // http://code.google.com/apis/chart/interactive/docs/gallery.html
     else if (!ui.running) {
-      cont.className = '';
-      data = cloneData(response.getDataTable());
-      labels = getDataLabels(data);
-      rows = getDataRows(data);
-      rowCount = rows.length;
+      var data = cloneData(response.getDataTable()),
+          labels = getDataLabels(data),
+          rows = getDataRows(data),
+          rowCount = rows.length;
+
+      // capitalize chart
       chart = chart.charAt(0).toUpperCase() + chart.slice(1).toLowerCase();
+
+      // clear `bs-rt-message`
+      cont.className = '';
 
       // adjust data for non-tabular displays
       if (chart != 'Table') {
@@ -813,7 +831,9 @@
       }
 
       if (rowCount && visualization[chart]) {
-         new visualization[chart](cont).draw(data, {
+        var chartObject = new visualization[chart](cont);
+        visualization.events.addListener(chartObject, 'ready', updateChartFrameHeight);
+        chartObject.draw(data, {
           'colors': ui.browserscope.colors,
           'fontSize': fontSize,
           'height': height,
@@ -828,7 +848,6 @@
       } else {
         setMessage(me.texts.empty);
       }
-      me.chartFrame.style.height = typeof height == 'number' ? (height + 110) + 'px' : '';
     }
   }
 
