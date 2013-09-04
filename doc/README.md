@@ -12,7 +12,7 @@
 * [`Benchmark.formatNumber`](#benchmarkformatnumbernumber)
 * [`Benchmark.invoke`](#benchmarkinvokebenches-name--arg)
 * [`Benchmark.join`](#benchmarkjoinobject--separator1---separator2:)
-* [`Benchmark.runInContext`](#benchmarkrunincontextcontextwindow)
+* [`Benchmark.runInContext`](#benchmarkrunincontextcontextroot)
 
 <!-- /div -->
 
@@ -428,13 +428,13 @@ Creates a string of joined array values or object key-value pairs.
 
 <!-- div -->
 
-### <a id="benchmarkrunincontextcontextwindow"></a>`Benchmark.runInContext([context=window])`
-<a href="#benchmarkrunincontextcontextwindow">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L111 "View in source") [&#x24C9;][1]
+### <a id="benchmarkrunincontextcontextroot"></a>`Benchmark.runInContext([context=root])`
+<a href="#benchmarkrunincontextcontextroot">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L111 "View in source") [&#x24C9;][1]
 
 Create a new `Benchmark` function using the given `context` object.
 
 #### Arguments
-1. `[context=window]` *(Object)*: The context object.
+1. `[context=root]` *(Object)*: The context object.
 
 #### Returns
 *(Function)*: Returns the `Benchmark` function.

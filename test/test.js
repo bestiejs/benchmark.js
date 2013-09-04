@@ -1,34 +1,34 @@
-;(function(window, undefined) {
+;(function(root, undefined) {
   'use strict';
 
   /** Use a single "load" function */
-  var load = typeof require == 'function' ? require : window.load;
+  var load = typeof require == 'function' ? require : root.load;
 
   /** The unit testing framework */
   var QUnit = (function() {
     var noop = Function.prototype;
-    return  window.QUnit || (
-      window.addEventListener || (window.addEventListener = noop),
-      window.setTimeout || (window.setTimeout = noop),
-      window.QUnit = load('../vendor/qunit/qunit/qunit.js') || window.QUnit,
-      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(window),
-      addEventListener === noop && delete window.addEventListener,
-      window.QUnit
+    return  root.QUnit || (
+      root.addEventListener || (root.addEventListener = noop),
+      root.setTimeout || (root.setTimeout = noop),
+      root.QUnit = load('../vendor/qunit/qunit/qunit.js') || root.QUnit,
+      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(root),
+      addEventListener === noop && delete root.addEventListener,
+      root.QUnit
     );
   }());
 
   /** The `lodash` utility function */
-  var _ = window._ || (window._ = (
-    _ = load('../vendor/lodash/lodash.js') || window._,
+  var _ = root._ || (root._ = (
+    _ = load('../vendor/lodash/lodash.js') || root._,
     _ = _._ || _,
-    _.runInContext(window)
+    _.runInContext(root)
   ));
 
   /** The `Benchmark` constructor to test */
-  var Benchmark = window.Benchmark || (window.Benchmark = (
-    Benchmark = load('../benchmark.js') || window.Benchmark,
+  var Benchmark = root.Benchmark || (root.Benchmark = (
+    Benchmark = load('../benchmark.js') || root.Benchmark,
     Benchmark = Benchmark.Benchmark || Benchmark,
-    Benchmark.runInContext(window)
+    Benchmark.runInContext(root)
   ));
 
   /** Used to create dummy benchmarks for comparisons */
@@ -79,7 +79,7 @@
 
   (function() {
     test('supports loading Benchmark.js as a module', function() {
-      if (window.define && define.amd) {
+      if (root.define && define.amd) {
         equal((Benchmark2 || {}).version, Benchmark.version);
       } else {
         skipTest(1);
@@ -87,7 +87,7 @@
     });
 
     test('supports loading Platform.js as a module', function() {
-      if (window.define && define.amd) {
+      if (root.define && define.amd) {
         var platform = (Benchmark2 || {}).platform || {};
         equal(typeof platform.name, 'string');
       } else {
@@ -1291,7 +1291,7 @@
 
   // configure QUnit and call `QUnit.start()` for
   // Narwhal, Node.js, PhantomJS, Rhino, and RingoJS
-  if (!window.document || window.phantom) {
+  if (!root.document || root.phantom) {
     QUnit.config.noglobals = true;
     QUnit.start();
   }
