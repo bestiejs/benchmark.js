@@ -13,27 +13,11 @@
     "ringo",
     "speed"
   ],
-  "author": {
-    "name": "Mathias Bynens",
-    "email": "mathias@qiwi.be",
-    "url": "http://mathiasbynens.be/"
-  },
+  "author": "Mathias Bynens <mathias@qiwi.be> (http://mathiasbynens.be/)",
   "contributors": [
-    {
-      "name": "Mathias Bynens",
-      "email": "mathias@qiwi.be",
-      "url": "http://mathiasbynens.be/"
-    },
-    {
-      "name": "John-David Dalton",
-      "email": "john.david.dalton@gmail.com",
-      "url": "http://allyoucanleet.com/"
-    },
-    {
-      "name": "Kit Cambridge",
-      "email": "github@kitcambridge.be",
-      "url": "http://kitcambridge.be/"
-    }
+    "Mathias Bynens <mathias@qiwi.be> (http://mathiasbynens.be/)",
+    "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
+    "Kit Cambridge <github@kitcambridge.be> (http://kitcambridge.be/)"
   ],
   "bugs": {
     "url": "https://github.com/bestiejs/benchmark.js/issues"
