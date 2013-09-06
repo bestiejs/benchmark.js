@@ -77,13 +77,8 @@
   };
 
   /** API shortcuts */
-  var each = Benchmark.each,
-      extend = Benchmark.extend,
-      filter = Benchmark.filter,
-      forOwn = Benchmark.forOwn,
+  var filter = Benchmark.filter,
       formatNumber = Benchmark.formatNumber,
-      indexOf = Benchmark.indexOf,
-      invoke = Benchmark.invoke,
       join = Benchmark.join;
 
   /*--------------------------------------------------------------------------*/
@@ -132,7 +127,7 @@
 
       if (stopped) {
         logError({ 'clear': true });
-        ui.push.apply(ui, filter(ui.benchmarks, function(bench) {
+        ui.push.apply(ui, _.filter(ui.benchmarks, function(bench) {
           return !bench.error && bench.reset();
         }));
         ui.run(runOptions);
@@ -239,7 +234,7 @@
 
         // prefill author details
         if (has.localStorage) {
-          each([$('author'), $('author-email'), $('author-url')], function(element) {
+          _.each([$('author'), $('author-email'), $('author-url')], function(element) {
             element.value = localStorage[element.id] || '';
             element.oninput = element.onkeydown = function(event) {
               event && event.type < 'k' && (element.onkeydown = null);
@@ -258,9 +253,11 @@
       // clear length so tests can be manually queued
       ui.length = 0;
 
-      // evaluate hash values
-      pageLoaded = true;
-      handlers.window.hashchange();
+      // evaluate hash values after all other "load" events have fired
+      _.defer(function() {
+        pageLoaded = true;
+        handlers.window.hashchange();
+      });
     }
   };
 
@@ -420,7 +417,7 @@
       div.className = div.innerHTML = '';
       errors.length = 0;
     }
-    if ('text' in options && indexOf(errors, text) < 0) {
+    if ('text' in options && _.indexOf(errors, text) < 0) {
       errors.push(text);
       addClass(div, classNames.show);
       appendHTML(div, text);
@@ -452,12 +449,12 @@
         params = me.params || (me.params = {});
 
     // remove old params
-    forOwn(params, function(value, key) {
+    _.forOwn(params, function(value, key) {
       delete params[key];
     });
 
     // add new params
-    each(hashes[0] && hashes, function(value) {
+    _.each(hashes[0] && hashes, function(value) {
       value = value.split('=');
       params[value[0].toLowerCase()] = (value[1] || '').toLowerCase();
     });
@@ -473,7 +470,7 @@
    * @returns {Object} The suite instance.
    */
   function render(index) {
-    each(index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]], function(bench) {
+    _.each(index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]], function(bench) {
       var parsed,
           cell = $(prefix + (++index)),
           error = bench.error,
@@ -559,15 +556,15 @@
     setStatus(texts.status.again);
 
     // highlight result cells
-    each(benches, function(bench) {
-      var cell = $(prefix + (indexOf(ui.benchmarks, bench) + 1)),
+    _.each(benches, function(bench) {
+      var cell = $(prefix + (_.indexOf(ui.benchmarks, bench) + 1)),
           fastestHz = getHz(fastest[0]),
           hz = getHz(bench),
           percent = (1 - (hz / fastestHz)) * 100,
           span = cell.getElementsByTagName('span')[0],
           text = 'fastest';
 
-      if (indexOf(fastest, bench) > -1) {
+      if (_.indexOf(fastest, bench) > -1) {
         // mark fastest
         addClass(cell, text);
       }
@@ -577,7 +574,7 @@
           : '';
 
         // mark slowest
-        if (indexOf(slowest, bench) > -1) {
+        if (_.indexOf(slowest, bench) > -1) {
           addClass(cell, 'slowest');
         }
       }
@@ -733,7 +730,7 @@
     setTimeout(function() {
       ui.off();
       ui.browserscope.post = function() { };
-      invoke(ui.benchmarks, 'off');
+      _.invoke(ui.benchmarks, 'off');
     }, 1);
   }
 
