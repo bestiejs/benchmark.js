@@ -4,7 +4,7 @@
   "description": "A benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results.",
   "homepage": "http://benchmarkjs.com/",
   "license": "MIT",
-  "main": "benchmark",
+  "main": "benchmark.js",
   "keywords": [
     "benchmark",
     "narwhal",
@@ -19,26 +19,21 @@
     "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
     "Kit Cambridge <github@kitcambridge.be> (http://kitcambridge.be/)"
   ],
-  "bugs": {
-    "url": "https://github.com/bestiejs/benchmark.js/issues"
-  },
+  "bugs": "https://github.com/bestiejs/benchmark.js/issues",
   "repository": {
     "type": "git",
     "url": "https://github.com/bestiejs/benchmark.js.git"
+  },
+  "dependencies": {
+    "lodash": "~1.3.0",
+    "platform": "~1.0.0"
   },
   "engines": [
     "node",
     "rhino"
   ],
-  "directories": {
-    "doc": "./doc",
-    "test": "./test"
-  },
-  "scripts": {
-    "test": "node test/test"
-  },
-  "dependencies": {
-    "lodash": "~1.2.0",
-    "platform": "~1.0.0"
-  }
+  "files": [
+    "LICENSE.txt",
+    "benchmark.js"
+  ]
 }
