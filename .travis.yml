@@ -37,4 +37,4 @@ before_script:
 script:
   - "[ $BIN == 'istanbul' ] && $BIN cover ./test/test.js || true"
   - "[ $BIN != 'istanbul' ] && cd ./test || true" 
-  - "[ $BIN != 'istanbul' ] && $BIN $OPTION ./test.js || true"
+  - "[ $BIN == 'istanbul' ] && true || $BIN $OPTION ./test.js"
