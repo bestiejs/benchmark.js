@@ -6,12 +6,12 @@
 <!-- div -->
 
 ## <a id="Benchmark"></a>`Benchmark`
-* [`Benchmark`](#benchmarkname-fn--options)
+* [`Benchmark`](#benchmarkname-fn-options)
 * [`Benchmark.version`](#benchmarkversion)
 * [`Benchmark.filter`](#benchmarkfilterarray-callback-thisarg)
 * [`Benchmark.formatNumber`](#benchmarkformatnumbernumber)
-* [`Benchmark.invoke`](#benchmarkinvokebenches-name--arg)
-* [`Benchmark.join`](#benchmarkjoinobject--separator1---separator2:)
+* [`Benchmark.invoke`](#benchmarkinvokebenches-name-arg)
+* [`Benchmark.join`](#benchmarkjoinobject-separator1-separator2:)
 * [`Benchmark.runInContext`](#benchmarkrunincontextcontextroot)
 
 <!-- /div -->
@@ -35,7 +35,7 @@
 * [`Benchmark.prototype.compare`](#benchmarkprototypecompareother)
 * [`Benchmark.prototype.emit`](#benchmarkprototypeemittype)
 * [`Benchmark.prototype.listeners`](#benchmarkprototypelistenerstype)
-* [`Benchmark.prototype.off`](#benchmarkprototypeofftype--listener)
+* [`Benchmark.prototype.off`](#benchmarkprototypeofftype-listener)
 * [`Benchmark.prototype.on`](#benchmarkprototypeontype-listener)
 * [`Benchmark.prototype.reset`](#benchmarkprototypereset)
 * [`Benchmark.prototype.run`](#benchmarkprototyperunoptions)
@@ -159,7 +159,7 @@
 <!-- div -->
 
 ## `Benchmark.Suite`
-* [`Benchmark.Suite`](#benchmarksuitename--options)
+* [`Benchmark.Suite`](#benchmarksuitename-options)
 
 <!-- /div -->
 
@@ -171,12 +171,12 @@
 * [`Benchmark.Suite.prototype.length`](#benchmarksuiteprototypelength)
 * [`Benchmark.Suite.prototype.running`](#benchmarksuiteprototyperunning)
 * [`Benchmark.Suite.prototype.abort`](#benchmarksuiteprototypeabort)
-* [`Benchmark.Suite.prototype.add`](#benchmarksuiteprototypeaddname-fn--options)
+* [`Benchmark.Suite.prototype.add`](#benchmarksuiteprototypeaddname-fn-options)
 * [`Benchmark.Suite.prototype.clone`](#benchmarksuiteprototypecloneoptions)
 * [`Benchmark.Suite.prototype.emit`](#benchmarkprototypeemittype)
 * [`Benchmark.Suite.prototype.filter`](#benchmarksuiteprototypefiltercallback)
 * [`Benchmark.Suite.prototype.listeners`](#benchmarkprototypelistenerstype)
-* [`Benchmark.Suite.prototype.off`](#benchmarkprototypeofftype--listener)
+* [`Benchmark.Suite.prototype.off`](#benchmarkprototypeofftype-listener)
 * [`Benchmark.Suite.prototype.on`](#benchmarkprototypeontype-listener)
 * [`Benchmark.Suite.prototype.reset`](#benchmarksuiteprototypereset)
 * [`Benchmark.Suite.prototype.run`](#benchmarksuiteprototyperunoptions)
@@ -205,8 +205,8 @@
 
 <!-- div -->
 
-### <a id="benchmarkname-fn--options"></a>`Benchmark(name, fn, [options={}])`
-<a href="#benchmarkname-fn--options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L356 "View in source") [&#x24C9;][1]
+### <a id="benchmarkname-fn-options"></a>`Benchmark(name, fn, [options={}])`
+<a href="#benchmarkname-fn-options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L356 "View in source") [&#x24C9;][1]
 
 The Benchmark constructor.
 
@@ -310,7 +310,7 @@ A generic `Array#filter` like method.
 #### Arguments
 1. `array` *(Array)*: The array to iterate over.
 2. `callback` *(Function|string)*: The function/alias called per iteration.
-3. `thisArg` *(\*)*: The `this` binding for the callback.
+3. `thisArg` *(&#42;)*: The `this` binding for the callback.
 
 #### Returns
 *(Array)*: A new array of values that passed callback filter.
@@ -357,15 +357,15 @@ Converts a number to a more readable comma-separated string representation.
 
 <!-- div -->
 
-### <a id="benchmarkinvokebenches-name--arg"></a>`Benchmark.invoke(benches, name, [arg])`
-<a href="#benchmarkinvokebenches-name--arg">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L841 "View in source") [&#x24C9;][1]
+### <a id="benchmarkinvokebenches-name-arg"></a>`Benchmark.invoke(benches, name, [arg])`
+<a href="#benchmarkinvokebenches-name-arg">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L841 "View in source") [&#x24C9;][1]
 
 Invokes a method on all items in an array.
 
 #### Arguments
 1. `benches` *(Array)*: Array of benchmarks to iterate over.
 2. `name` *(Object|string)*: The name of the method to invoke OR options object.
-3. `[arg]` *(...\*)*: Arguments to invoke the method with.
+3. `[arg]` *(...&#42;)*: Arguments to invoke the method with.
 
 #### Returns
 *(Array)*: A new array of values returned from each method invoked.
@@ -408,8 +408,8 @@ Benchmark.invoke(benches, {
 
 <!-- div -->
 
-### <a id="benchmarkjoinobject--separator1---separator2:"></a>`Benchmark.join(object, [separator1=','], [separator2=': '])`
-<a href="#benchmarkjoinobject--separator1---separator2:">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L993 "View in source") [&#x24C9;][1]
+### <a id="benchmarkjoinobject-separator1-separator2:"></a>`Benchmark.join(object, [separator1=','], [separator2=': '])`
+<a href="#benchmarkjoinobject-separator1-separator2:">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L993 "View in source") [&#x24C9;][1]
 
 Creates a string of joined array values or object key-value pairs.
 
@@ -552,7 +552,7 @@ Create a new `Benchmark` function using the given `context` object.
 ### <a id="benchmarkprototypesetup"></a>`Benchmark.prototype.setup`
 <a href="#benchmarkprototypesetup">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2479 "View in source") [&#x24C9;][1]
 
-*(Function, string)*: Compiled into the test and executed immediately **before** the test loop.
+*(Function, string)*: Compiled into the test and executed immediately &#42;&#42;before&#42;&#42; the test loop.
 
 #### Example
 ```js
@@ -621,7 +621,7 @@ var a = 0;
 ### <a id="benchmarkprototypeteardown"></a>`Benchmark.prototype.teardown`
 <a href="#benchmarkprototypeteardown">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L2487 "View in source") [&#x24C9;][1]
 
-*(Function, string)*: Compiled into the test and executed immediately **after** the test loop.
+*(Function, string)*: Compiled into the test and executed immediately &#42;&#42;after&#42;&#42; the test loop.
 
 * * *
 
@@ -697,7 +697,7 @@ Executes all registered listeners of the specified event type.
 1. `type` *(Object|string)*: The event type or object.
 
 #### Returns
-*(\*)*: Returns the return value of the last listener executed.
+*(&#42;)*: Returns the return value of the last listener executed.
 
 * * *
 
@@ -724,8 +724,8 @@ Returns an array of event listeners for a given type that can be manipulated to 
 
 <!-- div -->
 
-### <a id="benchmarkprototypeofftype--listener"></a>`Benchmark.Suite.prototype.off([type], [listener])`
-<a href="#benchmarkprototypeofftype--listener">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1270 "View in source") [&#x24C9;][1]
+### <a id="benchmarkprototypeofftype-listener"></a>`Benchmark.Suite.prototype.off([type], [listener])`
+<a href="#benchmarkprototypeofftype-listener">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1270 "View in source") [&#x24C9;][1]
 
 Unregisters a listener for the specified event type(s), or unregisters all listeners for the specified event type(s), or unregisters all listeners for all event types.
 
@@ -1512,8 +1512,8 @@ The Event constructor.
 
 <!-- div -->
 
-### <a id="benchmarksuitename--options"></a>`Benchmark.Suite(name, [options={}])`
-<a href="#benchmarksuitename--options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L462 "View in source") [&#x24C9;][1]
+### <a id="benchmarksuitename-options"></a>`Benchmark.Suite(name, [options={}])`
+<a href="#benchmarksuitename-options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L462 "View in source") [&#x24C9;][1]
 
 The Suite constructor.
 
@@ -1617,8 +1617,8 @@ Aborts all benchmarks in the suite.
 
 <!-- div -->
 
-### <a id="benchmarksuiteprototypeaddname-fn--options"></a>`Benchmark.Suite.prototype.add(name, fn, [options={}])`
-<a href="#benchmarksuiteprototypeaddname-fn--options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1074 "View in source") [&#x24C9;][1]
+### <a id="benchmarksuiteprototypeaddname-fn-options"></a>`Benchmark.Suite.prototype.add(name, fn, [options={}])`
+<a href="#benchmarksuiteprototypeaddname-fn-options">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1074 "View in source") [&#x24C9;][1]
 
 Adds a test to the benchmark suite.
 
@@ -1694,7 +1694,7 @@ Executes all registered listeners of the specified event type.
 1. `type` *(Object|string)*: The event type or object.
 
 #### Returns
-*(\*)*: Returns the return value of the last listener executed.
+*(&#42;)*: Returns the return value of the last listener executed.
 
 * * *
 
@@ -1739,8 +1739,8 @@ Returns an array of event listeners for a given type that can be manipulated to 
 
 <!-- div -->
 
-### <a id="benchmarkprototypeofftype--listener"></a>`Benchmark.Suite.prototype.off([type], [listener])`
-<a href="#benchmarkprototypeofftype--listener">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1270 "View in source") [&#x24C9;][1]
+### <a id="benchmarkprototypeofftype-listener"></a>`Benchmark.Suite.prototype.off([type], [listener])`
+<a href="#benchmarkprototypeofftype-listener">#</a> [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/master/benchmark.js#L1270 "View in source") [&#x24C9;][1]
 
 Unregisters a listener for the specified event type(s), or unregisters all listeners for the specified event type(s), or unregisters all listeners for all event types.
 
