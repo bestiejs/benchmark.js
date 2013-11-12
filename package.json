@@ -15,7 +15,7 @@
   "bugs": "https://github.com/bestiejs/benchmark.js/issues",
   "repository": { "type": "git", "url": "https://github.com/bestiejs/benchmark.js.git" },
   "dependencies": {
-    "lodash": "~2.0.0",
+    "lodash": "~2.3.0",
     "platform": "~1.0.0"
   },
   "engines": [
