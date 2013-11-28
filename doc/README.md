@@ -1,4 +1,4 @@
-# Benchmark.js <sup>v1.0.0</sup>
+# <a href="http://benchmarkjs.com/">Benchmark.js</a> <sup>v1.0.0</sup>
 
 <!-- div -->
 
