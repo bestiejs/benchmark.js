@@ -19,7 +19,7 @@
 
   /** The `lodash` utility function */
   var _ = root._ || (root._ = (
-    _ = load('../vendor/lodash/lodash.js') || root._,
+    _ = load('../vendor/lodash/dist/lodash.compat.js') || root._,
     _ = _._ || _,
     _.runInContext(root)
   ));

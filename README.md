@@ -15,7 +15,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/best
 
 ## Support
 
-Benchmark.js has been tested in at least Chrome 5~29, Firefox 2~24, IE 6-10, Opera 9.25-16, Safari 3-6, Node.js 0.4.8-0.10.18, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, and Rhino 1.7RC5.
+Benchmark.js has been tested in at least Chrome 5~31, Firefox 2~25, IE 6-11, Opera 9.25-17, Safari 3-7, Node.js 0.4.8-0.10.22, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, and Rhino 1.7RC5.
 
 ## Installation and usage
 
