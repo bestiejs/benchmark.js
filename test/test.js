@@ -11,7 +11,7 @@
       root.addEventListener || (root.addEventListener = noop),
       root.setTimeout || (root.setTimeout = noop),
       root.QUnit = load('../vendor/qunit/qunit/qunit.js') || root.QUnit,
-      (load('../vendor/qunit-clib/qunit-clib.js') || { 'runInContext': noop }).runInContext(root),
+      (load('../vendor/qunit-extras/qunit-extras.js') || { 'runInContext': noop }).runInContext(root),
       addEventListener === noop && delete root.addEventListener,
       root.QUnit
     );
