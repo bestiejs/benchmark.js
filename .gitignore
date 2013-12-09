@@ -1,4 +1,3 @@
 .DS_Store
+*.logs
 node_modules
-tests/benchmark.air/src/*.js
-tests/benchmark.air/bin-debug
