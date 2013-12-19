@@ -1289,6 +1289,8 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.config.asyncRetries = 10;
+
   if (!root.document || root.phantom) {
     QUnit.config.noglobals = true;
     QUnit.start();

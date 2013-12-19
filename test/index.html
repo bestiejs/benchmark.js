@@ -14,10 +14,12 @@
 	<body>
 		<div id="qunit"></div>
 		<script src="../vendor/qunit/qunit/qunit.js"></script>
+		<script src="../vendor/qunit-extras/qunit-extras.js"></script>
 		<script src="../vendor/lodash/dist/lodash.compat.js"></script>
-		<script src="../benchmark.js"></script>
 		<script src="../vendor/platform.js/platform.js"></script>
+		<script src="../benchmark.js"></script>
 		<script>
+			QUnit.config.hidepassed = true;
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
 			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
