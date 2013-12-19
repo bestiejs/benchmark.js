@@ -5,36 +5,51 @@
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
  */
-;(function(root, undefined) {
+;(function(undefined) {
   'use strict';
 
+  /** Used to determine if values are of the language type Object */
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
+  };
+
+  /** Used as a reference to the global object */
+  var root = (objectTypes[typeof window] && window) || this;
+
   /** Detect free variable `define` */
-  var freeDefine = typeof define == 'function' &&
-    typeof define.amd == 'object' && define.amd && define;
+  var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define;
 
   /** Detect free variable `exports` */
-  var freeExports = typeof exports == 'object' && exports;
+  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
+
+  /** Detect free variable `global`, from Node.js or Browserified code, and use it as `root` */
+  var freeGlobal = objectTypes[typeof global] && global;
+  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
+    root = freeGlobal;
+  }
 
   /** Detect free variable `module` */
-  var freeModule = typeof module == 'object' && module && module.exports == freeExports && module;
+  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
 
   /** Detect free variable `require` */
   var freeRequire = typeof require == 'function' && require;
 
-  /** Detect free variable `global`, from Node.js or Browserified code, and use it as `root` */
-  var freeGlobal = typeof global == 'object' && global;
-  if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
-    root = freeGlobal;
-  }
-
   /** Used to assign each benchmark an incrimented id */
   var counter = 0;
 
-  /** Used to make every compiled test unique */
-  var uidCounter = 0;
+  /** Detect the popular CommonJS extension `module.exports` */
+  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
 
   /** Used to detect primitive types */
   var rePrimitive = /^(?:boolean|number|string|undefined)$/;
+
+  /** Used to make every compiled test unique */
+  var uidCounter = 0;
 
   /** Used to assign default `context` object properties */
   var contextProps = [
@@ -2846,19 +2861,19 @@
     var Benchmark = runInContext();
 
     // check for `exports` after `define` in case a build optimizer adds an `exports` object
-    if (freeExports && !freeExports.nodeType) {
-      // in Node.js or RingoJS v0.8.0+
-      if (freeModule) {
+    if (freeExports && freeModule) {
+      // in Node.js or RingoJS
+      if (moduleExports) {
         (freeModule.exports = Benchmark).Benchmark = Benchmark;
       }
-      // in Narwhal or RingoJS v0.7.0-
+      // in Narwhal or Rhino -require
       else {
         freeExports.Benchmark = Benchmark;
       }
     }
-    // in a browser or Rhino
     else {
+      // in a browser or Rhino
       root.Benchmark = Benchmark;
     }
   }
-}(this));
+}.call(this));
