@@ -1633,7 +1633,7 @@
             throw new Error('The test "' + name + '" is empty. This may be the result of dead code removal.');
           }
           else if (!deferred) {
-            // pretest to determine if compiled code is exits early, usually by a
+            // pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             bench.count = 1;
             compiled = (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
