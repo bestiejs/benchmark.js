@@ -55,7 +55,7 @@
   var contextProps = [
     'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String', '_',
     'clearTimeout', 'chrome', 'chromium', 'document', 'java', 'navigator',
-    'performance', 'platform', 'process', 'runtime', 'setTimeout'
+    'performance', 'phantom', 'platform', 'process', 'runtime', 'setTimeout'
   ];
 
   /** Used to avoid hz of Infinity */
@@ -429,10 +429,10 @@
      */
     function Event(type) {
       var event = this;
-      return (event == null || event.constructor != Event)
-        ? new Event(type)
-        : (type instanceof Event
-            ? type
+      return type instanceof Event
+        ? type
+        : ((event == null || event.constructor != Event)
+            ? new Event(type)
             : _.extend(event, { 'timeStamp': +new Date }, typeof type == 'string' ? { 'type': type } : type)
           );
     }
@@ -482,7 +482,7 @@
         return new Suite(name, options);
       }
       // juggle arguments
-      if (isClassOf(name, 'Object')) {
+      if (_.isPlainObject(name)) {
         // 1 argument (options)
         options = name;
       } else {
@@ -601,7 +601,7 @@
       result = (result || '').replace(/^\s+|\s+$/g, '');
 
       // detect strings containing only the "use strict" directive
-      return /^(?:\/\*+[\w|\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
+      return /^(?:\/\*+[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
         ? ''
         : result;
     }
@@ -1130,7 +1130,7 @@
      */
     function filterSuite(callback) {
       var suite = this,
-          result = new suite.constructor;
+          result = new suite.constructor(cloneDeep(suite.options));
 
       result.push.apply(result, filter(suite, callback));
       return result;
@@ -1386,7 +1386,6 @@
      */
     function clone(options) {
       var bench = this,
-          sample = bench.stats.sample,
           result = new bench.constructor(_.extend({}, bench, options));
 
       // correct the `options` object
