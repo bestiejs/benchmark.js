@@ -429,12 +429,12 @@
      */
     function Event(type) {
       var event = this;
-      return type instanceof Event
-        ? type
-        : ((event == null || event.constructor != Event)
-            ? new Event(type)
-            : _.extend(event, { 'timeStamp': +new Date }, typeof type == 'string' ? { 'type': type } : type)
-          );
+      if (type instanceof Event) {
+        return type;
+      }
+      return (event == null || event.constructor != Event)
+        ? new Event(type)
+        : _.assign(event, { 'timeStamp': +new Date }, typeof type == 'string' ? { 'type': type } : type);
     }
 
     /**
@@ -644,7 +644,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.has(value, 'toString') || isClassOf(value, 'String');
+      return _.has(value, 'toString') || _.isString(value);
     }
 
     /**
@@ -709,8 +709,9 @@
      * @param {Object} [options={}] Options object.
      */
     function setOptions(object, options) {
-      options = _.extend({}, object.constructor.options, options);
-      object.options = _.forOwn(options, function(value, key) {
+      options = object.options = _.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+
+      _.forOwn(options, function(value, key) {
         if (value != null) {
           // add event listeners
           if (/^on[A-Z]/.test(key)) {
@@ -960,7 +961,7 @@
         args = slice.call(arguments, 2);
       } else {
         // 2 arguments (array, options)
-        options = _.extend(options, name);
+        options = _.assign(options, name);
         name = options.name;
         args = _.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
@@ -1107,7 +1108,7 @@
      */
     function cloneSuite(options) {
       var suite = this,
-          result = new suite.constructor(_.extend({}, suite.options, options));
+          result = new suite.constructor(_.assign({}, suite.options, options));
 
       // copy own properties
       _.forOwn(suite, function(value, key) {
@@ -1130,7 +1131,7 @@
      */
     function filterSuite(callback) {
       var suite = this,
-          result = new suite.constructor(cloneDeep(suite.options));
+          result = new suite.constructor(suite.options);
 
       result.push.apply(result, filter(suite, callback));
       return result;
@@ -1386,10 +1387,10 @@
      */
     function clone(options) {
       var bench = this,
-          result = new bench.constructor(_.extend({}, bench, options));
+          result = new bench.constructor(_.assign({}, bench, options));
 
       // correct the `options` object
-      result.options = _.extend({}, bench.options, options);
+      result.options = _.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
       // copy own custom properties
       _.forOwn(bench, function(value, key) {
@@ -1462,70 +1463,72 @@
      * @returns {Object} The benchmark instance.
      */
     function reset() {
-      var data,
-          event,
-          bench = this,
-          index = 0,
-          changes = { 'length': 0 },
-          queue = { 'length': 0 };
-
+      var bench = this;
       if (bench.running && !calledBy.abort) {
         // no worries, `reset()` is called within `abort()`
         calledBy.reset = true;
         bench.abort();
         delete calledBy.reset;
+        return bench;
       }
-      else {
-        // a non-recursive solution to check if properties have changed
-        // http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4
-        data = { 'destination': bench, 'source': _.extend({}, bench.constructor.prototype, bench.options) };
-        do {
-          _.forOwn(data.source, function(value, key) {
-            var changed,
-                destination = data.destination,
-                currValue = destination[key];
+      var event,
+          index = 0,
+          changes = { 'length': 0 },
+          queue = { 'length': 0 };
 
-            // skip pseudo private properties like `_timerId` which could be a
-            // Java object in environments like RingoJS
-            if (key.charAt(0) == '_') {
-              return;
-            }
-            if (value && typeof value == 'object') {
-              if (_.isArray(value)) {
-                // check if an array value has changed to a non-array value
-                if (!_.isArray(currValue)) {
-                  changed = currValue = [];
-                }
-                // or has changed its length
-                if (currValue.length != value.length) {
-                  changed = currValue = currValue.slice(0, value.length);
-                  currValue.length = value.length;
-                }
-              }
-              // check if an object has changed to a non-object value
-              else if (!currValue || typeof currValue != 'object') {
-                changed = currValue = {};
-              }
-              // register a changed object
-              if (changed) {
-                changes[changes.length++] = { 'destination': destination, 'key': key, 'value': currValue };
-              }
-              queue[queue.length++] = { 'destination': currValue, 'source': value };
-            }
-            // register a changed primitive
-            else if (value !== currValue && !(value == null || _.isFunction(value))) {
-              changes[changes.length++] = { 'destination': destination, 'key': key, 'value': value };
-            }
-          });
-        }
-        while ((data = queue[index++]));
+      // a non-recursive solution to check if properties have changed
+      // http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4
+      var data = {
+        'destination': bench,
+        'source': _.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
+      };
 
-        // if changed emit the `reset` event and if it isn't cancelled reset the benchmark
-        if (changes.length && (bench.emit(event = Event('reset')), !event.cancelled)) {
-          _.each(changes, function(data) {
-            data.destination[data.key] = data.value;
-          });
-        }
+      do {
+        _.forOwn(data.source, function(value, key) {
+          var changed,
+              destination = data.destination,
+              currValue = destination[key];
+
+          // skip pseudo private properties like `_timerId` which could be a
+          // Java object in environments like RingoJS
+          if (key.charAt(0) == '_') {
+            return;
+          }
+          if (value && typeof value == 'object') {
+            if (_.isArray(value)) {
+              // check if an array value has changed to a non-array value
+              if (!_.isArray(currValue)) {
+                changed = currValue = [];
+              }
+              // or has changed its length
+              if (currValue.length != value.length) {
+                changed = currValue = currValue.slice(0, value.length);
+                currValue.length = value.length;
+              }
+            }
+            // check if an object has changed to a non-object value
+            else if (!currValue || typeof currValue != 'object') {
+              changed = currValue = {};
+            }
+            // register a changed object
+            if (changed) {
+              changes[changes.length++] = { 'destination': destination, 'key': key, 'value': currValue };
+            }
+            queue[queue.length++] = { 'destination': currValue, 'source': value };
+          }
+          // register a changed primitive
+          else if (value !== currValue && !(value == null || _.isFunction(value))) {
+            changes[changes.length++] = { 'destination': destination, 'key': key, 'value': value };
+          }
+        });
+      }
+      while ((data = queue[index++]));
+
+      // if changed emit the `reset` event and if it isn't cancelled reset the benchmark
+      if (changes.length && (bench.emit(event = Event('reset')), !event.cancelled)) {
+        _.each(changes, function(data) {
+          data.destination[data.key] = data.value;
+        });
       }
       return bench;
     }
@@ -1688,7 +1691,7 @@
 
         templateData.uid = uid + uidCounter++;
 
-        _.extend(templateData, {
+        _.assign(templateData, {
           'setup': getSource(bench.setup, interpolate('m#.setup()')),
           'fn': getSource(fn, interpolate('m#.fn(' + fnArg + ')')),
           'fnArg': fnArg,
@@ -1698,12 +1701,12 @@
         // use API of chosen timer
         if (timer.unit == 'ns') {
           if (timer.ns.nanoTime) {
-            _.extend(templateData, {
+            _.assign(templateData, {
               'begin': interpolate('s#=n#.nanoTime()'),
               'end': interpolate('r#=(n#.nanoTime()-s#)/1e9')
             });
           } else {
-            _.extend(templateData, {
+            _.assign(templateData, {
               'begin': interpolate('s#=n#()'),
               'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
             });
@@ -1711,24 +1714,24 @@
         }
         else if (timer.unit == 'us') {
           if (timer.ns.stop) {
-            _.extend(templateData, {
+            _.assign(templateData, {
               'begin': interpolate('s#=n#.start()'),
               'end': interpolate('r#=n#.microseconds()/1e6')
             });
           } else if (perfName) {
-            _.extend(templateData, {
+            _.assign(templateData, {
               'begin': interpolate('s#=n#.' + perfName + '()'),
               'end': interpolate('r#=(n#.' + perfName + '()-s#)/1e3')
             });
           } else {
-            _.extend(templateData, {
+            _.assign(templateData, {
               'begin': interpolate('s#=n#()'),
               'end': interpolate('r#=(n#()-s#)/1e6')
             });
           }
         }
         else {
-          _.extend(templateData, {
+          _.assign(templateData, {
             'begin': interpolate('s#=new n#'),
             'end': interpolate('r#=(new n#-s#)/1e3')
           });
@@ -1979,7 +1982,7 @@
           // relative margin of error
           rme = (moe / mean) * 100 || 0;
 
-          _.extend(bench.stats, {
+          _.assign(bench.stats, {
             'deviation': sd,
             'mean': mean,
             'moe': moe,
@@ -2184,8 +2187,8 @@
     // The bugginess continues as the `Benchmark` constructor has an argument
     // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
     // making it non-writable in the process, unless it is the first property
-    // assigned by for-in loop of `_.extend()`.
-    _.extend(Benchmark, {
+    // assigned by for-in loop of `_.assign()`.
+    _.assign(Benchmark, {
 
       /**
        * The default options copied by benchmark instances.
@@ -2352,7 +2355,7 @@
       'version': '1.0.0'
     });
 
-    _.extend(Benchmark, {
+    _.assign(Benchmark, {
       'filter': filter,
       'formatNumber': formatNumber,
       'invoke': invoke,
@@ -2368,7 +2371,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.extend(Benchmark.prototype, {
+    _.assign(Benchmark.prototype, {
 
       /**
        * The number of times a test was executed.
@@ -2612,7 +2615,7 @@
       }
     });
 
-    _.extend(Benchmark.prototype, {
+    _.assign(Benchmark.prototype, {
       'abort': abort,
       'clone': clone,
       'compare': compare,
@@ -2627,7 +2630,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.extend(Deferred.prototype, {
+    _.assign(Deferred.prototype, {
 
       /**
        * The deferred benchmark instance.
@@ -2662,13 +2665,13 @@
       'timeStamp': 0
     });
 
-    _.extend(Deferred.prototype, {
+    _.assign(Deferred.prototype, {
       'resolve': resolve
     });
 
     /*------------------------------------------------------------------------*/
 
-    _.extend(Event.prototype, {
+    _.assign(Event.prototype, {
 
       /**
        * A flag to indicate if the emitters listener iteration is aborted.
@@ -2749,7 +2752,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.extend(Suite.prototype, {
+    _.assign(Suite.prototype, {
 
       /**
        * The number of benchmarks in the suite.
@@ -2776,7 +2779,7 @@
       'running': false
     });
 
-    _.extend(Suite.prototype, {
+    _.assign(Suite.prototype, {
       'abort': abortSuite,
       'add': add,
       'clone': cloneSuite,
@@ -2801,7 +2804,7 @@
     /*------------------------------------------------------------------------*/
 
     // expose Deferred, Event, and Suite
-    _.extend(Benchmark, {
+    _.assign(Benchmark, {
       'Deferred': Deferred,
       'Event': Event,
       'Suite': Suite
