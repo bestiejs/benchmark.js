@@ -966,27 +966,6 @@
   QUnit.module('Benchmark.Suite#splice');
 
   (function() {
-    test('works with no arguments', function() {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite.length = 1;
-
-      var actual = suite.splice();
-      deepEqual(actual, []);
-      deepEqual(slice.call(suite), [0]);
-    });
-
-    test('works with only the `start` argument', function() {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 1;
-      suite.length = 2;
-
-      var actual = suite.splice(1);
-      deepEqual(actual, [1]);
-      deepEqual(slice.call(suite), [0]);
-    });
-
     test('should have no elements when length is 0 after splice', function() {
       var suite = Benchmark.Suite();
       suite[0] = 0;
