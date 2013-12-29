@@ -204,14 +204,6 @@
     (function() {
 
       /**
-       * Detect Adobe AIR.
-       *
-       * @memberOf Benchmark.support
-       * @type boolean
-       */
-      support.air = isClassOf(context.runtime, 'ScriptBridgingProxyObject');
-
-      /**
        * Detect if in a browser environment.
        *
        * @memberOf Benchmark.support
@@ -2856,10 +2848,6 @@
         unshift.apply(value, arguments);
         return value.length;
       };
-    }
-    // trigger clock's lazy define early to avoid a security error
-    if (support.air) {
-      clock({ '_original': { 'fn': noop, 'count': 1, 'options': {} } });
     }
     return Benchmark;
   }
