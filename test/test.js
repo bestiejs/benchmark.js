@@ -80,7 +80,7 @@
   (function() {
     test('supports loading Benchmark.js as a module', function() {
       if (root.define && define.amd) {
-        equal((Benchmark2 || {}).version, Benchmark.version);
+        equal((benchmarkModule || {}).version, Benchmark.version);
       } else {
         skipTest(1);
       }
@@ -88,7 +88,7 @@
 
     test('supports loading Platform.js as a module', function() {
       if (root.define && define.amd) {
-        var platform = (Benchmark2 || {}).platform || {};
+        var platform = (benchmarkModule || {}).platform || {};
         equal(typeof platform.name, 'string');
       } else {
         skipTest(1);

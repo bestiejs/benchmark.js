@@ -5,8 +5,8 @@ node_js:
   - "0.10"
 env:
   global:
-    - BIN="node" ISTANBUL=false OPTION=""
-    - secure: "ZDPQQJlZeIn3x4YNlKf40F0l/KRAd994Q5BCiSMaWDov82SidR4nLO5dDJYrsWB/JapyN2WxHGr+1xxq45hNZLELAzESDDZsTQN+qFxMD7AMf1ZteaIOcjdKRf1gyGyhyOY44+ZMoCevyu6bcWc/NKJhHNxaP+ThUHF5f6rGtQE="
+    - BIN="node" ISTANBUL=false OPTION="" SAUCE_LABS=false SAUCE_USERNAME="bestiejs"
+    - secure: "ClxKZRZNQw5VOHYIwXotccm10WCXMdKx/LKp4t77ejV5kSyA8F3UOVGSYZnDgWVru0S2+NOM+5evFveVg39Rxie9OcgUvm8ywqizQt5WNSkzTtjjZvc8ecEwavlAtYwAlQL5N5iiDAYQMCI/yootOIHRjlkCKckl1I/mY+rH7YE="
 matrix:
   include:
     - node_js: "0.10"
@@ -21,6 +21,8 @@ matrix:
       env: BIN="rhino" OPTION="-require"
     - node_js: "0.10"
       env: BIN="ringo"
+    - node_js: "0.10"
+      env: SAUCE_LABS=true
 git:
   depth: 10
 branches:
@@ -28,7 +30,8 @@ branches:
     - master
 before_install:
   - "[ $TRAVIS_NODE_VERSION != '0.6' ] || npm conf set strict-ssl false"
-  - "[ $ISTANBUL == false ] || npm i -g coveralls@\"~2.5.0\" istanbul@\"~0.1.0\""
+  - "[ $SAUCE_LABS == false ] || npm i ecstatic@\"~0.4.0\" request@\"~2.27.0\" sauce-tunnel@\"~1.1.0\""
+  - "[ $ISTANBUL == false ]   || npm i -g coveralls@\"~2.5.0\" istanbul@\"~0.1.0\""
   - "[ $BIN != 'narwhal' ] || (wget https://github.com/280north/narwhal/archive/v0.3.2.zip && sudo unzip v0.3.2 -d /opt/ && rm v0.3.2.zip)"
   - "[ $BIN != 'narwhal' ] || (sudo ln -s /opt/narwhal-0.3.2/bin/narwhal /usr/local/bin/narwhal && sudo chmod +x /usr/local/bin/narwhal)"
   - "[ $BIN != 'rhino' ] || (sudo mkdir /opt/rhino-1.7R5 && sudo wget -O /opt/rhino-1.7R5/js.jar https://oss.sonatype.org/content/repositories/snapshots/org/mozilla/rhino/1.7R5-SNAPSHOT/rhino-1.7R5-20120629.144839-4.jar)"
@@ -37,5 +40,6 @@ before_install:
   - "[ $BIN != 'ringo' ] || (sudo ln -s /opt/ringojs-0.9/bin/ringo /usr/local/bin/ringo && sudo chmod +x /usr/local/bin/ringo)"
 script:
   - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage)"
-  - "[ $ISTANBUL == true ]  || cd ./test" 
-  - "[ $ISTANBUL == true ]  || $BIN $OPTION ./test.js"
+  - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || cd ./test" 
+  - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || $BIN $OPTION ./test.js"
+  - "[ $SAUCE_LABS == false ] || $BIN ./test/saucelabs.js name=\"benchmark tests\" runner=\"test/index.html\""
