@@ -162,7 +162,8 @@
         shift = arrayRef.shift,
         slice = arrayRef.slice,
         sqrt = Math.sqrt,
-        toString = objectProto.toString;
+        toString = objectProto.toString,
+        unshift = arrayRef.unshift;
 
     /** Detect DOM document object */
     var doc = isHostType(context, 'document') && context.document;
@@ -233,6 +234,14 @@
        * @type boolean
        */
       support.timeout = isHostType(context, 'setTimeout') && isHostType(context, 'clearTimeout');
+
+      /**
+       * Detect if `Array#unshift` returns the new length of the array (all but IE < 8).
+       *
+       * @memberOf _.support
+       * @type boolean
+       */
+      support.unshiftResult = !![].unshift(1);
 
       /**
        * Detect if functions support decompilation.
@@ -2795,10 +2804,10 @@
       'run': runSuite,
       'reverse': arrayRef.reverse,
       'shift': shift,
-      'slice': arrayRef.slice,
+      'slice': slice,
       'sort': arrayRef.sort,
       'splice': arrayRef.splice,
-      'unshift': arrayRef.unshift
+      'unshift': unshift
     });
 
     /*------------------------------------------------------------------------*/
@@ -2838,6 +2847,15 @@
           return result;
         };
       });
+    }
+    // avoid buggy `Array#unshift` in IE < 8 which doesn't return the new
+    // length of the array
+    if (!support.unshiftResult) {
+      Suite.prototype.unshift = function() {
+        var value = this;
+        unshift.apply(value, arguments);
+        return value.length;
+      };
     }
     // trigger clock's lazy define early to avoid a security error
     if (support.air) {
