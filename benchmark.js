@@ -1,6 +1,6 @@
 /*!
  * Benchmark.js v1.0.0 <http://benchmarkjs.com/>
- * Copyright 2010-2013 Mathias Bynens <http://mths.be/>
+ * Copyright 2010-2014 Mathias Bynens <http://mths.be/>
  * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
  * Modified by John-David Dalton <http://allyoucanleet.com/>
  * Available under MIT license <http://mths.be/mit>
