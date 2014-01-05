@@ -81,16 +81,20 @@
     test('supports loading Benchmark.js as a module', function() {
       if (root.define && define.amd) {
         equal((benchmarkModule || {}).version, Benchmark.version);
-      } else {
+      }
+      else {
         skipTest(1);
       }
     });
 
     test('supports loading Platform.js as a module', function() {
       if (root.define && define.amd) {
-        var platform = (benchmarkModule || {}).platform || {};
-        equal(typeof platform.name, 'string');
-      } else {
+        var platform = (benchmarkModule || {}).platform || {},
+            name = platform.name;
+
+        ok(typeof name == 'string' || name === null);
+      }
+      else {
         skipTest(1);
       }
     });
