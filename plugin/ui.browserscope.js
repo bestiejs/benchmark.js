@@ -576,7 +576,7 @@
       cache.timers.load = setTimeout(onComplete, me.timings.timeout * 1e3);
       // set "loading" message and attempt to load Browserscope data
       setMessage(me.texts.loading);
-      // request Browserscope pass chart data to `google.visualization.Query.setResponse()`
+      // request Browserscope chart data and pass it to `google.visualization.Query.setResponse()`
       (new visualization.Query(
         '//www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
         { 'sendMethod': 'scriptInjection' }
