@@ -32,6 +32,12 @@
     );
   }());
 
+  /** Load and install QUnit Extras */
+  var qa = load('../vendor/qunit-extras/qunit-extras.js');
+  if (qa) {
+    qa.runInContext(root);
+  }
+
   /** The `lodash` utility function */
   var _ = root._ || (root._ = (
     _ = load('../vendor/lodash/dist/lodash.compat.js') || root._,
@@ -61,12 +67,6 @@
       'variance': 0
     }
   };
-
-  /** Load and install QUnit Extras */
-  var qa = load('../vendor/qunit-extras/qunit-extras.js');
-  if (qa) {
-    qa.runInContext(root);
-  }
 
   /*--------------------------------------------------------------------------*/
 
