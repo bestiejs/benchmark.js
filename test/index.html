@@ -54,32 +54,54 @@
 		<script>
 			var benchmarkModule;
 
-			if (window.require) {
+			(function() {
+				if (!window.require) {
+					return;
+				}
 				QUnit.config.autostart = false;
 
-				// load Benchmark.js as a module
-				require({
-					'baseUrl': '../vendor/requirejs/',
+				requirejs.config({
+					'baseUrl': './',
 					'urlArgs': 't=' + (+new Date),
-					'paths': {
-						'benchmark': '../../benchmark',
-						'lodash': '../lodash/dist/lodash.compat',
-						'platform': '../platform.js/platform'
-					}
-				},
-				['benchmark'], function(Benchmark) {
+					'waitSeconds': 0,
+					'packages': [
+						{
+							'name': 'benchmark',
+							'location': '..',
+							'main': 'benchmark'
+						},
+						{
+							'name': 'lodash',
+							'location': '../vendor/lodash/dist',
+							'main': 'lodash.compat'
+						},
+						{
+							'name': 'platform',
+							'location': '../vendor/platform.js',
+							'main': 'platform'
+						},
+						{
+							'name': 'test',
+							'location': '.',
+							'main': 'test'
+						}
+					]
+				});
+
+				// load Benchmark.js as a module
+				require(['benchmark'], function(Benchmark) {
 					benchmarkModule = Benchmark;
-					require(['test.js'], function() {
+					require(['test'], function() {
 						QUnit.start();
 					});
 				});
-			}
+			}());
 
+			// set a more readable browser name
 			window.onload = function() {
 				var timeoutId = setInterval(function() {
 					var ua = document.getElementById('qunit-userAgent');
 					if (ua && (benchmarkModule || !window.require)) {
-						// set a more readable browser name
 						ua.innerHTML = platform;
 						clearInterval(timeoutId);
 					}
