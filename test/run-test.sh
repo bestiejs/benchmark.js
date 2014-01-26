@@ -1,9 +1,10 @@
 cd "$(dirname "$0")"
+
 for cmd in rhino "rhino -require" narwhal ringo phantomjs node; do
-	echo ""
-	echo "Testing in $cmd..."
-	$cmd test.js
+  echo "Testing in $cmd..."
+  $cmd test.js
+  echo ""
 done
-echo ""
+
 echo "Testing in a browser..."
 open index.html
