@@ -230,7 +230,7 @@ input, textarea {
   padding: .4em;
 }
 
-#visible, #calibrate { /* checkboxes, for IE */
+#visible { /* checkboxes, for IE */
   border: 0;
   padding: 0;
 }

@@ -267,7 +267,7 @@
    * Shortcut for document.getElementById().
    *
    * @private
-   * @param {Element|String} id The id of the element to retrieve.
+   * @param {Element|string} id The id of the element to retrieve.
    * @returns {Element} The element, if found, or null.
    */
   function $(id) {
@@ -278,8 +278,8 @@
    * Adds a CSS class name to an element's className property.
    *
    * @private
-   * @param {Element|String} element The element or id of the element.
-   * @param {String} className The class name.
+   * @param {Element|string} element The element or id of the element.
+   * @param {string} className The class name.
    * @returns {Element} The element.
    */
   function addClass(element, className) {
@@ -293,8 +293,8 @@
    * Registers an event listener on an element.
    *
    * @private
-   * @param {Element|String} element The element or id of the element.
-   * @param {String} eventName The name of the event.
+   * @param {Element|string} element The element or id of the element.
+   * @param {string} eventName The name of the event.
    * @param {Function} handler The event handler.
    * @returns {Element} The element.
    */
@@ -313,8 +313,8 @@
    * Appends to an element's innerHTML property.
    *
    * @private
-   * @param {Element|String} element The element or id of the element.
-   * @param {String} html The HTML to append.
+   * @param {Element|string} element The element or id of the element.
+   * @param {string} html The HTML to append.
    * @returns {Element} The element.
    */
   function appendHTML(element, html) {
@@ -328,7 +328,7 @@
    * Shortcut for document.createElement().
    *
    * @private
-   * @param {String} tag The tag name of the element to create.
+   * @param {string} tag The tag name of the element to create.
    * @returns {Element} A new element of the given tag name.
    */
   function createElement(tagName) {
@@ -339,9 +339,9 @@
    * Checks if an element is assigned the given class name.
    *
    * @private
-   * @param {Element|String} element The element or id of the element.
-   * @param {String} className The class name.
-   * @returns {Boolean} If assigned the class name return true, else false.
+   * @param {Element|string} element The element or id of the element.
+   * @param {string} className The class name.
+   * @returns {boolean} If assigned the class name return true, else false.
    */
   function hasClass(element, className) {
     return !!(element = $(element)) &&
@@ -352,8 +352,8 @@
    * Set an element's innerHTML property.
    *
    * @private
-   * @param {Element|String} element The element or id of the element.
-   * @param {String} html The HTML to set.
+   * @param {Element|string} element The element or id of the element.
+   * @param {string} html The HTML to set.
    * @returns {Element} The element.
    */
   function setHTML(element, html) {
@@ -371,7 +371,7 @@
    *
    * @private
    * @param {Object} bench The benchmark object.
-   * @returns {Number} Returns the adjusted Hz.
+   * @returns {number} Returns the adjusted Hz.
    */
   function getHz(bench) {
     return 1 / (bench.stats.mean + bench.stats.moe);
@@ -382,7 +382,7 @@
    *
    * @private
    * @param {Mixed} value The value to check.
-   * @returns {Boolean} Returns `true` if the value is a function, else `false`.
+   * @returns {boolean} Returns `true` if the value is a function, else `false`.
    */
   function isFunction(value) {
     return toString.call(value) == '[object Function]';
@@ -392,7 +392,7 @@
    * Appends to or clears the error log.
    *
    * @private
-   * @param {String|Object} text The text to append or options object.
+   * @param {string|Object} text The text to append or options object.
    */
   function logError(text) {
     var table,
@@ -428,7 +428,7 @@
    * Sets the status text.
    *
    * @private
-   * @param {String} text The text to write to the status.
+   * @param {string} text The text to write to the status.
    */
   function setStatus(text) {
     setHTML('status', text);
@@ -466,7 +466,7 @@
    *
    * @static
    * @memberOf ui
-   * @param {Number} [index] The index of the benchmark to render.
+   * @param {number} [index] The index of the benchmark to render.
    * @returns {Object} The suite instance.
    */
   function render(index) {
