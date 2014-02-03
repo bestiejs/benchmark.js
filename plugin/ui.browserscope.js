@@ -57,7 +57,7 @@
    *
    * @private
    * @param {Element} element The element.
-   * @param {String} eventName The name of the event to listen to.
+   * @param {string} eventName The name of the event to listen to.
    * @param {Function} handler The event handler.
    * @returns {Element} The element.
    */
@@ -76,8 +76,8 @@
    * Shortcut for `document.createElement()`.
    *
    * @private
-   * @param {String} tagName The tag name of the element to create.
-   * @param {String} name A name to assign to the element.
+   * @param {string} tagName The tag name of the element to create.
+   * @param {string} name A name to assign to the element.
    * @param {Document|Element} context The document object used to create the element.
    * @returns {Element} Returns a new element.
    */
@@ -100,7 +100,7 @@
    * Creates a new style element.
    *
    * @private
-   * @param {String} cssText The css text of the style element.
+   * @param {string} cssText The css text of the style element.
    * @param {Document|Element} context The document object used to create the element.
    * @returns {Element} Returns the new style element.
    */
@@ -118,7 +118,7 @@
    * @private
    * @param {Element} element The element.
    * @param {Document|Element} context The element whose descendants are queried.
-   * @returns {String} The text content of the element.
+   * @returns {string} The text content of the element.
    */
   function getText(element, context) {
     element = query(element, context)[0];
@@ -129,7 +129,7 @@
    * Injects a script into the document.
    *
    * @private
-   * @param {String} src The external script source.
+   * @param {string} src The external script source.
    * @param {Object} sibling The element to inject the script after.
    * @param {Document} context The document object used to create the script element.
    * @returns {Object} The new script element.
@@ -147,7 +147,7 @@
    * Queries the document for elements by id or tagName.
    *
    * @private
-   * @param {String} selector The css selector to match.
+   * @param {string} selector The css selector to match.
    * @param {Document|Element} context The element whose descendants are queried.
    * @returns {Array} The array of results.
    */
@@ -176,7 +176,7 @@
    *
    * @private
    * @param {Element} element The element.
-   * @param {String} html The HTML to set.
+   * @param {string} html The HTML to set.
    * @param {Object} object The template object used to modify the html.
    * @returns {Element} The element.
    */
@@ -191,7 +191,7 @@
    * Displays a message in the "results" element.
    *
    * @private
-   * @param {String} text The text to display.
+   * @param {string} text The text to display.
    * @param {Object} object The template object used to modify the text.
    */
   function setMessage(text, object) {
@@ -211,7 +211,7 @@
    * class name to the chart element containing the user's browser name.
    *
    * @private
-   * @returns {Boolean} Returns `true` if the operation succeeded, else `false`.
+   * @returns {boolean} Returns `true` if the operation succeeded, else `false`.
    */
   function addChartStyle() {
     var me = ui.browserscope,
@@ -301,7 +301,7 @@
    * Creates a Browserscope results object.
    *
    * @private
-   * @returns {Object|Null} Browserscope results object or null.
+   * @returns {Object|null} Browserscope results object or null.
    */
   function createSnapshot() {
     // clone benches, exclude those that are errored, unrun, or have hz of Infinity
@@ -445,7 +445,7 @@
    *
    * @private
    * @param {Function} callback The function called every poll interval.
-   * @param {Number} delay The delay between callback calls (secs).
+   * @param {number} delay The delay between callback calls (secs).
    */
   function poll(callback, delay) {
     function poller(init) {
@@ -460,7 +460,7 @@
    * Cleans up the last action and sets the current action.
    *
    * @private
-   * @param {String} action The current action.
+   * @param {string} action The current action.
    */
   function setAction(action) {
     clearTimeout(cache.timers[cache.lastAction]);
@@ -472,9 +472,9 @@
    * specified filter.
    *
    * @private
-   * @param {String} name The full browser name .
-   * @param {String} filterBy The filter formating rules to apply.
-   * @returns {String} The converted browser name.
+   * @param {string} name The full browser name .
+   * @param {string} filterBy The filter formating rules to apply.
+   * @returns {string} The converted browser name.
    */
   function toBrowserName(name, filterBy) {
     name || (name = '');
@@ -502,8 +502,8 @@
    * can only contain alphanumeric characters and spaces.
    *
    * @private
-   * @param {String} text The text to be converted.
-   * @returns {String} The Browserscope safe label text.
+   * @param {string} text The text to be converted.
+   * @returns {string} The Browserscope safe label text.
    * @see http://code.google.com/p/browserscope/issues/detail?id=271
    */
   function toLabel(text) {
@@ -648,7 +648,7 @@
    *
    * @static
    * @memberOf ui.browserscope
-   * @param {String} key The key of a single cache entry to clear.
+   * @param {string} key The key of a single cache entry to clear.
    */
   function purge(key) {
     // we don't pave the cache object with a new one to preserve existing references
@@ -860,7 +860,7 @@
      * Your Browserscope API key.
      *
      * @memberOf ui.browserscope
-     * @type String
+     * @type string
      */
     'key': '',
 
@@ -868,7 +868,7 @@
      * A flag to indicate if posting is enabled or disabled.
      *
      * @memberOf ui.browserscope
-     * @type Boolean
+     * @type boolean
      */
     'postable': true,
 
@@ -876,7 +876,7 @@
      * The selector of the element to contain the entire Browserscope UI.
      *
      * @memberOf ui.browserscope
-     * @type String
+     * @type string
      */
     'selector': '',
 
@@ -885,7 +885,7 @@
      * in charts.
      *
      * @memberOf ui.browserscope
-     * @type String
+     * @type string
      */
     'uaClass': 'rt-ua-cur',
 
@@ -901,7 +901,7 @@
        * The delay before refreshing the cumulative results after posting (secs).
        *
        * @memberOf ui.browserscope.timings
-       * @type Number
+       * @type number
        */
       'refresh': 3,
 
@@ -909,7 +909,7 @@
        * The delay between load attempts (secs).
        *
        * @memberOf ui.browserscope.timings
-       * @type Number
+       * @type number
        */
       'retry': 5,
 
@@ -917,7 +917,7 @@
        * The time to wait for a request to finish (secs).
        *
        * @memberOf ui.browserscope.timings
-       * @type Number
+       * @type number
        */
       'timeout': 10
     },
@@ -934,7 +934,7 @@
        * The text shown when their is no recorded data available to report.
        *
        * @memberOf ui.browserscope.texts
-       * @type String
+       * @type string
        */
       'empty': 'No data available',
 
@@ -942,7 +942,7 @@
        * The text shown when the cumulative results data cannot be retrieved.
        *
        * @memberOf ui.browserscope.texts
-       * @type String
+       * @type string
        */
       'error': 'The get/post request has failed :(',
 
@@ -950,7 +950,7 @@
        * The text shown while waiting for the cumulative results data to load.
        *
        * @memberOf ui.browserscope.texts
-       * @type String
+       * @type string
        */
       'loading': 'Loading cumulative results data&hellip;',
 
@@ -958,7 +958,7 @@
        * The text shown while posting the results snapshot to Browserscope.
        *
        * @memberOf ui.browserscope.texts
-       * @type String
+       * @type string
        */
       'post': 'Posting results snapshot&hellip;',
 
@@ -966,7 +966,7 @@
        * The text shown while benchmarks are running.
        *
        * @memberOf ui.browserscope.texts
-       * @type String
+       * @type string
        */
       'wait': 'Benchmarks running. Please wait&hellip;'
     },
