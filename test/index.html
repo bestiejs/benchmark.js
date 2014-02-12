@@ -23,12 +23,6 @@
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
 			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
-			// assign results to `global_test_results` for Sauce Labs
-			var global_test_results;
-			QUnit.done(function(results) {
-				global_test_results = results;
-			});
-
 			(function() {
 				if (QUnit.urlParams.nojava) {
 					return;
