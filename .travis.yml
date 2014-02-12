@@ -29,7 +29,6 @@ branches:
   only:
     - master
 before_install:
-  - "[ $TRAVIS_NODE_VERSION != '0.6' ] || npm config set ca \"\""
   - "[ $SAUCE_LABS == false ] || npm i ecstatic@\"~0.4.0\" request@\"~2.27.0\" sauce-tunnel@\"~1.1.0\""
   - "[ $ISTANBUL == false ]   || npm i -g coveralls@\"~2.5.0\" istanbul@\"~0.1.0\""
   - "[ $BIN != 'narwhal' ] || (wget https://github.com/280north/narwhal/archive/v0.3.2.zip && sudo unzip v0.3.2 -d /opt/ && rm v0.3.2.zip)"
