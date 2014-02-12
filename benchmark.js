@@ -297,6 +297,12 @@
     /**
      * The Benchmark constructor.
      *
+     * The Benchmark global variable also contains references to the common Lo-Dash methods
+     * [`each/forEach`](http://lodash.com/docs#forEach), [`forOwn`](http://lodash.com/docs#forOwn),
+     * [`has`](http://lodash.com/docs#has), [`indexOf`](http://lodash.com/docs#indexOf),
+     * [`map`](http://lodash.com/docs#map), [`pluck`](http://lodash.com/docs#pluck),
+     * and [`reduce`](http://lodash.com/docs#reduce).
+     *
      * @constructor
      * @param {string} name A name to identify the benchmark.
      * @param {Function|string} fn The test to benchmark.
@@ -439,6 +445,11 @@
 
     /**
      * The Suite constructor.
+     *
+     * Each Suite also contains references to the common Lo-Dash methods
+     * [`each/forEach`](http://lodash.com/docs#forEach), [`indexOf`](http://lodash.com/docs#indexOf),
+     * [`map`](http://lodash.com/docs#map), [`pluck`](http://lodash.com/docs#pluck),
+     * and [`reduce`](http://lodash.com/docs#reduce) on its prototype.
      *
      * @constructor
      * @memberOf Benchmark
