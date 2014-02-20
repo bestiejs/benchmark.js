@@ -54,7 +54,7 @@
   var contextProps = [
     'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String', '_',
     'clearTimeout', 'chrome', 'chromium', 'document', 'java', 'navigator',
-    'performance', 'phantom', 'platform', 'process', 'runtime', 'setTimeout'
+    'phantom', 'platform', 'process', 'runtime', 'setTimeout'
   ];
 
   /** Used to avoid hz of Infinity */
@@ -169,15 +169,6 @@
 
     /** Used to access Wade Simmons' Node microtime module */
     var microtimeObject = req('microtime');
-
-    /** Used to access the browser's high resolution timer */
-    var perfObject = isHostType(context, 'performance') && context.performance;
-
-    /** Used to call the browser's high resolution timer */
-    var perfName = perfObject && (
-      perfObject.now && 'now' ||
-      perfObject.webkitNow && 'webkitNow'
-    );
 
     /** Used to access Node's high resolution timer */
     var processObject = isHostType(context, 'process') && context.process;
@@ -1733,11 +1724,6 @@
               'begin': interpolate('s#=n#.start()'),
               'end': interpolate('r#=n#.microseconds()/1e6')
             });
-          } else if (perfName) {
-            _.assign(templateData, {
-              'begin': interpolate('s#=n#.' + perfName + '()'),
-              'end': interpolate('r#=(n#.' + perfName + '()-s#)/1e3')
-            });
           } else {
             _.assign(templateData, {
               'begin': interpolate('s#=n#()'),
@@ -1788,9 +1774,6 @@
             if (ns.stop) {
               ns.start();
               while (!(measured = ns.microseconds())) { }
-            } else if (ns[perfName]) {
-              divisor = 1e3;
-              measured = Function('n', 'var r,s=n.' + perfName + '();while(!(r=n.' + perfName + '()-s)){};return r')(ns);
             } else {
               begin = ns();
               while (!(measured = ns() - begin)) { }
@@ -1855,25 +1838,16 @@
         }
       } catch(e) { }
 
-      // detect `performance.now` microsecond resolution timer
-      if ((timer.ns = perfName && perfObject)) {
-        timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
-      }
-
       // detect Node's nanosecond resolution timer available in Node >= 0.8
       if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
         timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
       }
-
       // detect Wade Simmons' Node microtime module
       if (microtimeObject && typeof (timer.ns = microtimeObject.now) == 'function') {
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
-
       // pick timer with highest resolution
-      timer = _.reduce(timers, function(timer, other) {
-        return other.res < timer.res ? other : timer;
-      });
+      timer = _.min(timers, 'res');
 
       // remove unused applet
       if (timer.unit != 'ns' && applet) {
