@@ -535,7 +535,7 @@
       };
       // fix JaegerMonkey bug
       // http://bugzil.la/639720
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || _.noop)() == uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -650,15 +650,6 @@
      */
     function isStringable(value) {
       return _.has(value, 'toString') || _.isString(value);
-    }
-
-    /**
-     * A no-operation function.
-     *
-     * @private
-     */
-    function noop() {
-      // no operation performed
     }
 
     /**
@@ -865,7 +856,7 @@
           queued,
           index = -1,
           eventProps = { 'currentTarget': benches },
-          options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+          options = { 'onStart': _.noop, 'onCycle': _.noop, 'onComplete': _.noop },
           result = _.toArray(benches);
 
       /**
@@ -2487,7 +2478,7 @@
        *   }())
        * }())
        */
-      'setup': noop,
+      'setup': _.noop,
 
       /**
        * Compiled into the test and executed immediately **after** the test loop.
@@ -2495,7 +2486,7 @@
        * @memberOf Benchmark
        * @type {Function|string}
        */
-      'teardown': noop,
+      'teardown': _.noop,
 
       /**
        * An object of stats including mean, margin or error, and standard deviation.
