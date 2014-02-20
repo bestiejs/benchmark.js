@@ -177,7 +177,7 @@
     var trash = doc && doc.createElement('div');
 
     /** Used to integrity check compiled tests */
-    var uid = 'uid' + (+new Date);
+    var uid = 'uid' + _.now();
 
     /** Used to avoid infinite recursion when methods call each other */
     var calledBy = {};
@@ -433,7 +433,7 @@
       }
       return (event == null || event.constructor != Event)
         ? new Event(type)
-        : _.assign(event, { 'timeStamp': +new Date }, typeof type == 'string' ? { 'type': type } : type);
+        : _.assign(event, { 'timeStamp': _.now() }, typeof type == 'string' ? { 'type': type } : type);
     }
 
     /**
@@ -1722,10 +1722,16 @@
             });
           }
         }
+        else if (timer.ns.now) {
+          _.assign(templateData, {
+            'begin': interpolate('s#=n#.now()'),
+            'end': interpolate('r#=(n#.now()-s#)/1e3')
+          });
+        }
         else {
           _.assign(templateData, {
-            'begin': interpolate('s#=new n#'),
-            'end': interpolate('r#=(new n#-s#)/1e3')
+            'begin': interpolate('s#=new n#().getTime()'),
+            'end': interpolate('r#=(new n#().getTime()-s#)/1e3')
           });
         }
         // define `timer` methods
@@ -1781,9 +1787,13 @@
               divisor = 1;
             }
           }
+          else if (ns.now) {
+            begin = ns.now();
+            while (!(measured = ns.now() - begin)) { }
+          }
           else {
-            begin = new ns;
-            while (!(measured = new ns - begin)) { }
+            begin = new ns().getTime();
+            while (!(measured = new ns().getTime() - begin)) { }
           }
           // check for broken timers (nanoTime may have issues)
           // http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/
@@ -1933,7 +1943,7 @@
             variance,
             clone = event.target,
             done = bench.aborted,
-            now = +new Date,
+            now = _.now(),
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
             times = bench.times,
@@ -2138,7 +2148,7 @@
       bench.running = true;
 
       bench.count = bench.initCount;
-      bench.times.timeStamp = +new Date;
+      bench.times.timeStamp = _.now();
       bench.emit(event);
 
       if (!event.cancelled) {
