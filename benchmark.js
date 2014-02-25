@@ -1583,6 +1583,7 @@
             stringable = isStringable(bench.fn),
             count = bench.count = clone.count,
             decompilable = support.decompilation || stringable,
+            hasPhases = _.has(clone, 'setup') || _.has(clone, 'teardown'),
             id = bench.id,
             name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
             result = 0;
@@ -1600,7 +1601,6 @@
             timer.ns = new applet.Packages.nano;
           }
         }
-
         // Compile in setup/teardown functions and the test loop.
         // Create a new compiled test, instead of using the cached `bench.compiled`,
         // to avoid potential engine optimizations enabled over the life of the test.
@@ -1635,7 +1635,7 @@
             // pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             bench.count = 1;
-            compiled = (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
+            compiled = hasPhases && (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
             bench.count = count;
           }
         } catch(e) {
@@ -1646,7 +1646,7 @@
         // fallback when a test exits early or errors during pretest
         if (decompilable && !compiled && !deferred && !isEmpty) {
           funcBody = (
-            clone.error && !stringable
+            ((!hasPhases && _.isFunction(clone.fn)) || (clone.error && !stringable))
               ? 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count'
               : 'function f#(){${fn}\n}var r#,s#,m#=this,i#=m#.count'
             ) +
