@@ -593,16 +593,15 @@
      *
      * @private
      * @param {Function} fn The function.
-     * @param {string} altSource A string used when a function's source code is unretrievable.
      * @returns {string} The function's source code.
      */
-    function getSource(fn, altSource) {
-      var result = altSource;
+    function getSource(fn) {
+      var result = '';
       if (isStringable(fn)) {
         result = String(fn);
       } else if (support.decompilation) {
         // escape the `{` for Firefox 1
-        result = (/^[^{]+\{([\s\S]*)\}\s*$/.exec(fn) || 0)[1];
+        result = _.result(/^[^{]+\{([\s\S]*)\}\s*$/.exec(fn), 1);
       }
       // trim string
       result = (result || '').replace(/^\s+|\s+$/g, '');
@@ -651,7 +650,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.has(value, 'toString') || _.isString(value);
+      return _.isString(value) || (_.has(value, 'toString') && _.isFunction(value.toString));
     }
 
     /**
@@ -1584,8 +1583,7 @@
         var bench = clone._original,
             stringable = isStringable(bench.fn),
             count = bench.count = clone.count,
-            decompilable = support.decompilation || stringable,
-            hasPhases = _.has(clone, 'setup') || _.has(clone, 'teardown'),
+            decompilable = stringable || (support.decompilation && (_.has(clone, 'setup') || _.has(clone, 'teardown'))),
             id = bench.id,
             name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
             result = 0;
@@ -1624,7 +1622,7 @@
           : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count,n#=t#.ns;${setup}\n${begin};' +
             'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}';
 
-        var compiled = bench.compiled = clone.compiled = createCompiled(bench, deferred, funcBody),
+        var compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody),
             isEmpty = !(templateData.fn || stringable);
 
         try {
@@ -1637,7 +1635,7 @@
             // pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid
             bench.count = 1;
-            compiled = hasPhases && (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
+            compiled = decompilable && (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
             bench.count = count;
           }
         } catch(e) {
@@ -1646,16 +1644,16 @@
           bench.count = count;
         }
         // fallback when a test exits early or errors during pretest
-        if (decompilable && !compiled && !deferred && !isEmpty) {
+        if (!compiled && !deferred && !isEmpty) {
           funcBody = (
-            ((!hasPhases && _.isFunction(clone.fn)) || (clone.error && !stringable))
-              ? 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count'
-              : 'function f#(){${fn}\n}var r#,s#,m#=this,i#=m#.count'
+            stringable || (decompilable && !clone.error)
+              ? 'function f#(){${fn}\n}var r#,s#,m#=this,i#=m#.count'
+              : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count'
             ) +
             ',n#=t#.ns;${setup}\n${begin};m#.f#=f#;while(i#--){m#.f#()}${end};' +
             'delete m#.f#;${teardown}\nreturn{elapsed:r#}';
 
-          compiled = createCompiled(bench, deferred, funcBody);
+          compiled = createCompiled(bench, decompilable, deferred, funcBody);
 
           try {
             // pretest one more time to check for errors
@@ -1673,7 +1671,7 @@
         }
         // if no errors run the full test loop
         if (!clone.error) {
-          compiled = bench.compiled = clone.compiled = createCompiled(bench, deferred, funcBody);
+          compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody);
           result = compiled.call(deferred || bench, context, timer).elapsed;
         }
         return result;
@@ -1684,17 +1682,17 @@
       /**
        * Creates a compiled function from the given function `body`.
        */
-      function createCompiled(bench, deferred, body) {
+      function createCompiled(bench, decompilable, deferred, body) {
         var fn = bench.fn,
             fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '';
 
         templateData.uid = uid + uidCounter++;
 
         _.assign(templateData, {
-          'setup': getSource(bench.setup, interpolate('m#.setup()')),
-          'fn': getSource(fn, interpolate('m#.fn(' + fnArg + ')')),
+          'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
+          'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
           'fnArg': fnArg,
-          'teardown': getSource(bench.teardown, interpolate('m#.teardown()'))
+          'teardown': decompilable ? getSource(bench.teardown) : interpolate('m#.teardown()')
         });
 
         // use API of chosen timer
