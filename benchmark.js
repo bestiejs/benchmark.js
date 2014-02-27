@@ -240,7 +240,9 @@
         // parentheses from Function#toString results
         // http://bugzil.la/559438
         support.decompilation = Function(
-          'return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')'
+          ('return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')')
+          // avoid issues with code added by Istanbul
+          .replace(/__cov__[^;]+;/g, '')
         )()(0).x === '1';
       } catch(e) {
         support.decompilation = false;
