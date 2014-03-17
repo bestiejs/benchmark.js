@@ -1,7 +1,7 @@
 {
   "name": "benchmark.js",
   "version": "1.0.0",
-  "main": "./benchmark.js",
+  "main": "benchmark.js",
   "ignore": [
     ".*",
     "*.log",

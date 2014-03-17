@@ -1,0 +1,10 @@
+{
+  "name": "benchmark.js",
+  "repo": "bestiejs/benchmark.js",
+  "version": "1.0.0",
+  "description": "A benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, and returns statistically significant results.",
+  "license": "MIT",
+  "main": "benchmark.js",
+  "keywords": ["benchmark", "performance", "speed"],
+  "scripts": ["benchmark.js"]
+}
