@@ -38,7 +38,7 @@ before_install:
   - "[ $BIN != 'ringo' ] || (wget http://ringojs.org/downloads/ringojs-0.9.zip && sudo unzip ringojs-0.9 -d /opt && rm ringojs-0.9.zip)"
   - "[ $BIN != 'ringo' ] || (sudo ln -s /opt/ringojs-0.9/bin/ringo /usr/local/bin/ringo && sudo chmod +x /usr/local/bin/ringo)"
 script:
-  - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage)"
+  - "[ $ISTANBUL == true ]  && istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage || true"
   - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || cd ./test" 
   - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || $BIN $OPTION ./test.js"
   - "[ $SAUCE_LABS == false ] || $BIN ./test/saucelabs.js name=\"benchmark tests\" runner=\"test/index.html\""
