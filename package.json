@@ -14,6 +14,7 @@
   ],
   "bugs": "https://github.com/bestiejs/benchmark.js/issues",
   "repository": "bestiejs/benchmark.js",
+  "scripts": { "test": "echo \"See the repository CONTRIBUTING.md for testing instructions.\"" },
   "dependencies": {
     "lodash": "~2.4.1",
     "platform": "~1.0.0"
