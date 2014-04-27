@@ -19,11 +19,13 @@ Benchmark.js has been tested in at least Chrome 33-34, Firefox 27-28, IE 6-11, O
 ## Installation and usage
 
 Benchmark.js’ only hard dependency is [Lo-Dash](http://lodash.com/).
+Include [platform.js](http://mths.be/platform) to populate [Benchmark.platform](http://benchmarkjs.com/docs#platform).
 
 In a browser:
 
 ```html
 <script src="lodash.js"></script>
+<script src="platform.js"></script>
 <script src="benchmark.js"></script>
 ```
 
