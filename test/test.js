@@ -4,7 +4,7 @@
   var undefined;
 
   /** Used as a reference to the global object */
-  var root = typeof global == 'object' && global || this;
+  var root = (typeof global == 'object' && global) || this;
 
   /** Method and object shortcuts */
   var phantom = root.phantom,
