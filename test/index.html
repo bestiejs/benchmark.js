@@ -17,7 +17,6 @@
 		<script src="../vendor/qunit-extras/qunit-extras.js"></script>
 		<script src="../vendor/lodash/dist/lodash.compat.js"></script>
 		<script src="../vendor/platform.js/platform.js"></script>
-		<script src="../benchmark.js"></script>
 		<script>
 			QUnit.config.hidepassed = true;
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
@@ -41,7 +40,7 @@
 
 			// load test.js if not using require.js
 			document.write(QUnit.urlParams.norequire
-				? '<script src="test.js"><\/script>'
+				? '<script src="../benchmark.js"><\/script><script src="test.js"><\/script>'
 				: '<script src="../vendor/requirejs/require.js"><\/script>'
 			);
 		</script>
@@ -84,7 +83,7 @@
 
 				// load Benchmark as a module
 				require(['benchmark'], function(Benchmark) {
-					benchmarkModule = Benchmark;
+					benchmarkModule = window.Benchmark = Benchmark;
 					require(['test'], function() {
 						QUnit.start();
 					});
