@@ -12,8 +12,12 @@
   /** Used as a horizontal rule in console output */
   var hr = '----------------------------------------';
 
+  /** Used for native method references */
+  var arrayProto = Array.prototype;
+
   /** Native method shortcut */
-  var unshift = Array.prototype.unshift;
+  var push = arrayProto.push,
+      unshift = arrayProto.unshift;
 
   /** Used to match HTML entities */
   var reEscapedHtml = /(&amp;|&lt;|&gt;|&quot;|&#39;)/g;
@@ -85,6 +89,19 @@
   }
 
   /**
+   * Checks if `value` is the language type of `Object`.
+   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+   */
+  function isObject(value) {
+    var type = typeof value;
+    return type == 'function' || (value && type == 'object') || false;
+  }
+
+  /**
    * Creates a string with `text` repeated `n` number of times.
    *
    * @private
@@ -132,6 +149,25 @@
     return htmlUnescapes[match];
   }
 
+  /**
+   * Creates a function that provides `value` to the wrapper function as its
+   * first argument. Additional arguments provided to the function are appended
+   * to those provided to the wrapper function. The wrapper is executed with
+   * the `this` binding of the created function.
+   *
+   * @private
+   * @param {*} value The value to wrap.
+   * @param {Function} wrapper The wrapper function.
+   * @returns {Function} Returns the new function.
+   */
+  function wrap(value, wrapper) {
+    return function() {
+      var args = [value];
+      push.apply(args, arguments);
+      return wrapper.apply(this, args);
+    };
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -151,25 +187,18 @@
         modulePrinted;
 
     /** Object shortcuts */
-    var console = context.console,
-        phantom = context.phantom,
-        process = phantom || context.process,
+    var phantom = context.phantom,
+        define = context.define,
         document = !phantom && context.document,
-        java = !document && context.java;
+        process = phantom || context.process,
+        amd = define && define.amd,
+        console = context.console,
+        java = !document && context.java,
+        print = context.print,
+        require = context.require;
 
-    /** Detect the OS of the platform */
-    var os = (function() {
-      if (java) {
-        return java.lang.System.getProperty('os.name');
-      }
-      if (phantom) {
-        return require('system').os.name;
-      }
-      if (process) {
-        return process.platform;
-      }
-      return '';
-    }());
+    /** Detects if running on Node.js */
+    var isNode = isObject(process) && typeof process.on == 'function';
 
     /** Detects if running in a PhantomJS web page */
     var isPhantomPage = typeof context.callPhantom == 'function';
@@ -178,7 +207,18 @@
     var isSilent = document && !isPhantomPage;
 
     /** Used to indicate if running in Windows */
-    var isWindows = /\bwin/i.test(os);
+    var isWindows = isNode && process.platform == 'win32';
+
+    /** Used to indicate if ANSI escape codes are supported */
+    var isAnsiSupported = (function() {
+      if (isNode && process.stdout && !process.stdout.isTTY) {
+        return false;
+      }
+      if (isWindows || getEnv('COLORTERM')) {
+        return true;
+      }
+      return /^(?:ansi|cygwin|linux|screen|xterm|vt100)$|color/i.test(getEnv('TERM'));
+    }());
 
     /** Used to display the wait throbber */
     var throbberDelay = 500,
@@ -268,6 +308,27 @@
     /*------------------------------------------------------------------------*/
 
     /**
+     * Gets the environment variable value by a given name.
+     *
+     * @private
+     * @param {string} name The name of the environment variable to get.
+     * @returns {*} Returns the environment variable value.
+     */
+    function getEnv(name) {
+      if (isNode) {
+        return process.env[name];
+      }
+      if (java) {
+        return java.lang.System.getenv(name);
+      }
+      if (!amd && typeof require == 'function') {
+        try {
+          return require('system').env[name];
+        } catch(e) { }
+      }
+    }
+
+    /**
      * Adds text color to the terminal output of `string`.
      *
      * @private
@@ -276,10 +337,9 @@
      * @returns {string} Returns the colored string.
      */
     function color(colorName, string) {
-      var code = ansiCodes[colorName];
-      return isWindows
-        ? string
-        : ('\x1B[' + code + 'm' + string + '\x1B[0m');
+      return isAnsiSupported
+        ? ('\x1B[' + ansiCodes[colorName] + 'm' + string + '\x1B[0m')
+        : string;
     }
 
     /**
@@ -289,9 +349,7 @@
      * @param {string} [text=''] The text to log.
      */
     var logInline = (function() {
-      // exit early if not Node.js
-      if (!(typeof process == 'object' && process &&
-          process.on && process.stdout && process.platform != 'win32')) {
+      if (!isNode || isWindows) {
         return function() {};
       }
       // cleanup any inline logs when exited via `ctrl+c`
@@ -366,17 +424,17 @@
 
     // add a callback to be triggered at the start of every test
     QUnit.testStart(function(details) {
-      var excused = QUnit.config.excused || {},
+      var config = QUnit.config,
+          test = config.current;
+
+      var excused = config.excused || {},
           excusedTests = excused[details.module],
           excusedAsserts = excusedTests && excusedTests[details.name];
-
-      var test = QUnit.config.current,
-          finish = test.finish;
 
       // allow async tests to retry
       if (test.async && !test.retries) {
         test.retries = 0;
-        test.finish = function() {
+        test.finish = wrap(test.finish, function(finish) {
           var asserts = this.assertions,
               config = QUnit.config,
               index = -1,
@@ -401,7 +459,7 @@
             }
           }
           finish.call(this);
-        };
+        });
       }
       // nothing to excuse
       if (!excusedAsserts) {
@@ -415,28 +473,55 @@
         return;
       }
       // excuse specific assertions
-      test.finish = function() {
+      test.finish = wrap(test.finish, function(finish) {
         var asserts = this.assertions,
-            index = -1,
-            length = asserts.length;
+            config = QUnit.config,
+            expected = this.expected,
+            items = asserts.slice(),
+            length = items.length;
+
+        if (expected == null) {
+          if (config.requireExpects) {
+            expected = length;
+            items.push('Expected number of assertions to be defined, but expect() was not called.');
+          } else if (!length) {
+            expected = 1;
+            items.push('Expected at least one assertion, but none were run - call expect(0) to accept zero assertions.');
+          }
+        } else if (expected != length) {
+          items.push('Expected ' + expected + ' assertions, but ' + length + ' were run');
+        }
+        var index = -1;
+        length = items.length;
 
         while (++index < length) {
-          var assert = asserts[index],
-              message = unescape(result(reMessage.exec(assert.message), 1)),
-              died = result(reDied.exec(message), 0),
-              expected = unescape(result(reExpected.exec(assert.message), 1));
+          var assert = items[index],
+              isStr = typeof assert == 'string',
+              message = assert.message;
 
-          if ((message && contains(excusedAsserts, message)) ||
-              (died && contains(excusedAsserts, died)) ||
-              (expected && (
-                contains(excusedAsserts, expected) ||
-                contains(excusedAsserts, expected.replace(/\s+/g, ''))
+          var assertMessage = isStr ? assert : unescape(result(reMessage.exec(message), 1)),
+              assertValue = isStr ? assert : unescape(result(reExpected.exec(message), 1)),
+              assertDied = result(reDied.exec(assertMessage), 0);
+
+          if ((assertMessage && contains(excusedAsserts, assertMessage)) ||
+              (assertDied && contains(excusedAsserts, assertDied)) ||
+              (assertValue && (
+                contains(excusedAsserts, assertValue) ||
+                contains(excusedAsserts, assertValue.replace(/\s+/g, ''))
               ))) {
-            assert.result = true;
+            if (isStr) {
+              while (asserts.length < expected) {
+                asserts.push({ 'result': true });
+              }
+              asserts.length = expected;
+            }
+            else {
+              assert.result = true;
+            }
           }
         }
         finish.call(this);
-      };
+      });
     });
 
     // replace poisoned `raises` method
@@ -613,7 +698,11 @@
 
       // add `console.log` support to Narwhal, Rhino, and RingoJS
       if (!console) {
-        console = context.console = { 'log': context.print };
+        console = context.console = { 'log': function() {} };
+      }
+      // RingoJS removes ANSI escape codes in `console.log`, but not in `print`
+      if (java && typeof print == 'function') {
+        console.log = print;
       }
       // start log throbber
       if (!isSilent) {
