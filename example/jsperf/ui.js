@@ -697,16 +697,19 @@
     // inject nano applet
     // (assumes ui.js is just before </body>)
     (function() {
+      if ('nojava' in ui.params) {
+        addClass('java', classNames.show);
+        return;
+      }
+      if (typeof Date.now == 'function') {
+        return;
+      }
       var measured,
-          perfNow,
           begin = new Date;
 
-      if ('nojava' in ui.params) {
-        return addClass('java', classNames.show);
-      }
       // is the applet really needed?
       while (!(measured = new Date - begin)) { }
-      if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.now || perfNow.webkitNow) == 'function')) {
+      if (measured != 1) {
         // load applet using innerHTML to avoid an alert in some versions of IE6
         document.body.insertBefore(setHTML(createElement('div'),
           '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
