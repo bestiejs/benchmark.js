@@ -14,7 +14,7 @@ For a list of upcoming features, check out our [roadmap](https://github.com/best
 
 ## Support
 
-Tested in Chrome (19, 34-35), Firefox (3, 20, 28-29), IE 6-11, Opera (10, 12, 19-20), Safari 5-7, Node.js 0.6.21~0.10.28, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
+Tested in Chrome 34-35, Firefox 28-29, IE 6-11, Opera 20-21, Safari 5-7, Node.js 0.6.21~0.10.28, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## Installation and usage
 
