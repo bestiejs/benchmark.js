@@ -18,7 +18,7 @@
   var _ = require('../vendor/lodash/dist/lodash.compat.js'),
       ecstatic = require('ecstatic'),
       request = require('request'),
-      SauceTunnel = require('sauce-tunnel-sc3-1');
+      SauceTunnel = require('sauce-tunnel');
 
   /** Used by `logInline` to clear previously logged messages */
   var prevLine = '';

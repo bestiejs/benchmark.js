@@ -1,22 +1,17 @@
-# Benchmark.js <sup>v1.0.0</sup>
+# Benchmark.js v1.0.0
 
-A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/ "Bulletproof JavaScript benchmarks") benchmarking library that works on nearly all JavaScript platforms<sup><a name="fnref1" href="#fn1">1</a></sup>, supports high-resolution timers, and returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
+A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/ "Bulletproof JavaScript benchmarks") benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, & returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
+
+## Documentation
+
+* [API Documentation](http://benchmarkjs.com/docs)
+* Check out our [unit tests](http://benchmarkjs.com/tests) & [roadmap](https://github.com/bestiejs/benchmark.js/wiki/Roadmap)
 
 ## Download
 
  * [Development source](https://raw.github.com/bestiejs/benchmark.js/v1.0.0/benchmark.js)
 
-## Dive in
-
-We’ve got [API docs](http://benchmarkjs.com/docs) and [unit tests](http://benchmarkjs.com/tests).
-
-For a list of upcoming features, check out our [roadmap](https://github.com/bestiejs/benchmark.js/wiki/Roadmap).
-
-## Support
-
-Tested in Chrome 34-35, Firefox 28-29, IE 6-11, Opera 20-21, Safari 5-7, Node.js 0.6.21~0.10.28, Narwhal 0.3.2, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
-
-## Installation and usage
+## Installation
 
 Benchmark.js’ only hard dependency is [Lo-Dash](http://lodash.com/).
 Include [platform.js](http://mths.be/platform) to populate [Benchmark.platform](http://benchmarkjs.com/docs#platform).
@@ -37,39 +32,11 @@ Optionally, expose Java’s nanosecond timer by adding the `nano` applet to the 
 
 Or enable Chrome’s microsecond timer by using the [command line switch](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking):
 
-    --enable-benchmarking
-
-Via [npm](http://npmjs.org/):
-
-```bash
-npm install benchmark
+```
+  --enable-benchmarking
 ```
 
-In [Node.js](http://nodejs.org/) and [RingoJS v0.8.0+](http://ringojs.org/):
-
-```js
-var Benchmark = require('benchmark');
-```
-
-Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
-
-```bash
-npm install microtime
-```
-
-In [RingoJS v0.7.0-](http://ringojs.org/):
-
-```js
-var Benchmark = require('benchmark').Benchmark;
-```
-
-In [Rhino](http://www.mozilla.org/rhino/):
-
-```js
-load('benchmark.js');
-```
-
-In an AMD loader like [RequireJS](http://requirejs.org/):
+In an AMD loader:
 
 ```js
 require({
@@ -79,9 +46,25 @@ require({
     'platform': 'path/to/platform'
   }
 },
-['benchmark'], function(Benchmark) {
-  console.log(Benchmark.platform.name);
-});
+['benchmark'], function(Benchmark) {/*…*/});
+```
+
+Using npm:
+
+```bash
+$ npm i --save benchmark
+```
+
+In Node.js:
+
+```js
+var Benchmark = require('benchmark');
+```
+
+Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
+
+```bash
+npm install microtime
 ```
 
 Usage example:
@@ -107,14 +90,18 @@ suite.add('RegExp#test', function() {
 .run({ 'async': true });
 
 // logs:
-// > RegExp#test x 4,161,532 +-0.99% (59 cycles)
-// > String#indexOf x 6,139,623 +-1.00% (131 cycles)
-// > Fastest is String#indexOf
+// => RegExp#test x 4,161,532 +-0.99% (59 cycles)
+// => String#indexOf x 6,139,623 +-1.00% (131 cycles)
+// => Fastest is String#indexOf
 ```
+
+## Support
+
+Tested in Chrome 34-35, Firefox 29-30, IE 6-11, Opera 21-22, Safari 5-7, Node.js 0.8.26~0.10.28, PhantomJS 1.9.2, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## BestieJS
 
-Benchmark.js is part of the BestieJS *"Best in Class"* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, and plenty of documentation.
+Benchmark.js is part of the BestieJS *“Best in Class”* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, & plenty of documentation.
 
 ## Authors
 
