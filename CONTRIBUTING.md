@@ -8,7 +8,7 @@ Please make sure to [search the issue tracker](https://github.com/bestiejs/bench
 Include updated unit tests in the `test` directory as part of your pull request.
 
 You can run the tests from the command line via `node test/test`, or open `test/index.html` in a web browser.
-The `test/run-test.sh` script attempts to run the tests in [Rhino](https://developer.mozilla.org/en-US/docs/Rhino), [Narwhal](https://github.com/280north/narwhal), [RingoJS](http://ringojs.org/), [PhantomJS](http://phantomjs.org/), and [Node](http://nodejs.org/), before running them in your default browser.
+The `test/run-test.sh` script attempts to run the tests in [Rhino](https://developer.mozilla.org/en-US/docs/Rhino), [RingoJS](http://ringojs.org/), [PhantomJS](http://phantomjs.org/), and [Node](http://nodejs.org/), before running them in your default browser.
 
 ## Coding Guidelines
 

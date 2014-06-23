@@ -13,8 +13,6 @@ matrix:
     - node_js: "0.10"
       env: BIN="phantomjs"
     - node_js: "0.10"
-      env: BIN="narwhal"
-    - node_js: "0.10"
       env: BIN="rhino"
     - node_js: "0.10"
       env: BIN="rhino" OPTION="-require"
@@ -30,8 +28,6 @@ branches:
 before_install:
   - "[ $SAUCE_LABS == false ] || npm i chalk@\"^0.4.0\" ecstatic@\"^0.5.0\" request@\"^2.36.0\" sauce-tunnel@\"^2.0.0\""
   - "[ $ISTANBUL == false ]   || npm i -g coveralls@\"^2.10.0\" istanbul@\"^0.2.0\""
-  - "[ $BIN != 'narwhal' ] || (wget http://benchmarkjs.com/_travis/narwhal-0.3.2.zip && sudo unzip narwhal-0.3.2 -d /opt/ && rm narwhal-0.3.2.zip)"
-  - "[ $BIN != 'narwhal' ] || (sudo ln -s /opt/narwhal-0.3.2/bin/narwhal /usr/local/bin/narwhal && sudo chmod +x /usr/local/bin/narwhal)"
   - "[ $BIN != 'rhino' ] || (sudo mkdir /opt/rhino-1.7R5 && sudo wget -O /opt/rhino-1.7R5/js.jar http://benchmarkjs.com/_travis/rhino-1.7R5.jar)"
   - "[ $BIN != 'rhino' ] || (echo -e '#!/bin/sh\\njava -jar /opt/rhino-1.7R5/js.jar $@' | sudo tee /usr/local/bin/rhino && sudo chmod +x /usr/local/bin/rhino)"
   - "[ $BIN != 'ringo' ] || (wget http://benchmarkjs.com/_travis/ringojs-0.9.zip && sudo unzip ringojs-0.9 -d /opt && rm ringojs-0.9.zip)"
