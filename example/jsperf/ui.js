@@ -49,7 +49,7 @@
     'localStorage': !!function() {
       try {
         return !localStorage.getItem(+new Date);
-      } catch(e) { }
+      } catch(e) {}
     }(),
     // used to distinguish between a regular test page and an embedded chart
     'runner': !!$('runner')
@@ -248,7 +248,7 @@
           if (console.firebug || /firebug/i.test(console.table())) {
             addClass('firebug', classNames.show);
           }
-        } catch(e) { }
+        } catch(e) {}
       }
       // clear length so tests can be manually queued
       ui.length = 0;
@@ -619,7 +619,7 @@
   window.ui = ui;
 
   // don't let users alert, confirm, prompt, or open new windows
-  window.alert = window.confirm = window.prompt = window.open = function() { };
+  window.alert = window.confirm = window.prompt = window.open = function() {};
 
   // parse hash query params when it changes
   addListener(window, 'hashchange', handlers.window.hashchange);
@@ -708,7 +708,7 @@
           begin = new Date;
 
       // is the applet really needed?
-      while (!(measured = new Date - begin)) { }
+      while (!(measured = new Date - begin)) {}
       if (measured != 1) {
         // load applet using innerHTML to avoid an alert in some versions of IE6
         document.body.insertBefore(setHTML(createElement('div'),
@@ -728,11 +728,11 @@
   }
   else {
     // short circuit unusable methods
-    ui.render = function() { };
+    ui.render = function() {};
     ui.off('start cycle complete');
     setTimeout(function() {
       ui.off();
-      ui.browserscope.post = function() { };
+      ui.browserscope.post = function() {};
       _.invoke(ui.benchmarks, 'off');
     }, 1);
   }

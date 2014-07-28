@@ -128,22 +128,22 @@
     });
 
     test('supports passing an options object', function() {
-      var bench = Benchmark({ 'name': 'foo', 'fn': function() { } });
+      var bench = Benchmark({ 'name': 'foo', 'fn': function() {} });
       ok(bench.fn && bench.name == 'foo');
     });
 
     test('supports passing a "name" and "fn" argument', function() {
-      var bench = Benchmark('foo', function() { });
+      var bench = Benchmark('foo', function() {});
       ok(bench.fn && bench.name == 'foo');
     });
 
     test('supports passing a "name" argument and an options object', function() {
-      var bench = Benchmark('foo', { 'fn': function() { } });
+      var bench = Benchmark('foo', { 'fn': function() {} });
       ok(bench.fn && bench.name == 'foo');
     });
 
     test('supports passing a "name" argument and an options object', function() {
-      var bench = Benchmark('foo', function() { }, { 'id': 'bar' });
+      var bench = Benchmark('foo', function() {}, { 'id': 'bar' });
       ok(bench.fn && bench.name == 'foo' && bench.id == 'bar');
     });
 
@@ -153,7 +153,7 @@
     });
 
     test('detects dead code', function() {
-      var bench = Benchmark(function() { }).run();
+      var bench = Benchmark(function() {}).run();
       ok(/setup\(\)/.test(bench.compiled) ? !bench.error : bench.error);
     });
   }());
@@ -181,9 +181,9 @@
 
     test('compiles using a custom "toString" method', function() {
       var bench = Benchmark({
-        'setup': function() { },
-        'fn': function() { },
-        'teardown': function() { }
+        'setup': function() {},
+        'fn': function() {},
+        'teardown': function() {}
       });
 
       bench.setup.toString = function() { return 'var a = 1;' };
@@ -664,7 +664,7 @@
 
     (function() {
       test('returns the correct listeners', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -684,7 +684,7 @@
 
     (function() {
       test('returns the benchmark', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -692,8 +692,8 @@
       });
 
       test('will ignore inherited properties of the event cache', function() {
-        var Dummy = function() { },
-            listener = function() { },
+        var Dummy = function() {},
+            listener = function() {},
             object = Constructor();
 
         Dummy.prototype.x = [listener];
@@ -704,7 +704,7 @@
       });
 
       test('handles an event type and listener', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -713,7 +713,7 @@
       });
 
       test('handles unregistering duplicate listeners', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -729,12 +729,12 @@
 
       test('handles a non-registered listener', function() {
         var object = Constructor();
-        object.off('x', function() { });
+        object.off('x', function() {});
         equal(object.events, undefined);
       });
 
       test('handles space separated event type and listener', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -747,8 +747,8 @@
       });
 
       test('handles space separated event type and no listener', function() {
-        var listener1 = function() { },
-            listener2 = function() { },
+        var listener1 = function() {},
+            listener2 = function() {},
             object = Constructor();
 
         object.on('x', listener1);
@@ -761,9 +761,9 @@
       });
 
       test('handles no arguments', function() {
-        var listener1 = function() { },
-            listener2 = function() { },
-            listener3 = function() { },
+        var listener1 = function() {},
+            listener2 = function() {},
+            listener3 = function() {},
             object = Constructor();
 
         object.on('x', listener1);
@@ -784,16 +784,16 @@
 
     (function() {
       test('returns the benchmark', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         equal(object.on('x', listener), object);
       });
 
       test('will ignore inherited properties of the event cache', function() {
-        var Dummy = function() { },
-            listener1 = function() { },
-            listener2 = function() { },
+        var Dummy = function() {},
+            listener1 = function() {},
+            listener2 = function() {},
             object = Constructor();
 
         Dummy.prototype.x = [listener1];
@@ -804,7 +804,7 @@
       });
 
       test('handles an event type and listener', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -812,7 +812,7 @@
       });
 
       test('handles registering duplicate listeners', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x', listener);
@@ -821,7 +821,7 @@
       });
 
       test('handles space separated event type and listener', function() {
-        var listener = function() { },
+        var listener = function() {},
             object = Constructor();
 
         object.on('x y', listener);
@@ -844,7 +844,7 @@
         'onAbort': function() { fired = true; }
       });
 
-      suite.add('foo', function() { });
+      suite.add('foo', function() {});
       suite.abort();
       equal(fired, false);
     });
@@ -855,7 +855,7 @@
         'onAbort': function() { fired = true; }
       });
 
-      suite.add('foo', function() { });
+      suite.add('foo', function() {});
       suite.reset();
       equal(fired, false);
     });
@@ -873,7 +873,7 @@
         ok(fired);
         QUnit.start();
       })
-      .add(function(){ })
+      .add(function(){})
       .run({ 'async': true });
     });
 
@@ -890,7 +890,7 @@
         ok(fired);
         QUnit.start();
       })
-      .add(function(){ })
+      .add(function(){})
       .run({ 'async': true });
     });
 

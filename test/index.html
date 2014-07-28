@@ -31,7 +31,7 @@
 				    begin = new Date;
 
 				// is the applet really needed?
-				while (!(measured = new Date - begin)) { }
+				while (!(measured = new Date - begin)) {}
 				if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.now || perfNow.webkitNow) == 'function')) {
 					// load applet
 					document.write('<applet code="nano" archive="../nano.jar"></applet>');

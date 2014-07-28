@@ -243,7 +243,7 @@
               cssText.push(rule.style && rule.style.cssText || /[^{}]*(?=})/.exec(rule.cssText) || '');
             }
           });
-        } catch(e) { }
+        } catch(e) {}
       });
       // insert custom style sheet
       query('head', context)[0].appendChild(
