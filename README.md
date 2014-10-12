@@ -13,7 +13,7 @@ A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks
 
 ## Installation
 
-Benchmark.js’ only hard dependency is [Lo-Dash](http://lodash.com/).
+Benchmark.js’ only hard dependency is [Lo-Dash](https://lodash.com/).
 Include [platform.js](http://mths.be/platform) to populate [Benchmark.platform](http://benchmarkjs.com/docs#platform).
 
 In a browser:
@@ -97,7 +97,7 @@ suite.add('RegExp#test', function() {
 
 ## Support
 
-Tested in Chrome 36-37, Firefox 30-31, IE 6-11, Opera 22-23, Safari 5-7, Node.js 0.8.26~0.10.30, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
+Tested in Chrome 37-38, Firefox 31-32, IE 6-11, Opera 23-24, Safari 5-7, Node.js 0.8.26~0.10.32, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## BestieJS
 
