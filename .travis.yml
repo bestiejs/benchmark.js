@@ -4,8 +4,8 @@ node_js:
   - "0.10"
 env:
   global:
-    - BIN="node" ISTANBUL=false OPTION="" SAUCE_LABS=false SAUCE_USERNAME="bestiejs"
-    - secure: "ClxKZRZNQw5VOHYIwXotccm10WCXMdKx/LKp4t77ejV5kSyA8F3UOVGSYZnDgWVru0S2+NOM+5evFveVg39Rxie9OcgUvm8ywqizQt5WNSkzTtjjZvc8ecEwavlAtYwAlQL5N5iiDAYQMCI/yootOIHRjlkCKckl1I/mY+rH7YE="
+    - BIN="node" ISTANBUL=false OPTION=""
+    - secure: "XOINlYZG3DYXq5agQXvkad2MfnOO/+z40fn37RKfNuxNI5veBK7tPRcCIQ998o+NyVTpyd3NZhqkowCxAL8bp4HJ81SesRKQSaXoSzgV7CnloxLxcduiiRJ6lnxFGgCbpqyLxZHWr0mQugcLhs5nhiZ5Dnw6dZxYX/oKKvOomZA="
 matrix:
   include:
     - node_js: "0.10"
@@ -18,22 +18,18 @@ matrix:
       env: BIN="rhino" OPTION="-require"
     - node_js: "0.10"
       env: BIN="ringo"
-    - node_js: "0.10"
-      env: SAUCE_LABS=true
 git:
   depth: 10
 branches:
   only:
     - master
 before_install:
-  - "[ $SAUCE_LABS == false ] || npm i chalk@\"0.5.1\" ecstatic@\"0.5.4\" request@\"^2.0.0\" sauce-tunnel@\"^2.0.0\""
-  - "[ $ISTANBUL == false ]   || npm i -g coveralls@\"^2.0.0\" istanbul@\"0.3.2\""
+  - "[ $ISTANBUL == false ] || npm i -g coveralls@\"^2.0.0\" istanbul@\"0.3.2\""
   - "[ $BIN != 'rhino' ] || (sudo mkdir /opt/rhino-1.7R5 && sudo wget -O /opt/rhino-1.7R5/js.jar http://benchmarkjs.com/_travis/rhino-1.7R5.jar)"
   - "[ $BIN != 'rhino' ] || (echo -e '#!/bin/sh\\njava -jar /opt/rhino-1.7R5/js.jar $@' | sudo tee /usr/local/bin/rhino && sudo chmod +x /usr/local/bin/rhino)"
   - "[ $BIN != 'ringo' ] || (wget http://benchmarkjs.com/_travis/ringojs-0.9.zip && sudo unzip ringojs-0.9 -d /opt && rm ringojs-0.9.zip)"
   - "[ $BIN != 'ringo' ] || (sudo ln -s /opt/ringojs-0.9/bin/ringo /usr/local/bin/ringo && sudo chmod +x /usr/local/bin/ringo)"
 script:
-  - "[ $ISTANBUL == true ]  && istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage || true"
-  - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || cd ./test" 
-  - "[ $ISTANBUL == true ]  || [ $SAUCE_LABS == true ] || $BIN $OPTION ./test.js"
-  - "[ $SAUCE_LABS == false ] || $BIN ./test/saucelabs.js name=\"benchmark tests\" runner=\"test/index.html\""
+  - "[ $ISTANBUL == true ] && istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage || true"
+  - "[ $ISTANBUL == true ] || cd ./test" 
+  - "[ $ISTANBUL == true ] || $BIN $OPTION ./test.js"
