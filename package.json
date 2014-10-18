@@ -15,7 +15,7 @@
   "repository": "bestiejs/benchmark.js",
   "scripts": { "test": "echo \"See the repository CONTRIBUTING.md for testing instructions.\"" },
   "dependencies": {
-    "lodash": "~2.4.1",
+    "lodash": "3.0.0-pre",
     "platform": "~1.2.0"
   },
   "engines": [
