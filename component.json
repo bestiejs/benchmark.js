@@ -6,5 +6,9 @@
   "license": "MIT",
   "main": "benchmark.js",
   "keywords": ["benchmark", "performance", "speed"],
-  "scripts": ["benchmark.js"]
+  "scripts": ["benchmark.js"],
+  "dependencies": {
+    "lodash/lodash": "3.0.0-pre",
+    "bestiejs/platform.js": "~1.2.0"
+  }
 }

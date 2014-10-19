@@ -2,6 +2,10 @@
   "name": "benchmark.js",
   "version": "1.0.0",
   "main": "benchmark.js",
+  "dependencies": {
+    "lodash": "3.0.0-pre",
+    "platform": "~1.2.0"
+  },
   "ignore": [
     ".*",
     "*.log",
