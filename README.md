@@ -97,7 +97,7 @@ suite.add('RegExp#test', function() {
 
 ## Support
 
-Tested in Chrome 37-38, Firefox 31-32, IE 6-11, Opera 23-24, Safari 5-7, Node.js 0.8.26~0.10.32, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
+Tested in Chrome 37-38, Firefox 31-32, IE 6-11, Opera 24-25, Safari 5-7, Node.js 0.8.26~0.10.32, PhantomJS 1.9.7, RingoJS 0.9, & Rhino 1.7RC5.
 
 ## BestieJS
 
