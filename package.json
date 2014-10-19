@@ -18,6 +18,11 @@
     "lodash": "3.0.0-pre",
     "platform": "~1.2.0"
   },
+  "devDependencies": {
+    "qunit-extras": "~1.2.0",
+    "qunitjs": "~1.11.0",
+    "requirejs": "~2.1.15"
+  },
   "engines": [
     "node",
     "rhino"

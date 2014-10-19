@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Benchmark.js Test Suite</title>
-		<link rel="stylesheet" href="../vendor/qunit/qunit/qunit.css">
+		<link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
 		<style>
 			applet {
 				position: absolute;
@@ -13,10 +13,10 @@
 	</head>
 	<body>
 		<div id="qunit"></div>
-		<script src="../vendor/qunit/qunit/qunit.js"></script>
-		<script src="../vendor/qunit-extras/qunit-extras.js"></script>
-		<script src="../vendor/lodash/dist/lodash.compat.js"></script>
-		<script src="../vendor/platform.js/platform.js"></script>
+		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
+		<script src="../node_modules/qunit-extras/qunit-extras.js"></script>
+		<script src="../node_modules/lodash/dist/lodash.compat.js"></script>
+		<script src="../node_modules/platform.js/platform.js"></script>
 		<script>
 			QUnit.config.hidepassed = true;
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
@@ -41,7 +41,7 @@
 			// load test.js if not using require.js
 			document.write(QUnit.urlParams.norequire
 				? '<script src="../benchmark.js"><\/script><script src="test.js"><\/script>'
-				: '<script src="../vendor/requirejs/require.js"><\/script>'
+				: '<script src="../node_modules/requirejs/require.js"><\/script>'
 			);
 		</script>
 		<script>
@@ -65,12 +65,12 @@
 						},
 						{
 							'name': 'lodash',
-							'location': '../vendor/lodash/dist',
+							'location': '../node_modules/lodash/dist',
 							'main': 'lodash.compat'
 						},
 						{
 							'name': 'platform',
-							'location': '../vendor/platform.js',
+							'location': '../node_modules/platform.js',
 							'main': 'platform'
 						},
 						{
