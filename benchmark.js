@@ -1471,8 +1471,8 @@
       }
       var event,
           index = 0,
-          changes = { 'length': 0 },
-          queue = { 'length': 0 };
+          changes = [],
+          queue = [];
 
       // a non-recursive solution to check if properties have changed
       // http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4
@@ -1510,13 +1510,13 @@
             }
             // register a changed object
             if (changed) {
-              changes[changes.length++] = { 'destination': destination, 'key': key, 'value': currValue };
+              changes.push({ 'destination': destination, 'key': key, 'value': currValue });
             }
-            queue[queue.length++] = { 'destination': currValue, 'source': value };
+            queue.push({ 'destination': currValue, 'source': value });
           }
           // register a changed primitive
           else if (value !== currValue && !(value == null || _.isFunction(value))) {
-            changes[changes.length++] = { 'destination': destination, 'key': key, 'value': value };
+            changes.push({ 'destination': destination, 'key': key, 'value': value });
           }
         });
       }
