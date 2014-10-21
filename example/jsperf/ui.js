@@ -229,18 +229,24 @@
         setHTML('user-agent', Benchmark.platform);
         setStatus(texts.status.ready);
 
-        // answer spammer question
-        $('question').value = 'no';
+	// avoid errors if comment form is not available
+	if ($('comment-form')) {
+	  // answer spammer question
+	  $('question').value = 'no';
 
-        // prefill author details
-        if (has.localStorage) {
-          _.each([$('author'), $('author-email'), $('author-url')], function(element) {
-            element.value = localStorage[element.id] || '';
-            element.oninput = element.onkeydown = function(event) {
-              event && event.type < 'k' && (element.onkeydown = null);
-              localStorage[element.id] = element.value;
-            };
-          });
+	  // prefill author details
+	  if (has.localStorage) {
+	    _.each(['author', 'author-email', 'author-url'], function(id) {
+	      var element = $(id);
+	      if (element) {
+		element.value = localStorage[id] || '';
+		element.oninput = element.onkeydown = function(event) {
+		  event && event.type < 'k' && (element.onkeydown = null);
+		  localStorage[id] = element.value;
+		};
+	      }
+	    });
+	  }
         }
         // show warning when Firebug is enabled (avoids showing for Firebug Lite)
         try {
