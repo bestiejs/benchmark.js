@@ -107,7 +107,7 @@
      */
     'start': function() {
         // call user provided init() function
-        if (isFunction(window.init)) {
+	if (_.isFunction(window.init)) {
           init();
         }
     }
@@ -197,7 +197,7 @@
         }
         if (has.runner) {
           // call user provided init() function
-          if (isFunction(window.init)) {
+	  if (_.isFunction(window.init)) {
             init();
           }
           // auto-run
@@ -375,17 +375,6 @@
    */
   function getHz(bench) {
     return 1 / (bench.stats.mean + bench.stats.moe);
-  }
-
-  /**
-   * Checks if a value has an internal [[Class]] of Function.
-   *
-   * @private
-   * @param {Mixed} value The value to check.
-   * @returns {boolean} Returns `true` if the value is a function, else `false`.
-   */
-  function isFunction(value) {
-    return toString.call(value) == '[object Function]';
   }
 
   /**
