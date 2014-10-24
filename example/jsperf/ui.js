@@ -594,6 +594,12 @@
    */
   ui.benchmarks = [];
 
+  // avoid errors if `ui.browserscope.js` is not included
+  ui.browserscope = {
+    'post': _.noop,
+    'render': _.noop
+  };
+
   /**
    * The parsed query parameters of the pages url hash.
    *
