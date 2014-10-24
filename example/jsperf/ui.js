@@ -395,11 +395,11 @@
         options = {};
 
     // juggle arguments
-    if (typeof text == 'object' && text) {
+    if (_.isPlainObject(text)) {
       options = text;
       text = options.text;
     }
-    else if (arguments.length) {
+    else if (_.isString(text)) {
       options.text = text;
     }
     if (!div) {
@@ -620,7 +620,7 @@
   window.ui = ui;
 
   // don't let users alert, confirm, prompt, or open new windows
-  window.alert = window.confirm = window.prompt = window.open = function() {};
+  window.alert = window.confirm = window.prompt = window.open = _.noop;
 
   // parse hash query params when it changes
   addListener(window, 'hashchange', handlers.window.hashchange);
@@ -729,13 +729,13 @@
   }
   else {
     // short circuit unusable methods
-    ui.render = function() {};
+    ui.render = _.noop;
     ui.off('start cycle complete');
-    setTimeout(function() {
+    _.defer(function() {
       ui.off();
-      ui.browserscope.post = function() {};
+      ui.browserscope.post = _.noop;
       _.invoke(ui.benchmarks, 'off');
-    }, 1);
+    });
   }
 
   /*--------------------------------------------------------------------------*/
