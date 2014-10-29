@@ -5,7 +5,7 @@
   "homepage": "http://benchmarkjs.com/",
   "license": "MIT",
   "main": "benchmark.js",
-  "keywords": "benchmark, performance, speed",
+  "keywords": ["benchmark", "performance", "speed"],
   "author": "Mathias Bynens <mathias@qiwi.be> (http://mathiasbynens.be/)",
   "contributors": [
     "Mathias Bynens <mathias@qiwi.be> (http://mathiasbynens.be/)",
