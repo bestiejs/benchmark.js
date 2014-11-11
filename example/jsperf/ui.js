@@ -395,7 +395,7 @@
         options = {};
 
     // juggle arguments
-    if (_.isPlainObject(text)) {
+    if (_.isObject(text)) {
       options = text;
       text = options.text;
     }
