@@ -211,7 +211,7 @@
 The Benchmark constructor.
 
 Note: The Benchmark constructor exposes a handful of Lo-Dash methods to make working with arrays, collections, and objects easier. The Lo-Dash methods are:<br>
-&#91;`each/forEach`&#93;(http://lodash.com/docs#forEach), &#91;`forOwn`&#93;(http://lodash.com/docs#forOwn), &#91;`has`&#93;(http://lodash.com/docs#has), &#91;`indexOf`&#93;(http://lodash.com/docs#indexOf), &#91;`map`&#93;(http://lodash.com/docs#map), &#91;`pluck`&#93;(http://lodash.com/docs#pluck), and &#91;`reduce`&#93;(http://lodash.com/docs#reduce)
+&#91;`each/forEach`&#93;(https://lodash.com/docs#forEach), &#91;`forOwn`&#93;(https://lodash.com/docs#forOwn), &#91;`has`&#93;(https://lodash.com/docs#has), &#91;`indexOf`&#93;(https://lodash.com/docs#indexOf), &#91;`map`&#93;(https://lodash.com/docs#map), &#91;`pluck`&#93;(https://lodash.com/docs#pluck), and &#91;`reduce`&#93;(https://lodash.com/docs#reduce)
 
 #### Arguments
 1. `name` *(string)*: A name to identify the benchmark.
@@ -1522,7 +1522,7 @@ The Event constructor.
 The Suite constructor.
 
 Note: Each Suite instance has a handful of wrapped Lo-Dash methods to make working with Suites easier. The wrapped Lo-Dash methods are:<br>
-&#91;`each/forEach`&#93;(http://lodash.com/docs#forEach), &#91;`indexOf`&#93;(http://lodash.com/docs#indexOf), &#91;`map`&#93;(http://lodash.com/docs#map), &#91;`pluck`&#93;(http://lodash.com/docs#pluck), and &#91;`reduce`&#93;(http://lodash.com/docs#reduce)
+&#91;`each/forEach`&#93;(https://lodash.com/docs#forEach), &#91;`indexOf`&#93;(https://lodash.com/docs#indexOf), &#91;`map`&#93;(https://lodash.com/docs#map), &#91;`pluck`&#93;(https://lodash.com/docs#pluck), and &#91;`reduce`&#93;(https://lodash.com/docs#reduce)
 
 #### Arguments
 1. `name` *(string)*: A name to identify the suite.
