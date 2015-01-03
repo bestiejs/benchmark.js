@@ -22,15 +22,10 @@
     : (isJava && root.load) || noop;
 
   /** The unit testing framework */
-  var QUnit = (function() {
-    return  root.QUnit || (
-      root.addEventListener || (root.addEventListener = noop),
-      root.setTimeout || (root.setTimeout = noop),
-      root.QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
-      addEventListener === noop && delete root.addEventListener,
-      root.QUnit
-    );
-  }());
+  var QUnit = root.QUnit || (root.QUnit = (
+    QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
+    QUnit = QUnit.QUnit || QUnit
+  ));
 
   /** Load and install QUnit Extras */
   var qa = load('../node_modules/qunit-extras/qunit-extras.js');
@@ -1291,10 +1286,16 @@
   /*--------------------------------------------------------------------------*/
 
   QUnit.config.asyncRetries = 10;
-  QUnit.config.hidepassed = true;
 
-  if (!document) {
+  if (document) {
+    QUnit.begin(function() {
+      QUnit.config.hidepassed = true;
+      document.getElementById('qunit-tests').className += ' hidepass';
+      document.getElementById('qunit-urlconfig-hidepassed').checked = true;
+    });
+  } else {
+    QUnit.config.hidepassed = true;
     QUnit.config.noglobals = true;
-    QUnit.start();
+    QUnit.load();
   }
 }.call(this));
