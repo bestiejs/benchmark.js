@@ -1,6 +1,6 @@
 # Benchmark.js v2.0.0-pre
 
-A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/ "Bulletproof JavaScript benchmarks") benchmarking library that works on nearly all JavaScript platforms, supports high-resolution timers, & returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
+A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/ "Bulletproof JavaScript benchmarks") benchmarking library that supports high-resolution timers & returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
 
 ## Documentation
 
@@ -97,7 +97,7 @@ suite.add('RegExp#test', function() {
 
 ## Support
 
-Tested in Chrome 38-39, Firefox 33-34, IE 6-11, Opera 25-26, Safari 5-8, Node.js 0.8.26~0.10.35, PhantomJS 1.9.8, RingoJS 0.11, & Rhino 1.7RC5.
+Tested in Chrome 38-39, Firefox 34-35, IE 6-11, Opera 25-26, Safari 5-8, Node.js 0.8.28 & 0.10.35, PhantomJS 1.9.8, RingoJS 0.11, & Rhino 1.7RC5.
 
 ## BestieJS
 
