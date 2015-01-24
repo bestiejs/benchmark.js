@@ -123,7 +123,7 @@
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(context) {
-    // exit early if unable to acquire Lo-Dash
+    // exit early if unable to acquire lodash
     var _ = context && context._ || req('lodash') || root._;
     if (!_) {
       Benchmark.runInContext = runInContext;
@@ -290,8 +290,8 @@
     /**
      * The Benchmark constructor.
      *
-     * Note: The Benchmark constructor exposes a handful of Lo-Dash methods to
-     * make working with arrays, collections, and objects easier. The Lo-Dash
+     * Note: The Benchmark constructor exposes a handful of lodash methods to
+     * make working with arrays, collections, and objects easier. The lodash
      * methods are:
      * [`each/forEach`](https://lodash.com/docs#forEach), [`forOwn`](https://lodash.com/docs#forOwn),
      * [`has`](https://lodash.com/docs#has), [`indexOf`](https://lodash.com/docs#indexOf),
@@ -441,8 +441,8 @@
     /**
      * The Suite constructor.
      *
-     * Note: Each Suite instance has a handful of wrapped Lo-Dash methods to
-     * make working with Suites easier. The wrapped Lo-Dash methods are:
+     * Note: Each Suite instance has a handful of wrapped lodash methods to
+     * make working with Suites easier. The wrapped lodash methods are:
      * [`each/forEach`](https://lodash.com/docs#forEach), [`indexOf`](https://lodash.com/docs#indexOf),
      * [`map`](https://lodash.com/docs#map), [`pluck`](https://lodash.com/docs#pluck),
      * and [`reduce`](https://lodash.com/docs#reduce)
@@ -2354,7 +2354,7 @@
       'support': support
     });
 
-    // Add Lo-Dash methods to Benchmark
+    // Add lodash methods to Benchmark
     _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
       Benchmark[methodName] = _[methodName];
     });
@@ -2802,7 +2802,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    // add Lo-Dash methods as Suite methods
+    // add lodash methods as Suite methods
     _.each(['each', 'forEach', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
       var func = _[methodName];
       Suite.prototype[methodName] = function() {

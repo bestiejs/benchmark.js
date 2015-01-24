@@ -13,7 +13,7 @@ A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks
 
 ## Installation
 
-Benchmark.js’ only hard dependency is [Lo-Dash](https://lodash.com/).
+Benchmark.js’ only hard dependency is [lodash](https://lodash.com/).
 Include [platform.js](http://mths.be/platform) to populate [Benchmark.platform](http://benchmarkjs.com/docs#platform).
 
 In a browser:
