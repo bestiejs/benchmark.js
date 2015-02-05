@@ -24,7 +24,6 @@
     "requirejs": "~2.1.15"
   },
   "files": [
-    "LICENSE.txt",
     "benchmark.js"
   ]
 }
