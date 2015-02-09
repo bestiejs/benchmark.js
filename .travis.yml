@@ -1,23 +1,27 @@
 language: node_js
 node_js:
-  - "0.10"
+  - "0.12"
 env:
   global:
     - BIN="node" ISTANBUL=false OPTION="" NPM_VERSION="^2.0.0"
     - secure: "XOINlYZG3DYXq5agQXvkad2MfnOO/+z40fn37RKfNuxNI5veBK7tPRcCIQ998o+NyVTpyd3NZhqkowCxAL8bp4HJ81SesRKQSaXoSzgV7CnloxLxcduiiRJ6lnxFGgCbpqyLxZHWr0mQugcLhs5nhiZ5Dnw6dZxYX/oKKvOomZA="
 matrix:
   include:
+    - node_js: "io.js"
+      env:
     - node_js: "0.8"
       env: NPM_VERSION="~1.4.0"
     - node_js: "0.10"
+      env:
+    - node_js: "0.12"
       env: ISTANBUL=true
-    - node_js: "0.10"
+    - node_js: "0.12"
       env: BIN="phantomjs"
-    - node_js: "0.10"
+    - node_js: "0.12"
       env: BIN="rhino"
-    - node_js: "0.10"
+    - node_js: "0.12"
       env: BIN="rhino" OPTION="-require"
-    - node_js: "0.10"
+    - node_js: "0.12"
       env: BIN="ringo"
 git:
   depth: 10
@@ -29,12 +33,12 @@ before_install:
   - "npm config set loglevel error"
   - "npm i -g npm@\"$NPM_VERSION\""
   - "git clone --depth=10 --branch=master git://github.com/lodash/lodash.git ./node_modules/lodash-compat && cd $_ && sed -i'' 's|\"lodash\"|\"lodash-compat\"|' ./package.json && npm i && cd ../../"
-  - "[ $ISTANBUL == false ] || npm i -g coveralls@\"^2.0.0\" istanbul@\"0.3.2\""
+  - "[ $ISTANBUL == false ] || npm i -g coveralls@\"^2.0.0\" istanbul@\"0.3.5\""
   - "[ $BIN != 'rhino' ] || (sudo mkdir /opt/rhino-1.7R5 && sudo wget -O $_/js.jar http://benchmarkjs.com/_travis/rhino-1.7R5.jar)"
   - "[ $BIN != 'rhino' ] || (echo -e '#!/bin/sh\\njava -jar /opt/rhino-1.7R5/js.jar $@' | sudo tee /usr/local/bin/rhino && sudo chmod +x /usr/local/bin/rhino)"
   - "[ $BIN != 'ringo' ] || (wget http://benchmarkjs.com/_travis/ringojs-0.11.zip && sudo unzip ringojs-0.11 -d /opt && rm ringojs-0.11.zip)"
   - "[ $BIN != 'ringo' ] || (sudo ln -s /opt/ringojs-0.11/bin/ringo /usr/local/bin/ringo && sudo chmod +x $_)"
 script:
-  - "([ $ISTANBUL == true ] && istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
-  - "[ $ISTANBUL == true ] || cd ./test" 
-  - "[ $ISTANBUL == true ] || $BIN $OPTION ./test.js"
+  - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage)"
+  - "[ $ISTANBUL == true ]  || cd ./test" 
+  - "[ $ISTANBUL == true ]  || $BIN $OPTION ./test.js"
