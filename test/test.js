@@ -1,53 +1,53 @@
 ;(function() {
 
-  /** Used as a safe reference for `undefined` in pre ES5 environments */
+  /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
 
-  /** Used as a reference to the global object */
+  /** Used as a reference to the global object. */
   var root = (typeof global == 'object' && global) || this;
 
-  /** Method and object shortcuts */
+  /** Method and object shortcuts. */
   var phantom = root.phantom,
       amd = root.define && define.amd,
       document = !phantom && root.document,
       noop = function() {},
       slice = Array.prototype.slice;
 
-  /** Detect if running in Java */
+  /** Detect if running in Java. */
   var isJava = !document && !!root.java;
 
-  /** Use a single "load" function */
+  /** Use a single "load" function. */
   var load = (typeof require == 'function' && !amd)
     ? require
     : (isJava && root.load) || noop;
 
-  /** The unit testing framework */
+  /** The unit testing framework. */
   var QUnit = root.QUnit || (root.QUnit = (
     QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
     QUnit = QUnit.QUnit || QUnit
   ));
 
-  /** Load and install QUnit Extras */
+  /** Load QUnit Extras. */
   var qa = load('../node_modules/qunit-extras/qunit-extras.js');
   if (qa) {
     qa.runInContext(root);
   }
 
-  /** The `lodash` utility function */
+  /** The `lodash` utility function. */
   var _ = root._ || (root._ = (
     _ = load('../node_modules/lodash-compat/lodash.js') || root._,
     _ = _._ || _,
     _.runInContext(root)
   ));
 
-  /** The `Benchmark` constructor to test */
+  /** The `Benchmark` constructor to test. */
   var Benchmark = root.Benchmark || (root.Benchmark = (
     Benchmark = load('../benchmark.js') || root.Benchmark,
     Benchmark = Benchmark.Benchmark || Benchmark,
     Benchmark.runInContext(root)
   ));
 
-  /** Used to create dummy benchmarks for comparisons */
+  /** Used to create dummy benchmarks for comparisons. */
   var benchData = {
     'hz': 1000,
     'count': 10,
@@ -62,6 +62,12 @@
       'variance': 0
     }
   };
+
+  // Init Benchmark.options.minTime.
+  Benchmark(function() { throw 0; }).run();
+
+  // Set a shorter max time.
+  Benchmark.options.maxTime = Benchmark.options.minTime * 5;
 
   /*--------------------------------------------------------------------------*/
 
@@ -80,14 +86,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  // init Benchmark.options.minTime
-  Benchmark(function() { throw 0; }).run();
-
-  // set a shorter max time
-  Benchmark.options.maxTime = Benchmark.options.minTime * 5;
-
-  // explicitly call `QUnit.module()` instead of `module()`
-  // in case we are in a CLI environment
   QUnit.module('Benchmark');
 
   (function() {
