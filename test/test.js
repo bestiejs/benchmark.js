@@ -35,7 +35,7 @@
 
   /** The `lodash` utility function. */
   var _ = root._ || (root._ = (
-    _ = load('../node_modules/lodash-compat/lodash.js') || root._,
+    _ = load('../node_modules/lodash-compat/index.js') || root._,
     _ = _._ || _,
     _.runInContext(root)
   ));
