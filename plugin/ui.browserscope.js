@@ -182,7 +182,7 @@
    */
   function setHTML(element, html, object) {
     if ((element = query(element)[0])) {
-      element.innerHTML = _.template(html, object || {});
+      element.innerHTML = _.template(html)(object || {});
     }
     return element;
   }
@@ -626,14 +626,13 @@
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},${refresh}*1e3)},' +
         '_bT=setTimeout(function(){_bC=function(){};render()},${timeout}*1e3)' +
         '}<\/script>' +
-        '<script src=//www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>',
-        {
-          'doctype': doctype,
-          'key': me.key,
-          'refresh': me.timings.refresh,
-          'timeout': me.timings.timeout
-        }
-      ));
+        '<script src=//www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>'
+      )({
+        'doctype': doctype,
+        'key': me.key,
+        'refresh': me.timings.refresh,
+        'timeout': me.timings.timeout
+      }));
       // avoid the IE spinner of doom
       // http://www.google.com/search?q=IE+throbber+of+doom
       idoc.close();
@@ -1022,13 +1021,12 @@
       '<span>Browserscope</span></a></h1>' +
       '<div class=bs-rt><div id=bs-chart></div></div>' +
       '</div>' +
-      '</body></html>',
-      {
-        'doctype': doctype,
-        'href': href,
-        'key': key
-      }
-    ));
+      '</body></html>'
+    )({
+      'doctype': doctype,
+      'href': href,
+      'key': key
+    }));
     // avoid the IE spinner of doom
     // http://www.google.com/search?q=IE+throbber+of+doom
     idoc.close();

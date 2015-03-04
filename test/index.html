@@ -15,8 +15,8 @@
 		<div id="qunit"></div>
 		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
 		<script src="../node_modules/qunit-extras/qunit-extras.js"></script>
-		<script src="../node_modules/lodash-compat/lodash.js"></script>
-		<script src="../node_modules/platform.js/platform.js"></script>
+		<script src="../node_modules/lodash-compat/index.js"></script>
+		<script src="../node_modules/platform/platform.js"></script>
 		<script>
 			QUnit.config.hidepassed = true;
 			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
@@ -66,11 +66,11 @@
 						{
 							'name': 'lodash',
 							'location': '../node_modules/lodash-compat',
-							'main': 'lodash'
+							'main': 'index'
 						},
 						{
 							'name': 'platform',
-							'location': '../node_modules/platform.js',
+							'location': '../node_modules/platform',
 							'main': 'platform'
 						},
 						{
