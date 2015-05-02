@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "qunit-extras": "~1.4.0",
-    "qunitjs": "~1.17.0",
+    "qunitjs": "~1.18.0",
     "requirejs": "~2.1.0"
   },
   "files": [
