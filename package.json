@@ -24,6 +24,7 @@
     "requirejs": "~2.1.0"
   },
   "files": [
-    "benchmark.js"
+    "benchmark.js",
+    "nano.jar"
   ]
 }
