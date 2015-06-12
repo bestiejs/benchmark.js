@@ -1,6 +1,5 @@
 {
   "name": "benchmark.js",
-  "version": "2.0.0-pre",
   "main": "benchmark.js",
   "dependencies": {
     "lodash": "3.0.0",
