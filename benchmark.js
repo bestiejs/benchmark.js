@@ -38,7 +38,7 @@
   /** Detect free variable `require`. */
   var freeRequire = typeof require == 'function' && require;
 
-  /** Used to assign each benchmark an incrimented id. */
+  /** Used to assign each benchmark an incremented id. */
   var counter = 0;
 
   /** Detect the popular CommonJS extension `module.exports`. */
@@ -1440,7 +1440,7 @@
       function getZ(u) {
         return (u - ((size1 * size2) / 2)) / sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
       }
-      // Reject the null hyphothesis the two samples come from the
+      // Reject the null hypothesis the two samples come from the
       // same population (i.e. have the same median) if...
       if (size1 + size2 > 30) {
         // ...the z-stat is greater than 1.96 or less than -1.96
@@ -2085,7 +2085,7 @@
           if (!clocked && (divisor = divisors[clone.cycles]) != null) {
             count = floor(4e6 / divisor);
           }
-          // Calculate how many more iterations it will take to achive the `minTime`.
+          // Calculate how many more iterations it will take to achieve the `minTime`.
           if (count <= clone.count) {
             count += Math.ceil((minTime - clocked) / period);
           }

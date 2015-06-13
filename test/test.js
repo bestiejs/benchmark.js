@@ -140,7 +140,7 @@
       ok(bench.fn && bench.name == 'foo' && bench.id == 'bar');
     });
 
-    test('supports passing an empy string for the "fn" options property', function() {
+    test('supports passing an empty string for the "fn" options property', function() {
       var bench = Benchmark({ 'fn': '' }).run();
       ok(!bench.error);
     });
@@ -831,7 +831,7 @@
   QUnit.module('Benchmark.Suite#abort');
 
   (function() {
-    test('igores abort calls when the suite isn\'t running', function() {
+    test('ignores abort calls when the suite isn\'t running', function() {
       var fired = false;
       var suite = Benchmark.Suite('suite', {
         'onAbort': function() { fired = true; }
