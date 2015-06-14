@@ -208,6 +208,71 @@
         ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
       }
     });
+
+    test('compiles without use strict if strict is not set', function() {
+      // (backwards compatibility)
+      var bench = Benchmark({
+        'setup': 'var a = 1;',
+        'fn': 'throw a;',
+        'teardown': 'a = 2;'
+      }).run();
+
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest();
+      }
+      else {
+        ok(!/use strict/.test(compiled));
+      }
+    });
+
+    test('compiles with use strict if strict is true', function() {
+      var bench = Benchmark({
+        'strict': true,
+        'setup': 'var a = 1;',
+        'fn': 'throw a;',
+        'teardown': 'a = 2;'
+      }).run();
+
+      var compiled = bench.compiled;
+      if (/setup\(\)/.test(compiled)) {
+        skipTest();
+      }
+      else {
+        // "use strict"; should be the first statement in the generated anonymous function
+        ok(/^\s*function[^{]*\{\s*["']use strict["']\s*;/.test(compiled));
+        ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
+      }
+    });
+
+    test('strict mode should be enabled if strict is true', function() {
+      'use strict';
+
+      var strictSupported;
+      try {
+        NaN = 123;
+        strictSupported = false;
+      } catch(err) {
+        strictSupported = true;
+      }
+
+      var error = false;
+      if (!strictSupported) {
+        skipTest();
+      }
+      else {
+        Benchmark({
+          'strict': true,
+          'fn': 'NaN = 123',
+          'onError': function () {
+            error = true;
+          }
+        }).run();
+
+        ok(error);
+      }
+    });
+
   }());
 
   /*--------------------------------------------------------------------------*/
