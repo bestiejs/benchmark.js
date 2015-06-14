@@ -38,6 +38,6 @@ before_install:
   - "[ $BIN != 'ringo' ] || (wget http://benchmarkjs.com/_travis/ringojs-0.11.zip && sudo unzip ringojs-0.11 -d /opt && rm ringojs-0.11.zip)"
   - "[ $BIN != 'ringo' ] || (sudo ln -s /opt/ringojs-0.11/bin/ringo /usr/local/bin/ringo && sudo chmod +x $_)"
 script:
-  - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage)"
+  - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
   - "[ $ISTANBUL == true ]  || cd ./test" 
   - "[ $ISTANBUL == true ]  || $BIN $OPTION ./test.js"
