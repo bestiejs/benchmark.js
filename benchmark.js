@@ -124,7 +124,7 @@
    */
   function runInContext(context) {
     // Exit early if unable to acquire lodash.
-    var _ = context && context._ || req('lodash') || root._;
+    var _ = context && context._ || req('lodash-compat') || req('lodash') || root._;
     if (!_) {
       Benchmark.runInContext = runInContext;
       return Benchmark;
