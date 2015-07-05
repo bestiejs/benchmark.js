@@ -1847,7 +1847,7 @@
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
-      timer = _.min(timers, 'res');
+      timer = (_.minBy || _.min)(timers, 'res');
 
       // Remove unused applet.
       if (timer.unit != 'ns' && applet) {
