@@ -1818,8 +1818,8 @@
       /*----------------------------------------------------------------------*/
 
       // Detect nanosecond support from a Java applet.
-      _.each(doc && doc.applets || [], function(element) {
-        return !(timer.ns = applet = 'nanoTime' in element && element);
+      _.find(doc && doc.applets || [], function(element) {
+        return timer.ns = applet = 'nanoTime' in element && element;
       });
 
       // Check type in case Safari returns an object instead of a number.
