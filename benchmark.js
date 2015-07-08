@@ -1818,7 +1818,7 @@
       /*----------------------------------------------------------------------*/
 
       // Detect nanosecond support from a Java applet.
-      _.find(doc && doc.applets || [], function(element) {
+      _.find(doc && _.union(doc.applets, doc.embeds, doc.getElementsByTagName('object')) || [], function(element) {
         return timer.ns = applet = 'nanoTime' in element && element;
       });
 
