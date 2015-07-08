@@ -27,7 +27,7 @@ In a browser:
 Optionally, expose Java’s nanosecond timer by adding the `nano` applet to the `<body>`:
 
 ```html
-<applet code="nano" archive="nano.jar"></applet>
+<applet code="nano" archive="nano.jar" permissions="sandbox"></applet>
 ```
 
 Or enable Chrome’s microsecond timer by using the [command line switch](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking):
