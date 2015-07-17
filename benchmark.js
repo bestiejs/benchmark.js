@@ -218,14 +218,6 @@
       support.timeout = isHostType(context, 'setTimeout') && isHostType(context, 'clearTimeout');
 
       /**
-       * Detect if `Array#unshift` returns the new length of the array (all but IE < 8).
-       *
-       * @memberOf Benchmark.support
-       * @type boolean
-       */
-      support.unshiftResult = !![].unshift(1);
-
-      /**
        * Detect if function decompilation is support.
        *
        * @name decompilation
@@ -2813,30 +2805,28 @@
 
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
-    if (!_.support.spliceObjects) {
-      _.each(['pop', 'shift', 'splice'], function(methodName) {
-        var func = arrayRef[methodName];
+    _.each(['pop', 'shift', 'splice'], function(methodName) {
+      var func = arrayRef[methodName];
 
-        Suite.prototype[methodName] = function() {
-          var value = this,
-              result = func.apply(value, arguments);
+      Suite.prototype[methodName] = function() {
+        var value = this,
+            result = func.apply(value, arguments);
 
-          if (value.length === 0) {
-            delete value[0];
-          }
-          return result;
-        };
-      });
-    }
+        if (value.length === 0) {
+          delete value[0];
+        }
+        return result;
+      };
+    });
+
     // Avoid buggy `Array#unshift` in IE < 8 which doesn't return the new
     // length of the array.
-    if (!support.unshiftResult) {
-      Suite.prototype.unshift = function() {
-        var value = this;
-        unshift.apply(value, arguments);
-        return value.length;
-      };
-    }
+    Suite.prototype.unshift = function() {
+      var value = this;
+      unshift.apply(value, arguments);
+      return value.length;
+    };
+
     return Benchmark;
   }
 

@@ -964,7 +964,7 @@
       deepEqual(slice.call(suite), []);
     });
 
-    test('should have no elements when length is 0 after shift', function() {
+    test('should have no elements when length is `0` after shift', function() {
       var suite = Benchmark.Suite();
       suite[0] = 0;
       suite.length = 1;
@@ -981,17 +981,6 @@
   QUnit.module('Benchmark.Suite#splice');
 
   (function() {
-    test('should have no elements when length is 0 after splice', function() {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite.length = 1
-      suite.splice(0, 1);
-
-      // ensure element is removed
-      equal('0' in suite, false);
-      equal(suite.length, 0);
-    });
-
     test('works with positive `start` argument', function() {
       var suite = Benchmark.Suite();
       suite[0] = 0;
@@ -1045,6 +1034,17 @@
       var actual = suite.splice(0, -10, 1, 2);
       deepEqual(actual, []);
       deepEqual(slice.call(suite), [1, 2, 0, 3]);
+    });
+
+    test('should have no elements when length is `0` after splice', function() {
+      var suite = Benchmark.Suite();
+      suite[0] = 0;
+      suite.length = 1
+      suite.splice(0, 1);
+
+      // ensure element is removed
+      equal('0' in suite, false);
+      equal(suite.length, 0);
     });
   }());
 
