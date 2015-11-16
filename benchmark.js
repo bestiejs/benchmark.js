@@ -202,14 +202,6 @@
       support.browser = doc && isHostType(context, 'navigator') && !isHostType(context, 'phantom');
 
       /**
-       * Detect if Java is enabled/exposed.
-       *
-       * @memberOf Benchmark.support
-       * @type boolean
-       */
-      support.java = isClassOf(context.java, 'JavaPackage');
-
-      /**
        * Detect if the Timers API exists.
        *
        * @memberOf Benchmark.support
@@ -1558,8 +1550,7 @@
      * @returns {number} The time taken.
      */
     function clock() {
-      var applet,
-          options = Benchmark.options,
+      var options = Benchmark.options,
           templateData = {},
           timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }];
 
@@ -1582,16 +1573,6 @@
         // Init `minTime` if needed.
         clone.minTime = bench.minTime || (bench.minTime = bench.options.minTime = options.minTime);
 
-        // Repair nanosecond timer.
-        // Some Chrome builds erase the `ns` variable after millions of executions.
-        if (applet) {
-          try {
-            timer.ns.nanoTime();
-          } catch(e) {
-            // Use non-element to avoid issues with libs that augment them.
-            timer.ns = new applet.Packages.nano;
-          }
-        }
         // Compile in setup/teardown functions and the test loop.
         // Create a new compiled test, instead of using the cached `bench.compiled`,
         // to avoid potential engine optimizations enabled over the life of the test.
@@ -1809,18 +1790,6 @@
 
       /*----------------------------------------------------------------------*/
 
-      // Detect nanosecond support from a Java applet.
-      _.find(doc && _.union(doc.applets, doc.embeds, doc.getElementsByTagName('object')) || [], function(element) {
-        return timer.ns = applet = 'nanoTime' in element && element;
-      });
-
-      // Check type in case Safari returns an object instead of a number.
-      try {
-        if (typeof timer.ns.nanoTime() == 'number') {
-          timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
-        }
-      } catch(e) {}
-
       // Detect Chrome's microsecond timer:
       // enable benchmarking via the --enable-benchmarking command
       // line switch in at least Chrome 7 to use chrome.Interval
@@ -1841,10 +1810,6 @@
       // Pick timer with highest resolution.
       timer = (_.minBy || _.min)(timers, 'res');
 
-      // Remove unused applet.
-      if (timer.unit != 'ns' && applet) {
-        applet = destroyElement(applet);
-      }
       // Error if there are no working timers.
       if (timer.res == Infinity) {
         throw new Error('Benchmark.js was unable to find a working timer.');
