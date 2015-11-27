@@ -1668,17 +1668,10 @@
 
         // Use API of chosen timer.
         if (timer.unit == 'ns') {
-          if (timer.ns.nanoTime) {
-            _.assign(templateData, {
-              'begin': interpolate('s#=n#.nanoTime()'),
-              'end': interpolate('r#=(n#.nanoTime()-s#)/1e9')
-            });
-          } else {
-            _.assign(templateData, {
-              'begin': interpolate('s#=n#()'),
-              'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
-            });
-          }
+          _.assign(templateData, {
+            'begin': interpolate('s#=n#()'),
+            'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
+          });
         }
         else if (timer.unit == 'us') {
           if (timer.ns.stop) {
@@ -1749,14 +1742,9 @@
           }
           else if (unit == 'ns') {
             divisor = 1e9;
-            if (ns.nanoTime) {
-              begin = ns.nanoTime();
-              while (!(measured = ns.nanoTime() - begin)) {}
-            } else {
-              begin = (begin = ns())[0] + (begin[1] / divisor);
-              while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) {}
-              divisor = 1;
-            }
+            begin = (begin = ns())[0] + (begin[1] / divisor);
+            while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) {}
+            divisor = 1;
           }
           else if (ns.now) {
             begin = ns.now();
@@ -1766,8 +1754,7 @@
             begin = new ns().getTime();
             while (!(measured = new ns().getTime() - begin)) {}
           }
-          // Check for broken timers (`nanoTime` may have issues).
-          // For more information see http://alivebutsleepy.srnet.cz/unreliable-system-nanotime/.
+          // Check for broken timers.
           if (measured > 0) {
             sample.push(measured);
           } else {
