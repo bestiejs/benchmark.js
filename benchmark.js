@@ -742,7 +742,6 @@
      * @memberOf Benchmark
      * @param {Array} array The array to iterate over.
      * @param {Function|string} callback The function/alias called per iteration.
-     * @param {*} thisArg The `this` binding for the callback.
      * @returns {Array} A new array of values that passed callback filter.
      * @example
      *
@@ -760,7 +759,7 @@
      * // get benchmarks that completed without erroring
      * Benchmark.filter(benches, 'successful');
      */
-    function filter(array, callback, thisArg) {
+    function filter(array, callback) {
       if (callback === 'successful') {
         // Callback to exclude those that are errored, unrun, or have hz of Infinity.
         callback = function(bench) {
@@ -778,7 +777,7 @@
           return result[0].compare(bench) == 0;
         });
       }
-      return _.filter(array, callback, thisArg);
+      return _.filter(array, callback);
     }
 
     /**
