@@ -4,12 +4,6 @@
 		<meta charset="utf-8">
 		<title>Benchmark.js Test Suite</title>
 		<link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
-		<style>
-			applet {
-				position: absolute;
-				left: -9999em;
-			}
-		</style>
 	</head>
 	<body>
 		<div id="qunit"></div>
@@ -19,24 +13,7 @@
 		<script src="../node_modules/platform/platform.js"></script>
 		<script>
 			QUnit.config.hidepassed = true;
-			QUnit.urlParams.nojava = /[?&]nojava=true(?:&|$)/.test(location.search);
 			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
-
-			(function() {
-				if (QUnit.urlParams.nojava) {
-					return;
-				}
-				var measured,
-				    perfNow,
-				    begin = new Date;
-
-				// Is the applet really needed?
-				while (!(measured = new Date - begin)) {}
-				if (measured != 1 && !((perfNow = window.performance) && typeof (perfNow.now || perfNow.webkitNow) == 'function')) {
-					// Load the nano applet.
-					document.write('<applet code="nano" archive="../nano.jar"></applet>');
-				}
-			}());
 
 			// Load test.js if not using require.js.
 			document.write(QUnit.urlParams.norequire

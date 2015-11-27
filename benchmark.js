@@ -53,8 +53,8 @@
   /** Used to assign default `context` object properties. */
   var contextProps = [
     'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String', '_',
-    'clearTimeout', 'chrome', 'chromium', 'document', 'java', 'navigator',
-    'phantom', 'platform', 'process', 'runtime', 'setTimeout'
+    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator', 'phantom',
+    'platform', 'process', 'runtime', 'setTimeout'
   ];
 
   /** Used to avoid hz of Infinity. */
@@ -1527,7 +1527,7 @@
           id = bench.id,
           stats = bench.stats,
           size = stats.sample.length,
-          pm = support.java ? '+/-' : '\xb1',
+          pm = '\xb1',
           result = bench.name || (_.isNaN(id) ? id : '<Test #' + id + '>');
 
       if (error) {

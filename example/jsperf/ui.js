@@ -6,9 +6,6 @@
  */
 (function(window, document) {
 
-  /** Java applet archive path */
-  var archive = '../../nano.jar';
-
   /** Cache of error messages */
   var errors = [];
 
@@ -692,28 +689,6 @@
       bodyStyle.height = bodyHeight;
       htmlStyle.height = htmlHeight;
       html.scrollTop = scrollTop;
-    }());
-
-    // inject nano applet
-    // (assumes ui.js is just before </body>)
-    (function() {
-      if ('nojava' in ui.params) {
-        addClass('java', classNames.show);
-        return;
-      }
-      if (typeof Date.now == 'function') {
-        return;
-      }
-      var measured,
-          begin = new Date;
-
-      // is the applet really needed?
-      while (!(measured = new Date - begin)) {}
-      if (measured != 1) {
-        // load applet using innerHTML to avoid an alert in some versions of IE6
-        document.body.insertBefore(setHTML(createElement('div'),
-          '<applet code=nano archive=' + archive + '>').lastChild, document.body.firstChild);
-      }
     }());
 
     // catch and display errors from the "preparation code"
