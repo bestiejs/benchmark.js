@@ -1,82 +1,82 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>Benchmark.js Test Suite</title>
-		<link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
-	</head>
-	<body>
-		<div id="qunit"></div>
-		<script src="../node_modules/qunitjs/qunit/qunit.js"></script>
-		<script src="../node_modules/qunit-extras/qunit-extras.js"></script>
-		<script src="../node_modules/lodash-compat/index.js"></script>
-		<script src="../node_modules/platform/platform.js"></script>
-		<script>
-			QUnit.config.hidepassed = true;
-			QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
+  <head>
+    <meta charset="utf-8">
+    <title>Benchmark.js Test Suite</title>
+    <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
+  </head>
+  <body>
+    <div id="qunit"></div>
+    <script src="../node_modules/qunitjs/qunit/qunit.js"></script>
+    <script src="../node_modules/qunit-extras/qunit-extras.js"></script>
+    <script src="../node_modules/lodash-compat/index.js"></script>
+    <script src="../node_modules/platform/platform.js"></script>
+    <script>
+      QUnit.config.hidepassed = true;
+      QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
-			// Load test.js if not using require.js.
-			document.write(QUnit.urlParams.norequire
-				? '<script src="../benchmark.js"><\/script><script src="test.js"><\/script>'
-				: '<script src="../node_modules/requirejs/require.js"><\/script>'
-			);
-		</script>
-		<script>
-			var benchmarkModule;
+      // Load test.js if not using require.js.
+      document.write(QUnit.urlParams.norequire
+        ? '<script src="../benchmark.js"><\/script><script src="test.js"><\/script>'
+        : '<script src="../node_modules/requirejs/require.js"><\/script>'
+      );
+    </script>
+    <script>
+      var benchmarkModule;
 
-			(function() {
-				if (!window.require) {
-					return;
-				}
-				QUnit.config.autostart = false;
+      (function() {
+        if (!window.require) {
+          return;
+        }
+        QUnit.config.autostart = false;
 
-				requirejs.config({
-					'baseUrl': './',
-					'urlArgs': 't=' + (+new Date),
-					'waitSeconds': 0,
-					'packages': [
-						{
-							'name': 'benchmark',
-							'location': '..',
-							'main': 'benchmark'
-						},
-						{
-							'name': 'lodash',
-							'location': '../node_modules/lodash-compat',
-							'main': 'index'
-						},
-						{
-							'name': 'platform',
-							'location': '../node_modules/platform',
-							'main': 'platform'
-						},
-						{
-							'name': 'test',
-							'location': '.',
-							'main': 'test'
-						}
-					]
-				});
+        requirejs.config({
+          'baseUrl': './',
+          'urlArgs': 't=' + (+new Date),
+          'waitSeconds': 0,
+          'packages': [
+            {
+              'name': 'benchmark',
+              'location': '..',
+              'main': 'benchmark'
+            },
+            {
+              'name': 'lodash',
+              'location': '../node_modules/lodash-compat',
+              'main': 'index'
+            },
+            {
+              'name': 'platform',
+              'location': '../node_modules/platform',
+              'main': 'platform'
+            },
+            {
+              'name': 'test',
+              'location': '.',
+              'main': 'test'
+            }
+          ]
+        });
 
-				// Load Benchmark as a module.
-				require(['benchmark'], function(Benchmark) {
-					benchmarkModule = window.Benchmark = Benchmark;
-					require(['test'], function() {
-						QUnit.start();
-					});
-				});
-			}());
+        // Load Benchmark as a module.
+        require(['benchmark'], function(Benchmark) {
+          benchmarkModule = window.Benchmark = Benchmark;
+          require(['test'], function() {
+            QUnit.start();
+          });
+        });
+      }());
 
-			// Set a more readable browser name.
-			window.onload = function() {
-				var timeoutId = setInterval(function() {
-					var ua = document.getElementById('qunit-userAgent');
-					if (ua && (benchmarkModule || !window.require)) {
-						ua.innerHTML = platform;
-						clearInterval(timeoutId);
-					}
-				}, 16);
-			};
-		</script>
-	</body>
+      // Set a more readable browser name.
+      window.onload = function() {
+        var timeoutId = setInterval(function() {
+          var ua = document.getElementById('qunit-userAgent');
+          if (ua && (benchmarkModule || !window.require)) {
+            ua.innerHTML = platform;
+            clearInterval(timeoutId);
+          }
+        }, 16);
+      };
+    </script>
+  </body>
 </html>
