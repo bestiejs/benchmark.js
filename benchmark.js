@@ -467,7 +467,7 @@
       var suite = this;
 
       // Allow instance creation without the `new` operator.
-      if (suite == null || suite.constructor != Suite) {
+      if (!(suite instanceof Suite)) {
         return new Suite(name, options);
       }
       // Juggle arguments.
