@@ -933,7 +933,6 @@
           ? index
           : (index = false);
       }
-
       // Juggle arguments.
       if (_.isString(name)) {
         // 2 arguments (array, name).
@@ -945,7 +944,6 @@
         args = _.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
       }
-
       // Start iterating over the array.
       if (raiseIndex() !== false) {
         // Emit "start" event.
@@ -1977,7 +1975,6 @@
         deferred = clone;
         clone = clone.benchmark;
       }
-
       var clocked,
           cycles,
           divisor,
@@ -2008,7 +2005,6 @@
           }
         }
       }
-
       // Continue, if not errored.
       if (clone.running) {
         // Compute the time taken to complete last test cycle.
@@ -2799,17 +2795,15 @@
 
     // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
     if (freeExports && freeModule) {
-      // Export for Node.js or RingoJS.
+      // Export for Node.js.
       if (moduleExports) {
         (freeModule.exports = Benchmark).Benchmark = Benchmark;
       }
-      // Export for Rhino with CommonJS support.
-      else {
-        freeExports.Benchmark = Benchmark;
-      }
+      // Export for CommonJS support.
+      freeExports.Benchmark = Benchmark;
     }
     else {
-      // Export for a browser or Rhino.
+      // Export to the global object.
       root.Benchmark = Benchmark;
     }
   }
