@@ -355,7 +355,7 @@
       var bench = this;
 
       // Allow instance creation without the `new` operator.
-      if (bench == null || bench.constructor != Benchmark) {
+      if (!(bench instanceof Benchmark)) {
         return new Benchmark(name, fn, options);
       }
       // Juggle arguments.
@@ -396,7 +396,7 @@
      */
     function Deferred(clone) {
       var deferred = this;
-      if (deferred == null || deferred.constructor != Deferred) {
+      if (!(deferred instanceof Deferred)) {
         return new Deferred(clone);
       }
       deferred.benchmark = clone;
@@ -415,9 +415,9 @@
       if (type instanceof Event) {
         return type;
       }
-      return (event == null || event.constructor != Event)
-        ? new Event(type)
-        : _.assign(event, { 'timeStamp': _.now() }, typeof type == 'string' ? { 'type': type } : type);
+      return (event instanceof Event)
+        ? _.assign(event, { 'timeStamp': _.now() }, typeof type == 'string' ? { 'type': type } : type)
+        : new Event(type);
     }
 
     /**
@@ -914,7 +914,7 @@
       function isAsync(object) {
         // Avoid using `instanceof` here because of IE memory leak issues with host objects.
         var async = args[0] && args[0].async;
-        return Object(object).constructor == Benchmark && name == 'run' &&
+        return name == 'run' && (object instanceof Benchmark) &&
           ((async == null ? object.options.async : async) && support.timeout || object.defer);
       }
 
@@ -955,7 +955,7 @@
         options.onStart.call(benches, Event(eventProps));
 
         // End early if the suite was aborted in an "onStart" listener.
-        if (benches.aborted && benches.constructor == Suite && name == 'run') {
+        if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
           // Emit "cycle" event.
           eventProps.type = 'cycle';
           options.onCycle.call(benches, Event(eventProps));
