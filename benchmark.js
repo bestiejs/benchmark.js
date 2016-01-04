@@ -277,8 +277,7 @@
      * methods are:
      * [`each/forEach`](https://lodash.com/docs#forEach), [`forOwn`](https://lodash.com/docs#forOwn),
      * [`has`](https://lodash.com/docs#has), [`indexOf`](https://lodash.com/docs#indexOf),
-     * [`map`](https://lodash.com/docs#map), [`pluck`](https://lodash.com/docs#pluck),
-     * and [`reduce`](https://lodash.com/docs#reduce)
+     * [`map`](https://lodash.com/docs#map), and [`reduce`](https://lodash.com/docs#reduce)
      *
      * @constructor
      * @param {string} name A name to identify the benchmark.
@@ -426,8 +425,7 @@
      * Note: Each Suite instance has a handful of wrapped lodash methods to
      * make working with Suites easier. The wrapped lodash methods are:
      * [`each/forEach`](https://lodash.com/docs#forEach), [`indexOf`](https://lodash.com/docs#indexOf),
-     * [`map`](https://lodash.com/docs#map), [`pluck`](https://lodash.com/docs#pluck),
-     * and [`reduce`](https://lodash.com/docs#reduce)
+     * [`map`](https://lodash.com/docs#map), and [`reduce`](https://lodash.com/docs#reduce)
      *
      * @constructor
      * @memberOf Benchmark
@@ -2293,7 +2291,7 @@
     });
 
     // Add lodash methods to Benchmark.
-    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
+    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'], function(methodName) {
       Benchmark[methodName] = _[methodName];
     });
 
@@ -2741,7 +2739,7 @@
     /*------------------------------------------------------------------------*/
 
     // Add lodash methods as Suite methods.
-    _.each(['each', 'forEach', 'indexOf', 'map', 'pluck', 'reduce'], function(methodName) {
+    _.each(['each', 'forEach', 'indexOf', 'map', 'reduce'], function(methodName) {
       var func = _[methodName];
       Suite.prototype[methodName] = function() {
         var args = [this];
