@@ -4,7 +4,7 @@ node_js:
   - "5"
 env:
   global:
-    - BIN="node" ISTANBUL=false NPM_VERSION="^2.0.0"
+    - BIN="node" ISTANBUL=false
     - secure: "XOINlYZG3DYXq5agQXvkad2MfnOO/+z40fn37RKfNuxNI5veBK7tPRcCIQ998o+NyVTpyd3NZhqkowCxAL8bp4HJ81SesRKQSaXoSzgV7CnloxLxcduiiRJ6lnxFGgCbpqyLxZHWr0mQugcLhs5nhiZ5Dnw6dZxYX/oKKvOomZA="
   matrix:
     -
@@ -12,8 +12,6 @@ env:
     - BIN="phantomjs"
 matrix:
   include:
-    - node_js: "0.8"
-      env: NPM_VERSION="~1.4.0"
     - node_js: "0.10"
       env:
     - node_js: "0.12"
@@ -28,7 +26,7 @@ branches:
 before_install:
   - "nvm use $TRAVIS_NODE_VERSION"
   - "npm config set loglevel error"
-  - "npm i -g npm@\"$NPM_VERSION\""
+  - "npm i -g npm@\"^2.0.0\""
 script:
   - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
   - "[ $ISTANBUL == true ]  || cd ./test" 
