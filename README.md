@@ -52,7 +52,7 @@ var Benchmark = require('benchmark');
 Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
 
 ```bash
-npm install microtime
+npm i --save microtime
 ```
 
 Usage example:
