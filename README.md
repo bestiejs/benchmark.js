@@ -24,12 +24,6 @@ In a browser:
 <script src="benchmark.js"></script>
 ```
 
-Optionally, enable Chrome’s microsecond timer by using the [command line switch](http://peter.sh/experiments/chromium-command-line-switches/#enable-benchmarking):
-
-```
-  --enable-benchmarking
-```
-
 In an AMD loader:
 
 ```js
