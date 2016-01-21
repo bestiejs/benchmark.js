@@ -13,7 +13,7 @@
   /**
    * Used to filter Browserscope results by browser category.
    *
-   * @see http://www.browserscope.org/user/tests/howto#urlparams
+   * @see https://www.browserscope.org/user/tests/howto#urlparams
    */
   var filterMap = {
     'all': 3,
@@ -106,7 +106,7 @@
    */
   function createStyleSheet(cssText, context) {
     // use a text node, "x", to work around innerHTML issues with style elements
-    // http://msdn.microsoft.com/en-us/library/ms533897(v=vs.85).aspx#1
+    // https://msdn.microsoft.com/en-us/library/ms533897.aspx
     var div = createElement('div', context);
     div.innerHTML = 'x<style>' + cssText + '</style>';
     return div.lastChild;
@@ -504,7 +504,7 @@
    * @private
    * @param {string} text The text to be converted.
    * @returns {string} The Browserscope safe label text.
-   * @see http://code.google.com/p/browserscope/issues/detail?id=271
+   * @see https://code.google.com/p/browserscope/issues/detail?id=271
    */
   function toLabel(text) {
     return (text || '').replace(/[^a-z0-9]+/gi, ' ');
@@ -626,7 +626,7 @@
         '_bC=function(){clearTimeout(_bT);parent.setTimeout(function(){purge();load()},${refresh}*1e3)},' +
         '_bT=setTimeout(function(){_bC=function(){};render()},${timeout}*1e3)' +
         '}<\/script>' +
-        '<script src=//www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>'
+        '<script src=https://www.browserscope.org/user/beacon/${key}?callback=_bC><\/script>'
       )({
         'doctype': doctype,
         'key': me.key,
@@ -634,7 +634,7 @@
         'timeout': me.timings.timeout
       }));
       // avoid the IE spinner of doom
-      // http://www.google.com/search?q=IE+throbber+of+doom
+      // https://www.google.com/search?q=IE+throbber+of+doom
       idoc.close();
     }
     else {
@@ -729,7 +729,7 @@
       retry(true);
     }
     // visualization chart gallary
-    // http://code.google.com/apis/chart/interactive/docs/gallery.html
+    // https://developers.google.com/chart/interactive/docs/gallery
     else if (!ui.running) {
       var data = cloneData(response.getDataTable()),
           labels = getDataLabels(data),
@@ -1017,7 +1017,7 @@
       '<script>ui=parent.ui<\/script>' +
       '</head><body>' +
       '<div id=bs-results>' +
-      '<h1 id=bs-logo><a href=//www.browserscope.org/user/tests/table/${key}>' +
+      '<h1 id=bs-logo><a href=https://www.browserscope.org/user/tests/table/${key}>' +
       '<span>Browserscope</span></a></h1>' +
       '<div class=bs-rt><div id=bs-chart></div></div>' +
       '</div>' +
@@ -1028,7 +1028,7 @@
       'key': key
     }));
     // avoid the IE spinner of doom
-    // http://www.google.com/search?q=IE+throbber+of+doom
+    // https://www.google.com/search?q=IE+throbber+of+doom
     idoc.close();
 
     // the frame element of the charts
@@ -1041,11 +1041,11 @@
     me.container = query('#bs-chart', idoc)[0];
 
     // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
-    loadScript('//www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
+    loadScript('https://www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
 
-    // the "autoload" string can be created with
-    // http://code.google.com/apis/loader/autoloader-wizard.html
-    loadScript('//www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
+    // the "autoload" string is created following the guide at
+    // https://developers.google.com/loader/?hl=en#auto-loading
+    loadScript('https://www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
       'modules:[{' +
         'name:"visualization",' +
         'version:1,' +
