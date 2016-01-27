@@ -489,7 +489,7 @@
      * @param {*} value The value to clone.
      * @returns {*} The cloned value.
      */
-    var cloneDeep = _.partial(_.cloneDeepWith || _.cloneDeep, _, function(value) {
+    var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
       // Only clone primitives, arrays, and plain objects.
       return (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value))
         ? value
@@ -1790,7 +1790,7 @@
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
-      timer = (_.minBy || _.min)(timers, 'res');
+      timer = _.minBy(timers, 'res');
 
       // Error if there are no working timers.
       if (timer.res == Infinity) {
