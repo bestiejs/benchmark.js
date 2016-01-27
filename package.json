@@ -13,7 +13,10 @@
     "Kit Cambridge <github@kitcambridge.be> (http://kitcambridge.be/)"
   ],
   "repository": "bestiejs/benchmark.js",
-  "scripts": { "test": "echo \"See the repository CONTRIBUTING.md for testing instructions.\"" },
+  "scripts": {
+    "docs": "docdown benchmark.js doc/README.md toc='categories' url=\"https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js\" title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" hash='github'",
+    "test": "echo \"See the repository CONTRIBUTING.md for testing instructions.\""
+  },
   "dependencies": {
     "lodash": "^4.0.1",
     "platform": "^1.3.1"
