@@ -1,15 +1,14 @@
-# Benchmark.js v2.0.0
+# Benchmark.js v2.1.0
 
 A [robust](http://calendar.perfplanet.com/2010/bulletproof-javascript-benchmarks/ "Bulletproof JavaScript benchmarks") benchmarking library that supports high-resolution timers & returns statistically significant results. As seen on [jsPerf](http://jsperf.com/).
 
 ## Documentation
 
 * [API Documentation](http://benchmarkjs.com/docs)
-* Check out our [unit tests](http://benchmarkjs.com/tests) & [roadmap](https://github.com/bestiejs/benchmark.js/wiki/Roadmap)
 
 ## Download
 
- * [Development source](https://raw.github.com/bestiejs/benchmark.js/v2.0.0/benchmark.js)
+ * [Development source](https://raw.github.com/bestiejs/benchmark.js/v2.1.0/benchmark.js)
 
 ## Installation
 
