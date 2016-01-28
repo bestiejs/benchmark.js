@@ -761,7 +761,7 @@
       if (callback === 'successful') {
         // Callback to exclude those that are errored, unrun, or have hz of Infinity.
         callback = function(bench) {
-          return bench.cycles && _.isFinite(bench.hz);
+          return bench.cycles && _.isFinite(bench.hz) && !bench.error;
         };
       }
       else if (callback === 'fastest' || callback === 'slowest') {

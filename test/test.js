@@ -1090,7 +1090,9 @@
         suite = Benchmark.Suite();
 
     suite.add('a', function() {
-      count++;
+      for (var i = 0; i < 1e5; i++) {
+        count++;
+      }
     })
     .add('b', function() {
       for (var i = 0; i < 1e6; i++) {
