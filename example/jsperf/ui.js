@@ -1,8 +1,8 @@
 /*!
  * ui.js
- * Copyright Mathias Bynens <http://mths.be/>
+ * Copyright Mathias Bynens <https://mths.be/>
  * Modified by John-David Dalton <http://allyoucanleet.com/>
- * Available under MIT license <http://mths.be/mit>
+ * Available under MIT license <https://mths.be/mit>
  */
 (function(window, document) {
 
@@ -715,14 +715,14 @@
   /*--------------------------------------------------------------------------*/
 
   // optimized asynchronous Google Analytics snippet based on
-  // http://mathiasbynens.be/notes/async-analytics-snippet
+  // https://mathiasbynens.be/notes/async-analytics-snippet
   if (gaId) {
     (function() {
       var script = createElement('script'),
           sibling = document.getElementsByTagName('script')[0];
 
       window._gaq = [['_setAccount', gaId], ['_trackPageview']];
-      script.src = '//www.google-analytics.com/ga.js';
+      script.src = 'https://www.google-analytics.com/ga.js';
       sibling.parentNode.insertBefore(script, sibling);
     }());
   }
