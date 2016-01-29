@@ -25,7 +25,8 @@ branches:
     - master
 before_install:
   - "nvm use $TRAVIS_NODE_VERSION"
-  - "npm config set loglevel error"
+  - "npm set loglevel error"
+  - "npm set progress false"
   - "npm i -g npm@\"^2.0.0\""
 script:
   - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
