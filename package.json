@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "coveralls": "^2.11.6",
-    "docdown": "~0.3.0",
+    "docdown": "~0.4.1",
     "istanbul": "0.4.1",
     "qunit-extras": "^1.4.5",
     "qunitjs": "~1.20.0",
