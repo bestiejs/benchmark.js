@@ -1032,7 +1032,7 @@
      * @param {string} name A name to identify the benchmark.
      * @param {Function|string} fn The test to benchmark.
      * @param {Object} [options={}] Options object.
-     * @returns {Object} The benchmark instance.
+     * @returns {Object} The suite instance.
      * @example
      *
      * // basic usage
@@ -1241,7 +1241,7 @@
      * @memberOf Benchmark, Benchmark.Suite
      * @param {string} [type] The event type.
      * @param {Function} [listener] The function to unregister.
-     * @returns {Object} The benchmark instance.
+     * @returns {Object} The current instance.
      * @example
      *
      * // unregister a listener for an event type
@@ -1292,7 +1292,7 @@
      * @memberOf Benchmark, Benchmark.Suite
      * @param {string} type The event type.
      * @param {Function} listener The function to register.
-     * @returns {Object} The benchmark instance.
+     * @returns {Object} The current instance.
      * @example
      *
      * // register a listener for an event type
