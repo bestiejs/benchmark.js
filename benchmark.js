@@ -124,7 +124,7 @@
    */
   function runInContext(context) {
     // Exit early if unable to acquire lodash.
-    var _ = context && context._ || req('lodash') || root._;
+    var _ = context && context._ || require('lodash') || root._;
     if (!_) {
       Benchmark.runInContext = runInContext;
       return Benchmark;
@@ -168,7 +168,7 @@
     var doc = isHostType(context, 'document') && context.document;
 
     /** Used to access Wade Simmons' Node.js `microtime` module. */
-    var microtimeObject = req('microtime');
+    var microtimeObject = require('microtime');
 
     /** Used to access Node.js's high resolution timer. */
     var processObject = isHostType(context, 'process') && context.process;
@@ -641,7 +641,7 @@
      * @param {string} id The module id.
      * @returns {*} The exported module or `null`.
      */
-    function req(id) {
+    function require(id) {
       try {
         var result = freeExports && freeRequire(id);
       } catch(e) {}
@@ -2257,7 +2257,7 @@
        * @memberOf Benchmark
        * @type Object
        */
-      'platform': context.platform || req('platform') || ({
+      'platform': context.platform || require('platform') || ({
         'description': context.navigator && context.navigator.userAgent || null,
         'layout': null,
         'product': null,
