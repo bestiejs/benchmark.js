@@ -10,42 +10,12 @@
   var phantom = root.phantom,
       amd = root.define && define.amd,
       document = !phantom && root.document,
-      noop = function() {},
       slice = Array.prototype.slice;
 
-  /** Detect if running in Java. */
-  var isJava = !document && !!root.java;
-
-  /** Use a single "load" function. */
-  var load = (typeof require == 'function' && !amd)
-    ? require
-    : (isJava && root.load) || noop;
-
-  /** The unit testing framework. */
-  var QUnit = root.QUnit || (root.QUnit = (
-    QUnit = load('../node_modules/qunitjs/qunit/qunit.js') || root.QUnit,
-    QUnit = QUnit.QUnit || QUnit
-  ));
-
-  /** Load QUnit Extras. */
-  var QUnitExtras = load('../node_modules/qunit-extras/qunit-extras.js');
-  if (QUnitExtras) {
-    QUnitExtras.runInContext(root);
-  }
-
-  /** The `lodash` utility function. */
-  var _ = root._ || (root._ = (
-    _ = load('../node_modules/lodash/lodash.js') || root._,
-    _ = _._ || _,
-    _.runInContext(root)
-  ));
-
-  /** The `Benchmark` constructor to test. */
-  var Benchmark = root.Benchmark || (root.Benchmark = (
-    Benchmark = load('../benchmark.js') || root.Benchmark,
-    Benchmark = Benchmark.Benchmark || Benchmark,
-    Benchmark.runInContext(root)
-  ));
+  /** Load libraries. */
+  var _ = root._ || require('lodash'),
+      Benchmark = root.Benchmark || require('../benchmark.js'),
+      QUnit = root.QUnit || require('qunit-extras');
 
   /** Used to create dummy benchmarks for comparisons. */
   var benchData = {
