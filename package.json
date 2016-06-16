@@ -26,7 +26,7 @@
     "docdown": "~0.5.1",
     "istanbul": "0.4.3",
     "qunit-extras": "^2.0.0",
-    "qunitjs": "~1.23.1",
+    "qunitjs": "~2.0.0",
     "requirejs": "^2.2.0"
   },
   "files": [
