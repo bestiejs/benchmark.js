@@ -25,7 +25,7 @@
     "coveralls": "^2.11.9",
     "docdown": "~0.5.1",
     "istanbul": "0.4.4",
-    "qunit-extras": "^2.0.1",
+    "qunit-extras": "^2.1.0",
     "qunitjs": "^2.0.0",
     "requirejs": "^2.2.0"
   },
