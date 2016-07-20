@@ -240,7 +240,7 @@ form h2, form h3, form h4, p.error, .preview, #add-libraries, #add-buttons {
   display: block;
 }
 
-.js .question, hgroup h2, #controls, #firebug, #java {
+hgroup h2, #controls, #firebug, #java {
   display: none;
 }
 
