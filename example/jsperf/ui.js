@@ -223,7 +223,6 @@
         addListener('run', 'click', handlers.button.run);
 
         setHTML('run', texts.run.ready);
-        setHTML('user-agent', Benchmark.platform);
         setStatus(texts.status.ready);
 
         // prefill author details
