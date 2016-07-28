@@ -1,0 +1,6 @@
+test0001.json5
+test0002.json5
+test0003.json5
+test0004-fp-encode-only.json5
+test0005-fp-decode-only.json5
+test0006-fp-encode-plus-decode.json5

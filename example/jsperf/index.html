@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="description" content="This is just a test document for Benchmark.js.">
-    <title>Benchmark.js test page | jsPerf</title>
+    <title id="test-title-1">???</title>
     <!-- https://jsperf.com/benchmark-js-test-page -->
     <link rel="stylesheet" href="main.css">
     <meta name="referrer" content="never">
@@ -14,7 +14,7 @@
   <body>
     <article>
       <hgroup>
-        <h1>Benchmark.js test page</h1>
+        <h1 id="test-title-2">???</h1>
         <h2>JavaScript performance comparison</h2>
       </hgroup>
 
@@ -26,46 +26,26 @@
 
       <section>
         <h2>Info</h2>
-        <p>
-          This is just a test document for Benchmark.js.
+        <p id="test-description">
+          ???
         </p>
+      </section>
+
+      <section>
+        <h2>Related tests</h2>
+        <ul id="related-tests">
+          <li>&lt;none&gt;</li>
+        </ul>
       </section>
 
       <section id="prep-code">
         <h2>Preparation code</h2>
-        <pre><code><span
-          class="sc2">&lt;<span class="kw2">div</span>&gt;</span>Lorem ipsum<span
-          class="sc2">&lt;<span class="sy0">/</span><span class="kw2">div</span>&gt;</span><br><span
-          class="sc2">&lt;<span class="kw2">script</span>&gt;</span><br>&nbsp; <span
-          class="kw2">var</span> arr <span class="sy0">=</span> <span class="br0">&#91;</span><span
-          class="nu0">1</span><span class="sy0">,</span> <span class="nu0">5</span><span
-          class="sy0">,</span> <span class="nu0">4</span><span class="sy0">,</span> <span
-          class="nu0">2</span><span class="sy0">,</span> <span class="nu0">3</span><span
-          class="br0">&#93;</span><span class="sy0">;</span><br><br>&nbsp; <span
-          class="kw2">function</span> init<span class="br0">&#40;</span><span
-          class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp;&nbsp;&nbsp; window.<span
-          class="me1">console</span> <span class="sy0">&amp;&amp;</span> console.<span
-          class="me1">log</span><span class="br0">&#40;</span><span class="st0">'init called'</span><span
-          class="br0">&#41;</span><span class="sy0">;</span><br>&nbsp; <span
-          class="br0">&#125;</span><br><span class="sc2">&lt;<span class="sy0">/</span><span
-          class="kw2">script</span>&gt;</span><br><span class="sc2">&lt;<span
-          class="kw2">script</span>></span><br>Benchmark.<span class="me1">prototype</span>.<span
-          class="me1">setup</span> <span class="sy0">=</span> <span class="kw2">function</span><span
-          class="br0">(</span><span class="br0">)</span> <span class="br0">{</span><br>&nbsp; window.<span
-          class="me1">foo</span> <span class="sy0">=</span> <span class="nu0">42</span><span
-          class="sy0">;</span><br>&nbsp; <span class="kw2">var</span> x <span
-          class="sy0">=</span> arr<span class="sy0">;</span><br><span class="br0">}</span><span
-          class="sy0">;</span><br><br>Benchmark.<span class="me1">prototype</span>.<span
-          class="me1">teardown</span> <span class="sy0">=</span> <span class="kw2">function</span><span
-          class="br0">(</span><span class="br0">) </span><span class="br0">{</span><br>&nbsp; window.<span
-          class="me1">foo</span> <span class="sy0">=</span> <span class="nu0">24</span><span
-          class="sy0">;</span><br><span class="br0">}</span><span class="sy0">;</span><br><span
-          class="sc2">&lt;<span class="sy0">/</span><span class="kw2">script</span>></span></code></pre>
+        <pre id="prep-code-display"><code>???</code></pre>
       </section>
 
       <section>
         <h2>Preparation code output</h2>
-        <div class="user-output">
+        <div id="user-output">
           <div>Lorem ipsum</div>
         </div>
       </section>
@@ -91,84 +71,7 @@
             <th title="Operations per second (higher is better)">Ops/sec</th>
           </tr>
           </thead>
-          <tbody>
-          <tr>
-            <th scope="row" id="title-1">
-              <div>Normal</div>
-            </th>
-            <td class="code">
-              <pre><code>x.<span class="me1">sort</span><span class="br0">&#40;</span><span
-                class="kw2">function</span><span class="br0">&#40;</span>a<span
-                class="sy0">,</span> b<span class="br0">&#41;</span> <span
-                class="br0">&#123;</span><br>&nbsp; <span class="kw1">return</span> a <span
-                class="sy0">-</span> b<span class="sy0">;</span><br><span
-                class="br0">&#125;</span><span class="br0">&#41;</span><span
-                class="sy0">;</span></code></pre>
-            </td>
-            <td id="results-1" class="results"></td>
-          </tr>
-          <tr>
-            <th scope="row" id="title-2">
-              <div>Exit Early</div>
-            </th>
-            <td class="code">
-              <pre><code>x.<span class="me1">sort</span><span class="br0">&#40;</span><span
-                class="kw2">function</span><span class="br0">&#40;</span>a<span
-                class="sy0">,</span> b<span class="br0">&#41;</span> <span
-                class="br0">&#123;</span><br>&nbsp; <span class="kw1">return</span> a <span
-                class="sy0">-</span> b<span class="sy0">;</span><br><span
-                class="br0">&#125;</span><span class="br0">&#41;</span><span
-                class="sy0">;</span><br><span class="kw1">return</span><span
-                class="sy0">;</span></code></pre>
-            </td>
-            <td id="results-2" class="results"></td>
-          </tr>
-          <tr>
-            <th scope="row" id="title-3">
-              <div>Async</div>
-            </th>
-            <td class="code">
-              <pre><code><strong class="co1">// async test</strong><br>setTimeout<span
-                class="br0">&#40;</span><span class="kw2">function</span><span
-                class="br0">&#40;</span><span class="br0">&#41;</span> <span
-                class="br0">&#123;</span><br>&nbsp; deferred.<span
-                class="me1">resolve</span><span class="br0">&#40;</span><span
-                class="br0">&#41;</span><span class="sy0">;</span><br><span
-                class="br0">&#125;</span><span class="sy0">,</span> <span
-                class="nu0">10</span><span class="br0">&#41;</span><span
-                class="sy0">;</span></code></pre>
-            </td>
-            <td id="results-3" class="results"></td>
-          </tr>
-          <tr>
-            <th scope="row" id="title-4">
-              <div>Error</div>
-            </th>
-            <td class="code">
-              <pre><code>x.<span class="me1">foo</span><span class="br0">&#40;</span><span
-                class="br0">&#41;</span><span class="sy0">;</span> <span
-                class="co1">// unknown method</span></code></pre>
-            </td>
-            <td id="results-4" class="results"></td>
-          </tr>
-          <tr>
-            <th scope="row" id="title-5">
-              <div>Comments</div>
-            </th>
-            <td class="code">
-              <pre><code><span class="co1">// comments at start</span><br>x.<span
-                class="me1">reverse</span><span class="br0">&#40;</span><span
-                class="br0">&#41;</span>.<span class="me1">sort</span><span
-                class="br0">&#40;</span><span class="kw2">function</span><span
-                class="br0">&#40;</span>a<span class="sy0">,</span> b<span
-                class="br0">&#41;</span> <span class="br0">&#123;</span><br>&nbsp; <span
-                class="kw1">return</span> a <span class="sy0">-</span> b<span
-                class="sy0">;</span><br><span class="br0">&#125;</span><span
-                class="br0">&#41;</span><span class="sy0">;</span><br><span
-                class="co1">// comments at end</span></code></pre>
-            </td>
-            <td id="results-5" class="results"></td>
-          </tr>
+          <tbody id="test-rows-container">
           </tbody>
         </table>
 
@@ -214,6 +117,11 @@
           </form>
         </div>
       </section>
+
+      <section>
+        <h2>A list of all available tests</h2>
+        <div id="test-catalog"></div>
+      </section>
     </article>
 
     <footer>
@@ -229,55 +137,70 @@
 
     <script src="../../node_modules/lodash/lodash.js"></script>
     <script src="../../node_modules/platform/platform.js"></script>
+    <script src="../../node_modules/json5/lib/json5.js"></script>
     <script src="../../benchmark.js"></script>
     <script src="ui.js"></script>
+    <script src="../../plugin/globalEval.js"></script>
     <script src="../../plugin/ui.browserscope.js"></script>
     <script>
-      var arr = [1, 5, 4, 2, 3];
-
-      function init() {
-        window.console && console.log('init called');
-      }
+      // ui.browserscope.key = 'agt1YS1wcm9maWxlcnIRCxIEVGVzdBiAgICAiI2QCgw';
+      ui.browserscope.selector = '#bs-results';
+    </script>
+    <script id="test-row-template" type="text/plain">
+          <tr>
+            <th scope="row" id="title-ID">
+              <div>Comments</div>
+            </th>
+            <td id="code-ID" class="code">
+              <pre><code>???</code></pre>
+            </td>
+            <td id="results-ID" class="results"></td>
+          </tr>
     </script>
     <script>
-      ui.browserscope.key = 'agt1YS1wcm9maWxlcnIRCxIEVGVzdBiAgICAiI2QCgw';
-      ui.browserscope.selector = '#bs-results';
+      // https://codepen.io/KryptoniteDove/post/load-json-file-locally-using-pure-javascript
+      function loadTestFile(callback) {
+        var xobj = new XMLHttpRequest();
+        //xobj.overrideMimeType("application/json");
+        var testfile = window.location.hash || 'testfile=test0001.json5';
+        testfile = testfile.replace(/^.*testfile=(.*?\.json5?).*$/, '$1');
+        console.info('loading test spec file:', testfile);
+        xobj.open('GET', testfile, true);
+        xobj.onreadystatechange = function () {
+          if (xobj.readyState === 4 && xobj.status == "200") {
+            callback(xobj.responseText, testfile);
+          }
+        };
+        xobj.send(null);
+      }
+      function loadCatalogFile() {
+        var xobj = new XMLHttpRequest();
+        var testfile = 'test-catalog.txt';
+        xobj.open('GET', testfile, true);
+        xobj.onreadystatechange = function () {
+          if (xobj.readyState === 4 && xobj.status == "200") {
+            var lst = xobj.responseText
+            .replace(/\r\n?/g, '\n')
+            .split('\n')
+            .filter(function (l) {
+              return (l.trim() !== '');
+            })
+            .map(function (l) {
+              return '<li><a href="?' + ('' + Math.random()).substr(-3) + '#testfile=' + l.trim() + '">' + l.trim().replace(/\.json5?/, '') + '</a></li>';
+            });
 
-      ui.add('Normal', '\
-        x.sort(function(a, b) {\n\
-          return a - b;\n\
-        });'
-      )
-      .add('Exit Early', '\
-        x.sort(function(a, b) {\n\
-          return a - b;\n\
-        });\n\
-        return;'
-      )
-      .add('Async', {
-        'defer': true,
-        'fn': '\
-          setTimeout(function() {\n\
-            deferred.resolve();\n\
-          }, 10);'
-      })
-      .add('Error', '\
-        x.foo(); // unknown method'
-      )
-      .add('Comments', '\
-        // comments at start\n\
-        x.reverse().sort(function(a, b) {\n\
-          return a - b;\n\
-        });\n\
-        // comments at end'
-      );
+            setHTML('test-catalog', '<ul>' + lst.join('\n') + '</ul>');
+          }
+        };
+        xobj.send(null);
+      }
 
-      Benchmark.prototype.setup = '\
-        window.foo = 42;\n\
-        var x = arr;';
-
-      Benchmark.prototype.teardown = '\
-        window.foo = 24;';
+      loadTestFile(function benchmark_load_cb(response, file_uri) {
+        // Parse JSON string into object
+        var actual_JSON = JSON5.parse(response);
+        ui.initFromJSON(actual_JSON);
+      });
+      loadCatalogFile();
     </script>
   </body>
 </html>
