@@ -578,7 +578,7 @@
       setMessage(me.texts.loading);
       // request Browserscope chart data and pass it to `google.visualization.Query.setResponse()`
       (new visualization.Query(
-        '//www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
+        'https://www.browserscope.org/gviz_table_data?category=usertest_' + me.key + '&v=' + filterMap[filterBy],
         { 'sendMethod': 'scriptInjection' }
       ))
       .send(onComplete);
