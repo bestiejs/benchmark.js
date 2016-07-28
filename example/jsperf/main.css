@@ -345,7 +345,7 @@ footer {
   width: 232px;
   height: 39px;
   filter: none;
-  background: url(//www.browserscope.org/static/img/logo.png) 0 0 no-repeat;
+  background: url(https://www.browserscope.org/static/img/logo.png) 0 0 no-repeat;
 }
 
 #bs-ua {
