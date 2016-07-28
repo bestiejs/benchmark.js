@@ -615,7 +615,7 @@
       // set "posting" message and attempt to post the results snapshot
       setMessage(me.texts.post);
 
-      // Note: We originally created an iframe to avoid Browerscope's old limit
+      // Note: We originally created an iframe to avoid Browserscope's old limit
       // of one beacon per page load. It's currently used to implement custom
       // request timeout and retry routines.
       var idoc = win.frames[name].document;
@@ -728,7 +728,7 @@
       !response && visualization && setMessage(me.texts.error);
       retry(true);
     }
-    // visualization chart gallary
+    // visualization chart gallery
     // https://developers.google.com/chart/interactive/docs/gallery
     else if (!ui.running) {
       var data = cloneData(response.getDataTable()),
