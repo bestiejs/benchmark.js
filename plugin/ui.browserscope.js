@@ -305,7 +305,9 @@
    */
   function createSnapshot() {
     // clone benches, exclude those that are errored, unrun, or have hz of Infinity
-    var benches = _.invoke(filter(ui.benchmarks, 'successful'), 'clone'),
+    var benches = filter(ui.benchmarks, 'successful').map(function clone_me(o) {
+            return _.clone(o);
+        }),
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest');
 
