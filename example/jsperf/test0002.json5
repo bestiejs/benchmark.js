@@ -1,0 +1,113 @@
+/*
+    Preparation code chunk:
+
+    <div>Lorem ipsum</div>                                              --> user-output
+    <script>                                                            --> prep-spec
+      var arr = [1, 5, 4, 2, 3];
+
+      function init() {
+        window.console && console.log('init called');
+      }
+    <\/script>
+    <script>                                                            --> setup-spec
+    Benchmark.prototype.setup = function() {
+      window.foo = 42;
+      var x = arr;
+    };
+
+    Benchmark.prototype.teardown = function() {
+      window.foo = 24;
+    };
+    <\/script>
+*/
+
+{
+  title: 'test #2',
+  description: 'bla bla bla',
+
+  HTML: "<div>Lorem ipsum</div>",
+  init: "\
+      var arr = [1, 5, 4, 2, 3];\n\
+      var obj = {a: 1, b: 2, c: 3};\n\
+      var rv = 0;\n\
+\n\
+      function init() {\n\
+        window.console && console.log('init called');\n\
+      }\n\
+\n\
+      function t_global_scope() {\n\
+        if (!arr[7]) {\n\
+          arr[7] = 1;\n\
+        } else {\n\
+          arr[7] += arr[2];\n\
+        }\n\
+        if (!obj.s) {\n\
+          obj.s = 1;\n\
+        } else {\n\
+          obj.s += obj.b;\n\
+        }\n\
+        return arr[7] + obj.s;\n\
+      }\n\
+\n\
+      function t_closure_scope() {\n\
+        var arr = [1, 5, 4, 2, 3];\n\
+        var obj = {a: 1, b: 2, c: 3};\n\
+\n\
+        function t_do() {\n\
+          if (!arr[7]) {\n\
+            arr[7] = 1;\n\
+          } else {\n\
+            arr[7] += arr[2];\n\
+          }\n\
+          if (!obj.s) {\n\
+            obj.s = 1;\n\
+          } else {\n\
+            obj.s += obj.b;\n\
+          }\n\
+          return arr[7] + obj.s;\n\
+        }\n\
+\n\
+        return t_do;\n\
+      }\n\
+      var t_closure_scope_f = t_closure_scope();\n\
+\n\
+      function t_pass_by_ref(arr, obj) {\n\
+        if (!arr[7]) {\n\
+          arr[7] = 1;\n\
+        } else {\n\
+          arr[7] += arr[2];\n\
+        }\n\
+        if (!obj.s) {\n\
+          obj.s = 1;\n\
+        } else {\n\
+          obj.s += obj.b;\n\
+        }\n\
+        return arr[7] + obj.s;\n\
+      }\n\
+      ",
+  tests: [
+    {
+      name: 'Global Scope', 
+      fn: '\
+        rv += t_global_scope();'
+    },
+    {
+      name: 'Parent / Closure', 
+      fn: '\
+        rv += t_closure_scope_f();'
+    },
+    { 
+      name: 'CPS / Pass By Reference', 
+      'defer': false,
+      'fn': '\
+        rv += t_pass_by_ref(arr, obj);'
+    },
+  ],
+  setup: "\
+        Benchmark.prototype.setup = function () { rv = 0; };\n\
+        ",
+  teardown: "\
+        var pulse_counter = 0;\n\
+        Benchmark.prototype.teardown = function () { pulse_counter++; if (pulse_counter >= 1000) { pulse_counter = 0; console.log('rv = ', rv); } };\n\
+        "
+}

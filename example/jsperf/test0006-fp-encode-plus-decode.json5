@@ -1,0 +1,131 @@
+{
+  title: 'test #3 : custom FP value serialization',
+  description: 'determining the speed loss factor when we serialize FP (and integer) values to a custom string format vs. standard print+parse.\n\nThis particular test compares the <em>back and forth conversion of floating point values to strings</em> using a series of random numbers.</p>\n<blockquote>Note: I ignore the probable speedups available in the "custom" encoders when they hit <em>usual numbers</em>, e.g. 1 or 12 or 0.3 and ditto for <em>special values</em> such as <code>NaN</code> and <code>+/-Infinity</code> as the random set has very low probability of generating any of these.</blockquote>\n<p>The point of the test is to see who is the fastest <strong>combo</strong> on the block for the <def>float → string → float</def> conversion process.',
+  related: [
+    'test0003.json5',
+    'test0004-fp-encode-only.json5',
+    'test0005-fp-decode-only.json5',
+  ],
+
+  HTML: "",
+  init: "\
+      // simply injecting script tag to DOM via innerHTML doesn't work, so we have to do it this way:\n\
+      [\n\
+        'fpcvt.js',\n\
+        'fpcvt-alt1.js',\n\
+        'fpcvt-alt2.js',\n\
+      ].forEach(function (src) {\n\
+        var script = document.createElement('script');\n\
+        script.src = src;\n\
+        document.head.appendChild(script);\n\
+      });\n\
+\n\
+      //var x = Math.random();\n\
+      //var y = Math.tan(x - 0.5);\n\
+      //var z = Math.pow(2, 100 * y);\n\
+      //var a = (1 + Math.random() * 21) | 0;\n\
+      //var b = z.toPrecision(a); // accepted prec range: 1..21\n\
+      //console.log(x, y, z, a, b);\n\
+\n\
+      const test_serialization = true;\n\
+\n\
+      var data = [];\n\
+      var serialized_data = [];\n\
+      var serialized_data2 = [];\n\
+      var data_length = 0;\n\
+\n\
+      function init() {\n\
+        if (data_length) return;\n\
+\n\
+        for (var i = 0, l = 1000; i < l; i++) {\n\
+          var x = Math.random();\n\
+          var y = Math.tan(x - 0.5);\n\
+          var z = Math.pow(2, 100 * y);\n\
+          var a = (1 + Math.random() * 21) | 0;\n\
+          var b = z.toPrecision(a);\n\
+          data[i] = parseFloat(b);\n\
+        }\n\
+        data_length = l;\n\
+\n\
+        window.console && console.log('init:: data set:', data.slice(0, 20), '...');\n\
+      }\n\
+\n\
+      // serialize / deserialize functions:\n\
+      function classic_1(data, len, serialized_data) {\n\
+        for (var i = 0; i < len; i++) {\n\
+          var flt = data[i];\n\
+\n\
+          var s = '' + flt; // fastest solution for encode\n\
+          var t = parseFloat(s); // fastest solution for decode\n\
+          //if (t !== flt) {\n\
+          //  console.error('classic enc/dec mismatch: ', flt, s, t);\n\
+          //}\n\
+        }\n\
+      }\n\
+\n\
+      function custom_1(data, len, serialized_data) {\n\
+        for (var ii = 0; ii < len; ii++) {\n\
+          var flt = data[ii];\n\
+\n\
+          var s = encode_fp_value(flt);\n\
+          var t = decode_fp_value(s);\n\
+          //if (t !== flt) {\n\
+          //  console.error('custom enc/dec mismatch: ', flt, s, t);\n\
+          //}\n\
+        }\n\
+      }\n\
+\n\
+      function custom_2(data, len, serialized_data) {\n\
+        for (var ii = 0; ii < len; ii++) {\n\
+          var flt = data[ii];\n\
+\n\
+          var s = encode_fp_value2(flt);\n\
+          var t = decode_fp_value(s);\n\
+          //if (t !== flt) {\n\
+          //  console.error('custom enc/dec mismatch: ', flt, s, t);\n\
+          //}\n\
+        }\n\
+      }\n\
+\n\
+      function custom_3(data, len, serialized_data) {\n\
+        for (var ii = 0; ii < len; ii++) {\n\
+          var flt = data[ii];\n\
+\n\
+          var s = encode_fp_value3(flt);\n\
+          var t = decode_fp_value(s);\n\
+          //if (t !== flt) {\n\
+          //  console.error('custom enc/dec mismatch: ', flt, s, t);\n\
+          //}\n\
+        }\n\
+      }\n\
+      ",
+  tests: [
+    {
+      name: 'Classic', 
+      fn: '\
+        classic_1(data, data_length, serialized_data);'
+    },
+    {
+      name: 'Custom : v1', 
+      fn: '\
+        custom_1(data, data_length, serialized_data);'
+    },
+    {
+      name: 'Custom : v2', 
+      fn: '\
+        custom_2(data, data_length, serialized_data);'
+    },
+    {
+      name: 'Custom : v3', 
+      fn: '\
+        custom_3(data, data_length, serialized_data);'
+    },
+  ],
+  setup: "\
+        Benchmark.prototype.setup = function () {\n\
+        };\n\
+        ",
+  teardown: "\
+        Benchmark.prototype.teardown = function () { };\n\
+        "
+}

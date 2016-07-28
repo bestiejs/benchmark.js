@@ -1,0 +1,83 @@
+/*
+    Preparation code chunk:
+
+    <div>Lorem ipsum</div>                                              --> user-output
+    <script>                                                            --> prep-spec
+      var arr = [1, 5, 4, 2, 3];
+
+      function init() {
+        window.console && console.log('init called');
+      }
+    <\/script>
+    <script>                                                            --> setup-spec
+    Benchmark.prototype.setup = function() {
+      window.foo = 42;
+      var x = arr;
+    };
+
+    Benchmark.prototype.teardown = function() {
+      window.foo = 24;
+    };
+    <\/script>
+*/
+
+{
+  title: 'Benchmark.js test page (for jsPerf & alternatives) :: demo test #1',
+  description: 'This is just a test document for Benchmark.js.',
+  browserscope_API_key: 'ahBzfnVhLXByb2ZpbGVyLWhychELEgRUZXN0GICA4LDez_EKDA',
+
+  HTML: "<div>Lorem ipsum</div>",
+  init: "\
+      var arr = [1, 5, 4, 2, 3];\n\
+\n\
+      function init() {\n\
+        window.console && console.log('init called');\n\
+      }\
+        ",
+  tests: [
+    {
+      name: 'Normal', 
+      fn: '\
+        x.sort(function(a, b) {\n\
+          return a - b;\n\
+        });'
+    },
+    {
+      name: 'Exit Early', 
+      fn: '\
+        x.sort(function(a, b) {\n\
+          return a - b;\n\
+        });\n\
+        return;'
+    },
+    { 
+      name: 'Async', 
+      'defer': true,
+      'fn': '\
+        setTimeout(function() {\n\
+          deferred.resolve();\n\
+        }, 10);'
+    },
+    {
+      name: 'Error', 
+      fn: '\
+        x.foo(); // unknown method'
+    },
+    {
+      name: 'Comments', 
+      fn: '\
+        // comments at start\n\
+        x.reverse().sort(function(a, b) {\n\
+          return a - b;\n\
+        });\n\
+        // comments at end'
+    }
+  ],
+  setup: '\
+        Benchmark.prototype.setup = window.foo = 42;\n\
+        var x = arr;\n\
+        ',
+  teardown: '\
+        Benchmark.prototype.teardown = window.foo = 24;\n\
+        '
+}
