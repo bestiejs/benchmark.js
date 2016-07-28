@@ -985,7 +985,8 @@
 
   /*--------------------------------------------------------------------------*/
 
-  addListener(window, 'load', function() {
+  // was: addListener(window, 'load', function() {
+  ui.browserscope.init = function initBrowserscopeFrame() {
     var me = ui.browserscope,
         key = me.key,
         placeholder = key && query(me.selector)[0];
@@ -1053,7 +1054,7 @@
         'callback:ui.browserscope.load' +
       '}]' +
     '}'), idoc);
-  });
+  };
 
   // hide the chart while benchmarks are running
   ui.on('start', function() {

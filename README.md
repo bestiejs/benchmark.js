@@ -82,6 +82,19 @@ suite.add('RegExp#test', function() {
 // => Fastest is String#indexOf
 ```
 
+## Developing
+
+The following `npm` tasks are available to assist during development and release:
+
+- `npm run server` will start `live-server` and open the base directory in your browser; then you can, for example, browse to /example/jsperf/ to run the available tests in your browser using the local benchmark.js file. 
+
+- `npm run test` -- nuff said.
+
+- `npm run doc` -- will regenerate the documentation from source.
+
+Also note that rough support for a test *catalog* is available for the `/example/jsperf/` demo: run `./build-jsperf.sh` to update the catalog file and then the next reload of the `/example/jsperf/index.html` page will show a clickable list of all available tests near the bottom so you can browse and jump from one test file/suite to another.
+
+
 ## Support
 
 Tested in Chrome 46-47, Firefox 42-43, IE 9-11, Edge 13, Safari 8-9, Node.js 0.10-6, & PhantomJS 1.9.8.

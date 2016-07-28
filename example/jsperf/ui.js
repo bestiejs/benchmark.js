@@ -356,6 +356,59 @@
     return element;
   }
 
+  // strip the common leading whitespace block off all input lines
+  function unindent(s) {
+    var w = Infinity;
+    var end_of_leading = 0;
+    var is_leading = true;
+    var may_be_trailing = 0;
+    var a = s.split('\n').map(function (l, i) {
+      l = l.replace(/^\s+/, function (ws) {
+        // TAB = 4 spaces
+        return ws.replace(/\t/g, '    ');
+      });
+
+      if (l.trim().length > 0) {
+        is_leading = false;
+        may_be_trailing = 0;
+        var m = /^ +/.exec(l);
+        if (m) {
+          w = Math.min(w, m[0].length);
+        }
+      } else {
+        if (is_leading) {
+          end_of_leading = i + 1;
+        } else if (!may_be_trailing) {
+          may_be_trailing = i;
+        }
+        l = '';
+      }
+
+      return l;
+    });
+    if (w === Infinity) {
+      w = 0;
+    }
+    console.log('line ws width = ', w);
+
+    // strip off leading and trailing empty lines:
+    a = a.slice(end_of_leading, may_be_trailing ? may_be_trailing : a.length);
+
+    if (w > 0) {
+      var re = new RegExp('^' + (new Array(w + 1)).join(' '));
+      a = a.map(function (l) {
+        return l.replace(re, '');
+      });
+    }
+    return a.join('\n');
+  }
+
+  // escape a piece of text to be HTML-safe inside a <pre> block:
+  function escape(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  }
+
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -518,8 +571,17 @@
   ui.on('add', function(event) {
     var bench = event.target,
         index = ui.benchmarks.length,
-        id = index + 1,
-        title = $('title-' + id);
+        id = index + 1;
+
+    var table = $('test-rows-container');
+    var table_row_template = $('test-row-template').innerHTML;
+    appendHTML(table, table_row_template.replace(/ID/g, id));
+
+    var title = $('title-' + id),
+        sourceDisplay = $('code-' + id);
+
+    setHTML(title, '<div>' + escape(bench.name) + '</div>');
+    setHTML(sourceDisplay, '<pre><code>' + escape(unindent(bench.fn)) + '</code></pre>');
 
     ui.benchmarks.push(bench);
 
@@ -606,6 +668,39 @@
   // (re)render the results of one or more benchmarks
   ui.render = render;
 
+
+  ui.initFromJSON = function (json) {
+    setHTML('test-title-1', escape(json.title));
+    setHTML('test-title-2', escape(json.title));
+    setHTML('test-description', json.description.replace(/\n\n/g, '</p><p>'));
+
+    ui.browserscope.key = json.browserscope_API_key;
+
+    ui.browserscope.init();
+
+    setHTML('user-output', json.HTML);
+
+    if (json.related) {
+      var rellst = [];
+
+      for (var i = 0; i < json.related.length; i++) {
+        var link = json.related[i];
+        rellst.push('<li><a href="?' + ((Math.random() * 1000) | 0) /* hack: force reload */ + '#testfile=' + link + '">' + link.replace(/\.json5?/, '') + '</a></li>');
+      }
+      setHTML('related-tests', rellst.join('\n'));
+    }
+
+    var prep_source_code = unindent(json.init) + '\n\n// -----------------\n// setup:\n// -----------------\n\n' + unindent(json.setup) + '\n\n// -----------------\n// teardown:\n// -----------------\n\n' + unindent(json.teardown) + '\n';
+    setHTML('prep-code-display', '<code>' + escape(unindent(json.HTML) + '\n<script>\n' + prep_source_code + '\n</script>') + '</code>');
+    // run this code in global scope:
+    console.log('init code loading into global scope:\n', prep_source_code);
+    globalEval(prep_source_code);
+
+    for (var i = 0, l = json.tests; l[i]; i++) {
+      ui.add(l[i]);
+    }
+  };
+
   /*--------------------------------------------------------------------------*/
 
   // expose
@@ -613,6 +708,8 @@
 
   // don't let users alert, confirm, prompt, or open new windows
   window.alert = window.confirm = window.prompt = window.open = function() {};
+
+  window.setHTML = setHTML;
 
   // parse hash query params when it changes
   addListener(window, 'hashchange', handlers.window.hashchange);
