@@ -560,10 +560,11 @@
       if (_.indexOf(fastest, bench) > -1) {
         // mark fastest
         addClass(cell, text);
+        text += '<br>(&#x2715;&#x00a0;1)';
       }
       else {
         text = isFinite(hz)
-          ? formatNumber(percent < 1 ? percent.toFixed(2) : Math.round(percent)) + '% slower'
+          ? formatNumber(percent < 1 ? percent.toFixed(2) : Math.round(percent)) + '% slower<br>(&#x2715;&#x00a0;' + (fastestHz / hz).toFixed(1) + ')'
           : '';
 
         // mark slowest
