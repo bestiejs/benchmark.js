@@ -18,15 +18,15 @@
     "test": "node test/test"
   },
   "dependencies": {
-    "lodash": "^4.13.1",
+    "lodash": "^4.14.1",
     "platform": "^1.3.1"
   },
   "devDependencies": {
-    "coveralls": "^2.11.11",
+    "coveralls": "^2.11.12",
     "docdown": "~0.6.1",
     "istanbul": "0.4.4",
     "qunit-extras": "^2.1.0",
-    "qunitjs": "^2.0.0",
+    "qunitjs": "^2.0.1",
     "requirejs": "^2.2.0"
   },
   "files": [
