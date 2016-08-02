@@ -14,7 +14,7 @@
   ],
   "repository": "bestiejs/benchmark.js",
   "scripts": {
-    "doc": "docdown benchmark.js doc/README.md toc='categories' url=\"https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js\" title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" hash='github'",
+    "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
     "test": "node test/test"
   },
   "dependencies": {
