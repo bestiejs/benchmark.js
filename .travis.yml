@@ -2,6 +2,9 @@ language: node_js
 sudo: false
 node_js:
   - "6"
+cache:
+  directories:
+    - node_modules
 env:
   global:
     - BIN="node" ISTANBUL=false
@@ -32,5 +35,5 @@ before_install:
   - "npm i -g npm@\"^2.0.0\""
 script:
   - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
-  - "[ $ISTANBUL == true ]  || cd ./test" 
+  - "[ $ISTANBUL == true ]  || cd ./test"
   - "[ $ISTANBUL == true ]  || $BIN ./test.js"
