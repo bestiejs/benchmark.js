@@ -33,6 +33,7 @@ before_install:
   - "npm set loglevel error"
   - "npm set progress false"
   - "npm i -g npm@\"^2.0.0\""
+  - "npm prune && npm update --dev"
 script:
   - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
   - "[ $ISTANBUL == true ]  || cd ./test"
