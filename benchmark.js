@@ -660,7 +660,9 @@
     function runScript(code) {
       var anchor = freeDefine ? define.amd : Benchmark,
           script = doc.createElement('script'),
-          sibling = doc.getElementsByTagName('script')[0],
+          sibling = doc.getElementsByTagName('script')[0] ||
+                    doc.body.children[doc.body.children.length - 1] || // Last Element Node in <body> OR
+                    doc.body.appendChild(doc.createElement('script')), // Create element to insert next to
           parent = sibling.parentNode,
           prop = uid + 'runScript',
           prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
