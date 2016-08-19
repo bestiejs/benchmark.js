@@ -15,13 +15,7 @@ env:
     - BIN="phantomjs"
 matrix:
   include:
-    - node_js: "0.10"
-      env:
-    - node_js: "0.12"
-      env:
     - node_js: "4"
-      env:
-    - node_js: "5"
       env:
 git:
   depth: 10
