@@ -24,7 +24,7 @@
   "devDependencies": {
     "coveralls": "^2.11.12",
     "docdown": "~0.7.1",
-    "istanbul": "0.4.4",
+    "istanbul": "0.4.5",
     "qunit-extras": "^2.1.0",
     "qunitjs": "^2.0.1",
     "requirejs": "^2.2.0"
