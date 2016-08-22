@@ -38,7 +38,7 @@ require({
 
 Using npm:
 
-```bash
+```shell
 $ npm i --save benchmark
 ```
 
@@ -50,7 +50,7 @@ var Benchmark = require('benchmark');
 
 Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
 
-```bash
+```shell
 npm i --save microtime
 ```
 
