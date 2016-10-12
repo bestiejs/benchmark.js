@@ -143,7 +143,7 @@
       }
     }
     if (!sibling) {
-      sibling = context.body.lastChild;
+      sibling = query('*', context).pop();
     }
     var script = createElement('script', context);
     script.src = src;
