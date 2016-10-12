@@ -135,12 +135,19 @@
    * @returns {Object} The new script element.
    */
   function loadScript(src, sibling, context) {
-    context = sibling ? sibling.ownerDocument || [sibling, sibling = 0][0] : context;
-    var script = createElement('script', context),
-        nextSibling = sibling ? sibling.nextSibling : query('script', context).pop();
-
+    if (sibling) {
+      context = sibling.ownerDocument;
+      if (!context) {
+        context = sibling;
+        sibling = query('script', context).pop();
+      }
+    }
+    if (!sibling) {
+      sibling = context.body.lastChild;
+    }
+    var script = createElement('script', context);
     script.src = src;
-    return (sibling || nextSibling).parentNode.insertBefore(script,  nextSibling);
+    return sibling.parentNode.insertBefore(script, sibling.nextSibling);
   }
 
   /**
