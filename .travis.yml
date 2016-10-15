@@ -1,33 +1,66 @@
 language: node_js
 sudo: false
 node_js:
-  - "6"
+  - 6
+
 cache:
   directories:
     - $HOME/.npm
+    - $HOME/.yarn-cache
+    - travis_phantomjs
+
 env:
   global:
-    - BIN="node" ISTANBUL=false
-    - secure: "XOINlYZG3DYXq5agQXvkad2MfnOO/+z40fn37RKfNuxNI5veBK7tPRcCIQ998o+NyVTpyd3NZhqkowCxAL8bp4HJ81SesRKQSaXoSzgV7CnloxLxcduiiRJ6lnxFGgCbpqyLxZHWr0mQugcLhs5nhiZ5Dnw6dZxYX/oKKvOomZA="
+    - BIN=node ISTANBUL=false
+    - secure: XOINlYZG3DYXq5agQXvkad2MfnOO/+z40fn37RKfNuxNI5veBK7tPRcCIQ998o+NyVTpyd3NZhqkowCxAL8bp4HJ81SesRKQSaXoSzgV7CnloxLxcduiiRJ6lnxFGgCbpqyLxZHWr0mQugcLhs5nhiZ5Dnw6dZxYX/oKKvOomZA=
   matrix:
     -
     - ISTANBUL=true
-    - BIN="phantomjs"
+    - BIN=phantomjs
+
 matrix:
   include:
-    - node_js: "4"
+    - node_js: 4
       env:
+
 git:
   depth: 10
+
 branches:
   only:
     - master
+
 before_install:
-  - "nvm use $TRAVIS_NODE_VERSION"
-  - "npm set loglevel error"
-  - "npm set progress false"
-  - "npm i -g npm@\"^2.0.0\""
+  # Upgrade PhantomJS.
+  - |
+      export PHANTOMJS_VERSION=2.1.1
+      export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
+      if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then
+        rm -rf $PWD/travis_phantomjs
+        mkdir -p $PWD/travis_phantomjs
+        wget https://github.com/Medium/phantomjs/releases/download/v$PHANTOMJS_VERSION/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2
+        tar -xvf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C $PWD/travis_phantomjs
+      fi
+      phantomjs -v
+
+  # Use exact Node version.
+  - nvm use $TRAVIS_NODE_VERSION
+
+  # Setup package managers.
+  - npm set loglevel error
+  - npm set progress false
+  - npm i -g yarn
+  - yarn -V
+
+install:
+  # Install packages.
+  - yarn
+
 script:
-  - "[ $ISTANBUL == false ] || (istanbul cover -x \"**/vendor/**\" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage) || true"
-  - "[ $ISTANBUL == true ]  || cd ./test"
-  - "[ $ISTANBUL == true ]  || $BIN ./test.js"
+  - |
+      if [ $ISTANBUL = true ]; then
+        istanbul cover -x "**/vendor/**" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage
+      else
+        cd ./test
+        $BIN ./test.js
+      fi
