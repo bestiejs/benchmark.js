@@ -1699,12 +1699,35 @@
 
         templateData.uid = uid + uidCounter++;
 
-        _.assign(templateData, {
-          'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
-          'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
-          'fnArg': fnArg,
-          'teardown': decompilable ? getSource(bench.teardown) : interpolate('m#.teardown()')
-        });
+        if (deferred) {
+          if (decompilable) {
+            var suSource = getSource(bench.setup),
+                tdSource = getSource(bench.teardown);
+
+            _.assign(templateData, {
+              'setup': (suSource == '' || suSource == '// No operation performed.') ? 'deferred.suResolve();' : getSource(bench.setup),
+              'fn': getSource(fn),
+              'fnArg': fnArg,
+              'teardown': (tdSource == '' || tdSource == '// No operation performed.') ? 'deferred.tdResolve();' : getSource(bench.teardown)
+            });
+          }
+          else {
+            _.assign(templateData, {
+              'setup': interpolate('d#.suResolve()'),
+              'fn': interpolate('m#.fn(' + fnArg + ')'),
+              'fnArg': fnArg,
+              'teardown': interpolate('d#.tdResolve()')
+            });
+          }
+        }
+        else {
+          _.assign(templateData, {
+            'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
+            'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
+            'fnArg': fnArg,
+            'teardown': decompilable ? getSource(bench.teardown) : interpolate('m#.teardown()')
+          });
+        }
 
         // Use API of chosen timer.
         if (timer.unit == 'ns') {
