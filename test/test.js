@@ -1229,6 +1229,23 @@
       .run();
     });
 
+    QUnit.test('should run a deferred benchmark correctly without being asynchronous', function(assert) {
+      var done = assert.async();
+
+      Benchmark(function(deferred) {
+        setTimeout(function() { deferred.resolve(); }, 1e3);
+      }, {
+        'defer': true,
+        'setup': function(deferred) { deferred.suResolve(); },
+        'teardown': function(deferred) { deferred.tdResolve(); },
+        'onComplete': function() {
+          assert.strictEqual(this.hz.toFixed(0), '1');
+          done();
+        }
+      })
+      .run();
+    });
+
     QUnit.test('should run with string values for "fn", "setup", and "teardown"', function(assert) {
       var done = assert.async();
 
