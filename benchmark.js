@@ -1694,38 +1694,42 @@
        * Creates a compiled function from the given function `body`.
        */
       function createCompiled(bench, decompilable, deferred, body) {
-        var fn = bench.fn,
-            fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '';
+        var setup = bench.setup,
+            fn = bench.fn,
+            teardown = bench.teardown,
+            suArg = deferred ? getFirstArgument(setup) : '',
+            fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '',
+            tdArg = deferred ? getFirstArgument(teardown) : '';
 
         templateData.uid = uid + uidCounter++;
 
         if (deferred) {
           if (decompilable) {
-            var suSource = getSource(bench.setup),
-                tdSource = getSource(bench.teardown);
+            var suSource = getSource(setup),
+                tdSource = getSource(teardown);
 
             _.assign(templateData, {
-              'setup': (suSource == '' || suSource == '// No operation performed.') ? 'deferred.suResolve();' : getSource(bench.setup),
+              'setup': (suSource == '' || suSource == '// No operation performed.') ? 'deferred.suResolve();' : getSource(setup),
               'fn': getSource(fn),
               'fnArg': fnArg,
-              'teardown': (tdSource == '' || tdSource == '// No operation performed.') ? 'deferred.tdResolve();' : getSource(bench.teardown)
+              'teardown': (tdSource == '' || tdSource == '// No operation performed.') ? 'deferred.tdResolve();' : getSource(teardown)
             });
           }
           else {
             _.assign(templateData, {
-              'setup': interpolate('d#.suResolve()'),
-              'fn': interpolate('m#.fn(' + fnArg + ')'),
+              'setup': suArg ? interpolate('m#.setup(' + suArg + ');') : 'deferred.suResolve();',
+              'fn': interpolate('m#.fn(' + fnArg + ');'),
               'fnArg': fnArg,
-              'teardown': interpolate('d#.tdResolve()')
+              'teardown': tdArg ? interpolate('m#.teardown(' + tdArg + ');') : 'deferred.tdResolve();'
             });
           }
         }
         else {
           _.assign(templateData, {
-            'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
+            'setup': decompilable ? getSource(setup) : interpolate('m#.setup()'),
             'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
             'fnArg': fnArg,
-            'teardown': decompilable ? getSource(bench.teardown) : interpolate('m#.teardown()')
+            'teardown': decompilable ? getSource(teardown) : interpolate('m#.teardown()')
           });
         }
 
