@@ -1473,21 +1473,24 @@
           if (key.charAt(0) == '_') {
             return;
           }
-          if (value && typeof value == 'object') {
+          if (_.isObjectLike(value)) {
             if (_.isArray(value)) {
               // Check if an array value has changed to a non-array value.
               if (!_.isArray(currValue)) {
-                changed = currValue = [];
+                changed = true;
+                currValue = [];
               }
               // Check if an array has changed its length.
-              if (currValue.length != value.length) {
-                changed = currValue = currValue.slice(0, value.length);
+              else if (currValue.length != value.length) {
+                changed = true;
+                currValue = currValue.slice(0, value.length);
                 currValue.length = value.length;
               }
             }
             // Check if an object has changed to a non-object value.
-            else if (!currValue || typeof currValue != 'object') {
-              changed = currValue = {};
+            else if (!_.isObjectLike(currValue)) {
+              changed = true;
+              currValue = {};
             }
             // Register a changed object.
             if (changed) {
