@@ -1468,9 +1468,8 @@
               destination = data.destination,
               currValue = destination[key];
 
-          // Skip pseudo private properties like `_timerId` which could be a
-          // Java object in environments like RingoJS.
-          if (key.charAt(0) == '_') {
+          // Skip pseudo private properties and event listeners.
+          if (/^_|^events$|^on[A-Z]/.test(key)) {
             return;
           }
           if (_.isObjectLike(value)) {
@@ -1481,7 +1480,7 @@
                 currValue = [];
               }
               // Check if an array has changed its length.
-              else if (currValue.length != value.length) {
+              if (currValue.length != value.length) {
                 changed = true;
                 currValue = currValue.slice(0, value.length);
                 currValue.length = value.length;
@@ -1499,7 +1498,7 @@
             queue.push({ 'destination': currValue, 'source': value });
           }
           // Register a changed primitive.
-          else if (value !== currValue && !(value == null || _.isFunction(value))) {
+          else if (!_.eq(currValue, value) && value !== undefined) {
             changes.push({ 'destination': destination, 'key': key, 'value': value });
           }
         });
@@ -1507,7 +1506,8 @@
       while ((data = queue[index++]));
 
       // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
-      if (changes.length && (bench.emit(event = Event('reset')), !event.cancelled)) {
+      if (changes.length &&
+          (bench.emit(event = Event('reset')), !event.cancelled)) {
         _.each(changes, function(data) {
           data.destination[data.key] = data.value;
         });
