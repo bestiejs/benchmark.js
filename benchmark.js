@@ -1091,7 +1091,7 @@
       // Copy own properties.
       _.forOwn(suite, function(value, key) {
         if (!_.has(result, key)) {
-          result[key] = value && _.isFunction(value.clone)
+          result[key] = _.isFunction(_.get(value, 'clone'))
             ? value.clone()
             : cloneDeep(value);
         }
