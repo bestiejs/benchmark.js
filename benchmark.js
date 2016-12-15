@@ -494,9 +494,9 @@
      */
     var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
       // Only clone primitives, arrays, and plain objects.
-      return (_.isObject(value) && !_.isArray(value) && !_.isPlainObject(value))
-        ? value
-        : undefined;
+      if (!_.isArray(value) && !_.isPlainObject(value)) {
+        return value;
+      }
     });
 
     /**
