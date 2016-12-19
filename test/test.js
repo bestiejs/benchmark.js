@@ -496,7 +496,7 @@
     })
     .run();
 
-    QUnit.test('onXYZ callbacks should not be triggered by internal benchmark clones', function(assert) {
+    QUnit.test('should not trigger event handlers by internal benchmark clones', function(assert) {
       assert.strictEqual(data.onStart, 1);
       assert.strictEqual(data.onComplete, 1);
     });
