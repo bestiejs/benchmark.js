@@ -478,6 +478,25 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark#reset');
+
+  (function() {
+    QUnit.test('should not reset default event handlers', function(assert) {
+      var handler = function() {};
+      Benchmark.options.onStart = handler;
+
+      var bench = Benchmark(),
+          clone = bench.clone({ 'events': { 'cycle': [function() {}] } });
+
+      clone.reset();
+
+      assert.deepEqual(clone.events, { 'start': [handler] });
+      delete Benchmark.options.onStart;
+    });
+  }());
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark#run');
 
   (function() {
