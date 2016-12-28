@@ -1841,7 +1841,7 @@
        * Adds a clone to the queue.
        */
       function enqueue() {
-        queue.push(bench.clone({
+        queue.push(_.assign(bench.clone().off(), {
           '_original': bench,
           'events': {
             'abort': [update],
