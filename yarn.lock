@@ -234,8 +234,8 @@ extsprintf@1.0.2:
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
 
 fast-levenshtein@~2.0.4:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.5.tgz#bd33145744519ab1c36c3ee9f31f08e9079b67f2"
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
 forever-agent@~0.6.1:
   version "0.6.1"
@@ -457,9 +457,9 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lodash@^4.17.2, lodash@^4.17.3:
-  version "4.17.3"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.3.tgz#557ed7d2a9438cac5fd5a43043ca60cb455e01f7"
+lodash@^4.17.2, lodash@^4.17.4:
+  version "4.17.4"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
 log-driver@1.2.5:
   version "1.2.5"
@@ -579,9 +579,9 @@ qunit-extras@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/qunit-extras/-/qunit-extras-3.0.0.tgz#aae0e2e0e22e980b58a25cfcff494af9959846db"
 
-qunitjs@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/qunitjs/-/qunitjs-2.1.0.tgz#b29780501dfbc8285fe7cbba6c184f4b1a307216"
+qunitjs@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/qunitjs/-/qunitjs-2.1.1.tgz#c3087c864d9a9443103bdbdecc0ef359c7a82281"
 
 readable-stream@~2.0.5:
   version "2.0.6"
