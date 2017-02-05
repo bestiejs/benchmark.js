@@ -22,7 +22,7 @@
     "platform": "^1.3.3"
   },
   "devDependencies": {
-    "coveralls": "^2.11.15",
+    "coveralls": "^2.11.16",
     "docdown": "~0.7.2",
     "istanbul": "0.4.5",
     "qunit-extras": "^3.0.0",
