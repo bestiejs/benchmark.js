@@ -1007,6 +1007,30 @@
     iframe.frameBorder = 0;
     iframe.scrolling = 'no';
 
+    addListener(iframe, 'load', function() {
+      // the element the charts are inserted into
+      me.container = query('#bs-chart', idoc)[0];
+
+      if (!me.container) return;
+
+      // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
+      loadScript('https://www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
+
+      // the "autoload" string is created following the guide at
+      // https://developers.google.com/loader/?hl=en#auto-loading
+      loadScript(
+        'https://www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
+          'modules:[{' +
+            'name:"visualization",' +
+            'version:1,' +
+            'packages:["corechart","table"],' +
+            'callback:ui.browserscope.load' +
+          '}]' +
+        '}'),
+        idoc
+      );
+    });
+
     placeholder.parentNode.replaceChild(iframe, placeholder);
 
     var iwin = frames[name],
@@ -1043,26 +1067,6 @@
 
     // the frame window of the charts
     me.chartWindow = iwin;
-
-    // ensure that content in iframe is processed by executing on next tick
-    setTimeout(function() {
-      // the element the charts are inserted into
-      me.container = query('#bs-chart', idoc)[0];
-
-      // Browserscope's UA div is inserted before an element with the id of "bs-ua-script"
-      loadScript('https://www.browserscope.org/ua?o=js', me.container).id = 'bs-ua-script';
-
-      // the "autoload" string is created following the guide at
-      // https://developers.google.com/loader/?hl=en#auto-loading
-      loadScript('https://www.google.com/jsapi?autoload=' + encodeURIComponent('{' +
-        'modules:[{' +
-          'name:"visualization",' +
-          'version:1,' +
-          'packages:["corechart","table"],' +
-          'callback:ui.browserscope.load' +
-        '}]' +
-      '}'), idoc);
-    }, 1);
   });
 
   // hide the chart while benchmarks are running
