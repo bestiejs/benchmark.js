@@ -54,7 +54,13 @@ Optionally, use the [microtime module](https://github.com/wadey/node-microtime) 
 npm i --save microtime
 ```
 
-Usage example:
+Alternatively, use the development build:
+
+```
+$ npm i --save bestiejs/benchmark.js
+```
+
+## Usage example
 
 ```js
 var suite = new Benchmark.Suite;
