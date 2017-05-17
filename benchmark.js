@@ -1724,6 +1724,7 @@
         // Create compiled test.
         return createFunction(
           interpolate('window,t#'),
+          (bench.strict ? '"use strict";\n' : '') +
           'var global = window, clearTimeout = global.clearTimeout, setTimeout = global.setTimeout;\n' +
           interpolate(body)
         );
@@ -2157,6 +2158,14 @@
          * @type boolean
          */
         'defer': false,
+
+        /**
+         * A flag to indicate that the test should run in javascript strict mode.
+         *
+         * @memberOf Benchmark.options
+         * @type boolean
+         */
+        'strict': false,
 
         /**
          * The delay between test cycles (secs).
