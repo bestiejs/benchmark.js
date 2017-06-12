@@ -6,7 +6,6 @@ node_js:
 cache:
   directories:
     - ~/.npm
-    - ~/.yarn-cache
     - travis_phantomjs
 
 env:
@@ -43,18 +42,11 @@ before_install:
       fi
       phantomjs -v
 
-  # Use exact Node version.
   - nvm use $TRAVIS_NODE_VERSION
-
-  # Setup package managers.
-  - npm set loglevel error
-  - npm set progress false
-  - npm i -g yarn@0.16.1
-  - yarn -V
+  - npm i -g npm@^5
 
 install:
-  # Install packages.
-  - yarn
+  - npm i
 
 script:
   - |
