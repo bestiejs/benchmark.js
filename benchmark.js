@@ -180,7 +180,7 @@
     var trash = doc && doc.createElement('div');
 
     /** Used to integrity check compiled tests. */
-    var uid = 'uid' + _.now();
+    var uid = 'uid' + (+_.now());
 
     /** Used to avoid infinite recursion when methods call each other. */
     var calledBy = {};
@@ -418,7 +418,7 @@
         return type;
       }
       return (event instanceof Event)
-        ? _.assign(event, { 'timeStamp': _.now() }, typeof type == 'string' ? { 'type': type } : type)
+        ? _.assign(event, { 'timeStamp': (+_.now()) }, typeof type == 'string' ? { 'type': type } : type)
         : new Event(type);
     }
 
@@ -1700,8 +1700,8 @@
         }
         else if (timer.ns.now) {
           _.assign(templateData, {
-            'begin': interpolate('s#=n#.now()'),
-            'end': interpolate('r#=(n#.now()-s#)/1e3')
+            'begin': interpolate('s#=(+n#.now())'),
+            'end': interpolate('r#=((+n#.now())-s#)/1e3')
           });
         }
         else {
@@ -1759,8 +1759,8 @@
             divisor = 1;
           }
           else if (ns.now) {
-            begin = ns.now();
-            while (!(measured = ns.now() - begin)) {}
+            begin = (+ns.now());
+            while (!(measured = (+ns.now()) - begin)) {}
           }
           else {
             begin = new ns().getTime();
@@ -1897,7 +1897,7 @@
             variance,
             clone = event.target,
             done = bench.aborted,
-            now = _.now(),
+            now = (+_.now()),
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
             times = bench.times,
@@ -2100,7 +2100,7 @@
       bench.running = true;
 
       bench.count = bench.initCount;
-      bench.times.timeStamp = _.now();
+      bench.times.timeStamp = (+_.now());
       bench.emit(event);
 
       if (!event.cancelled) {
