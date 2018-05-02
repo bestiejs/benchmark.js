@@ -1709,18 +1709,18 @@
                 tdSource = getSource(teardown);
 
             _.assign(templateData, {
-              'setup': (suSource == '' || suSource == '// No operation performed.') ? 'deferred.suResolve();' : getSource(setup),
+              'setup': (suSource == '' || suSource == '// No operation performed.') ? interpolate('d#.suResolve();') : getSource(setup),
               'fn': getSource(fn),
               'fnArg': fnArg,
-              'teardown': (tdSource == '' || tdSource == '// No operation performed.') ? 'deferred.tdResolve();' : getSource(teardown)
+              'teardown': (tdSource == '' || tdSource == '// No operation performed.') ? interpolate('d#.tdResolve();') : getSource(teardown)
             });
           }
           else {
             _.assign(templateData, {
-              'setup': suArg ? interpolate('m#.setup(' + suArg + ');') : 'deferred.suResolve();',
+              'setup': suArg ? interpolate('m#.setup(' + suArg + ');') : interpolate('d#.suResolve();'),
               'fn': interpolate('m#.fn(' + fnArg + ');'),
               'fnArg': fnArg,
-              'teardown': tdArg ? interpolate('m#.teardown(' + tdArg + ');') : 'deferred.tdResolve();'
+              'teardown': tdArg ? interpolate('m#.teardown(' + tdArg + ');') : interpolate('d#.tdResolve();')
             });
           }
         }
