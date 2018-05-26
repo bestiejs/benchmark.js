@@ -6,6 +6,7 @@ node_js:
 cache:
   directories:
     - ~/.npm
+    - node_modules
     - travis_phantomjs
 
 env:
