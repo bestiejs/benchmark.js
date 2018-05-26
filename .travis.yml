@@ -17,11 +17,6 @@ env:
     - ISTANBUL=true
     - BIN=phantomjs
 
-matrix:
-  include:
-    - node_js: 4
-      env:
-
 git:
   depth: 10
 
