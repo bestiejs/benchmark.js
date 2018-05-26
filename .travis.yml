@@ -43,7 +43,7 @@ before_install:
       phantomjs -v
 
   - nvm use $TRAVIS_NODE_VERSION
-  - npm i -g npm@^5
+  - npm i -g npm@latest
 
 install:
   - npm i
