@@ -42,9 +42,6 @@ before_install:
   - nvm use $TRAVIS_NODE_VERSION
   - npm i -g npm
 
-install:
-  - npm ci
-
 script:
   - |
       if [ $ISTANBUL = true ]; then
