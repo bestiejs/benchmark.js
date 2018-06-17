@@ -43,7 +43,7 @@ before_install:
   - npm i -g npm@^5
 
 install:
-  - npm i
+  - npm ci
 
 script:
   - |
