@@ -1,8 +1,8 @@
 /*!
  * ui.js
- * Copyright Mathias Bynens <https://mths.be/>
- * Modified by John-David Dalton <http://allyoucanleet.com/>
- * Available under MIT license <https://mths.be/mit>
+ * Copyright Mathias Bynens
+ * Modified by John-David Dalton
+ * Available under MIT license
  */
 (function(window, document) {
 

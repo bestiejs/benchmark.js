@@ -6,11 +6,11 @@
   "license": "MIT",
   "main": "benchmark.js",
   "keywords": "benchmark, performance, speed",
-  "author": "Mathias Bynens <mathias@qiwi.be> (https://mathiasbynens.be/)",
+  "author": "Mathias Bynens <mathias@qiwi.be>",
   "contributors": [
-    "Mathias Bynens <mathias@qiwi.be> (https://mathiasbynens.be/)",
-    "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
-    "Kit Cambridge <github@kitcambridge.be> (http://kitcambridge.be/)"
+    "Mathias Bynens <mathias@qiwi.be>",
+    "John-David Dalton <john.david.dalton@gmail.com>",
+    "Kit Cambridge <github@kitcambridge.be>"
   ],
   "repository": "bestiejs/benchmark.js",
   "scripts": {
