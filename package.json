@@ -6,11 +6,11 @@
   "license": "MIT",
   "main": "benchmark.js",
   "keywords": "benchmark, performance, speed",
-  "author": "Mathias Bynens <mathias@qiwi.be> (https://mathiasbynens.be/)",
+  "author": "Mathias Bynens <mathias@qiwi.be>",
   "contributors": [
-    "Mathias Bynens <mathias@qiwi.be> (https://mathiasbynens.be/)",
-    "John-David Dalton <john.david.dalton@gmail.com> (http://allyoucanleet.com/)",
-    "Kit Cambridge <github@kitcambridge.be> (http://kitcambridge.be/)"
+    "Mathias Bynens <mathias@qiwi.be>",
+    "John-David Dalton <john.david.dalton@gmail.com>",
+    "Kit Cambridge <github@kitcambridge.be>"
   ],
   "repository": "bestiejs/benchmark.js",
   "scripts": {
@@ -18,16 +18,16 @@
     "test": "node test/test"
   },
   "dependencies": {
-    "lodash": "^4.17.4",
-    "platform": "^1.3.4"
+    "lodash": "^4.17.10",
+    "platform": "^1.3.5"
   },
   "devDependencies": {
-    "coveralls": "^2.13.1",
-    "docdown": "~0.7.2",
+    "coveralls": "^3.0.1",
+    "docdown": "^0.7.3",
     "istanbul": "0.4.5",
     "qunit-extras": "^3.0.0",
-    "qunitjs": "^2.3.3",
-    "requirejs": "^2.3.3"
+    "qunitjs": "^2.4.1",
+    "requirejs": "^2.3.5"
   },
   "files": [
     "benchmark.js"

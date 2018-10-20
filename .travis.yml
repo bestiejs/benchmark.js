@@ -2,6 +2,8 @@ language: node_js
 sudo: false
 node_js:
   - 6
+  - 8
+  - 10
 
 cache:
   directories:
@@ -16,11 +18,6 @@ env:
     -
     - ISTANBUL=true
     - BIN=phantomjs
-
-matrix:
-  include:
-    - node_js: 4
-      env:
 
 git:
   depth: 10
@@ -43,10 +40,7 @@ before_install:
       phantomjs -v
 
   - nvm use $TRAVIS_NODE_VERSION
-  - npm i -g npm@^5
-
-install:
-  - npm i
+  - npm i -g npm
 
 script:
   - |

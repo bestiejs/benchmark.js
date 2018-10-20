@@ -1,9 +1,9 @@
 /*!
- * Benchmark.js <https://benchmarkjs.com/>
- * Copyright 2010-2016 Mathias Bynens <https://mths.be/>
- * Based on JSLitmus.js, copyright Robert Kieffer <http://broofa.com/>
- * Modified by John-David Dalton <http://allyoucanleet.com/>
- * Available under MIT license <https://mths.be/mit>
+ * Benchmark.js
+ * Copyright 2010-2016 Mathias Bynens
+ * Based on JSLitmus.js, copyright Robert Kieffer
+ * Modified by John-David Dalton
+ * Available under MIT license
  */
 ;(function() {
   'use strict';
