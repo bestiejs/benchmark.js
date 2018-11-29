@@ -1248,14 +1248,31 @@
       .run();
     });
 
+    QUnit.test('should run a deferred benchmark correctly without being asynchronous', function(assert) {
+      var done = assert.async();
+
+      Benchmark(function(deferred) {
+        setTimeout(function() { deferred.resolve(); }, 1e3);
+      }, {
+        'defer': true,
+        'setup': function(deferred) { deferred.suResolve(); },
+        'teardown': function(deferred) { deferred.tdResolve(); },
+        'onComplete': function() {
+          assert.strictEqual(this.hz.toFixed(0), '1');
+          done();
+        }
+      })
+      .run();
+    });
+
     QUnit.test('should run with string values for "fn", "setup", and "teardown"', function(assert) {
       var done = assert.async();
 
       Benchmark({
         'defer': true,
-        'setup': 'var x = [3, 2, 1];',
+        'setup': 'var x = [3, 2, 1]; setTimeout(function() { deferred.suResolve(); }, 10);',
         'fn': 'setTimeout(function() { x.sort(); deferred.resolve(); }, 10);',
-        'teardown': 'x.length = 0;',
+        'teardown': 'x.length = 0; setTimeout(function() { deferred.tdResolve(); }, 10);',
         'onComplete': function() {
           assert.ok(true);
           done();
@@ -1271,15 +1288,17 @@
 
       Benchmark({
         'defer': true,
-        'setup': function() {
+        'setup': function(deferred) {
           fired.push('setup');
+          setTimeout(function() { deferred.suResolve(); }, 10);
         },
         'fn': function(deferred) {
           fired.push('fn');
           setTimeout(function() { deferred.resolve(); }, 10);
         },
-        'teardown': function() {
+        'teardown': function(deferred) {
           fired.push('teardown');
+          setTimeout(function() { deferred.tdResolve(); }, 10);
         },
         'onComplete': function() {
           var actual = fired.join().replace(/(fn,)+/g, '$1').replace(/(setup,fn,teardown(?:,|$))+/, '$1');
