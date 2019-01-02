@@ -30,7 +30,7 @@ branches:
 before_install:
   # Upgrade PhantomJS.
   - |
-      export PHANTOMJS_VERSION=2.1.1
+      export PHANTOMJS_VERSION=2.1.14
       export PATH=$PWD/travis_phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin:$PATH
       if [ $(phantomjs --version) != $PHANTOMJS_VERSION ]; then
         rm -rf $PWD/travis_phantomjs
@@ -48,6 +48,5 @@ script:
       if [ $ISTANBUL = true ]; then
         istanbul cover -x "**/vendor/**" --report lcovonly ./test/test.js && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage
       else
-        cd ./test
-        $BIN ./test.js
+        npm run test:$BIN
       fi
