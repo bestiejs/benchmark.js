@@ -74,7 +74,7 @@ suite.add('RegExp#test', function() {
   console.log('Fastest is ' + this.filter('fastest').map('name'));
 })
 // run async
-.run({ 'async': true });
+.run({ 'async': true, 'locale': 'en-US' });
 
 // logs:
 // => RegExp#test x 4,161,532 +-0.99% (59 cycles)
@@ -85,6 +85,26 @@ suite.add('RegExp#test', function() {
 ## Support
 
 Tested in Chrome 54-55, Firefox 49-50, IE 11, Edge 14, Safari 9-10, Node.js 6-7, & PhantomJS 2.1.1.
+
+## Localization
+
+Results are formatted using [Number.prototype.toLocaleString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toLocaleString)
+
+### Node.js
+
+Node.js does not support all number localizations by default. Install the optional [full-icu](https://www.npmjs.com/package/full-icu) package
+
+```
+npm i --save full-icu
+```
+
+and run your benchmark as follows:
+
+```
+NODE_ICU_DATA=./node_modules/full-icu node your_benchmark.js
+```
+
+Read the [Internationalization chapter](https://nodejs.org/dist/latest/docs/api/intl.html) from the Node.js documentation for more information.
 
 ## BestieJS
 

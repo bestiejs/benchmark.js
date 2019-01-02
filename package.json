@@ -15,7 +15,7 @@
   "repository": "bestiejs/benchmark.js",
   "scripts": {
     "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
-    "test": "node test/test"
+    "test": "NODE_ICU_DATA=./node_modules/full-icu node test/test"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "coveralls": "^3.0.1",
     "docdown": "^0.7.3",
+    "full-icu": "^1.2.1",
     "istanbul": "0.4.5",
     "qunit-extras": "^3.0.0",
     "qunitjs": "^2.4.1",

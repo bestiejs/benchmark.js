@@ -321,6 +321,22 @@
     QUnit.test('should format negative numbers correctly', function(assert) {
       assert.strictEqual(Benchmark.formatNumber(-1234.56), '-1,234.56');
     });
+
+    QUnit.test('should format a million correctly when passing a locale', function(assert) {
+      assert.strictEqual(Benchmark.formatNumber(1e6, 'nl-NL'), '1.000.000');
+    });
+
+    QUnit.test('should format less than 100 correctly when passing a locale', function(assert) {
+      assert.strictEqual(Benchmark.formatNumber(23, 'nl-NL'), '23');
+    });
+
+    QUnit.test('should format numbers with decimal values correctly when passing a locale', function(assert) {
+      assert.strictEqual(Benchmark.formatNumber(1234.56, 'nl-NL'), '1.234,56');
+    });
+
+    QUnit.test('should format negative numbers correctly when passing a locale', function(assert) {
+      assert.strictEqual(Benchmark.formatNumber(-1234.56, 'nl-NL'), '-1.234,56');
+    });
   }());
 
   /*--------------------------------------------------------------------------*/
