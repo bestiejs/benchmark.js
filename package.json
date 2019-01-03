@@ -14,8 +14,9 @@
   ],
   "repository": "bestiejs/benchmark.js",
   "scripts": {
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
-    "test": "node test/test"
+    "test": "NODE_ICU_DATA=./node_modules/full-icu nyc node test/test.js"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -24,7 +25,8 @@
   "devDependencies": {
     "coveralls": "^3.0.1",
     "docdown": "^0.7.3",
-    "istanbul": "0.4.5",
+    "full-icu": "^1.2.1",
+    "nyc": "^13.1.0",
     "qunit-extras": "^3.0.0",
     "qunitjs": "^2.4.1",
     "requirejs": "^2.3.5"
