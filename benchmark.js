@@ -791,7 +791,13 @@
      * @returns {string} The more readable string representation.
      */
     function formatNumber(number, locale) {
-      return number.toLocaleString(locale);
+      if (typeof Number.prototype.toLocaleString === 'function') {
+        return number.toLocaleString(locale);
+      } else {
+        number = String(number).split('.');
+        return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
+          (number[1] ? '.' + number[1] : '');
+      }
     }
 
     /**
