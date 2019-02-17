@@ -1592,11 +1592,11 @@
             // When `deferred.cycles` is `0` then...
             'if(!d#.cycles){' +
             // set `deferred.fn`,
-            'd#.fn=function(){var ${fnArg}=d#;if(typeof f#=="function"){try{${fn}\n}catch(e#){f#(d#)}}else{${fn}\n}};' +
+            'd#.fn=function(){var ${fnArg}=d#;if(typeof f#=="function"){f#(d#)}else{${fn}\n}};' +
             // set `deferred.teardown`,
-            'd#.teardown=function(){d#.cycles=0;if(typeof td#=="function"){try{${teardown}\n}catch(e#){td#()}}else{${teardown}\n}};' +
+            'd#.teardown=function(){d#.cycles=0;if(typeof td#=="function"){td#()}else{${teardown}\n}};' +
             // execute the benchmark's `setup`,
-            'if(typeof su#=="function"){try{${setup}\n}catch(e#){su#()}}else{${setup}\n};' +
+            'if(typeof su#=="function"){su#()}else{${setup}\n}' +
             // start timer,
             't#.start(d#);' +
             // and then execute `deferred.fn` and return a dummy object.
