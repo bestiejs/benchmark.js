@@ -1834,6 +1834,7 @@
           elapsed = 0,
           initCount = bench.initCount,
           minSamples = bench.minSamples,
+          endAtRME = bench.endAtRME,
           queue = [],
           sample = bench.stats.sample;
 
@@ -1934,6 +1935,11 @@
             'sem': sem,
             'variance': variance
           });
+
+          // Exit early if we have reached a satisfying answer
+          if (size >= minSamples && rme < endAtRME) {
+            maxedOut = true;
+          }
 
           // Abort the cycle loop when the minimum sample size has been collected
           // and the elapsed time exceeds the maximum time allowed per benchmark.
@@ -2207,6 +2213,16 @@
          * @type number
          */
         'minTime': 0,
+
+        /**
+         * Exit the benchmark early if relative margin of error drops below
+         * this number. The benchmark will still adhere to the minSamples
+         * option.
+         *
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'endAtRME': 0,
 
         /**
          * The name of the benchmark.
