@@ -757,6 +757,9 @@
      * // get slowest benchmarks
      * Benchmark.filter(benches, 'slowest');
      *
+     * // Note: Filtering by 'fastest' and 'slowest' may return multiple results,
+     * // if multiple tests' margins of error overlap.
+     * 
      * // get benchmarks that completed without erroring
      * Benchmark.filter(benches, 'successful');
      */
