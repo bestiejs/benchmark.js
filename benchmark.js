@@ -433,7 +433,7 @@
      * @constructor
      * @memberOf Benchmark
      * @param {string} name A name to identify the suite.
-     * @param {Object} [options={}] Options object.
+     * @param {Object} [options={}] Benchmark.options object.
      * @example
      *
      * // basic usage (the `new` operator is optional)
