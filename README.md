@@ -66,6 +66,12 @@ suite.add('RegExp#test', function() {
 .add('String#indexOf', function() {
   'Hello World!'.indexOf('o') > -1;
 })
+.add('String#indexOf#callback', function(deferred) {
+  setTimeout(() => {
+    'Hello World!'.indexOf('o') > -1;
+    deferred.resolve();
+  }, 1);
+}, { defer: true })
 // add listeners
 .on('cycle', function(event) {
   console.log(String(event.target));
