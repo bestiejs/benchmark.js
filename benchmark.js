@@ -124,7 +124,7 @@
    */
   function runInContext(context) {
     // Exit early if unable to acquire lodash.
-    var _ = context && context._ || require('lodash') || root._;
+    var _ = context && context._ || req('lodash') || root._;
     if (!_) {
       Benchmark.runInContext = runInContext;
       return Benchmark;
@@ -163,9 +163,6 @@
         sqrt = Math.sqrt,
         toString = objectProto.toString,
         unshift = arrayRef.unshift;
-
-    /** Used to avoid inclusion in Browserified bundles. */
-    var req = require;
 
     /** Detect DOM document object. */
     var doc = isHostType(context, 'document') && context.document;
@@ -521,7 +518,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || _.noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && hasRunScript() && (createFunction('', 'return"' + uid + '"') || _.noop)() == uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -644,11 +641,39 @@
      * @param {string} id The module id.
      * @returns {*} The exported module or `null`.
      */
-    function require(id) {
+    function req(id) {
       try {
-        var result = freeExports && freeRequire(id);
+        var result;
+        if (freeExports && freeRequire) {
+          switch(id) {
+            case 'lodash':
+              // Let all essential dependencies be literal.
+              // Let ast-global `require` be caller.
+              result = require('lodash');
+              break;
+            case 'platform':
+              result = require('platform');
+              break;
+            default:
+              /** Used to avoid inclusion in Browserified bundles. */
+              // eg: microtime
+              result = freeRequire(id);
+              break;
+          }
+        }
       } catch(e) {}
       return result || null;
+    }
+
+    /**
+     * Test if able to run a snippet of JavaScript via script injection.
+     *
+     * @private
+     */
+    function hasRunScript() {
+      return freeDefine
+        ? (root.define.amd !== undefined)
+        : (root.Benchmark !== undefined);
     }
 
     /**
@@ -2066,7 +2091,7 @@
       else {
         // Fix TraceMonkey bug associated with clock fallbacks.
         // For more information see http://bugzil.la/509069.
-        if (support.browser) {
+        if (support.browser && hasRunScript()) {
           runScript(uid + '=1;delete ' + uid);
         }
         // We're done.
@@ -2273,7 +2298,7 @@
        * @memberOf Benchmark
        * @type Object
        */
-      'platform': context.platform || require('platform') || ({
+      'platform': context.platform || req('platform') || ({
         'description': context.navigator && context.navigator.userAgent || null,
         'layout': null,
         'product': null,
