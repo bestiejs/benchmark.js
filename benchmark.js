@@ -535,7 +535,7 @@
      * @param {Object} fn The function to execute.
      */
     function delay(bench, fn) {
-      bench._timerId = _.delay(fn, bench.delay * 1e3);
+      bench._timerId = setTimeout(fn, bench.delay * 1e3);
     }
 
     /**
