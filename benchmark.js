@@ -1410,9 +1410,11 @@
           u = min(u1, u2);
 
       function getScore(xA, sampleB) {
-        return _.reduce(sampleB, function(total, xB) {
-          return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
-        }, 0);
+        var total = 0;
+        for (var i = 0, il = sampleB.length; i < il; ++i) {
+          total +=  (sampleB[i] > xA ? 0 : sampleB[i] < xA ? 1 : 0.5);
+        }
+        return total;
       }
 
       function getU(sampleA, sampleB) {
