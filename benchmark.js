@@ -1556,7 +1556,7 @@
             queue.push({ 'destination': currValue, 'source': value });
           }
           // Register a changed primitive.
-          else if (!_.eq(currValue, value) && value !== undefined) {
+          else if (!(currValue === value || (currValue !== currValue && value !== value)) && value !== undefined) {
             changes.push({ 'destination': destination, 'key': key, 'value': value });
           }
         });
