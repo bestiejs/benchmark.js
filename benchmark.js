@@ -418,7 +418,7 @@
         return type;
       }
       return (event instanceof Event)
-        ? _.assign(event, { 'timeStamp': (+_.now()) }, typeof type == 'string' ? { 'type': type } : type)
+        ? Object.assign(event, { 'timeStamp': (+_.now()) }, typeof type == 'string' ? { 'type': type } : type)
         : new Event(type);
     }
 
@@ -690,7 +690,7 @@
      * @param {Object} [options={}] Options object.
      */
     function setOptions(object, options) {
-      options = object.options = _.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+      options = object.options = Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
 
       _.forOwn(options, function(value, key) {
         if (value != null) {
@@ -940,7 +940,7 @@
         args = slice.call(arguments, 2);
       } else {
         // 2 arguments (array, options).
-        options = _.assign(options, name);
+        options = Object.assign(options, name);
         name = options.name;
         args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
@@ -1086,7 +1086,7 @@
      */
     function cloneSuite(options) {
       var suite = this,
-          result = new suite.constructor(_.assign({}, suite.options, options));
+          result = new suite.constructor(Object.assign({}, suite.options, options));
 
       // Copy own properties.
       _.forOwn(suite, function(value, key) {
@@ -1366,10 +1366,10 @@
      */
     function clone(options) {
       var bench = this,
-          result = new bench.constructor(_.assign({}, bench, options));
+          result = new bench.constructor(Object.assign({}, bench, options));
 
       // Correct the `options` object.
-      result.options = _.assign({}, cloneDeep(bench.options), cloneDeep(options));
+      result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
       // Copy own custom properties.
       _.forOwn(bench, function(value, key) {
@@ -1459,7 +1459,7 @@
       // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
       var data = {
         'destination': bench,
-        'source': _.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
+        'source': Object.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
       };
 
       do {
@@ -1540,7 +1540,7 @@
           errorStr = join(error);
         } else {
           // Error#name and Error#message properties are non-enumerable.
-          errorStr = join(_.assign({ 'name': error.name, 'message': error.message }, error));
+          errorStr = join(Object.assign({ 'name': error.name, 'message': error.message }, error));
         }
         result += ': ' + errorStr;
       }
@@ -1671,7 +1671,7 @@
 
         templateData.uid = uid + uidCounter++;
 
-        _.assign(templateData, {
+        Object.assign(templateData, {
           'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
           'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
           'fnArg': fnArg,
@@ -1680,32 +1680,32 @@
 
         // Use API of chosen timer.
         if (timer.unit == 'ns') {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=n#()'),
             'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
           });
         }
         else if (timer.unit == 'us') {
           if (timer.ns.stop) {
-            _.assign(templateData, {
+            Object.assign(templateData, {
               'begin': interpolate('s#=n#.start()'),
               'end': interpolate('r#=n#.microseconds()/1e6')
             });
           } else {
-            _.assign(templateData, {
+            Object.assign(templateData, {
               'begin': interpolate('s#=n#()'),
               'end': interpolate('r#=(n#()-s#)/1e6')
             });
           }
         }
         else if (timer.ns.now) {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=(+n#.now())'),
             'end': interpolate('r#=((+n#.now())-s#)/1e3')
           });
         }
         else {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=new n#().getTime()'),
             'end': interpolate('r#=(new n#().getTime()-s#)/1e3')
           });
@@ -1841,7 +1841,7 @@
        * Adds a clone to the queue.
        */
       function enqueue() {
-        queue.push(_.assign(bench.clone(), {
+        queue.push(Object.assign(bench.clone(), {
           '_original': bench,
           'events': {
             'abort': [update],
@@ -1926,7 +1926,7 @@
           // Compute the relative margin of error.
           rme = (moe / mean) * 100 || 0;
 
-          _.assign(bench.stats, {
+          Object.assign(bench.stats, {
             'deviation': sd,
             'mean': mean,
             'moe': moe,
@@ -2129,8 +2129,8 @@
     // The bugginess continues as the `Benchmark` constructor has an argument
     // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
     // making it non-writable in the process, unless it is the first property
-    // assigned by for-in loop of `_.assign()`.
-    _.assign(Benchmark, {
+    // assigned by for-in loop of `Object.assign()`.
+    Object.assign(Benchmark, {
 
       /**
        * The default options copied by benchmark instances.
@@ -2297,7 +2297,7 @@
       'version': '2.1.4'
     });
 
-    _.assign(Benchmark, {
+    Object.assign(Benchmark, {
       'filter': filter,
       'formatNumber': formatNumber,
       'invoke': invoke,
@@ -2313,7 +2313,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Benchmark.prototype, {
+    Object.assign(Benchmark.prototype, {
 
       /**
        * The number of times a test was executed.
@@ -2557,7 +2557,7 @@
       }
     });
 
-    _.assign(Benchmark.prototype, {
+    Object.assign(Benchmark.prototype, {
       'abort': abort,
       'clone': clone,
       'compare': compare,
@@ -2572,7 +2572,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Deferred.prototype, {
+    Object.assign(Deferred.prototype, {
 
       /**
        * The deferred benchmark instance.
@@ -2607,13 +2607,13 @@
       'timeStamp': 0
     });
 
-    _.assign(Deferred.prototype, {
+    Object.assign(Deferred.prototype, {
       'resolve': resolve
     });
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Event.prototype, {
+    Object.assign(Event.prototype, {
 
       /**
        * A flag to indicate if the emitters listener iteration is aborted.
@@ -2694,7 +2694,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Suite.prototype, {
+    Object.assign(Suite.prototype, {
 
       /**
        * The number of benchmarks in the suite.
@@ -2721,7 +2721,7 @@
       'running': false
     });
 
-    _.assign(Suite.prototype, {
+    Object.assign(Suite.prototype, {
       'abort': abortSuite,
       'add': add,
       'clone': cloneSuite,
@@ -2746,7 +2746,7 @@
     /*------------------------------------------------------------------------*/
 
     // Expose Deferred, Event, and Suite.
-    _.assign(Benchmark, {
+    Object.assign(Benchmark, {
       'Deferred': Deferred,
       'Event': Event,
       'Suite': Suite
