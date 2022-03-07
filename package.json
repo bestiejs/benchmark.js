@@ -7,6 +7,7 @@
   "main": "benchmark.js",
   "keywords": "benchmark, performance, speed",
   "author": "Mathias Bynens <mathias@qiwi.be>",
+  "types": "types/index.d.ts",
   "contributors": [
     "Mathias Bynens <mathias@qiwi.be>",
     "John-David Dalton <john.david.dalton@gmail.com>",
@@ -15,7 +16,8 @@
   "repository": "bestiejs/benchmark.js",
   "scripts": {
     "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
-    "test": "node test/test"
+    "test": "node test/test",
+    "test:tsd": "tsd"
   },
   "dependencies": {
     "lodash": "^4.17.10",
@@ -27,9 +29,17 @@
     "istanbul": "0.4.5",
     "qunit-extras": "^3.0.0",
     "qunitjs": "^2.4.1",
-    "requirejs": "^2.3.5"
+    "requirejs": "^2.3.5",
+    "tsd": "^0.19.1"
   },
   "files": [
+    "types",
     "benchmark.js"
-  ]
+  ],
+  "tsd": {
+    "directory": "test/types",
+    "compilerOptions": {
+      "strict": true
+    }
+  }
 }
