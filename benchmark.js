@@ -1476,7 +1476,7 @@
           if (/^_|^events$|^on[A-Z]/.test(key)) {
             return;
           }
-          if (_.isObjectLike(value)) {
+          if (typeof value === 'object' && value !== null) {
             if (Array.isArray(value)) {
               // Check if an array value has changed to a non-array value.
               if (!Array.isArray(currValue)) {
@@ -1491,7 +1491,7 @@
               }
             }
             // Check if an object has changed to a non-object value.
-            else if (!_.isObjectLike(currValue)) {
+            else if (typeof currValue !== 'object' || currValue === null) {
               changed = true;
               currValue = {};
             }
