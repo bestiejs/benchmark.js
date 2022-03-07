@@ -786,7 +786,7 @@
         if (value != null) {
           // Add event listeners.
           if (/^on[A-Z]/.test(key)) {
-            _.each(key.split(' '), function(key) {
+            (key.indexOf(' ') === -1 ? [key] : key.split(' ')).forEach(function(key) {
               object.on(key.slice(2).toLowerCase(), value);
             });
           } else if (!has(object, key)) {
@@ -1398,7 +1398,7 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      _.each(type.split(' '), function(type) {
+      (type.indexOf(' ') === -1 ? [type] : type.split(' ')).forEach(function(type) {
         (has(events, type)
           ? events[type]
           : (events[type] = [])
@@ -1602,7 +1602,7 @@
       // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
       if (changes.length &&
           (bench.emit(event = Event('reset')), !event.cancelled)) {
-        _.each(changes, function(data) {
+          changes.forEach(function(data) {
           data.destination[data.key] = data.value;
         });
       }
