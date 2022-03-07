@@ -557,7 +557,9 @@
      * @returns {string} The argument name.
      */
     function getFirstArgument(fn) {
-      return (!_.has(fn, 'toString') &&
+      return (
+        typeof fn === 'function' &&
+        !('toString' in fn) &&
         (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || '';
     }
 
