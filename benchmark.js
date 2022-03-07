@@ -1536,7 +1536,7 @@
         var errorStr;
         if (!_.isObject(error)) {
           errorStr = String(error);
-        } else if (!_.isError(Error)) {
+        } else if (!_.isError(error)) {
           errorStr = join(error);
         } else {
           // Error#name and Error#message properties are non-enumerable.
