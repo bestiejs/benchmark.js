@@ -545,19 +545,48 @@
     /*------------------------------------------------------------------------*/
 
     /**
-     * A specialized version of `_.cloneDeep` which only clones arrays and plain
+     * A specialized version of lodashs `cloneDeep` which only clones arrays and plain
      * objects assigning all other values by reference.
      *
      * @private
      * @param {*} value The value to clone.
      * @returns {*} The cloned value.
      */
-    var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
-      // Only clone primitives, arrays, and plain objects.
-      if (!Array.isArray(value) && !isPlainObject(value)) {
-        return value;
+    var cloneDeep = function (value) {
+      if (Array.isArray(value)) {
+        return cloneArray(value);
       }
-    });
+      
+      if (isPlainObject(value)) {
+        return cloneObject(value);
+      }
+
+      return value;
+    }
+
+    function cloneObject(obj) {
+      var ret = {};
+    
+      var key = '';
+      var keys = Object.keys(obj);
+    
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        key = keys[i];
+        ret[key] = cloneDeep(obj[key]);
+      }
+    
+      return ret;
+    }
+    
+    function cloneArray(arr) {
+      var ret = new Array(arr.length);
+
+      for (var i = 0, il = arr.length; i < il; ++i) {
+        ret[i] = cloneDeep(arr[i]);
+      }
+    
+      return ret;
+    }
 
     /**
      * Creates a function from the given arguments string and body.
