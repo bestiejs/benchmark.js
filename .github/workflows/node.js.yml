@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm i
+    - run: npm install
     - run: npm test
 
   test-ts-types:
@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: 16
 
-      - run: npm i
+      - run: npm install
 
       - name: Typings
         run: npm run test:tsd
