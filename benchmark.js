@@ -782,7 +782,7 @@
     function setOptions(object, options) {
       options = object.options = Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
 
-      _.forOwn(options, function(value, key) {
+      Object.entries(options).forEach(function([key, value]) {
         if (value != null) {
           // Add event listeners.
           if (/^on[A-Z]/.test(key)) {
@@ -864,7 +864,7 @@
           return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
         });
 
-        return _.filter(result, function(bench) {
+        return result.filter(function(bench) {
           return result[0].compare(bench) == 0;
         });
       }
@@ -1179,7 +1179,7 @@
           result = new suite.constructor(Object.assign({}, suite.options, options));
 
       // Copy own properties.
-      _.forOwn(suite, function(value, key) {
+      Object.entries(suite).forEach(function([key, value]) {
         if (!has(result, key)) {
           result[key] = typeof (value && value.clone) === 'function'
             ? value.clone()
@@ -1462,7 +1462,7 @@
       result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
       // Copy own custom properties.
-      _.forOwn(bench, function(value, key) {
+      Object.entries(bench).forEach(function([key, value]) {
         if (!has(result, key)) {
           result[key] = cloneDeep(value);
         }
@@ -1557,7 +1557,7 @@
       };
 
       do {
-        _.forOwn(data.source, function(value, key) {
+        Object.entries(data.source).forEach(function([key, value]) {
           var changed,
               destination = data.destination,
               currValue = destination[key];
