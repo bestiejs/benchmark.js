@@ -1,5 +1,11 @@
 # Benchmark.js v2.1.4
 
+<div align="center">
+
+[![Coverage Status](https://coveralls.io/repos/github/cthulhu-node/benchmark.js/badge.svg?branch=master)](https://coveralls.io/github/cthulhu-node/benchmark.js?branch=master)
+
+</div>
+
 A [robust](https://mathiasbynens.be/notes/javascript-benchmarking "Bulletproof JavaScript benchmarks") benchmarking library that supports high-resolution timers & returns statistically significant results. As seen on [jsPerf](https://jsperf.com/).
 
 ## Documentation
