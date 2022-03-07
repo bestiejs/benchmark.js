@@ -570,10 +570,38 @@
      * @param {Array} sample The sample.
      * @returns {number} The mean.
      */
-    function getMean(sample) {
-      return (_.reduce(sample, function(sum, x) {
-        return sum + x;
-      }) / sample.length) || 0;
+     function getMean(sample) {
+      if (sample.length === 0) {
+        return 0;
+      }
+
+      var result = 0;
+
+      for (var i = 0, il = sample.length; i < il; ++i) {
+        result += sample[i];
+      }
+      return result / sample.length;
+    }
+
+    /**
+     * Computes the variance of a sample.
+     *
+     * @private
+     * @param {Array} sample The sample.
+     * @param {number} mean The mean.
+     * @param {number} size The size.
+     * @returns {number} The variance.
+     */
+    function getVariance(sample, mean, size) {
+      if (sample.length === 0) {
+        return 0;
+      }
+      var result = 0;
+
+      for (var i = 0, il = sample.length; i < il; ++i) {
+        result += pow(sample[i] - mean, 2);
+      }
+      return result / (size - 1);
     }
 
     /**
@@ -1420,9 +1448,11 @@
       }
 
       function getU(sampleA, sampleB) {
-        return _.reduce(sampleA, function(total, xA) {
-          return total + getScore(xA, sampleB);
-        }, 0);
+        var total = 0;
+        for (var i = 0, il = sampleA.length; i < il; ++i) {
+          total += getScore(sampleA[i], sampleB);
+        }
+        return total;
       }
 
       function getZ(u) {
@@ -1906,8 +1936,7 @@
             now = (+Date.now()),
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
-            times = bench.times,
-            varOf = function(sum, x) { return sum + pow(x - mean, 2); };
+            times = bench.times;
 
         // Exit early for aborted or unclockable tests.
         if (done || clone.hz == Infinity) {
@@ -1918,7 +1947,7 @@
           // Compute the sample mean (estimate of the population mean).
           mean = getMean(sample);
           // Compute the sample variance (estimate of the population variance).
-          variance = _.reduce(sample, varOf, 0) / (size - 1) || 0;
+          variance = getVariance(sample, mean, size);
           // Compute the sample standard deviation (estimate of the population standard deviation).
           sd = sqrt(variance);
           // Compute the standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean).
