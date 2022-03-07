@@ -182,7 +182,7 @@
     var trash = doc && doc.createElement('div');
 
     /** Used to integrity check compiled tests. */
-    var uid = 'uid' + (+_.now());
+    var uid = 'uid' + (+Date.now());
 
     /** Used to avoid infinite recursion when methods call each other. */
     var calledBy = {};
@@ -420,7 +420,7 @@
         return type;
       }
       return (event instanceof Event)
-        ? Object.assign(event, { 'timeStamp': (+_.now()) }, typeof type == 'string' ? { 'type': type } : type)
+        ? Object.assign(event, { 'timeStamp': (+Date.now()) }, typeof type == 'string' ? { 'type': type } : type)
         : new Event(type);
     }
 
@@ -1899,7 +1899,7 @@
             variance,
             clone = event.target,
             done = bench.aborted,
-            now = (+_.now()),
+            now = (+Date.now()),
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
             times = bench.times,
@@ -2102,7 +2102,7 @@
       bench.running = true;
 
       bench.count = bench.initCount;
-      bench.times.timeStamp = (+_.now());
+      bench.times.timeStamp = (+Date.now());
       bench.emit(event);
 
       if (!event.cancelled) {
