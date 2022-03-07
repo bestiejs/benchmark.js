@@ -1536,7 +1536,7 @@
 
       if (error) {
         var errorStr;
-        if (!_.isObject(error)) {
+        if (typeof error !== 'object') {
           errorStr = String(error);
         } else if (!(error instanceof Error)) {
           errorStr = join(error);
