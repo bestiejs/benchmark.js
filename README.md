@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Build Status](https://github.com/cthulhu-node/benchmark.js/workflows/ci/badge.svg)](https://github.com/cthulhu-node/benchmark.js/actions)
 [![Coverage Status](https://coveralls.io/repos/github/cthulhu-node/benchmark.js/badge.svg?branch=master)](https://coveralls.io/github/cthulhu-node/benchmark.js?branch=master)
 
 </div>
