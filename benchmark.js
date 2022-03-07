@@ -494,7 +494,7 @@
      */
     var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
       // Only clone primitives, arrays, and plain objects.
-      if (!_.isArray(value) && !_.isPlainObject(value)) {
+      if (!Array.isArray(value) && !_.isPlainObject(value)) {
         return value;
       }
     });
@@ -942,7 +942,7 @@
         // 2 arguments (array, options).
         options = _.assign(options, name);
         name = options.name;
-        args = _.isArray(args = 'args' in options ? options.args : []) ? args : [args];
+        args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
       }
       // Start iterating over the array.
@@ -1473,9 +1473,9 @@
             return;
           }
           if (_.isObjectLike(value)) {
-            if (_.isArray(value)) {
+            if (Array.isArray(value)) {
               // Check if an array value has changed to a non-array value.
-              if (!_.isArray(currValue)) {
+              if (!Array.isArray(currValue)) {
                 changed = true;
                 currValue = [];
               }
