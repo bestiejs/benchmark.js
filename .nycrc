@@ -1,0 +1,21 @@
+{
+	"all": true,
+	"reporter": [
+		"lcovonly",
+		"html",
+		"text",
+		"text-summary"
+	],
+	"exclude": [
+        "index.js",
+		"test",
+        "example",
+		"coverage",
+        "plugin"
+	],
+    "check-coverage": true,
+    "lines": 75,
+    "statements": 75,
+    "functions": 75,
+    "branches": 75
+}
