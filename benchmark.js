@@ -636,7 +636,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.isString(value) || (_.has(value, 'toString') && typeof value.toString === 'function');
+      return typeof value === 'string' || (_.has(value, 'toString') && typeof value.toString === 'function');
     }
 
     /**
@@ -937,7 +937,7 @@
           : (index = false);
       }
       // Juggle arguments.
-      if (_.isString(name)) {
+      if (typeof name === 'string') {
         // 2 arguments (array, name).
         args = slice.call(arguments, 2);
       } else {
