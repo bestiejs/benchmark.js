@@ -291,7 +291,7 @@
         ctor,
         result = data;
 
-    if (_.isArray(data)) {
+    if (Array.isArray(data)) {
       result = _.map(data, cloneData);
     }
     else if (data === Object(data)) {
@@ -372,7 +372,7 @@
     // resolve cells by duck typing because of munged property names
     var result = [];
     _.forOwn(object, function(value) {
-      return !(_.isArray(value) && (result = value));
+      return !(Array.isArray(value) && (result = value));
     });
     // remove empty entries which occur when not all the tests are recorded
     return _.compact(result);
@@ -391,7 +391,7 @@
 
     // resolve labels by duck typing because of munged property names
     _.forOwn(object, function(value) {
-      return !(_.isArray(value) && 0 in value && 'type' in value[0] && (result = value));
+      return !(Array.isArray(value) && 0 in value && 'type' in value[0] && (result = value));
     });
     // create a data map of labels to names
     _.each(ui.benchmarks, function(bench) {
@@ -423,7 +423,7 @@
 
     // resolve rows by duck typing because of munged property names
     _.forOwn(object, function(value, key) {
-      return !(_.isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
+      return !(Array.isArray(value) && 0 in value && !('type' in value[0]) && (name = key, result = value));
     });
     // remove empty rows and set the `p.className` on the browser
     // name cell that matches the user's browser name
