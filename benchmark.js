@@ -1331,7 +1331,7 @@
         }
         if (listeners) {
           if (listener) {
-            index = _.indexOf(listeners, listener);
+            index = listeners.indexOf(listener);
             if (index > -1) {
               listeners.splice(index, 1);
             }
@@ -1864,7 +1864,7 @@
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
-      timer = _.minBy(timers, 'res');
+      timer = timers.reduce(function(a, b) { return a.res <= b.res ? a : b }, {});
 
       // Error if there are no working timers.
       if (timer.res == Infinity) {
