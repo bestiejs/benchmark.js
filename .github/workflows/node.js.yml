@@ -28,3 +28,19 @@ jobs:
         cache: 'npm'
     - run: npm i
     - run: npm test
+
+  test-ts-types:
+    runs-on: ubuntu-latest
+    name: Typescript Types
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+
+      - run: npm i
+
+      - name: Typings
+        run: npm run test:tsd
