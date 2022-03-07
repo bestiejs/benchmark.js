@@ -818,7 +818,7 @@
       if (callback === 'successful') {
         // Callback to exclude those that are errored, unrun, or have hz of Infinity.
         callback = function(bench) {
-          return bench.cycles && _.isFinite(bench.hz) && !bench.error;
+          return bench.cycles && Number.isFinite(bench.hz) && !bench.error;
         };
       }
       else if (callback === 'fastest' || callback === 'slowest') {
@@ -1588,7 +1588,7 @@
           stats = bench.stats,
           size = stats.sample.length,
           pm = '\xb1',
-          result = bench.name || (_.isNaN(id) ? id : '<Test #' + id + '>');
+          result = bench.name || (Number.isNaN(id) ? id : '<Test #' + id + '>');
 
       if (error) {
         var errorStr;
