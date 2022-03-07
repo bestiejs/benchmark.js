@@ -115,6 +115,28 @@
   };
 
   /*--------------------------------------------------------------------------*/
+  function pick(object, keys) {
+    return keys.reduce((obj, key) => {
+       if (object && object.hasOwnProperty(key)) {
+          obj[key] = object[key];
+       }
+       return obj;
+     }, {});
+  }
+
+  function has(obj, key) {
+    if (!obj) {
+      return;
+    }
+    var keyParts = key.indexOf('.') === -1 ? [key] : key.split('.');
+
+    return !!obj && (
+      keyParts.length > 1
+        ? has(obj[key.split('.')[0]], keyParts.slice(1).join('.'))
+        : obj.hasOwnProperty(key)
+    );
+  }
+  /*--------------------------------------------------------------------------*/
 
   /**
    * Create a new `Benchmark` function using the given `context` object.
@@ -135,7 +157,7 @@
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
     // See http://es5.github.io/#x11.1.5.
-    context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
+    context = context ? Object.assign({}, root.Object(), context, pick(root, contextProps)) : root;
 
     /** Native constructor references. */
     var Array = context.Array,
@@ -666,7 +688,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return typeof value === 'string' || (_.has(value, 'toString') && typeof value.toString === 'function');
+      return typeof value === 'string' || (!!value && value.hasOwnProperty('toString') && typeof value.toString === 'function');
     }
 
     /**
@@ -731,7 +753,7 @@
             _.each(key.split(' '), function(key) {
               object.on(key.slice(2).toLowerCase(), value);
             });
-          } else if (!_.has(object, key)) {
+          } else if (!has(object, key)) {
             object[key] = cloneDeep(value);
           }
         }
@@ -1122,8 +1144,8 @@
 
       // Copy own properties.
       _.forOwn(suite, function(value, key) {
-        if (!_.has(result, key)) {
-          result[key] = typeof (_.get(value, 'clone')) === 'function'
+        if (!has(result, key)) {
+          result[key] = typeof (value && value.clone) === 'function'
             ? value.clone()
             : cloneDeep(value);
         }
@@ -1242,7 +1264,7 @@
       event.target || (event.target = object);
       delete event.result;
 
-      if (events && (listeners = _.has(events, event.type) && events[event.type])) {
+      if (events && (listeners = has(events, event.type) && events[event.type])) {
         _.each(listeners.slice(), function(listener) {
           if ((event.result = listener.apply(object, args)) === false) {
             event.cancelled = true;
@@ -1265,7 +1287,7 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      return _.has(events, type) ? events[type] : (events[type] = []);
+      return has(events, type) ? events[type] : (events[type] = []);
     }
 
     /**
@@ -1305,7 +1327,7 @@
         var index;
         if (typeof listeners == 'string') {
           type = listeners;
-          listeners = _.has(events, type) && events[type];
+          listeners = has(events, type) && events[type];
         }
         if (listeners) {
           if (listener) {
@@ -1341,7 +1363,7 @@
           events = object.events || (object.events = {});
 
       _.each(type.split(' '), function(type) {
-        (_.has(events, type)
+        (has(events, type)
           ? events[type]
           : (events[type] = [])
         ).push(listener);
@@ -1405,7 +1427,7 @@
 
       // Copy own custom properties.
       _.forOwn(bench, function(value, key) {
-        if (!_.has(result, key)) {
+        if (!has(result, key)) {
           result[key] = cloneDeep(value);
         }
       });
