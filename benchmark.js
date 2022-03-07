@@ -132,10 +132,46 @@
 
     return !!obj && (
       keyParts.length > 1
-        ? has(obj[key.split('.')[0]], keyParts.slice(1).join('.'))
+        ? has(obj[keyParts[0]], keyParts.slice(1).join('.'))
         : obj.hasOwnProperty(key)
     );
   }
+
+  var objectCtorString = Object.prototype.toString.call(Object);
+
+  /**
+   * Checks if `value` is a plain object, that is, an object created by the
+   * `Object` constructor or one with a `[[Prototype]]` of `null`.
+   *
+   * function Foo() {
+   *   this.a = 1;
+   * }
+   *
+   * isPlainObject(new Foo);
+   * // => false
+   *
+   * isPlainObject([1, 2, 3]);
+   * // => false
+   *
+   * isPlainObject({ 'x': 0, 'y': 0 });
+   * // => true
+   *
+   * isPlainObject(Object.create(null));
+   * // => true
+   */
+    function isPlainObject(value) {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    var proto = Object.getPrototypeOf(value);
+    if (proto === null) {
+      return true;
+    }
+    var Ctor = Object.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+    return typeof Ctor == 'function' && Ctor instanceof Ctor &&
+      Object.prototype.toString.call(Ctor) == objectCtorString;
+  }
+
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -385,7 +421,7 @@
         return new Benchmark(name, fn, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (isPlainObject(name)) {
         // 1 argument (options).
         options = name;
       }
@@ -394,7 +430,7 @@
         options = fn;
         fn = name;
       }
-      else if (_.isPlainObject(fn)) {
+      else if (isPlainObject(fn)) {
         // 2 arguments (name, options).
         options = fn;
         fn = null;
@@ -496,7 +532,7 @@
         return new Suite(name, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (isPlainObject(name)) {
         // 1 argument (options).
         options = name;
       } else {
@@ -518,7 +554,7 @@
      */
     var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
       // Only clone primitives, arrays, and plain objects.
-      if (!Array.isArray(value) && !_.isPlainObject(value)) {
+      if (!Array.isArray(value) && !isPlainObject(value)) {
         return value;
       }
     });
