@@ -2429,9 +2429,13 @@
     });
 
     // Add lodash methods to Benchmark.
-    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'], function(methodName) {
-      Benchmark[methodName] = _[methodName];
-    });
+    Benchmark.each = _.each;
+    Benchmark.forEach = _.forEach;
+    Benchmark.forOwn = _.forOwn;
+    Benchmark.has = _.has;
+    Benchmark.indexOf = _.indexOf;
+    Benchmark.map = _.map;
+    Benchmark.reduce = _.reduce;
 
     /*------------------------------------------------------------------------*/
 
@@ -2877,7 +2881,7 @@
     /*------------------------------------------------------------------------*/
 
     // Add lodash methods as Suite methods.
-    _.each(['each', 'forEach', 'indexOf', 'map', 'reduce'], function(methodName) {
+    ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach(function(methodName) {
       var func = _[methodName];
       Suite.prototype[methodName] = function() {
         var args = [this];
@@ -2888,7 +2892,7 @@
 
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
-    _.each(['pop', 'shift', 'splice'], function(methodName) {
+    ['pop', 'shift', 'splice'].forEach(function(methodName) {
       var func = arrayRef[methodName];
 
       Suite.prototype[methodName] = function() {
