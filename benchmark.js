@@ -1376,12 +1376,16 @@
       delete event.result;
 
       if (events && (listeners = has(events, event.type) && events[event.type])) {
-        _.each(listeners.slice(), function(listener) {
-          if ((event.result = listener.apply(object, args)) === false) {
+        var listenersClone = listeners.slice();
+        
+        for (var i = 0, il = listenersClone.length; i < il; ++i) {
+          if ((event.result = listenersClone[i].apply(object, args)) === false) {
             event.cancelled = true;
           }
-          return !event.aborted;
-        });
+          if (event.aborted) {
+            break;
+          };
+        }
       }
       return event.result;
     }
