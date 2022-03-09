@@ -5,7 +5,7 @@
   "homepage": "https://benchmarkjs.com/",
   "license": "MIT",
   "main": "benchmark.js",
-  "keywords": "benchmark, performance, speed",
+  "keywords": ["benchmark", "performance", "speed"],
   "author": "Mathias Bynens <mathias@qiwi.be>",
   "types": "types/index.d.ts",
   "contributors": [
@@ -17,7 +17,8 @@
   "scripts": {
     "coveralls": "nyc report --reporter=lcov",
     "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
-    "test": "node test/test",
+    "test": "npm run test:mocha ",
+    "test:mocha": "mocha --parallel test",
     "test:coverage": "nyc npm run test",
     "test:tsd": "tsd"
   },
@@ -29,8 +30,7 @@
   "devDependencies": {
     "coveralls": "^3.1.1",
     "docdown": "^0.7.3",
-    "qunit-extras": "^3.0.0",
-    "qunitjs": "^2.4.1",
+    "mocha": "^9.2.1",
     "requirejs": "^2.3.6",
     "tsd": "^0.19.1"
   },
