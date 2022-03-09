@@ -13,23 +13,17 @@
 
   var noop = function() {};
 
-  /** Used to determine if values are of the language type Object. */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
   /** Used as a reference to the global object. */
-  var root = (objectTypes[typeof window] && window) || this;
+  var root = ((typeof window === 'function' || typeof window === 'object') && window) || this;
 
   /** Detect free variable `define`. */
-  var freeDefine = typeof define == 'function' && typeof define.amd == 'object' && define.amd && define;
+  var freeDefine = typeof define === 'function' && typeof define.amd === 'object' && define.amd && define;
 
   /** Detect free variable `exports`. */
-  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
+  var freeExports = (typeof exports === 'function' || typeof exports === 'object') && exports && !exports.nodeType && exports;
 
   /** Detect free variable `module`. */
-  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
+  var freeModule = (typeof module === 'function' || typeof module === 'object') && module && !module.nodeType && module;
 
   /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
   var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
@@ -710,7 +704,7 @@
       result = (result || '').replace(/^\s+|\s+$/g, '');
 
       // Detect strings containing only the "use strict" directive.
-      return /^(?:\/\*+[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
+      return /^(?:\/\*[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
         ? ''
         : result;
     }
