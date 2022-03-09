@@ -130,6 +130,7 @@ declare namespace Benchmark {
         timeStamp: number;
 
         resolve(): void;
+        reject(err: Error): void;
     }
 
     export interface Target {
