@@ -280,7 +280,6 @@
     var abs = Math.abs,
         clearTimeout = context.clearTimeout,
         floor = Math.floor,
-        log = Math.log,
         max = Math.max,
         min = Math.min,
         pow = Math.pow,
@@ -737,18 +736,6 @@
       return /^(?:\/\*[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
         ? ''
         : result;
-    }
-
-    /**
-     * Checks if an object is of the specified class.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {string} name The name of the class.
-     * @returns {boolean} Returns `true` if the value is of the specified class, else `false`.
-     */
-    function isClassOf(value, name) {
-      return value != null && toString.call(value) == '[object ' + name + ']';
     }
 
     /**
