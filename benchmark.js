@@ -11,6 +11,8 @@
   /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
 
+  var noop = function() {};
+
   /** Used as a reference to the global object. */
   var root = ((typeof window === 'function' || typeof window === 'object') && window) || this;
 
@@ -109,6 +111,138 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * A specialized version of lodashs `cloneDeep` which only clones arrays and plain
+   * objects assigning all other values by reference.
+   *
+   * @private
+   * @param {*} value The value to clone.
+   * @returns {*} The cloned value.
+   */
+  var cloneDeep = function (value) {
+    if (Array.isArray(value)) {
+      return cloneArray(value);
+    }
+    
+    if (isPlainObject(value)) {
+      return cloneObject(value);
+    }
+
+    return value;
+  }
+
+  function cloneObject(obj) {
+    var ret = {};
+  
+    var key = '';
+    var keys = Object.keys(obj);
+  
+    for (var i = 0, il = keys.length; i < il; ++i) {
+      key = keys[i];
+      ret[key] = cloneDeep(obj[key]);
+    }
+  
+    return ret;
+  }
+  
+  function cloneArray(arr) {
+    var ret = new Array(arr.length);
+
+    for (var i = 0, il = arr.length; i < il; ++i) {
+      ret[i] = cloneDeep(arr[i]);
+    }
+  
+    return ret;
+  }
+  
+  function isArrayLikeObject(value) {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'length' in value &&
+      typeof value.length === 'number' &&
+      value.length > -1 &&
+      value.length % 1 === 0 &&
+      value.length <= Number.MAX_SAFE_INTEGER
+    )
+  }
+  
+  function toArray(value) {
+    if (!value) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return cloneArray(value);
+    }
+    if (isArrayLikeObject(value)) {
+      var result = new Array(value.length);
+      for (var i = 0, il = value.length; i < il; ++i) {
+        result[i] = value[i];
+      }
+      return result;
+    }
+    throw new TypeError('Expected an ArrayLikeObject')
+  }
+
+  function pick(object, keys) {
+    return keys.reduce((obj, key) => {
+       if (object && object.hasOwnProperty(key)) {
+          obj[key] = object[key];
+       }
+       return obj;
+     }, {});
+  }
+
+  function has(obj, key) {
+    if (!obj) {
+      return;
+    }
+    var keyParts = key.indexOf('.') === -1 ? [key] : key.split('.');
+
+    return !!obj && (
+      keyParts.length > 1
+        ? has(obj[keyParts[0]], keyParts.slice(1).join('.'))
+        : obj.hasOwnProperty(key)
+    );
+  }
+
+  var objectCtorString = Object.prototype.toString.call(Object);
+
+  /**
+   * Checks if `value` is a plain object, that is, an object created by the
+   * `Object` constructor or one with a `[[Prototype]]` of `null`.
+   *
+   * function Foo() {
+   *   this.a = 1;
+   * }
+   *
+   * isPlainObject(new Foo);
+   * // => false
+   *
+   * isPlainObject([1, 2, 3]);
+   * // => false
+   *
+   * isPlainObject({ 'x': 0, 'y': 0 });
+   * // => true
+   *
+   * isPlainObject(Object.create(null));
+   * // => true
+   */
+    function isPlainObject(value) {
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    var proto = Object.getPrototypeOf(value);
+    if (proto === null) {
+      return true;
+    }
+    var Ctor = Object.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+    return typeof Ctor == 'function' && Ctor instanceof Ctor &&
+      Object.prototype.toString.call(Ctor) == objectCtorString;
+  }
+
+  /*--------------------------------------------------------------------------*/
+
+  /**
    * Create a new `Benchmark` function using the given `context` object.
    *
    * @static
@@ -127,7 +261,7 @@
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
     // See http://es5.github.io/#x11.1.5.
-    context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
+    context = context ? Object.assign({}, root.Object(), context, pick(root, contextProps)) : root;
 
     /** Native constructor references. */
     var Array = context.Array,
@@ -174,7 +308,7 @@
     var trash = doc && doc.createElement('div');
 
     /** Used to integrity check compiled tests. */
-    var uid = 'uid' + (+_.now());
+    var uid = 'uid' + (+Date.now());
 
     /** Used to avoid infinite recursion when methods call each other. */
     var calledBy = {};
@@ -355,16 +489,16 @@
         return new Benchmark(name, fn, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (isPlainObject(name)) {
         // 1 argument (options).
         options = name;
       }
-      else if (_.isFunction(name)) {
+      else if (typeof name === 'function') {
         // 2 arguments (fn, options).
         options = fn;
         fn = name;
       }
-      else if (_.isPlainObject(fn)) {
+      else if (isPlainObject(fn)) {
         // 2 arguments (name, options).
         options = fn;
         fn = null;
@@ -412,7 +546,7 @@
         return type;
       }
       return (event instanceof Event)
-        ? _.assign(event, { 'timeStamp': (+_.now()) }, typeof type == 'string' ? { 'type': type } : type)
+        ? Object.assign(event, { 'timeStamp': (+Date.now()) }, typeof type == 'string' ? { 'type': type } : type)
         : new Event(type);
     }
 
@@ -466,7 +600,7 @@
         return new Suite(name, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (isPlainObject(name)) {
         // 1 argument (options).
         options = name;
       } else {
@@ -477,21 +611,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    /**
-     * A specialized version of `_.cloneDeep` which only clones arrays and plain
-     * objects assigning all other values by reference.
-     *
-     * @private
-     * @param {*} value The value to clone.
-     * @returns {*} The cloned value.
-     */
-    var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
-      // Only clone primitives, arrays, and plain objects.
-      if (!_.isArray(value) && !_.isPlainObject(value)) {
-        return value;
-      }
-    });
 
     /**
      * Creates a function from the given arguments string and body.
@@ -515,7 +634,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || _.noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -527,7 +646,7 @@
      * @param {Object} fn The function to execute.
      */
     function delay(bench, fn) {
-      bench._timerId = _.delay(fn, bench.delay * 1e3);
+      bench._timerId = setTimeout(fn, bench.delay * 1e3);
     }
 
     /**
@@ -549,7 +668,9 @@
      * @returns {string} The argument name.
      */
     function getFirstArgument(fn) {
-      return (!_.has(fn, 'toString') &&
+      return (
+        typeof fn === 'function' &&
+        !('toString' in fn) &&
         (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || '';
     }
 
@@ -560,10 +681,38 @@
      * @param {Array} sample The sample.
      * @returns {number} The mean.
      */
-    function getMean(sample) {
-      return (_.reduce(sample, function(sum, x) {
-        return sum + x;
-      }) / sample.length) || 0;
+     function getMean(sample) {
+      if (sample.length === 0) {
+        return 0;
+      }
+
+      var result = 0;
+
+      for (var i = 0, il = sample.length; i < il; ++i) {
+        result += sample[i];
+      }
+      return result / sample.length;
+    }
+
+    /**
+     * Computes the variance of a sample.
+     *
+     * @private
+     * @param {Array} sample The sample.
+     * @param {number} mean The mean.
+     * @param {number} size The size.
+     * @returns {number} The variance.
+     */
+    function getVariance(sample, mean, size) {
+      if (sample.length === 0) {
+        return 0;
+      }
+      var result = 0;
+
+      for (var i = 0, il = sample.length; i < il; ++i) {
+        result += pow(sample[i] - mean, 2);
+      }
+      return result / (size - 1);
     }
 
     /**
@@ -579,7 +728,7 @@
         result = String(fn);
       } else if (support.decompilation) {
         // Escape the `{` for Firefox 1.
-        result = _.result(/^[^{]+\{([\s\S]*)\}\s*$/.exec(fn), 1);
+        result = /^[^{]+\{([\s\S]*)\}\s*$/.exec(fn)[1];
       }
       // Trim string.
       result = (result || '').replace(/^\s+|\s+$/g, '');
@@ -628,7 +777,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.isString(value) || (_.has(value, 'toString') && _.isFunction(value.toString));
+      return typeof value === 'string' || (!!value && value.hasOwnProperty('toString') && typeof value.toString === 'function');
     }
 
     /**
@@ -684,16 +833,16 @@
      * @param {Object} [options={}] Options object.
      */
     function setOptions(object, options) {
-      options = object.options = _.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+      options = object.options = Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
 
-      _.forOwn(options, function(value, key) {
+      Object.entries(options).forEach(function([key, value]) {
         if (value != null) {
           // Add event listeners.
           if (/^on[A-Z]/.test(key)) {
-            _.each(key.split(' '), function(key) {
+            (key.indexOf(' ') === -1 ? [key] : key.split(' ')).forEach(function(key) {
               object.on(key.slice(2).toLowerCase(), value);
             });
-          } else if (!_.has(object, key)) {
+          } else if (!has(object, key)) {
             object[key] = cloneDeep(value);
           }
         }
@@ -758,7 +907,7 @@
       if (callback === 'successful') {
         // Callback to exclude those that are errored, unrun, or have hz of Infinity.
         callback = function(bench) {
-          return bench.cycles && _.isFinite(bench.hz) && !bench.error;
+          return bench.cycles && Number.isFinite(bench.hz) && !bench.error;
         };
       }
       else if (callback === 'fastest' || callback === 'slowest') {
@@ -768,11 +917,22 @@
           return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
         });
 
-        return _.filter(result, function(bench) {
+        return result.filter(function(bench) {
           return result[0].compare(bench) == 0;
         });
       }
-      return _.filter(array, callback);
+      if (Array.isArray(array)){
+        return array.filter(callback);
+      } else if (isArrayLikeObject(array)){
+        var result = [];
+        for (var i = 0, il = array.length; i < il; ++i) {
+          if (callback(array[i], i, array)) {
+            result.push(array[i]);
+          }
+        }
+        return result;
+      }
+      throw new TypeError('Expected Array or Array-like-Object.');
     }
 
     /**
@@ -834,8 +994,8 @@
           queued,
           index = -1,
           eventProps = { 'currentTarget': benches },
-          options = { 'onStart': _.noop, 'onCycle': _.noop, 'onComplete': _.noop },
-          result = _.toArray(benches);
+          options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+          result = toArray(benches);
 
       /**
        * Invokes the method of the current object and if synchronous, fetches the next.
@@ -851,7 +1011,7 @@
           listeners.splice(0, 0, listeners.pop());
         }
         // Execute method.
-        result[index] = _.isFunction(bench && bench[name]) ? bench[name].apply(bench, args) : undefined;
+        result[index] = typeof (bench && bench[name]) === 'function' ? bench[name].apply(bench, args) : undefined;
         // If synchronous return `true` until finished.
         return !async && getNext();
       }
@@ -929,14 +1089,14 @@
           : (index = false);
       }
       // Juggle arguments.
-      if (_.isString(name)) {
+      if (typeof name === 'string') {
         // 2 arguments (array, name).
         args = slice.call(arguments, 2);
       } else {
         // 2 arguments (array, options).
-        options = _.assign(options, name);
+        options = Object.assign(options, name);
         name = options.name;
-        args = _.isArray(args = 'args' in options ? options.args : []) ? args : [args];
+        args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
       }
       // Start iterating over the array.
@@ -984,10 +1144,21 @@
           arrayLike = length === length >>> 0;
 
       separator2 || (separator2 = ': ');
-      _.each(object, function(value, key) {
-        result.push(arrayLike ? value : key + separator2 + value);
-      });
-      return result.join(separator1 || ',');
+      
+      if (Array.isArray(object)){
+        return object.join(separator1 || ',');
+      } else if (isArrayLikeObject(object)){
+        for (var i = 0, il = object.length; i < il; ++i) {
+            result.push(object[i]);
+        }
+        return result.join(separator1 || ',');
+      } else {
+        var keys = Object.keys(object);
+        for (var i = 0, il = keys.length; i < il; ++i) {
+          result.push(keys[i] + separator2 + object[keys[i]]);
+        }
+        return result.join(separator1 || ',');
+      }
     }
 
     /*------------------------------------------------------------------------*/
@@ -1080,12 +1251,12 @@
      */
     function cloneSuite(options) {
       var suite = this,
-          result = new suite.constructor(_.assign({}, suite.options, options));
+          result = new suite.constructor(Object.assign({}, suite.options, options));
 
       // Copy own properties.
-      _.forOwn(suite, function(value, key) {
-        if (!_.has(result, key)) {
-          result[key] = _.isFunction(_.get(value, 'clone'))
+      Object.entries(suite).forEach(function([key, value]) {
+        if (!has(result, key)) {
+          result[key] = typeof (value && value.clone) === 'function'
             ? value.clone()
             : cloneDeep(value);
         }
@@ -1204,13 +1375,17 @@
       event.target || (event.target = object);
       delete event.result;
 
-      if (events && (listeners = _.has(events, event.type) && events[event.type])) {
-        _.each(listeners.slice(), function(listener) {
-          if ((event.result = listener.apply(object, args)) === false) {
+      if (events && (listeners = has(events, event.type) && events[event.type])) {
+        var listenersClone = listeners.slice();
+        
+        for (var i = 0, il = listenersClone.length; i < il; ++i) {
+          if ((event.result = listenersClone[i].apply(object, args)) === false) {
             event.cancelled = true;
           }
-          return !event.aborted;
-        });
+          if (event.aborted) {
+            break;
+          };
+        }
       }
       return event.result;
     }
@@ -1227,7 +1402,7 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      return _.has(events, type) ? events[type] : (events[type] = []);
+      return has(events, type) ? events[type] : (events[type] = []);
     }
 
     /**
@@ -1257,30 +1432,41 @@
      * bench.off();
      */
     function off(type, listener) {
-      var object = this,
-          events = object.events;
+      var events = this.events;
 
       if (!events) {
-        return object;
+        return this;
       }
-      _.each(type ? type.split(' ') : events, function(listeners, type) {
+
+      function callback(listeners, type) {
         var index;
         if (typeof listeners == 'string') {
           type = listeners;
-          listeners = _.has(events, type) && events[type];
+          listeners = has(events, type) && events[type];
         }
         if (listeners) {
           if (listener) {
-            index = _.indexOf(listeners, listener);
-            if (index > -1) {
+            index = listeners.indexOf(listener);
+            if (index !== -1) {
               listeners.splice(index, 1);
             }
           } else {
             listeners.length = 0;
           }
         }
-      });
-      return object;
+      }
+
+      if (typeof type === 'string') {
+        type.split(' ').forEach(callback);
+        return this;
+      }
+
+      var keys = Object.keys(events);
+      for(var i = 0, il = keys.length; i < il; ++i) {
+        callback(events[keys[i]]);
+      }
+
+      return this;
     }
 
     /**
@@ -1302,8 +1488,8 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      _.each(type.split(' '), function(type) {
-        (_.has(events, type)
+      (type.indexOf(' ') === -1 ? [type] : type.split(' ')).forEach(function(type) {
+        (has(events, type)
           ? events[type]
           : (events[type] = [])
         ).push(listener);
@@ -1360,14 +1546,14 @@
      */
     function clone(options) {
       var bench = this,
-          result = new bench.constructor(_.assign({}, bench, options));
+          result = new bench.constructor(Object.assign({}, bench, options));
 
       // Correct the `options` object.
-      result.options = _.assign({}, cloneDeep(bench.options), cloneDeep(options));
+      result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
       // Copy own custom properties.
-      _.forOwn(bench, function(value, key) {
-        if (!_.has(result, key)) {
+      Object.entries(bench).forEach(function([key, value]) {
+        if (!has(result, key)) {
           result[key] = cloneDeep(value);
         }
       });
@@ -1402,15 +1588,19 @@
           u = min(u1, u2);
 
       function getScore(xA, sampleB) {
-        return _.reduce(sampleB, function(total, xB) {
-          return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
-        }, 0);
+        var total = 0;
+        for (var i = 0, il = sampleB.length; i < il; ++i) {
+          total +=  (sampleB[i] > xA ? 0 : sampleB[i] < xA ? 1 : 0.5);
+        }
+        return total;
       }
 
       function getU(sampleA, sampleB) {
-        return _.reduce(sampleA, function(total, xA) {
-          return total + getScore(xA, sampleB);
-        }, 0);
+        var total = 0;
+        for (var i = 0, il = sampleA.length; i < il; ++i) {
+          total += getScore(sampleA[i], sampleB);
+        }
+        return total;
       }
 
       function getZ(u) {
@@ -1453,11 +1643,11 @@
       // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
       var data = {
         'destination': bench,
-        'source': _.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
+        'source': Object.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
       };
 
       do {
-        _.forOwn(data.source, function(value, key) {
+        Object.entries(data.source).forEach(function([key, value]) {
           var changed,
               destination = data.destination,
               currValue = destination[key];
@@ -1466,10 +1656,10 @@
           if (/^_|^events$|^on[A-Z]/.test(key)) {
             return;
           }
-          if (_.isObjectLike(value)) {
-            if (_.isArray(value)) {
+          if (typeof value === 'object' && value !== null) {
+            if (Array.isArray(value)) {
               // Check if an array value has changed to a non-array value.
-              if (!_.isArray(currValue)) {
+              if (!Array.isArray(currValue)) {
                 changed = true;
                 currValue = [];
               }
@@ -1481,7 +1671,7 @@
               }
             }
             // Check if an object has changed to a non-object value.
-            else if (!_.isObjectLike(currValue)) {
+            else if (typeof currValue !== 'object' || currValue === null) {
               changed = true;
               currValue = {};
             }
@@ -1492,7 +1682,7 @@
             queue.push({ 'destination': currValue, 'source': value });
           }
           // Register a changed primitive.
-          else if (!_.eq(currValue, value) && value !== undefined) {
+          else if (!(currValue === value || (currValue !== currValue && value !== value)) && value !== undefined) {
             changes.push({ 'destination': destination, 'key': key, 'value': value });
           }
         });
@@ -1502,7 +1692,7 @@
       // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
       if (changes.length &&
           (bench.emit(event = Event('reset')), !event.cancelled)) {
-        _.each(changes, function(data) {
+          changes.forEach(function(data) {
           data.destination[data.key] = data.value;
         });
       }
@@ -1524,17 +1714,17 @@
           stats = bench.stats,
           size = stats.sample.length,
           pm = '\xb1',
-          result = bench.name || (_.isNaN(id) ? id : '<Test #' + id + '>');
+          result = bench.name || (Number.isNaN(id) ? id : '<Test #' + id + '>');
 
       if (error) {
         var errorStr;
-        if (!_.isObject(error)) {
+        if (typeof error !== 'object') {
           errorStr = String(error);
-        } else if (!_.isError(error)) {
+        } else if (!(error instanceof Error)) {
           errorStr = join(error);
         } else {
           // Error#name and Error#message properties are non-enumerable.
-          errorStr = join(_.assign({ 'name': error.name, 'message': error.message }, error));
+          errorStr = join(Object.assign({ 'name': error.name, 'message': error.message }, error));
         }
         result += ': ' + errorStr;
       }
@@ -1570,7 +1760,7 @@
         var bench = clone._original,
             stringable = isStringable(bench.fn),
             count = bench.count = clone.count,
-            decompilable = stringable || (support.decompilation && (clone.setup !== _.noop || clone.teardown !== _.noop)),
+            decompilable = stringable || (support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
             id = bench.id,
             name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
             result = 0;
@@ -1665,7 +1855,7 @@
 
         templateData.uid = uid + uidCounter++;
 
-        _.assign(templateData, {
+        Object.assign(templateData, {
           'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
           'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
           'fnArg': fnArg,
@@ -1674,32 +1864,32 @@
 
         // Use API of chosen timer.
         if (timer.unit == 'ns') {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=n#()'),
             'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
           });
         }
         else if (timer.unit == 'us') {
           if (timer.ns.stop) {
-            _.assign(templateData, {
+            Object.assign(templateData, {
               'begin': interpolate('s#=n#.start()'),
               'end': interpolate('r#=n#.microseconds()/1e6')
             });
           } else {
-            _.assign(templateData, {
+            Object.assign(templateData, {
               'begin': interpolate('s#=n#()'),
               'end': interpolate('r#=(n#()-s#)/1e6')
             });
           }
         }
         else if (timer.ns.now) {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=(+n#.now())'),
             'end': interpolate('r#=((+n#.now())-s#)/1e3')
           });
         }
         else {
-          _.assign(templateData, {
+          Object.assign(templateData, {
             'begin': interpolate('s#=new n#().getTime()'),
             'end': interpolate('r#=(new n#().getTime()-s#)/1e3')
           });
@@ -1772,12 +1962,26 @@
         return getMean(sample) / divisor;
       }
 
+      var interpolationRegExp = {
+      };
       /**
        * Interpolates a given template string.
        */
       function interpolate(string) {
         // Replaces all occurrences of `#` with a unique number and template tokens with content.
-        return _.template(string.replace(/\#/g, /\d+/.exec(templateData.uid)))(templateData);
+        var result = string.replace(/\#/g, /\d+/.exec(templateData.uid));
+        var keys = Object.keys(templateData);
+        for (var i = 0, il = keys.length; i < il; ++i) {
+          if (result.indexOf('${' + keys[i] + '}') === -1) {
+            continue;
+          }
+
+          result = result.replace(
+            interpolationRegExp[keys[i]] || (interpolationRegExp[keys[i]] = new RegExp('\\$\\{' + keys[i] + '\\}', 'g')),
+            templateData[keys[i]]
+          );
+        }
+        return result;
       }
 
       /*----------------------------------------------------------------------*/
@@ -1800,7 +2004,7 @@
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
-      timer = _.minBy(timers, 'res');
+      timer = timers.reduce(function(a, b) { return a.res <= b.res ? a : b }, {});
 
       // Error if there are no working timers.
       if (timer.res == Infinity) {
@@ -1835,7 +2039,7 @@
        * Adds a clone to the queue.
        */
       function enqueue() {
-        queue.push(_.assign(bench.clone(), {
+        queue.push(Object.assign(bench.clone(), {
           '_original': bench,
           'events': {
             'abort': [update],
@@ -1891,11 +2095,10 @@
             variance,
             clone = event.target,
             done = bench.aborted,
-            now = (+_.now()),
+            now = (+Date.now()),
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
-            times = bench.times,
-            varOf = function(sum, x) { return sum + pow(x - mean, 2); };
+            times = bench.times;
 
         // Exit early for aborted or unclockable tests.
         if (done || clone.hz == Infinity) {
@@ -1906,7 +2109,7 @@
           // Compute the sample mean (estimate of the population mean).
           mean = getMean(sample);
           // Compute the sample variance (estimate of the population variance).
-          variance = _.reduce(sample, varOf, 0) / (size - 1) || 0;
+          variance = getVariance(sample, mean, size);
           // Compute the sample standard deviation (estimate of the population standard deviation).
           sd = sqrt(variance);
           // Compute the standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean).
@@ -1920,7 +2123,7 @@
           // Compute the relative margin of error.
           rme = (moe / mean) * 100 || 0;
 
-          _.assign(bench.stats, {
+          Object.assign(bench.stats, {
             'deviation': sd,
             'mean': mean,
             'moe': moe,
@@ -2094,7 +2297,7 @@
       bench.running = true;
 
       bench.count = bench.initCount;
-      bench.times.timeStamp = (+_.now());
+      bench.times.timeStamp = (+Date.now());
       bench.emit(event);
 
       if (!event.cancelled) {
@@ -2123,8 +2326,8 @@
     // The bugginess continues as the `Benchmark` constructor has an argument
     // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
     // making it non-writable in the process, unless it is the first property
-    // assigned by for-in loop of `_.assign()`.
-    _.assign(Benchmark, {
+    // assigned by for-in loop of `Object.assign()`.
+    Object.assign(Benchmark, {
 
       /**
        * The default options copied by benchmark instances.
@@ -2291,7 +2494,7 @@
       'version': '2.1.4'
     });
 
-    _.assign(Benchmark, {
+    Object.assign(Benchmark, {
       'filter': filter,
       'formatNumber': formatNumber,
       'invoke': invoke,
@@ -2301,13 +2504,17 @@
     });
 
     // Add lodash methods to Benchmark.
-    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'], function(methodName) {
-      Benchmark[methodName] = _[methodName];
-    });
+    Benchmark.each = _.each;
+    Benchmark.forEach = _.forEach;
+    Benchmark.forOwn = _.forOwn;
+    Benchmark.has = _.has;
+    Benchmark.indexOf = _.indexOf;
+    Benchmark.map = _.map;
+    Benchmark.reduce = _.reduce;
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Benchmark.prototype, {
+    Object.assign(Benchmark.prototype, {
 
       /**
        * The number of times a test was executed.
@@ -2434,7 +2641,7 @@
        *   }())
        * }())
        */
-      'setup': _.noop,
+      'setup': noop,
 
       /**
        * Compiled into the test and executed immediately **after** the test loop.
@@ -2442,7 +2649,7 @@
        * @memberOf Benchmark
        * @type {Function|string}
        */
-      'teardown': _.noop,
+      'teardown': noop,
 
       /**
        * An object of stats including mean, margin or error, and standard deviation.
@@ -2551,7 +2758,7 @@
       }
     });
 
-    _.assign(Benchmark.prototype, {
+    Object.assign(Benchmark.prototype, {
       'abort': abort,
       'clone': clone,
       'compare': compare,
@@ -2566,7 +2773,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Deferred.prototype, {
+    Object.assign(Deferred.prototype, {
 
       /**
        * The deferred benchmark instance.
@@ -2601,13 +2808,13 @@
       'timeStamp': 0
     });
 
-    _.assign(Deferred.prototype, {
+    Object.assign(Deferred.prototype, {
       'resolve': resolve
     });
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Event.prototype, {
+    Object.assign(Event.prototype, {
 
       /**
        * A flag to indicate if the emitters listener iteration is aborted.
@@ -2688,7 +2895,7 @@
 
     /*------------------------------------------------------------------------*/
 
-    _.assign(Suite.prototype, {
+    Object.assign(Suite.prototype, {
 
       /**
        * The number of benchmarks in the suite.
@@ -2715,7 +2922,7 @@
       'running': false
     });
 
-    _.assign(Suite.prototype, {
+    Object.assign(Suite.prototype, {
       'abort': abortSuite,
       'add': add,
       'clone': cloneSuite,
@@ -2740,7 +2947,7 @@
     /*------------------------------------------------------------------------*/
 
     // Expose Deferred, Event, and Suite.
-    _.assign(Benchmark, {
+    Object.assign(Benchmark, {
       'Deferred': Deferred,
       'Event': Event,
       'Suite': Suite
@@ -2749,7 +2956,7 @@
     /*------------------------------------------------------------------------*/
 
     // Add lodash methods as Suite methods.
-    _.each(['each', 'forEach', 'indexOf', 'map', 'reduce'], function(methodName) {
+    ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach(function(methodName) {
       var func = _[methodName];
       Suite.prototype[methodName] = function() {
         var args = [this];
@@ -2760,7 +2967,7 @@
 
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
-    _.each(['pop', 'shift', 'splice'], function(methodName) {
+    ['pop', 'shift', 'splice'].forEach(function(methodName) {
       var func = arrayRef[methodName];
 
       Suite.prototype[methodName] = function() {
