@@ -891,7 +891,18 @@
           return result[0].compare(bench) == 0;
         });
       }
-      return _.filter(array, callback);
+      if (Array.isArray(array)){
+        return array.filter(callback);
+      } else if (typeof array === 'object' && array !== null && 'length' in array){
+        var result = [];
+        for (var i = 0, il = array.length; i < il; ++i) {
+          if (callback(array[i], i, array)) {
+            result.push(array[i]);
+          }
+        }
+        return result;
+      }
+      throw new TypeError('Expected Array or Array-like-Object.');
     }
 
     /**
