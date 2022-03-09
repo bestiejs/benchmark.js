@@ -11,10 +11,6 @@ var amd = root.define && define.amd,
 var assert = require('assert');
 var Benchmark = require('../benchmark');
 
-// /** Load libraries. */
-// var _ = root._ || require('lodash'),
-//   Benchmark = root.Benchmark || require('../benchmark.js');
-
 /** Used to create dummy benchmarks for comparisons. */
 function generateBenchData() {
   return {
