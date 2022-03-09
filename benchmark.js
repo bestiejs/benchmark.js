@@ -109,6 +109,33 @@
   };
 
   /*--------------------------------------------------------------------------*/
+
+  function isArrayLikeObject(value) {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      'length' in value &&
+      typeof value.length === 'number' &&
+      value.length > -1 &&
+      value.length % 1 === 0 &&
+      value.length <= Number.MAX_SAFE_INTEGER
+    )
+  }
+  
+  function toArray(value) {
+    if (!value) {
+      return [];
+    }
+    if (isArrayLikeObject(value)) {
+      var result = new Array(value.length);
+      for (var i = 0, il = value.length; i < il; ++i) {
+        result[i] = value[i];
+      }
+      return result;
+    }
+    throw new TypeError('Expected an ArrayLikeObject')
+  }
+
   function pick(object, keys) {
     return keys.reduce((obj, key) => {
        if (object && object.hasOwnProperty(key)) {
@@ -893,7 +920,7 @@
       }
       if (Array.isArray(array)){
         return array.filter(callback);
-      } else if (typeof array === 'object' && array !== null && 'length' in array){
+      } else if (isArrayLikeObject(array)){
         var result = [];
         for (var i = 0, il = array.length; i < il; ++i) {
           if (callback(array[i], i, array)) {
@@ -965,7 +992,7 @@
           index = -1,
           eventProps = { 'currentTarget': benches },
           options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-          result = _.toArray(benches);
+          result = toArray(benches);
 
       /**
        * Invokes the method of the current object and if synchronous, fetches the next.
