@@ -698,7 +698,7 @@
         result = String(fn);
       } else if (support.decompilation) {
         // Escape the `{` for Firefox 1.
-        result = _.result(/^[^{]+\{([\s\S]*)\}\s*$/.exec(fn), 1);
+        result = /^[^{]+\{([\s\S]*)\}\s*$/.exec(fn)[1];
       }
       // Trim string.
       result = (result || '').replace(/^\s+|\s+$/g, '');
