@@ -1432,13 +1432,13 @@
      * bench.off();
      */
     function off(type, listener) {
-      var object = this,
-          events = object.events;
+      var events = this.events;
 
       if (!events) {
-        return object;
+        return this;
       }
-      _.each(type ? type.split(' ') : events, function(listeners, type) {
+
+      function callback(listeners, type) {
         var index;
         if (typeof listeners == 'string') {
           type = listeners;
@@ -1447,15 +1447,26 @@
         if (listeners) {
           if (listener) {
             index = listeners.indexOf(listener);
-            if (index > -1) {
+            if (index !== -1) {
               listeners.splice(index, 1);
             }
           } else {
             listeners.length = 0;
           }
         }
-      });
-      return object;
+      }
+
+      if (typeof type === 'string') {
+        type.split(' ').forEach(callback);
+        return this;
+      }
+
+      var keys = Object.keys(events);
+      for(var i = 0, il = keys.length; i < il; ++i) {
+        callback(events[keys[i]]);
+      }
+
+      return this;
     }
 
     /**
