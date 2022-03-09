@@ -1947,12 +1947,26 @@
         return getMean(sample) / divisor;
       }
 
+      var interpolationRegExp = {
+      };
       /**
        * Interpolates a given template string.
        */
       function interpolate(string) {
         // Replaces all occurrences of `#` with a unique number and template tokens with content.
-        return _.template(string.replace(/\#/g, /\d+/.exec(templateData.uid)))(templateData);
+        var result = string.replace(/\#/g, /\d+/.exec(templateData.uid));
+        var keys = Object.keys(templateData);
+        for (var i = 0, il = keys.length; i < il; ++i) {
+          if (result.indexOf('${' + keys[i] + '}') === -1) {
+            continue;
+          }
+
+          result = result.replace(
+            interpolationRegExp[keys[i]] || (interpolationRegExp[keys[i]] = new RegExp('\\$\\{' + keys[i] + '\\}', 'g')),
+            templateData[keys[i]]
+          );
+        }
+        return result;
       }
 
       /*----------------------------------------------------------------------*/
