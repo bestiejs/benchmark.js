@@ -110,6 +110,50 @@
 
   /*--------------------------------------------------------------------------*/
 
+  /**
+   * A specialized version of lodashs `cloneDeep` which only clones arrays and plain
+   * objects assigning all other values by reference.
+   *
+   * @private
+   * @param {*} value The value to clone.
+   * @returns {*} The cloned value.
+   */
+  var cloneDeep = function (value) {
+    if (Array.isArray(value)) {
+      return cloneArray(value);
+    }
+    
+    if (isPlainObject(value)) {
+      return cloneObject(value);
+    }
+
+    return value;
+  }
+
+  function cloneObject(obj) {
+    var ret = {};
+  
+    var key = '';
+    var keys = Object.keys(obj);
+  
+    for (var i = 0, il = keys.length; i < il; ++i) {
+      key = keys[i];
+      ret[key] = cloneDeep(obj[key]);
+    }
+  
+    return ret;
+  }
+  
+  function cloneArray(arr) {
+    var ret = new Array(arr.length);
+
+    for (var i = 0, il = arr.length; i < il; ++i) {
+      ret[i] = cloneDeep(arr[i]);
+    }
+  
+    return ret;
+  }
+  
   function isArrayLikeObject(value) {
     return (
       typeof value === 'object' &&
@@ -125,6 +169,9 @@
   function toArray(value) {
     if (!value) {
       return [];
+    }
+    if (Array.isArray(value)) {
+      return cloneArray(value);
     }
     if (isArrayLikeObject(value)) {
       var result = new Array(value.length);
@@ -564,50 +611,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    /**
-     * A specialized version of lodashs `cloneDeep` which only clones arrays and plain
-     * objects assigning all other values by reference.
-     *
-     * @private
-     * @param {*} value The value to clone.
-     * @returns {*} The cloned value.
-     */
-    var cloneDeep = function (value) {
-      if (Array.isArray(value)) {
-        return cloneArray(value);
-      }
-      
-      if (isPlainObject(value)) {
-        return cloneObject(value);
-      }
-
-      return value;
-    }
-
-    function cloneObject(obj) {
-      var ret = {};
-    
-      var key = '';
-      var keys = Object.keys(obj);
-    
-      for (var i = 0, il = keys.length; i < il; ++i) {
-        key = keys[i];
-        ret[key] = cloneDeep(obj[key]);
-      }
-    
-      return ret;
-    }
-    
-    function cloneArray(arr) {
-      var ret = new Array(arr.length);
-
-      for (var i = 0, il = arr.length; i < il; ++i) {
-        ret[i] = cloneDeep(arr[i]);
-      }
-    
-      return ret;
-    }
 
     /**
      * Creates a function from the given arguments string and body.
@@ -1141,10 +1144,21 @@
           arrayLike = length === length >>> 0;
 
       separator2 || (separator2 = ': ');
-      _.each(object, function(value, key) {
-        result.push(arrayLike ? value : key + separator2 + value);
-      });
-      return result.join(separator1 || ',');
+      
+      if (Array.isArray(object)){
+        return object.join(separator1 || ',');
+      } else if (isArrayLikeObject(object)){
+        for (var i = 0, il = object.length; i < il; ++i) {
+            result.push(object[i]);
+        }
+        return result.join(separator1 || ',');
+      } else {
+        var keys = Object.keys(object);
+        for (var i = 0, il = keys.length; i < il; ++i) {
+          result.push(keys[i] + separator2 + object[keys[i]]);
+        }
+        return result.join(separator1 || ',');
+      }
     }
 
     /*------------------------------------------------------------------------*/
