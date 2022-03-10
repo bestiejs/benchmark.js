@@ -184,7 +184,7 @@
   }
 
   function pick(object, keys) {
-    return keys.reduce((obj, key) => {
+    return keys.reduce(function (obj, key) {
        if (object && object.hasOwnProperty(key)) {
           obj[key] = object[key];
        }
