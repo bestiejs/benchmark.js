@@ -184,12 +184,12 @@
   }
 
   function pick(object, keys) {
-    return keys.reduce((obj, key) => {
-      if (object && object.hasOwnProperty(key)) {
-        obj[key] = object[key];
-      }
-      return obj;
-    }, {});
+    return keys.reduce(function (obj, key) {
+       if (object && object.hasOwnProperty(key)) {
+          obj[key] = object[key];
+       }
+       return obj;
+     }, {});
   }
 
   function has(obj, key) {
@@ -278,19 +278,18 @@
 
     /** Native method shortcuts. */
     var abs = Math.abs,
-      clearTimeout = context.clearTimeout,
-      floor = Math.floor,
-      log = Math.log,
-      max = Math.max,
-      min = Math.min,
-      pow = Math.pow,
-      push = arrayRef.push,
-      setTimeout = context.setTimeout,
-      shift = arrayRef.shift,
-      slice = arrayRef.slice,
-      sqrt = Math.sqrt,
-      toString = objectProto.toString,
-      unshift = arrayRef.unshift;
+        clearTimeout = context.clearTimeout,
+        floor = Math.floor,
+        max = Math.max,
+        min = Math.min,
+        pow = Math.pow,
+        push = arrayRef.push,
+        setTimeout = context.setTimeout,
+        shift = arrayRef.shift,
+        slice = arrayRef.slice,
+        sqrt = Math.sqrt,
+        toString = objectProto.toString,
+        unshift = arrayRef.unshift;
 
     /** Used to avoid inclusion in Browserified bundles. */
     var req = require;
