@@ -251,7 +251,9 @@
   function forOwn(object, iteratee) {
     for (var key in object) {
       if (object.hasOwnProperty(key)) {
-        iteratee(object[key], key, object);
+        if (iteratee(object[key], key, object) === false) {
+          break;
+        }
       }
     }
   }
@@ -273,7 +275,7 @@
   }
 
   function indexOf(arr, value, position) {
-    return arr.indexOf(value, position)
+    return Array.prototype.indexOf.call(arr, value, position);
   }
 
   function map(collection, iteratee) {
@@ -3050,15 +3052,11 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Add lodash methods as Suite methods.
-    ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach(function (methodName) {
-      var func = Benchmark[methodName];
-      Suite.prototype[methodName] = function () {
-        var args = [this];
-        push.apply(args, arguments);
-        return func.apply(this, args);
-      };
-    });
+    Suite.prototype.each = function (iteratee) { return each(this, iteratee) };
+    Suite.prototype.forEach = function (iteratee) { return each(this, iteratee) };
+    Suite.prototype.indexOf = function (value, position) { return indexOf(this, value, position) };
+    Suite.prototype.map = function (var1) { return map(this, var1) };
+    Suite.prototype.reduce = function (iteratee, initialValue) { return reduce(this, iteratee, initialValue) };
 
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
