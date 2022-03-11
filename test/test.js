@@ -1159,6 +1159,145 @@ describe('Benchmark.Suite event flow', function () {
 
 /*--------------------------------------------------------------------------*/
 
+describe('lodash helper substitutes', function () {
+  describe('forOwn', function () {
+    it('example 1', function () {
+      function Foo() {
+        this.a = 1;
+        this.b = 2;
+      }
+       
+      Foo.prototype.c = 3;
+      
+      var result = [];
+      Benchmark.forOwn(new Foo, function(value, key) {
+        result.push(key);
+      });
+
+      assert.ok(result.length === 2);
+      assert.ok(result[0] === 'a');
+      assert.ok(result[1] === 'b');
+    });
+  });
+
+  describe('each', function () {
+    it('example 1', function () {
+      var result = [];
+
+      Benchmark.each([1, 2], function(value) {
+        result.push(value);
+      });
+
+      assert.ok(result.length === 2);
+      assert.ok(result[0] === 1);
+      assert.ok(result[1] === 2);
+    });
+    it('example 2', function () {
+      var keys = [];
+      var values = [];
+
+      Benchmark.each({ 'a': 1, 'b': 2 }, function(value, key) {
+        keys.push(key);
+        values.push(value);
+      });
+
+      assert.ok(values.length === 2);
+      assert.ok(values[0] === 1);
+      assert.ok(values[1] === 2);
+
+      assert.ok(keys.length === 2);
+      assert.ok(keys[0] === 'a');
+      assert.ok(keys[1] === 'b');
+    });
+  });
+
+  describe('has', function () {
+    it('example 1', function () {
+      var object = { 'a': { 'b': 2 } };
+
+      assert.ok(Benchmark.has(object, 'a'));
+      assert.ok(Benchmark.has(object, 'a.b'));
+      assert.ok(Benchmark.has(object, ['a', 'b']));
+    });
+    
+    it('example 2', function () {
+      function Foo() {}
+       
+      Foo.prototype.a = { 'b': 2 };
+      
+      assert.ok(!Benchmark.has(new Foo, 'a'));
+    });
+    
+  });
+
+  describe('indexOf', function () {
+    it('example 1', function () {
+      assert.ok(Benchmark.indexOf([1, 2, 1, 2], 2) === 1);
+    });
+    it('example 2', function () {
+      assert.ok(Benchmark.indexOf([1, 2, 1, 2], 2, 2) === 3);
+    });
+  });
+
+  describe('map', function () {
+    function square(n) {
+      return n * n;
+    }
+
+    it('example 1', function () {
+      var result = Benchmark.map([4, 8], square);
+
+      assert.ok(result.length === 2);
+      assert.ok(result[0] === 16);
+      assert.ok(result[1] === 64);
+    });
+
+    it('example 2', function () {
+      var result = Benchmark.map({ 'a': 4, 'b': 8 }, square);
+
+      assert.ok(result.length === 2);
+      assert.ok(result[0] === 16);
+      assert.ok(result[1] === 64);
+    });
+
+    it('example 3', function () {
+      var users = [
+        { 'user': 'barney' },
+        { 'user': 'fred' }
+      ];
+       
+      var result = Benchmark.map(users, 'user');
+
+      assert.ok(result.length === 2);
+      assert.ok(result[0] === 'barney');
+      assert.ok(result[1] === 'fred');
+    });
+  });
+
+  describe('reduce', function () {
+    it('example 1', function () {
+      assert.ok(Benchmark.reduce([1, 2], function(sum, n) {
+        return sum + n;
+      }, 0) === 3);
+    });
+
+    it('example 1 mod', function () {
+      assert.ok(Benchmark.reduce([1, 2], function(sum, n) {
+        return sum + n;
+      }) === 3);
+    });
+
+    it('example 2', function () {
+      assert.deepEqual(Benchmark.reduce({ 'a': 1, 'b': 2, 'c': 1 }, function(result, value, key) {
+        (result[value] || (result[value] = [])).push(key);
+        return result;
+      }, {}), { '1': ['a', 'c'], '2': ['b'] } );
+    });
+  });
+});
+
+/*--------------------------------------------------------------------------*/
+
 describe('Deferred benchmarks', function () {
   it('should run a deferred benchmark correctly', function (done) {
     this.timeout(7000);

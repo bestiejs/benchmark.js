@@ -48,8 +48,8 @@
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
-    'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String', '_',
-    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator', 'phantom',
+    'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String',
+    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator',
     'platform', 'process', 'runtime', 'setTimeout'
   ];
 
@@ -185,24 +185,11 @@
 
   function pick(object, keys) {
     return keys.reduce(function (obj, key) {
-       if (object && object.hasOwnProperty(key)) {
-          obj[key] = object[key];
-       }
-       return obj;
-     }, {});
-  }
-
-  function has(obj, key) {
-    if (!obj) {
-      return;
-    }
-    var keyParts = key.indexOf('.') === -1 ? [key] : key.split('.');
-
-    return !!obj && (
-      keyParts.length > 1
-        ? has(obj[keyParts[0]], keyParts.slice(1).join('.'))
-        : obj.hasOwnProperty(key)
-    );
+      if (object && object.hasOwnProperty(key)) {
+        obj[key] = object[key];
+      }
+      return obj;
+    }, {});
   }
 
   var objectCtorString = Object.prototype.toString.call(Object);
@@ -240,6 +227,112 @@
       Object.prototype.toString.call(Ctor) == objectCtorString;
   }
 
+  function each(collection, iteratee) {
+    if (Array.isArray(collection)) {
+      for (var i = 0, il = collection.length; i < il; ++i) {
+        if (iteratee(collection[i], i, collection) === false) {
+          break;
+        };
+      }
+      return;
+    }
+    if (typeof collection === 'object' && collection !== null) {
+      var keys = Object.keys(collection);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i];
+        if (iteratee(collection[key], key, collection) === false) {
+          break;
+        };
+      }
+      return;
+    }
+  }
+
+  function forOwn(object, iteratee) {
+    for (var key in object) {
+      if (object.hasOwnProperty(key)) {
+        iteratee(object[key], key, object);
+      }
+    }
+  }
+
+  function has(obj, key) {
+    if (!obj) {
+      return;
+    }
+
+    var keyParts = Array.isArray(key)
+      ? key
+      : key.indexOf('.') === -1 ? [key] : key.split('.');
+
+    return !!obj && (
+      keyParts.length > 1
+        ? has(obj[keyParts[0]], keyParts.slice(1).join('.'))
+        : obj.hasOwnProperty(key)
+    );
+  }
+
+  function indexOf(arr, value, position) {
+    return arr.indexOf(value, position)
+  }
+
+  function map(collection, iteratee) {
+    var result = [];
+
+    if (typeof iteratee === 'string') {
+      var keys = Object.keys(collection);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i];
+        if (collection[key][iteratee] !== undefined) {
+          result.push(collection[key][iteratee]);
+        }
+      }
+      return result;
+    }
+    if (Array.isArray(collection)) {
+      for (var i = 0, il = collection.length; i < il; ++i) {
+        result.push(iteratee(collection[i], i, collection));
+      }
+      return result;
+    }
+    if (typeof collection === 'object' && collection !== null) {
+      var keys = Object.keys(collection);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i];
+        result.push(iteratee(collection[key], key, collection));
+      }
+      return result;
+    }
+  }
+
+  function reduce(collection, iteratee, initialValue) {
+    if (Array.isArray(collection)) {
+      if (collection.length === 0) {
+        return initialValue;
+      }
+      var value = initialValue || collection[0];
+
+      for (var i = 1, il = collection.length; i < il; ++i) {
+        value = iteratee(value, collection[i], i, collection);
+      }
+      return value;
+    }
+
+    if (typeof collection === 'object' && collection !== null) {
+      var keys = Object.keys(collection);
+
+      if (keys.length === 0) {
+        return initialValue;
+      }
+      var value = initialValue || collection[keys[0]];
+
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i];
+        value = iteratee(value, collection[key], key, collection);
+      }
+      return value;
+    }
+  }
   /*--------------------------------------------------------------------------*/
 
   /**
@@ -251,12 +344,6 @@
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(context) {
-    // Exit early if unable to acquire lodash.
-    var _ = context && context._ || require('lodash') || root._;
-    if (!_) {
-      Benchmark.runInContext = runInContext;
-      return Benchmark;
-    }
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
@@ -278,18 +365,18 @@
 
     /** Native method shortcuts. */
     var abs = Math.abs,
-        clearTimeout = context.clearTimeout,
-        floor = Math.floor,
-        max = Math.max,
-        min = Math.min,
-        pow = Math.pow,
-        push = arrayRef.push,
-        setTimeout = context.setTimeout,
-        shift = arrayRef.shift,
-        slice = arrayRef.slice,
-        sqrt = Math.sqrt,
-        toString = objectProto.toString,
-        unshift = arrayRef.unshift;
+      clearTimeout = context.clearTimeout,
+      floor = Math.floor,
+      max = Math.max,
+      min = Math.min,
+      pow = Math.pow,
+      push = arrayRef.push,
+      setTimeout = context.setTimeout,
+      shift = arrayRef.shift,
+      slice = arrayRef.slice,
+      sqrt = Math.sqrt,
+      toString = objectProto.toString,
+      unshift = arrayRef.unshift;
 
     /** Used to avoid inclusion in Browserified bundles. */
     var req = require;
@@ -2511,13 +2598,13 @@
     });
 
     // Add lodash methods to Benchmark.
-    Benchmark.each = _.each;
-    Benchmark.forEach = _.forEach;
-    Benchmark.forOwn = _.forOwn;
-    Benchmark.has = _.has;
-    Benchmark.indexOf = _.indexOf;
-    Benchmark.map = _.map;
-    Benchmark.reduce = _.reduce;
+    Benchmark.each = each;
+    Benchmark.forEach = each;
+    Benchmark.forOwn = forOwn;
+    Benchmark.has = has;
+    Benchmark.indexOf = indexOf;
+    Benchmark.map = map;
+    Benchmark.reduce = reduce;
 
     /*------------------------------------------------------------------------*/
 
@@ -2965,11 +3052,11 @@
 
     // Add lodash methods as Suite methods.
     ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach(function (methodName) {
-      var func = _[methodName];
+      var func = Benchmark[methodName];
       Suite.prototype[methodName] = function () {
         var args = [this];
         push.apply(args, arguments);
-        return func.apply(_, args);
+        return func.apply(this, args);
       };
     });
 
