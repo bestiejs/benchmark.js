@@ -380,9 +380,6 @@
       toString = objectProto.toString,
       unshift = arrayRef.unshift;
 
-    /** Used to avoid inclusion in Browserified bundles. */
-    var req = require;
-
     /** Detect DOM document object. */
     var doc = isHostType(context, 'document') && context.document;
 
@@ -427,6 +424,16 @@
        * @type boolean
        */
       support.timeout = isHostType(context, 'setTimeout') && isHostType(context, 'clearTimeout');
+
+      /**
+       * Test if able to run a snippet of JavaScript via script injection.
+       *
+       * @memberOf Benchmark.support
+       * @type boolean
+       */
+      support.canInjectScript = freeDefine
+        ? (root.define.amd !== undefined)
+        : (root.Benchmark !== undefined);
 
       /**
        * Detect if function decompilation is support.
@@ -722,7 +729,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && support.canInjectScript && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -858,14 +865,27 @@
 
     /**
      * A wrapper around `require` to suppress `module missing` errors.
+     * Used to avoid inclusion in Browserified bundles.
      *
      * @private
      * @param {string} id The module id.
      * @returns {*} The exported module or `null`.
      */
-    function require(id) {
+    function req(id) {
       try {
-        var result = freeExports && freeRequire(id);
+        var result;
+        if (freeExports && freeRequire) {
+          switch (id) {
+            case 'platform':
+              result = require('platform');
+              break;
+            default:
+              /** Used to avoid inclusion in Browserified bundles. */
+              // eg: microtime
+              result = freeRequire(id);
+              break;
+          }
+        }
       } catch (e) { }
       return result || null;
     }
@@ -2359,7 +2379,7 @@
       else {
         // Fix TraceMonkey bug associated with clock fallbacks.
         // For more information see http://bugzil.la/509069.
-        if (support.browser) {
+        if (support.browser && support.canInjectScript) {
           runScript(uid + '=1;delete ' + uid);
         }
         // We're done.
@@ -2566,7 +2586,7 @@
        * @memberOf Benchmark
        * @type Object
        */
-      'platform': context.platform || require('platform') || ({
+      'platform': context.platform || req('platform') || ({
         'description': context.navigator && context.navigator.userAgent || null,
         'layout': null,
         'product': null,

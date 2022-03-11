@@ -100,6 +100,7 @@ declare namespace Benchmark {
 
     export interface Support {
         browser: boolean;
+        canInjectScript: boolean;
         timeout: boolean;
         decompilation: boolean;
     }
