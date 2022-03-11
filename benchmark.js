@@ -3091,9 +3091,8 @@
   // Some AMD build optimizers, like r.js, check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
-    define(['lodash', 'platform'], function (_, platform) {
+    define(['platform'], function (platform) {
       return runInContext({
-        '_': _,
         'platform': platform
       });
     });
