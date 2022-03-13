@@ -8,8 +8,9 @@ var root = (typeof global == 'object' && global) || this;
 var amd = root.define && define.amd,
   slice = Array.prototype.slice;
 
-var assert = require('assert');
-var Benchmark = require('../benchmark');
+var describe = root.mocha && root.Mocha.describe || require('mocha').describe;
+var assert = root.chai && root.chai.assert || require('chai').assert;
+var Benchmark = root.Benchmark || require('..');
 
 /** Used to create dummy benchmarks for comparisons. */
 function generateBenchData() {
@@ -41,18 +42,6 @@ describe('Benchmark', function () {
   it('should support loading Benchmark.js as a module', function () {
     if (amd) {
       assert.strictEqual((benchmarkModule || {}).version, Benchmark.version);
-    }
-    else {
-      this.skip();
-    }
-  });
-
-  it('should support loading Platform.js as a module', function () {
-    if (amd) {
-      var platform = (benchmarkModule || {}).platform || {},
-        name = platform.name;
-
-      assert.ok(typeof name == 'string' || name === null);
     }
     else {
       this.skip();

@@ -19,14 +19,9 @@ A [robust](https://mathiasbynens.be/notes/javascript-benchmarking "Bulletproof J
 
 ## Installation
 
-Benchmark.js’ only hard dependency is [lodash](https://lodash.com/).
-Include [platform.js](https://mths.be/platform) to populate [Benchmark.platform](https://benchmarkjs.com/docs#platform).
-
 In a browser:
 
 ```html
-<script src="lodash.js"></script>
-<script src="platform.js"></script>
 <script src="benchmark.js"></script>
 ```
 
@@ -35,9 +30,7 @@ In an AMD loader:
 ```js
 require({
   'paths': {
-    'benchmark': 'path/to/benchmark',
-    'lodash': 'path/to/lodash',
-    'platform': 'path/to/platform'
+    'benchmark': 'path/to/benchmark'
   }
 },
 ['benchmark'], function(Benchmark) {/*…*/});

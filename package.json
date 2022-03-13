@@ -5,7 +5,11 @@
   "homepage": "https://benchmarkjs.com/",
   "license": "MIT",
   "main": "benchmark.js",
-  "keywords": ["benchmark", "performance", "speed"],
+  "keywords": [
+    "benchmark",
+    "performance",
+    "speed"
+  ],
   "author": "Mathias Bynens <mathias@qiwi.be>",
   "types": "types/index.d.ts",
   "contributors": [
@@ -24,11 +28,8 @@
     "test:coverage": "nyc npm run test",
     "test:tsd": "tsd"
   },
-  "dependencies": {
-    "lodash": "^4.17.10",
-    "platform": "^1.3.6"
-  },
   "devDependencies": {
+    "chai": "^4.3.6",
     "coveralls": "^3.1.1",
     "docdown": "^0.7.3",
     "mocha": "^9.2.1",

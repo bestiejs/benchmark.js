@@ -69,7 +69,6 @@
 * <a href="#benchmarkoptionsonerror">`Benchmark.options.onError`</a>
 * <a href="#benchmarkoptionsonreset">`Benchmark.options.onReset`</a>
 * <a href="#benchmarkoptionsonstart">`Benchmark.options.onStart`</a>
-* <a href="#benchmarkplatform">`Benchmark.platform`</a>
 * <a href="#benchmarksupport">`Benchmark.support`</a>
 * <a href="#benchmarksupportbrowser">`Benchmark.support.browser`</a>
 * <a href="#benchmarkversion">`Benchmark.version`</a>
@@ -117,8 +116,8 @@
 The Benchmark constructor.
 <br>
 <br>
-Note: The Benchmark constructor exposes a handful of lodash methods to
-make working with arrays, collections, and objects easier. The lodash
+Note: The Benchmark constructor exposes a handful of lodash-like methods to
+make working with arrays, collections, and objects easier. The lodash-like
 methods are:<br>
 [`each/forEach`](https://lodash.com/docs#forEach), [`forOwn`](https://lodash.com/docs#forOwn),
 [`has`](https://lodash.com/docs#has), [`indexOf`](https://lodash.com/docs#indexOf),
@@ -1125,18 +1124,6 @@ An event listener called when the benchmark is reset.
 [&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/2.1.4/benchmark.js#L2265 "View in source") [&#x24C9;][1]
 
 An event listener called when the benchmark starts running.
-
----
-
-<!-- /div -->
-
-<!-- div -->
-
-<h3 id="benchmarkplatform"><code>Benchmark.platform</code></h3>
-[&#x24C8;](https://github.com/bestiejs/benchmark.js/blob/2.1.4/benchmark.js#L2276 "View in source") [&#x24C9;][1]
-
-Platform object with properties describing things like browser name,
-version, and operating system. See [`platform.js`](https://mths.be/platform).
 
 ---
 
