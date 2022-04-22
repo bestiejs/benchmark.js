@@ -1,3 +1,5 @@
+'use strict'
+
 /** Used as a safe reference for `undefined` in pre ES5 environments. */
 var undefined;
 
@@ -170,7 +172,7 @@ describe('Benchmark test binding', function () {
   };
 
   var keys = Object.keys(tests);
-  for (let i = 0, il = keys.length; i < il; ++i) {
+  for (var i = 0, il = keys.length; i < il; ++i) {
     var title = keys[i];
     it('should have correct binding for ' + title, function () {
       var bench = Benchmark({
@@ -202,7 +204,7 @@ describe('Benchmark.filter', function () {
   };
 
   var keys = Object.keys(objects);
-  for (let i = 0, il = keys.length; i < il; ++i) {
+  for ( var i = 0, il = keys.length; i < il; ++i) {
     var key = keys[i];
     it('should providee the correct arguments when passing an ' + key, function () {
       var args;
@@ -288,7 +290,7 @@ describe('Benchmark.invoke', function () {
   };
 
   var keys = Object.keys(objects);
-  for (let i = 0, il = keys.length; i < il; ++i) {
+  for ( var i = 0, il = keys.length; i < il; ++i) {
     var key = keys[i];
     it('should return the correct result when passing an ' + key, function () {
       var actual = Benchmark.invoke(objects[key], 'concat');
@@ -326,7 +328,7 @@ describe('Benchmark.invoke', function () {
 
     it('should support queuing when passing an ' + key, function () {
       var lengths = [];
-      var array = Array.isArray(objects[key]) && Array.from(objects[key]) || { ...objects[key] };
+      var array = Array.isArray(objects[key]) && Array.from(objects[key]) || Object.assign({}, objects[key]);
       var actual = Benchmark.invoke(array, {
         'name': 'concat',
         'queued': true,
@@ -352,7 +354,7 @@ describe('Benchmark.join', function () {
   };
 
   var keys = Object.keys(objects);
-  for (let i = 0, il = keys.length; i < il; ++i) {
+  for ( var i = 0, il = keys.length; i < il; ++i) {
     var key = keys[i];
     it('should join correctly using the default separator when passing an ' + key, function () {
       assert.strictEqual(Benchmark.join(objects[key]), key == 'object' ? 'a: 0,b: 1,: 2' : 'a,b,');
@@ -472,7 +474,7 @@ var constructors = {
 };
 
 var namespaces = Object.keys(constructors);
-for (let i = 0, il = namespaces.length; i < il; ++i) {
+for ( var i = 0, il = namespaces.length; i < il; ++i) {
   var namespace = namespaces[i];
   var Constructor = constructors[namespaces[i]];
 
