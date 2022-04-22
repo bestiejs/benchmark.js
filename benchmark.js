@@ -925,6 +925,8 @@
       delete anchor[prop];
     }
 
+    var onEventRE = /^on[A-Z]/;
+
     /**
      * A helper function for setting options/event handlers.
      *
@@ -938,7 +940,7 @@
       Object.entries(options).forEach(function ([key, value]) {
         if (value != null) {
           // Add event listeners.
-          if (/^on[A-Z]/.test(key)) {
+          if (onEventRE.test(key)) {
             (key.indexOf(' ') === -1 ? [key] : key.split(' ')).forEach(function (key) {
               object.on(key.slice(2).toLowerCase(), value);
             });
@@ -1055,6 +1057,8 @@
       throw new TypeError('Expected Array or Array-like-Object.');
     }
 
+    var formatNumberRE = /(?=(?:\d{3})+$)(?!\b)/g;
+
     /**
      * Converts a number to a more readable comma-separated string representation.
      *
@@ -1065,7 +1069,7 @@
      */
     function formatNumber(number) {
       number = String(number).split('.');
-      return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
+      return number[0].replace(formatNumberRE, ',') +
         (number[1] ? '.' + number[1] : '');
     }
 
