@@ -20,7 +20,6 @@
   "repository": "bestiejs/benchmark.js",
   "scripts": {
     "coveralls": "nyc report --reporter=lcov",
-    "doc": "docdown benchmark.js doc/README.md style=github title=\"<a href=\\\"https://benchmarkjs.com/\\\">Benchmark.js</a> <span>v${npm_package_version}</span>\" toc=categories url=https://github.com/bestiejs/benchmark.js/blob/${npm_package_version}/benchmark.js",
     "test": "npm run test:mocha",
     "test:parallel": "npm run test:mocha:parallel",
     "test:mocha:parallel": "mocha --parallel test",
@@ -31,14 +30,13 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "coveralls": "^3.1.1",
-    "docdown": "^0.7.3",
     "mocha": "^9.2.1",
     "nyc": "^15.1.0",
-    "requirejs": "^2.3.6",
     "tsd": "^0.19.1"
   },
   "files": [
     "types",
+    "index.js",
     "benchmark.js"
   ],
   "tsd": {
