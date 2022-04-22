@@ -3,16 +3,15 @@ name: ci
 on:
   push:
     paths-ignore:
-      - 'docs/**'
       - '*.md'
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        node-version: [12, 14, 16, 17]
+        node-version: [12, 14, 16, 18]
         os: [ubuntu-latest]
 
     steps:
@@ -28,18 +27,9 @@ jobs:
       - name: Run Tests
         run: npm run test:parallel
 
-  automerge:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: write
-    steps:
-      - uses: fastify/github-action-merge-dependabot@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
   test-ts-types:
+    needs:
+      - test
     runs-on: ubuntu-latest
     name: Typescript Types
     steps:
@@ -54,3 +44,48 @@ jobs:
 
       - name: Typings
         run: npm run test:tsd
+
+  coverage:
+    needs:
+      - test-ts-types
+    runs-on: ubuntu-latest
+    name: coverage
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node 16
+        uses: actions/setup-node@v3
+        with:
+          always-auth: false
+          node-version: 16
+
+      - name: Run npm install
+        run: npm install
+
+      - name: Run Tests
+        run: npm run test:coverage
+
+      - name: Generate LCOV
+        run: npm run coveralls
+
+      - name: Update Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        if: success()
+
+  automerge:
+    needs:
+      - coverage
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
