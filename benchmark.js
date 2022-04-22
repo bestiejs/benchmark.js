@@ -26,13 +26,13 @@
   var freeModule = (typeof module === 'function' || typeof module === 'object') && module && !module.nodeType && module;
 
   /** Detect free variable `global` from Node.js or Browserified code and use it as `root`. */
-  var freeGlobal = freeExports && freeModule && typeof global == 'object' && global;
+  var freeGlobal = freeExports && freeModule && typeof global === 'object' && global;
   if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal)) {
     root = freeGlobal;
   }
 
   /** Detect free variable `require`. */
-  var freeRequire = typeof require == 'function' && require;
+  var freeRequire = typeof require === 'function' && require;
 
   /** Used to assign each benchmark an incremented id. */
   var counter = 0;
@@ -234,8 +234,8 @@
       return true;
     }
     var Ctor = Object.hasOwnProperty.call(proto, 'constructor') && proto.constructor;
-    return typeof Ctor == 'function' && Ctor instanceof Ctor &&
-      Object.prototype.toString.call(Ctor) == objectCtorString;
+    return typeof Ctor === 'function' && Ctor instanceof Ctor &&
+      Object.prototype.toString.call(Ctor) === objectCtorString;
   }
 
   function each(collection, iteratee) {
@@ -652,7 +652,7 @@
         return type;
       }
       return (event instanceof Event)
-        ? Object.assign(event, { 'timeStamp': (+Date.now()) }, typeof type == 'string' ? { 'type': type } : type)
+        ? Object.assign(event, { 'timeStamp': (+Date.now()) }, typeof type === 'string' ? { 'type': type } : type)
         : new Event(type);
     }
 
@@ -740,7 +740,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && support.canInjectScript && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && support.canInjectScript && (createFunction('', 'return"' + uid + '"') || noop)() === uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -1038,7 +1038,7 @@
         });
 
         return result.filter(function (bench) {
-          return result[0].compare(bench) == 0;
+          return result[0].compare(bench) === 0;
         });
       }
       if (Array.isArray(array)) {
@@ -1189,7 +1189,7 @@
       function isAsync(object) {
         // Avoid using `instanceof` here because of IE memory leak issues with host objects.
         var async = args[0] && args[0].async;
-        return name == 'run' && (object instanceof Benchmark) &&
+        return name === 'run' && (object instanceof Benchmark) &&
           ((async == null ? object.options.async : async) && support.timeout || object.defer);
       }
 
@@ -1228,7 +1228,7 @@
         options.onStart.call(benches, Event(eventProps));
 
         // End early if the suite was aborted in an "onStart" listener.
-        if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
+        if (name === 'run' && (benches instanceof Suite) && benches.aborted) {
           // Emit "cycle" event.
           eventProps.type = 'cycle';
           options.onCycle.call(benches, Event(eventProps));
@@ -1560,7 +1560,7 @@
 
       function callback(listeners, type) {
         var index;
-        if (typeof listeners == 'string') {
+        if (typeof listeners === 'string') {
           type = listeners;
           listeners = has(events, type) && events[type];
         }
@@ -1692,7 +1692,7 @@
       var bench = this;
 
       // Exit early if comparing the same benchmark.
-      if (bench == other) {
+      if (bench === other) {
         return 0;
       }
       var critical,
@@ -1732,11 +1732,11 @@
         // ...the z-stat is greater than 1.96 or less than -1.96
         // http://www.statisticslectures.com/topics/mannwhitneyu/
         zStat = getZ(u);
-        return abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
+        return abs(zStat) > 1.96 ? (u === u1 ? 1 : -1) : 0;
       }
       // ...the U value is less than or equal the critical U value.
       critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
-      return u <= critical ? (u == u1 ? 1 : -1) : 0;
+      return u <= critical ? (u === u1 ? 1 : -1) : 0;
     }
 
     /**
@@ -1850,7 +1850,7 @@
       }
       else {
         result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
-          stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
+          stats.rme.toFixed(2) + '% (' + size + ' run' + (size === 1 ? '' : 's') + ' sampled)';
       }
       return result;
     }
@@ -1882,7 +1882,7 @@
           count = bench.count = clone.count,
           decompilable = stringable || (support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
           id = bench.id,
-          name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
+          name = bench.name || (typeof id === 'number' ? '<Test #' + id + '>' : id),
           result = 0;
 
         // Init `minTime` if needed.
@@ -1922,7 +1922,7 @@
             // Pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid.
             bench.count = 1;
-            compiled = decompilable && (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
+            compiled = decompilable && (compiled.call(bench, context, timer) || {}).uid === templateData.uid && compiled;
             bench.count = count;
           }
         } catch (e) {
@@ -1983,13 +1983,13 @@
         });
 
         // Use API of chosen timer.
-        if (timer.unit == 'ns') {
+        if (timer.unit === 'ns') {
           Object.assign(templateData, {
             'begin': interpolate('s#=n#()'),
             'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
           });
         }
-        else if (timer.unit == 'us') {
+        else if (timer.unit === 'us') {
           if (timer.ns.stop) {
             Object.assign(templateData, {
               'begin': interpolate('s#=n#.start()'),
@@ -2046,7 +2046,7 @@
 
         // Get average smallest measurable time.
         while (count--) {
-          if (unit == 'us') {
+          if (unit === 'us') {
             divisor = 1e6;
             if (ns.stop) {
               ns.start();
@@ -2056,7 +2056,7 @@
               while (!(measured = ns() - begin)) { }
             }
           }
-          else if (unit == 'ns') {
+          else if (unit === 'ns') {
             divisor = 1e9;
             begin = (begin = ns())[0] + (begin[1] / divisor);
             while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) { }
@@ -2116,18 +2116,18 @@
       } catch (e) { }
 
       // Detect Node.js's nanosecond resolution timer available in Node.js >= 0.8.
-      if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
+      if (processObject && typeof (timer.ns = processObject.hrtime) === 'function') {
         timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
       }
       // Detect Wade Simmons' Node.js `microtime` module.
-      if (microtimeObject && typeof (timer.ns = microtimeObject.now) == 'function') {
+      if (microtimeObject && typeof (timer.ns = microtimeObject.now) === 'function') {
         timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
       timer = timers.reduce(function (a, b) { return a.res <= b.res ? a : b }, {});
 
       // Error if there are no working timers.
-      if (timer.res == Infinity) {
+      if (timer.res === Infinity) {
         throw new Error('Benchmark.js was unable to find a working timer.');
       }
       // Resolve time span required to achieve a percent uncertainty of at most 1%.
@@ -2178,15 +2178,15 @@
           type = event.type;
 
         if (bench.running) {
-          if (type == 'start') {
+          if (type === 'start') {
             // Note: `clone.minTime` prop is inited in `clock()`.
             clone.count = bench.initCount;
           }
           else {
-            if (type == 'error') {
+            if (type === 'error') {
               bench.error = clone.error;
             }
-            if (type == 'abort') {
+            if (type === 'abort') {
               bench.abort();
               bench.emit('cycle');
             } else {
@@ -2221,7 +2221,7 @@
           times = bench.times;
 
         // Exit early for aborted or unclockable tests.
-        if (done || clone.hz == Infinity) {
+        if (done || clone.hz === Infinity) {
           maxedOut = !(size = sample.length = queue.length = 0);
         }
 
@@ -3091,7 +3091,7 @@
 
   // Export Benchmark.
   // Some AMD build optimizers, like r.js, check for condition patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
+  if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
     define('benchmark', function () {
       return runInContext();
