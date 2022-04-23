@@ -1,3 +1,4 @@
+import { expectType } from "tsd";
 import Benchmark from "../../types";
 
 var suite = new Benchmark.Suite;
@@ -22,17 +23,17 @@ suite.add('RegExp#test', function () {
   // run async
   .run({ 'async': true });
 
-var fn: Function = () => { };
-var onStart: Function = () => { };
-var onCycle: Function = () => { };
-var onAbort: Function = () => { };
-var onError: Function = () => { };
-var onReset: Function = () => { };
-var onComplete: Function = () => { };
-var setup: Function = () => { };
-var teardown: Function = () => { };
+var fn = () => { };
+var onStart = () => { };
+var onCycle = () => { };
+var onAbort = () => { };
+var onError = () => { };
+var onReset = () => { };
+var onComplete = () => { };
+var setup = () => { };
+var teardown = () => { };
 var benches: Benchmark[] = [new Benchmark(fn), new Benchmark(fn)];
-var listener: Function = () => { };
+var listener = () => { };
 var count: number = 0;
 
 // basic usage (the `new` operator is optional)
@@ -146,6 +147,7 @@ var element: HTMLElement;
 // basic usage
 var bench = new Benchmark({
   'setup': function () {
+    expectType<Benchmark>(this);
     var c = this.count || 0,
       element = document.getElementById('container');
     while (c--) {
@@ -153,6 +155,9 @@ var bench = new Benchmark({
         element.appendChild(document.createElement('div'));
       }
     }
+  },
+  'teardown': function () {
+    expectType<Benchmark>(this);
   },
   'fn': function () {
     if (element.lastChild) {
