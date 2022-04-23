@@ -4,7 +4,9 @@
   "description": "A benchmarking library that supports high-resolution timers & returns statistically significant results.",
   "homepage": "https://benchmarkjs.com/",
   "license": "MIT",
-  "main": "benchmark.js",
+  "browser": "benchmark.js",
+  "main": "index.js",
+  "module": "index.js",
   "keywords": [
     "benchmark",
     "performance",
