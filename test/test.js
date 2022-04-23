@@ -1000,6 +1000,7 @@ describe('Benchmark.Suite#unshift', function () {
 /*--------------------------------------------------------------------------*/
 
 describe('Benchmark.Suite filtered results onComplete', function () {
+  this.timeout(5000);
   var count = 0,
     suite = Benchmark.Suite();
 

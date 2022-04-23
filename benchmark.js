@@ -71,7 +71,7 @@
    * - http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm (WARNING: the table listed there is for ONE-SIDED regions!)
    */
   var tTable = {
-    "1": 12.71, "2": 4.303, "3": 3.182, "4": 2.776, "5": 2.571, "6": 2.447, "7": 2.365, "8": 2.306, "9": 2.262, "10": 2.228, 
+    "1": 12.71, "2": 4.303, "3": 3.182, "4": 2.776, "5": 2.571, "6": 2.447, "7": 2.365, "8": 2.306, "9": 2.262, "10": 2.228,
     "11": 2.201, "12": 2.179, "13": 2.16, "14": 2.145, "15": 2.131, "16": 2.12, "17": 2.11, "18": 2.101, "19": 2.093, "20": 2.086,
     "21": 2.08, "22": 2.074, "23": 2.069, "24": 2.064, "25": 2.06, "26": 2.056, "27": 2.052, "28": 2.048, "29": 2.045, "30": 2.042,
     "31": 2.0399, "32": 2.0378, "33": 2.0357, "34": 2.0336, "35": 2.0315, "36": 2.0294, "37": 2.0273, "38": 2.0252, "39": 2.0231, "40": 2.021,
@@ -202,6 +202,16 @@
       return obj;
     }, {});
   }
+
+  function entries(obj) {
+    var ownProps = Object.keys(obj),
+      i = ownProps.length,
+      resArray = new Array(i);
+    while (i--)
+      resArray[i] = [ownProps[i], obj[ownProps[i]]];
+
+    return resArray;
+  };
 
   var objectCtorString = Object.prototype.toString.call(Object);
 
@@ -937,7 +947,10 @@
     function setOptions(object, options) {
       options = object.options = Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
 
-      Object.entries(options).forEach(function ([key, value]) {
+      var keys = Object.keys(options);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i],
+          value = options[keys[i]];
         if (value != null) {
           // Add event listeners.
           if (onEventRE.test(key)) {
@@ -948,7 +961,7 @@
             object[key] = cloneDeep(value);
           }
         }
-      });
+      }
     }
 
     /*------------------------------------------------------------------------*/
@@ -1378,13 +1391,16 @@
         result = new suite.constructor(Object.assign({}, suite.options, options));
 
       // Copy own properties.
-      Object.entries(suite).forEach(function ([key, value]) {
+      var keys = Object.keys(suite);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i],
+          value = suite[keys[i]];
         if (!has(result, key)) {
           result[key] = typeof (value && value.clone) === 'function'
             ? value.clone()
             : cloneDeep(value);
         }
-      });
+      }
       return result;
     }
 
@@ -1676,11 +1692,14 @@
       result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
       // Copy own custom properties.
-      Object.entries(bench).forEach(function ([key, value]) {
+      var keys = Object.keys(bench);
+      for (var i = 0, il = keys.length; i < il; ++i) {
+        var key = keys[i],
+          value = bench[keys[i]];
         if (!has(result, key)) {
           result[key] = cloneDeep(value);
         }
-      });
+      }
 
       return result;
     }
@@ -1771,7 +1790,9 @@
       };
 
       do {
-        Object.entries(data.source).forEach(function ([key, value]) {
+        each(entries(data.source), function (entry) {
+          var key = entry[0];
+          var value = entry[1];
           var changed,
             destination = data.destination,
             currValue = destination[key];
