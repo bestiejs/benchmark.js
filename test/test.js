@@ -1336,9 +1336,9 @@ describe('Deferred benchmarks', function () {
         fired.push('teardown');
       },
       'onComplete': function () {
-        assert.ok(fired.includes('fn'));
-        assert.ok(fired.includes('setup'));
-        assert.ok(fired.includes('teardown'));
+        assert.ok(fired.indexOf('fn') !== -1);
+        assert.ok(fired.indexOf('setup') !== -1);
+        assert.ok(fired.indexOf('teardown') !== -1);
         done();
       }
     })
