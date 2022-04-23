@@ -8,6 +8,8 @@
 ; (function () {
   'use strict';
 
+  var version = '2.1.4';
+
   /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
 
@@ -1926,7 +1928,7 @@
         'onReset': undefined,
         'onStart': undefined
       },
-      'version': '2.1.4'
+      'version': version
     });
 
     Object.assign(Benchmark, {
