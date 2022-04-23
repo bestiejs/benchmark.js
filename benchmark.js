@@ -123,6 +123,44 @@
 
   /*--------------------------------------------------------------------------*/
 
+
+  var isAsyncFunction;
+  try {
+    var asyncFunctionPrototype = eval('Object.getPrototypeOf(async function () { })');
+    isAsyncFunction = function (fn) {
+      try {
+        return (
+          (
+            typeof fn === 'string' &&
+            asyncFunctionPrototype === eval('Object.getPrototypeOf(' + fn + ')')
+          ) ||
+          (
+            typeof fn === 'function' &&
+            Object.getPrototypeOf(fn) === asyncFunctionPrototype
+          )
+        );
+      } catch (e) {
+        return false;
+      }
+    };
+  } catch (e) {
+    isAsyncFunction = function () {
+      return false;
+    }
+  }
+
+  var hasCallbackArgument = function (fn) {
+    return (
+      (
+        typeof fn === 'string' &&
+        eval('(' + fn + ')').length === 1
+      ) || (
+        typeof fn === 'function' &&
+        fn.length === 1
+      )
+    )
+  }
+
   /**
    * A specialized version of lodashs `cloneDeep` which only clones arrays and plain
    * objects assigning all other values by reference.
@@ -977,9 +1015,67 @@
     }
 
     function add(name, fn, options) {
-      var suite = this,
-        bench = new Benchmark(name, fn, options),
-        event = Event({ 'type': 'add', 'target': bench });
+      if (
+        isAsyncFunction(fn) &&
+        hasCallbackArgument(fn)
+      ) {
+        throw new Error('Async Functions need to be async or need a callback-argument.')
+      }
+      var suite = this;
+      var bench;
+      if (hasCallbackArgument(fn)) {
+        if (typeof fn === 'function') {
+          bench = new Benchmark(name,
+            {
+              defer: true,
+              fn: function (deferred) {
+                fn(function (err) {
+                  err ?
+                    deferred.reject(err) :
+                    deferred.resolve()
+                })
+              }
+            },
+            options);
+        } else {
+          bench = new Benchmark(name,
+            {
+              defer: true,
+              fn: '(' + fn + ')(function (err) { err ? deferred.reject(err) : deferred.resolve() } )'
+            },
+            options)
+        }
+      } else if (isAsyncFunction(fn)) {
+        if (typeof fn === 'function') {
+          bench = new Benchmark(name,
+            {
+              defer: true,
+              fn: function (deferred) {
+                fn()
+                  .then(function () {
+                    deferred.resolve();
+                  })
+                  .catch(function (error) {
+                    deferred.reject(error);
+                  });
+              }
+            },
+            options);
+        } else {
+          bench = new Benchmark(name,
+            {
+              defer: true,
+              fn: '(' + fn + ')()' +
+                '.then(function () { deferred.resolve(); })' +
+                '.catch(function (error) { deferred.reject(error); })'
+            },
+            options)
+        }
+      } else {
+        bench = new Benchmark(name, fn, options);
+      }
+
+      var event = Event({ 'type': 'add', 'target': bench });
 
       if (suite.emit(event), !event.cancelled) {
         suite.push(bench);
