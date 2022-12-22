@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" id="index">
+ <head>
+  <meta charset="utf-8">
+  <title>Benchmark.js</title>
+  <meta name="viewport" content="width=device-width">
+  <meta name="description" content="A benchmarking library that supports high-resolution timers & returns statistically significant results.">
+  <link rel="stylesheet" href="_css/main.css">
+  <link rel="feed alternate" type="application/atom+xml" href="https://github.com/bestiejs/benchmark.js/commits/main.atom">
+ </head>
+ <body>
+  <hgroup>
+   <h1>Benchmark.js <span>v2.1.2</span></h1>
+   <h2>A benchmarking library that supports high-resolution timers & returns statistically significant results.</h2>
+  </hgroup>
+
+  <pre class="intro"><code><span class="kw2">var</span> suite <span class="sy0">=</span> <span class="kw2">new</span> Benchmark.<span class="me1">Suite</span><span class="sy0">;</span><br><br><span class="co1">// add tests</span><br>suite.<span class="me1">add</span><span class="br0">(</span><span class="st0">'RegExp#test'</span><span class="sy0">,</span> <span class="kw2">function</span><span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span><br>  <span class="co2">/o/</span>.<span class="me1">test</span><span class="br0">(</span><span class="st0">'Hello World!'</span><span class="br0">)</span><span class="sy0">;</span><br><span class="br0">}</span><span class="br0">)</span><br>.<span class="me1">add</span><span class="br0">(</span><span class="st0">'String#indexOf'</span><span class="sy0">,</span> <span class="kw2">function</span><span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span><br>  <span class="st0">'Hello World!'</span>.<span class="me1">indexOf</span><span class="br0">(</span><span class="st0">'o'</span><span class="br0">)</span> <span class="sy0">></span> <span class="nu0">-1</span><span class="sy0">;</span><br><span class="br0">}</span><span class="br0">)</span><br>.<span class="me1">add</span><span class="br0">(</span><span class="st0">'String#match'</span><span class="sy0">,</span> <span class="kw2">function</span><span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span><br>  <span class="sy0">!!</span><span class="st0">'Hello World!'</span>.<span class="me1">match</span><span class="br0">(</span><span class="co2">/o/</span><span class="br0">)</span><span class="sy0">;</span><br><span class="br0">}</span><span class="br0">)</span><br><span class="co1">// add listeners</span><br>.<span class="me1">on</span><span class="br0">(</span><span class="st0">'cycle'</span><span class="sy0">,</span> <span class="kw2">function</span><span class="br0">(</span>event<span class="br0">)</span> <span class="br0">{</span><br>  console.<span class="me1">log</span><span class="br0">(</span>String<span class="br0">(</span>event.<span class="me1">target</span><span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span><br><span class="br0">}</span><span class="br0">)</span><br>.<span class="me1">on</span><span class="br0">(</span><span class="st0">'complete'</span><span class="sy0">,</span> <span class="kw2">function</span><span class="br0">(</span><span class="br0">)</span> <span class="br0">{</span><br>  console.<span class="me1">log</span><span class="br0">(</span><span class="st0">'Fastest is '</span> <span class="sy0">+</span> <span class="kw1">this</span>.<span class="me1">filter</span><span class="br0">(</span><span class="st0">'fastest'</span><span class="br0">)</span>.<span class="me1">map</span><span class="br0">(</span><span class="st0">'name'</span><span class="br0">)</span><span class="br0">)</span><span class="sy0">;</span><br><span class="br0">}</span><span class="br0">)</span><br><span class="co1">// run async</span><br>.<span class="me1">run</span><span class="br0">(</span><span class="br0">{</span> <span class="st0">'async'</span><span class="sy0">:</span> <span class="kw2">true</span> <span class="br0">}</span><span class="br0">)</span><span class="sy0">;</span></code></pre>
+
+  <h2 id="docs">Documentation</h2>
+  <ul>
+   <li><a href="docs/">API Documentation</a></li>
+  </ul>
+
+  <h2 id="download">Download</h2>
+  <ul>
+   <li><a href="https://raw.githubusercontent.com/bestiejs/benchmark.js/2.1.2/benchmark.js">Development source</a></li>
+  </ul>
+
+  <h2>Installation</h2>
+  <p>Benchmark.js’ only hard dependency is <a href="https://lodash.com/">lodash</a>. Include <a href="https://mths.be/platform">platform.js</a> to populate <a href="/docs#platform">Benchmark.platform</a>.</p>
+  <p>In a browser:</p>
+  <pre><code><span class="sy0">&lt;</span>script src<span class="sy0">=</span><span class="st0">"lodash.js"</span><span class="sy0">>&lt;/</span>script<span class="sy0">></span><br><span class="sy0">&lt;</span>script src<span class="sy0">=</span><span class="st0">"platform.js"</span><span class="sy0">>&lt;/</span>script<span class="sy0">></span><br><span class="sy0">&lt;</span>script src<span class="sy0">=</span><span class="st0">"benchmark.js"</span><span class="sy0">>&lt;/</span>script<span class="sy0">></span></code></pre>
+  <p>Using npm:</p>
+  <pre><code>$ {sudo -H} npm i -g npm<br>$ npm i --save benchmark</code></pre>
+  <p>In Node.js:</p>
+  <pre><code><span class="kw2">var</span> Benchmark <span class="sy0">=</span> require<span class="sy0">(</span><span class="st0">'benchmark'</span><span class="sy0">)</span><span class="sy0">;</span></code></pre>
+  <p>Optionally, use <a href="https://github.com/wadey/node-microtime">the microtime module for Node.js</a> by Wade Simmons:</p>
+  <pre><code>$ npm i --save microtime</code></pre>
+
+  <h2 id="support">Support</h2>
+  <p>Tested in Chrome 46-47, Firefox 42-43, IE 9-11, Edge 13, Safari 8-9, Node.js 0.10.x, 0.12.x, 4.x, & 5.x, & PhantomJS 1.9.8.</p>
+  <a href="https://github.com/bestiejs/benchmark.js" class="github"><img src="/_img/github.png" alt="Fork me on GitHub"></a>
+  <footer>Benchmark.js by <a href="https://mathiasbynens.be/">Mathias Bynens</a> and <a href="http://allyoucanleet.com/">John-David Dalton</a><br>Twitter: <a href="https://twitter.com/benchmarkjs" rel="nofollow">@benchmarkjs</a></footer>
+  <script>window._gaq=[['_setAccount','UA-6065217-50'],['_trackPageview']];(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.src='https://www.google-analytics.com/ga.js';s.parentNode.insertBefore(g,s)}(document,'script'))</script>
+ </body>
+</html>
